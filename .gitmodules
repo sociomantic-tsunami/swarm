@@ -1,0 +1,6 @@
+[submodule "ocean"]
+	path = submodules/ocean
+	url = https://github.com/sociomantic-tsunami/ocean.git
+[submodule "makd"]
+	path = submodules/makd
+	url = https://github.com/sociomantic-tsunami/makd.git
