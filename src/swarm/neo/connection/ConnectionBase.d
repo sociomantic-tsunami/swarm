@@ -975,15 +975,20 @@ abstract class ConnectionBase: ISelectClient
         }
 
         /*
-         * Note that closing the socket automatically  unregisters it in epoll.
+         * Note that closing the socket doesn't automatically  unregister
+         * it in epoll, in case when there are more open references to the
+         * underlying device.
          * socket.close() should not throw. We don't handle its errors because
          * it is unclear how.
          * TODO: IConnectionHandler calls socket.close(), too, remove it from
          * there.
          */
-        this.socket.close();
         if ( this.is_registered() )
-            this.unregistered(); // ISelectClient method
+        {
+            this.epoll.unregister(this);
+        }
+
+        this.socket.close();
         this.events_ = this.events_.init;
 
         this.send_loop.unregisterAll(
