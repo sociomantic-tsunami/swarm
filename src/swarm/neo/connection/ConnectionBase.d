@@ -26,7 +26,7 @@ abstract class ConnectionBase: ISelectClient
 
     import swarm.neo.util.TreeQueue;
 
-    import swarm.neo.protocol.Message: MessageType, RequestId;
+    import Message = swarm.neo.protocol.Message;
     import swarm.neo.protocol.socket.MessageReceiver;
     import swarm.neo.protocol.socket.MessageSender;
     import swarm.neo.protocol.MessageParser;
@@ -48,6 +48,12 @@ abstract class ConnectionBase: ISelectClient
     import ocean.transition;
 
     debug ( SwarmConn ) import ocean.io.Stdout;
+
+
+    /// Convenience aliases for derived class
+    protected alias Message.RequestId RequestId;
+    /// Ditto
+    protected alias Message.MessageType MessageType;
 
     /***************************************************************************
 

@@ -21,6 +21,7 @@ class NodeConnect
     import swarm.neo.protocol.ProtocolError;
 
     import swarm.neo.authentication.HmacAuthCode;
+    import HmacDef = swarm.neo.authentication.HmacDef;
     import swarm.neo.authentication.Credentials;
     import swarm.neo.util.MessageFiber;
 
@@ -40,7 +41,7 @@ class NodeConnect
 
     ***************************************************************************/
 
-    private Const!(HmacAuthCode.Key[istring])* credentials;
+    private Const!(HmacDef.Key[istring])* credentials;
 
     /***************************************************************************
 
@@ -68,7 +69,7 @@ class NodeConnect
 
     ***************************************************************************/
 
-    public this ( ref Const!(HmacAuthCode.Key[istring]) credentials )
+    public this ( ref Const!(HmacDef.Key[istring]) credentials )
     {
         this.credentials = &credentials;
         this.e_auth_rejected = new HmacAuthCode.RejectedException;
@@ -113,7 +114,7 @@ class NodeConnect
             fiber, socket_fd, receiver, sender);
         scope ( exit ) this.protocol.unregisterEpoll();
 
-        const request_type     = this.protocol.MessageType.Authentication,
+        const request_type     = MessageType.Authentication,
               protocol_version = 1;
 
         ubyte client_protocol_version = this.protocol.receiveProtocolVersion();
@@ -157,7 +158,7 @@ class NodeConnect
         this.e_auth_rejected.resetAuthParams();
 
         // receive() callback, does the authentication.
-        void authenticate ( Const!(char)[] client_name, HmacAuthCode.Code client_code )
+        void authenticate ( Const!(char)[] client_name, HmacDef.Code client_code )
         {
             try
             {

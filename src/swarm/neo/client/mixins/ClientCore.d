@@ -39,6 +39,14 @@ template ClientCore ( )
 
     /***************************************************************************
 
+        Convenience alias for the connection notification union.
+
+    ***************************************************************************/
+
+    public alias ConnectionSet.ConnNotification ConnNotification;
+
+    /***************************************************************************
+
         Convenience alias for the connection notifier.
 
     ***************************************************************************/

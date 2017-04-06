@@ -41,7 +41,7 @@ import ocean.io.select.EpollSelectDispatcher;
 
 import ocean.io.select.client.TimerEvent;
 
-import ocean.util.log.Log;
+import ocean.util.log.Appender;
 
 import ocean.util.log.Stats;
 

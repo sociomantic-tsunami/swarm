@@ -8,5 +8,3 @@ apt-get install -y \
     libgcrypt-dev \
     libglib2.0-dev \
     libgpg-error-dev
-
-                    

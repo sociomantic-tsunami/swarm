@@ -35,7 +35,7 @@ import ocean.core.Traits;
 
 import ocean.io.select.EpollSelectDispatcher;
 
-import ocean.io.serialize.SimpleSerializer;
+import ocean.io.serialize.SimpleStreamSerializer;
 
 import ocean.io.model.IConduit: IOStream, InputStream, OutputStream;
 
@@ -89,7 +89,7 @@ public abstract class IRequestParams
     protected alias .IOStream IOStream;
     protected alias .InputStream InputStream;
     protected alias .OutputStream OutputStream;
-    protected alias .SimpleSerializer SimpleSerializer;
+    protected alias .SimpleStreamSerializer SimpleStreamSerializer;
     protected alias .copyFields copyFields;
     protected alias .SizeofTuple SizeofTuple;
 

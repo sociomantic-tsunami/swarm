@@ -52,6 +52,7 @@ extern (C) private int g_ascii_xdigit_value ( char c ); // glib-2.0
 class CredentialsFile
 {
     import swarm.neo.authentication.Credentials;
+    import HmacDef = swarm.neo.authentication.HmacDef;
 
     import ocean.io.device.File;
 
@@ -66,7 +67,7 @@ class CredentialsFile
 
     ***************************************************************************/
 
-    private Credentials.Key[istring] credentials_;
+    private HmacDef.Key[istring] credentials_;
 
     /***************************************************************************
 
@@ -105,7 +106,7 @@ class CredentialsFile
 
     ***************************************************************************/
 
-    public Const!(Credentials.Key[istring])* credentials ( )
+    public Const!(HmacDef.Key[istring])* credentials ( )
     {
         return &this.credentials_;
     }
@@ -175,8 +176,8 @@ class CredentialsFile
 
     ***************************************************************************/
 
-    private static Credentials.Key[istring] parse ( istring content,
-                                                    cstring filepath = null )
+    private static HmacDef.Key[istring] parse ( istring content,
+                                                cstring filepath = null )
     {
         int line = 0; // The current line in the input file.
 
@@ -199,7 +200,7 @@ class CredentialsFile
 
         scope parser = new QueryParams('\n', ':');
 
-        Credentials.Key[istring] keys;
+        HmacDef.Key[istring] keys;
 
         foreach (name, hex_key; parser.set(content))
         {
@@ -222,7 +223,7 @@ class CredentialsFile
 
             size_t i = 0;
 
-            Credentials.Key key;
+            HmacDef.Key key;
 
             foreach (ref b; key.content)
             {
@@ -296,6 +297,7 @@ class CredentialsFile
 version ( UnitTest )
 {
     import swarm.neo.authentication.Credentials;
+    import HmacDef = swarm.neo.authentication.HmacDef;
     import ocean.core.Test;
     import ocean.core.ByteSwap;
 
@@ -312,7 +314,7 @@ version ( UnitTest )
 
     ***************************************************************************/
 
-    void registryTest ( istring name, istring file_content, Credentials.Key[istring] expected )
+    void registryTest ( istring name, istring file_content, HmacDef.Key[istring] expected )
     {
         auto t = new NamedTest(name);
         auto reg = CredentialsFile.parse(file_content, name);
@@ -339,14 +341,14 @@ version ( UnitTest )
 
     ***************************************************************************/
 
-    Credentials.Key makeKey ( ulong[] words ... )
+    HmacDef.Key makeKey ( ulong[] words ... )
     in
     {
-        assert(words.length == Credentials.Key.length / words[0].sizeof);
+        assert(words.length == HmacDef.Key.length / words[0].sizeof);
     }
     body
     {
-        Credentials.Key key;
+        HmacDef.Key key;
         (cast(ulong[])key.content)[] = words;
         ByteSwap.swap64(key.content);
         return key;
@@ -364,7 +366,7 @@ version ( UnitTest )
 unittest
 {
     // Empty
-    registryTest("Empty", [], (Credentials.Key[istring]).init);
+    registryTest("Empty", [], (HmacDef.Key[istring]).init);
 
     // One entry then EOF
     registryTest(

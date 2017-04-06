@@ -20,7 +20,7 @@ import ocean.transition;
 *******************************************************************************/
 
 import ocean.io.model.ISuspendable;
-import ocean.io.serialize.SimpleSerializer;
+import ocean.io.serialize.SimpleStreamSerializer;
 import ocean.io.Console : Cin, Cout;
 
 version ( UnitTest )
@@ -39,8 +39,7 @@ public struct Record
 {
     import swarm.util.Hash;
 
-    import ocean.core.Array : copy;
-    import ocean.core.Array_tango : find;
+    import ocean.core.Array : copy, find;
     import ocean.core.TypeConvert;
     import ocean.core.Enforce;
 
@@ -126,13 +125,13 @@ public struct Record
     {
         if ( this.key.length )
         {
-            SimpleSerializer.writeData(stream, this.key);
+            SimpleStreamSerializer.writeData(stream, this.key);
         }
-        SimpleSerializer.write(stream, Separator);
+        SimpleStreamSerializer.write(stream, Separator);
 
         buf.length = Base64.allocateEncodeSize(this.value);
-        SimpleSerializer.writeData(stream, Base64.encode(this.value, buf));
-        SimpleSerializer.write(stream, '\n');
+        SimpleStreamSerializer.writeData(stream, Base64.encode(this.value, buf));
+        SimpleStreamSerializer.write(stream, '\n');
     }
 
 
@@ -243,12 +242,12 @@ public struct Record
         static assert(C.sizeof == char.sizeof);
 
         char c;
-        SimpleSerializer.read(stream, c);
+        SimpleStreamSerializer.read(stream, c);
 
         while ( c != sep )
         {
             dst ~= cast(C)c;
-            SimpleSerializer.read(stream, c);
+            SimpleStreamSerializer.read(stream, c);
         }
     }
 

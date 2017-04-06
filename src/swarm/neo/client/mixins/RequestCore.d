@@ -120,6 +120,7 @@ public template RequestCore ( RequestType request_type_, ubyte request_code,
 
     import swarm.neo.request.Command;
     import swarm.neo.IPAddress;
+    import swarm.neo.client.NotifierTypes;
 
     /***************************************************************************
 
@@ -263,29 +264,12 @@ public template RequestCore ( RequestType request_type_, ubyte request_code,
     private static bool handleGlobalStatusCodes ( StatusCode status,
         Context* context, IPAddress remote_address )
     {
-        static if ( is(typeof(
-            { NotificationUnion n; n.unsupported = RequestNodeUnsupportedInfo(); } )) )
-        {
-            const bool include_request_id = true;
-            alias RequestNodeUnsupportedInfo UnsupportedInfo;
-        }
-        else
-        {
-            static assert(is(typeof(
-                { NotificationUnion n; n.unsupported = NodeUnsupportedInfo(); } )));
-
-            const bool include_request_id = false;
-            alias NodeUnsupportedInfo UnsupportedInfo;
-        }
-
         switch ( status )
         {
             case GlobalStatusCode.RequestNotSupported:
                 NotificationUnion n;
-                n.unsupported = UnsupportedInfo();
-                static if ( include_request_id )
-                    n.unsupported.request_id = context.request_id;
-
+                n.unsupported = RequestNodeUnsupportedInfo();
+                n.unsupported.request_id = context.request_id;
                 n.unsupported.node_addr = remote_address;
                 n.unsupported.type = n.unsupported.type.RequestNotSupported;
 
@@ -294,11 +278,8 @@ public template RequestCore ( RequestType request_type_, ubyte request_code,
 
             case GlobalStatusCode.RequestVersionNotSupported:
                 NotificationUnion n;
-                n.unsupported = UnsupportedInfo();
-
-                static if ( include_request_id )
-                    n.unsupported.request_id = context.request_id;
-
+                n.unsupported = RequestNodeUnsupportedInfo();
+                n.unsupported.request_id = context.request_id;
                 n.unsupported.node_addr = remote_address;
                 n.unsupported.type = n.unsupported.type.RequestVersionNotSupported;
 

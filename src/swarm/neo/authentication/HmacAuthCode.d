@@ -32,8 +32,9 @@ struct HmacAuthCode
     import swarm.neo.authentication.HmacDef: Key, Code, Nonce;
 
     import ocean.util.cipher.gcrypt.HMAC;
-    import ocean.util.cipher.gcrypt.c.random;
     import ocean.util.cipher.gcrypt.c.gpgerror;
+    import ocean.util.cipher.gcrypt.c.md;
+    import ocean.util.cipher.gcrypt.c.random;
 
     import core.stdc.time: time_t;
 
@@ -49,7 +50,7 @@ struct HmacAuthCode
 
     ***************************************************************************/
 
-    const hash_algoritm = HMAC.gcry_md_algos.GCRY_MD_SHA512;
+    const hash_algoritm = gcry_md_algos.GCRY_MD_SHA512;
 
     private HMAC hmac;
 
@@ -203,7 +204,7 @@ struct HmacAuthCode
         ***********************************************************************/
 
         ulong timestamp;
-        
+
         Nonce nonce;
 
         char[] name;

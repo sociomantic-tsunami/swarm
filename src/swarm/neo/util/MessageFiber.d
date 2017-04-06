@@ -591,7 +591,10 @@ public class OceanMessageFiber
         // throw `msg.exc` if it isn't caught by the fiber. However, this method
         // should throw only exceptions passed to the `suspend()` call that
         // continues the call of this method.
-        auto throwable = this.fiber.call(false);
+        version (D_Version2)
+            auto throwable = this.fiber.call(Fiber.Rethrow.no);
+        else
+            auto throwable = this.fiber.call(false);
 
         // If the fiber terminated with an unhandled Error, rethrow it.
         if (cast(RethrowType)throwable)

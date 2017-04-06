@@ -234,6 +234,7 @@ private class ChannelsNodeStatsTemplate ( Logger = StatsLog )
     : NodeStatsTemplate!(Logger)
 {
     import swarm.node.model.IChannelsNodeInfo;
+    import swarm.node.model.INodeInfo;
 
     /***************************************************************************
 

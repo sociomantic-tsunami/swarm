@@ -40,10 +40,17 @@ An overview of the features of the legacy and neo client architecture can be
 found here
 
 `Legacy client documentation
-<https://github.com/sociomantic-tsunami/swarm/blob/v3.x.x/src/swarm/README_client.rst>`_.
+<https://github.com/sociomantic-tsunami/swarm/blob/v4.x.x/src/swarm/README_client.rst>`_.
 
 `Neo client documentation
-<https://github.com/sociomantic-tsunami/swarm/blob/v3.x.x/src/swarm/README_client_neo.rst>`_.
+<https://github.com/sociomantic-tsunami/swarm/blob/v4.x.x/src/swarm/README_client_neo.rst>`_.
+
+Example
+-------
+
+A simple example of how to construct a client and node using the neo protocol
+can be found `here
+<https://github.com/sociomantic-tsunami/swarm/blob/v4.x.x/test/neo/>`_.
 
 Build / Use
 ===========
@@ -54,7 +61,7 @@ Dependencies
 ========== =======
 Dependency Version
 ========== =======
-ocean      v2.5.x
+ocean      v3.1.x
 makd       v1.5.x
 ========== =======
 
