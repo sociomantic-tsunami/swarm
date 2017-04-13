@@ -119,7 +119,7 @@ abstract class RequestOnConnBase
 
     ***************************************************************************/
 
-    protected void[][] send_payload_;
+    protected Const!(void[])[] send_payload_;
 
     /***************************************************************************
 
@@ -128,7 +128,7 @@ abstract class RequestOnConnBase
 
     ***************************************************************************/
 
-    private void[][] send_payload;
+    private Const!(void)[][] send_payload;
 
     /***************************************************************************
 
@@ -520,7 +520,7 @@ abstract class RequestOnConnBase
 
         ***********************************************************************/
 
-        public void send ( void[][] payload ... )
+        public void send ( in void[][] payload ... )
         {
             int resume_code = this.sendAndHandleEvents(payload);
             assert(resume_code <= 0, "send: User unexpectedy resumed the fiber");
@@ -580,7 +580,7 @@ abstract class RequestOnConnBase
 
         ***********************************************************************/
 
-        public int sendAndHandleEvents ( void[][] payload ... )
+        public int sendAndHandleEvents ( in void[][] payload ... )
         in
         {
             assert(payload.length, "sendAndHandleEvents: no payload to send");
@@ -1085,7 +1085,7 @@ abstract class RequestOnConnBase
 
         public void sendReceive (
             void delegate ( in void[] payload ) received,
-            void[][] payload ...
+            in void[][] payload ...
         )
         in
         {
@@ -1166,7 +1166,7 @@ abstract class RequestOnConnBase
 
         public int sendReceiveAndHandleEvents (
             void delegate ( in void[] recv_payload ) received,
-            void[][] payload ...
+            in void[][] payload ...
         )
         in
         {
@@ -1391,7 +1391,7 @@ abstract class RequestOnConnBase
 
     ***************************************************************************/
 
-    protected void getPayloadForSending ( void delegate ( void[][] payload ) send )
+    protected void getPayloadForSending ( void delegate ( in void[][] payload ) send )
     {
         try
             send(this.send_payload_);

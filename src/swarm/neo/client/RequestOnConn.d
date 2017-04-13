@@ -595,7 +595,7 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
 
     ***************************************************************************/
 
-    override public void getPayloadForSending ( void delegate ( void[][] payload ) send )
+    override public void getPayloadForSending ( void delegate ( in void[][] payload ) send )
     {
         super.getPayloadForSending(send);
     }
