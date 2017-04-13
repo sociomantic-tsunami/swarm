@@ -300,7 +300,7 @@ abstract class RequestOnConnBase
             public void add ( T ) ( ref T elem )
             {
                 static assert(!hasIndirections!(T));
-                this.outer.outer.send_payload ~= (cast(void*)&elem)[0..T.sizeof];
+                this.outer.outer.send_payload ~= (cast(Const!(void*))&elem)[0..T.sizeof];
             }
 
             /*******************************************************************
@@ -380,9 +380,9 @@ abstract class RequestOnConnBase
                  * variable.
                  */
                 this.outer.outer.send_payload ~=
-                    (cast(void*)&arr)[0..size_t.sizeof];
+                    (cast(Const!(void)*)&arr)[0..size_t.sizeof];
                 this.outer.outer.send_payload ~=
-                    (cast(void*)arr.ptr)[0..arr.length * Element.sizeof];
+                    (cast(Const!(void)*)arr.ptr)[0..arr.length * Element.sizeof];
             }
 
             /*******************************************************************
@@ -394,10 +394,10 @@ abstract class RequestOnConnBase
 
             unittest
             {
-                void[][] slices;
-                mstring arr = "Hello World!".dup;
-                slices ~= (cast(void*)&arr)[0..size_t.sizeof];
-                slices ~= (cast(void*)arr.ptr)[0..arr.length];
+                Const!(void)[][] slices;
+                istring arr = "Hello World!";
+                slices ~= (cast(Const!(void)*)&arr)[0..size_t.sizeof];
+                slices ~= (cast(Const!(void)*)arr.ptr)[0..arr.length];
                 assert(slices.length == 2);
                 assert(slices[0].length == size_t.sizeof);
                 assert(*cast(size_t*)(slices[0].ptr) == arr.length);
