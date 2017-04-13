@@ -26,8 +26,8 @@ class MessageSender
 
     import ocean.io.select.protocol.generic.ErrnoIOException: IOError;
 
+    import swarm.neo.protocol.socket.uio_const;
     import core.sys.posix.sys.socket: setsockopt;
-    import core.sys.posix.sys.uio: iovec, writev;
     import core.sys.posix.netinet.in_: IPPROTO_TCP;
     import core.sys.linux.sys.netinet.tcp: TCP_CORK;
     import core.stdc.errno: errno, EAGAIN, EWOULDBLOCK, EINTR;
@@ -144,7 +144,7 @@ class MessageSender
 
     public bool assignProtocolVersion ( ubyte protocol_version )
     {
-        auto iov = iovec(&protocol_version, protocol_version.sizeof);
+        auto iov = iovec_const(&protocol_version, protocol_version.sizeof);
         auto tracker = IoVecTracker((&iov)[0 .. 1], iov.iov_len);
         return this.assign_(tracker);
     }
@@ -217,7 +217,7 @@ class MessageSender
     }
     body
     {
-        auto iov = iovec(this.pending_data.ptr, this.pending_data.length);
+        auto iov = iovec_const(this.pending_data.ptr, this.pending_data.length);
         auto src = IoVecTracker((&iov)[0 .. 1], iov.iov_len);
 
         scope (exit)
@@ -388,7 +388,7 @@ class MessageSender
 
         errno = 0;
 // maybe do the vector I/O call + advance in IoVecTracker?
-        socket.ssize_t n = writev(this.socket.fd, src.fields.ptr, cast(int)src.fields.length);
+        socket.ssize_t n = sendv(this.socket.fd, src.fields);
 
         if (n >= 0) // n == 0 cannot happen: write() returns it only if the
         {           // output data are empty, which we prevent in the precondition
