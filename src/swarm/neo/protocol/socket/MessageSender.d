@@ -179,7 +179,7 @@ class MessageSender
 
      **************************************************************************/
 
-    public bool assign ( MessageType type, void[][] dynamic_fields, void[][] static_fields ... )
+    public bool assign ( MessageType type, in void[][] dynamic_fields, in void[][] static_fields ... )
     {
         auto tracker = this.iov_msg.setup(type, dynamic_fields, static_fields);
         this.io_stats.msg_body.countBytes(tracker.length - MessageHeader.sizeof);
