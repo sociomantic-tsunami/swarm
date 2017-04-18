@@ -348,9 +348,9 @@ abstract class RequestOnConnBase
 
             *******************************************************************/
 
-            public void addArray ( T ) ( ref T[] arr )
+            public void addArray ( T: Element[], Element ) ( ref T arr )
             {
-                static assert(!hasIndirections!(T));
+                static assert(!hasIndirections!(Element));
 
                 /*
                  * arr is a dynamic array. To slice the data of arr.length, we
@@ -382,7 +382,7 @@ abstract class RequestOnConnBase
                 this.outer.outer.send_payload ~=
                     (cast(void*)&arr)[0..size_t.sizeof];
                 this.outer.outer.send_payload ~=
-                    (cast(void*)arr.ptr)[0..arr.length * T.sizeof];
+                    (cast(void*)arr.ptr)[0..arr.length * Element.sizeof];
             }
 
             /*******************************************************************
