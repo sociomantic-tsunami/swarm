@@ -176,9 +176,57 @@ public template RequestCore ( RequestType request_type_, ubyte request_code,
 
     public static struct UserSpecifiedParams
     {
+        /// User-specified request-specific arguments.
         public Args args;
 
-        public SerializableReferenceType!(Notifier) notifier;
+        /***********************************************************************
+
+            Note: this struct is essentially deprecated. It is only needed in
+            order to maintain the public API of UserSpecifiedParams (specifically
+            the ability to call `params.notifier.set()`). In the next major
+            release, the `serialized_notifier` can be moved into
+            UserSpecifiedParams and this wrapper struct removed.
+
+        ***********************************************************************/
+
+        public struct SerializedNotifier
+        {
+            /// Serialized notifier delegate. (Must be serialized as the ocean
+            /// contiguous serializer rejects delegates.)
+            private ubyte[Notifier.sizeof] serialized_notifier;
+
+            /*******************************************************************
+
+                Serializes the passed notifier into this.serialized_notifier.
+
+                Params:
+                    notifier = notifier to serialize
+
+            *******************************************************************/
+
+            deprecated("Construct a const UserSpecifiedParams instance at once; "
+                "do not set the notifier after construction.")
+            public void set ( Notifier notifier )
+            {
+                this.serialized_notifier[] =
+                    (cast(Const!(ubyte)*)&notifier)[0..notifier.sizeof];
+            }
+        }
+
+        /// ditto
+        public SerializedNotifier notifier;
+
+        /***********************************************************************
+
+            Returns:
+                the previously serialized notifier, deserialized
+
+        ***********************************************************************/
+
+        public Notifier getNotifier ( )
+        {
+            return *(cast(Notifier*)(this.notifier.serialized_notifier.ptr));
+        }
     }
 
     /***************************************************************************
@@ -190,13 +238,34 @@ public template RequestCore ( RequestType request_type_, ubyte request_code,
 
     public static struct Context
     {
+        import ocean.util.serialize.contiguous.Serializer;
+        import ocean.util.serialize.contiguous.Deserializer;
+
         /***********************************************************************
 
-            User-specified data required by the request.
+            User-specified data required by the request, serialized. The params
+            are serialized separately, inside this struct (which is also
+            serialized in the Request instance), in order to enable the use of a
+            Const!(UserSpecifiedParams) to allow a const user-facing API. See
+            ClientCore.assign.
 
         ***********************************************************************/
 
-        public UserSpecifiedParams user_params;
+        public void[] user_specified_params_blob;
+
+        /***********************************************************************
+
+            Returns:
+                deserialized user-specified data required by the request
+
+        ***********************************************************************/
+
+        public UserSpecifiedParams* user_params ( )
+        {
+            Deserializer.deserialize!(UserSpecifiedParams)(
+                this.user_specified_params_blob);
+            return cast(UserSpecifiedParams*)this.user_specified_params_blob.ptr;
+        }
 
         /***********************************************************************
 
@@ -235,10 +304,10 @@ public template RequestCore ( RequestType request_type_, ubyte request_code,
 
     ***************************************************************************/
 
-    private static void notify ( ref UserSpecifiedParams params,
+    private static void notify ( UserSpecifiedParams* params,
         NotificationUnion type )
     {
-        if ( auto notifier = params.notifier.get() )
+        if ( auto notifier = params.getNotifier() )
         {
             notifier(type, params.args);
         }
