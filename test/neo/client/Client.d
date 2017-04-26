@@ -77,10 +77,12 @@ public class Client
 
         public void put ( hash_t key, cstring value, Put.Notifier notifier )
         {
-            Internals.Put.UserSpecifiedParams params;
-            params.args.key = key;
-            params.args.value = value;
-            params.notifier.set(notifier);
+            auto params = Const!(Internals.Put.UserSpecifiedParams)(
+                Const!(Put.Args)(key, value),
+                Const!(Internals.Put.UserSpecifiedParams.SerializedNotifier)(
+                    *(cast(Const!(ubyte[notifier.sizeof])*)&notifier)
+                )
+            );
 
             this.assign!(Internals.Put)(params);
         }
@@ -99,9 +101,12 @@ public class Client
 
         public void get ( hash_t key, Get.Notifier notifier )
         {
-            Internals.Get.UserSpecifiedParams params;
-            params.args.key = key;
-            params.notifier.set(notifier);
+            auto params = Const!(Internals.Get.UserSpecifiedParams)(
+                Const!(Get.Args)(key),
+                Const!(Internals.Get.UserSpecifiedParams.SerializedNotifier)(
+                    *(cast(Const!(ubyte[notifier.sizeof])*)&notifier)
+                )
+            );
 
             this.assign!(Internals.Get)(params);
         }
