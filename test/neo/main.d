@@ -54,13 +54,44 @@ class Test : Task
 
     override public void run ( )
     {
-        mstring msg_buf;
-
         this.node = new Node(theScheduler.epoll, "127.0.0.1", 10_000);
         this.client = new Client(theScheduler.epoll, "127.0.0.1", 10_000,
             &this.connNotifier);
 
         this.client.blocking.waitAllNodesConnected();
+
+        this.testPutGet();
+
+        theScheduler.shutdown();
+    }
+
+    /***************************************************************************
+
+        Delegate called by the client when an event relating to a connection
+        (e.g. connection established or connection error) occurs.
+
+        Params:
+            info = smart-union whose active member describes the notification
+
+    ***************************************************************************/
+
+    private void connNotifier ( Client.Neo.ConnNotification info )
+    {
+        mstring buf;
+        formatNotification(info, buf);
+        Stdout.formatln("Conn: {}", buf);
+    }
+
+    /***************************************************************************
+
+        Runs a simple test where a single record is written to the node with Put
+        and then fetched with Get.
+
+    ***************************************************************************/
+
+    private void testPutGet ( )
+    {
+        mstring msg_buf;
 
         auto ok = this.client.blocking.put(23, "hello",
             ( Client.Neo.Put.Notification info, Client.Neo.Put.Args args )
@@ -81,25 +112,6 @@ class Test : Task
         );
         enforce(ok, "Get request failed");
         enforce(value == cast(void[])"hello");
-
-        theScheduler.shutdown();
-    }
-
-    /***************************************************************************
-
-        Delegate called by the client when an event relating to a connection
-        (e.g. connection established or connection error) occurs.
-
-        Params:
-            info = smart-union whose active member describes the notification
-
-    ***************************************************************************/
-
-    private void connNotifier ( Client.Neo.ConnNotification info )
-    {
-        mstring buf;
-        formatNotification(info, buf);
-        Stdout.formatln("Conn: {}", buf);
     }
 }
 
