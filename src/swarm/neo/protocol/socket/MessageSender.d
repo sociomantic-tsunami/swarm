@@ -36,7 +36,6 @@ class MessageSender
 
     debug (Raw) import ocean.io.Stdout: Stderr;
 
-    import core.sys.posix.signal: signal, SIGPIPE, SIG_IGN, SIG_ERR;
     import core.stdc.stdio: fputs, stderr;
     import core.stdc.stdlib: exit, EXIT_FAILURE;
     import swarm.neo.protocol.socket.IOStats;
@@ -48,23 +47,6 @@ class MessageSender
     ***************************************************************************/
 
     public IOStats io_stats;
-
-    /***************************************************************************
-
-        Suppress the Broken Pipe signal for this process; `writev()` may trigger
-        it otherwise. It is safe to suppress it for the whole process because it
-        is useful only to abort if not handling I/O events.
-
-    ***************************************************************************/
-
-    static this ( )
-    {
-        if (signal(SIGPIPE, SIG_IGN) == SIG_ERR)
-        {
-            fputs("signal(SIGPIPE, SIG_IGN) failed\n".ptr, stderr);
-            exit(EXIT_FAILURE);
-        }
-    }
 
     /***************************************************************************
 
@@ -388,7 +370,7 @@ class MessageSender
 
         errno = 0;
 // maybe do the vector I/O call + advance in IoVecTracker?
-        socket.ssize_t n = sendv(this.socket.fd, src.fields);
+        socket.ssize_t n = sendv(this.socket.fd, src.fields, MSG_NOSIGNAL);
 
         if (n >= 0) // n == 0 cannot happen: write() returns it only if the
         {           // output data are empty, which we prevent in the precondition
