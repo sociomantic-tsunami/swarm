@@ -52,7 +52,7 @@ struct IoVecMessage // MessageGenerator
 
     ***************************************************************************/
 
-    IoVecTracker* setup ( MessageType type, void[][] dynamic_fields, void[][] static_fields ... )
+    IoVecTracker* setup ( MessageType type, in void[][] dynamic_fields, in void[][] static_fields ... )
     in
     {
         assert(type <= type.max);
@@ -131,7 +131,7 @@ struct IoVecMessage // MessageGenerator
 
 struct IoVecTracker
 {
-    import core.sys.posix.sys.uio: iovec;
+    import swarm.neo.protocol.socket.uio_const: iovec_const;
     import ocean.transition: enableStomping;
 
     /***************************************************************************
@@ -143,7 +143,7 @@ struct IoVecTracker
 
     ***************************************************************************/
 
-    iovec[] fields;
+    iovec_const[] fields;
 
     /***************************************************************************
 
@@ -264,7 +264,7 @@ struct IoVecTracker
             assert(start == this.length);
 
             this.fields = this.fields[0 .. 1];
-            this.fields[0] = iovec(dst.ptr, this.length);
+            this.fields[0] = iovec_const(dst.ptr, this.length);
         }
         else if (dst)
         {
@@ -290,18 +290,18 @@ struct IoVecTracker
                e = "Treppe".dup,
                f = "krumm".dup;
 
-        iovec[6] iovecs = void;
+        iovec_const[6] iovecs = void;
 
         This iov;
 
         void setup ( )
         {
-            iovecs[0] = iovec(a.ptr, a.length);
-            iovecs[1] = iovec(b.ptr, b.length);
-            iovecs[2] = iovec(c.ptr, c.length);
-            iovecs[3] = iovec(d.ptr, d.length);
-            iovecs[4] = iovec(e.ptr, e.length);
-            iovecs[5] = iovec(f.ptr, f.length);
+            iovecs[0] = iovec_const(a.ptr, a.length);
+            iovecs[1] = iovec_const(b.ptr, b.length);
+            iovecs[2] = iovec_const(c.ptr, c.length);
+            iovecs[3] = iovec_const(d.ptr, d.length);
+            iovecs[4] = iovec_const(e.ptr, e.length);
+            iovecs[5] = iovec_const(f.ptr, f.length);
 
             foreach (field; iov.fields = iovecs)
             {
@@ -309,7 +309,7 @@ struct IoVecTracker
             }
         }
 
-        void[] iovField ( size_t i )
+        Const!(void)[] iovField ( size_t i )
         {
             with (iov.fields[i]) return iov_base[0 .. iov_len];
         }
