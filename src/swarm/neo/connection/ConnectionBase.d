@@ -359,7 +359,7 @@ abstract class ConnectionBase: ISelectClient
 
             this.outer.getPayloadForSending(
                 id,
-                ( void[][] payload )
+                ( in void[][] payload )
                 {
                     finish_sending = this.outer.sender.assign(
                         MessageType.Request, payload,
@@ -1030,7 +1030,7 @@ abstract class ConnectionBase: ISelectClient
     ***************************************************************************/
 
     abstract protected void getPayloadForSending ( RequestId id,
-        void delegate ( void[][] payload ) send );
+        void delegate ( in void[][] payload ) send );
 
     /***************************************************************************
 

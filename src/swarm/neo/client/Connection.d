@@ -585,7 +585,7 @@ public final class Connection: ConnectionBase
     ***************************************************************************/
 
     override protected void getPayloadForSending (
-        RequestId id, void delegate ( void[][] payload ) send
+        RequestId id, void delegate ( in void[][] payload ) send
     )
     {
         if (auto request_handler = this.getRequestOnConn(id))
