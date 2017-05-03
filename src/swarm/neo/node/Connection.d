@@ -25,9 +25,9 @@ class Connection: ConnectionBase
     import swarm.neo.authentication.HmacDef: Key;
     import swarm.neo.connection.YieldedRequestOnConns;
 
-    import ocean.sys.socket.AddressIPSocket;
-
     import ocean.core.Enforce;
+    import ocean.io.select.EpollSelectDispatcher;
+    import ocean.sys.socket.AddressIPSocket;
 
     import core.sys.posix.netinet.in_: SOL_SOCKET, IPPROTO_TCP, SO_KEEPALIVE;
 

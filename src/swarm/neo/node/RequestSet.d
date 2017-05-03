@@ -118,6 +118,18 @@ class RequestSet
 
         /***********************************************************************
 
+            Returns:
+                the id of this request
+
+        ***********************************************************************/
+
+        public RequestId id ( ) /* d1to2fix_inject: const */
+        {
+            return this.request_id;
+        }
+
+        /***********************************************************************
+
             Called when ready to send a message for this request.
 
             Outputs the payload of the request message to the send callback,
@@ -395,7 +407,7 @@ class RequestSet
     out (request)
     {
         assert(request);
-        assert(request.request_id == id);
+        assert(request.id == id);
         assert(this.n_active_requests <= max_requests);
     }
     body

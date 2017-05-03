@@ -33,6 +33,7 @@ public final class Connection: ConnectionBase
     import swarm.neo.client.RetryTimer;
 
     import ocean.core.Enforce;
+    import ocean.io.select.EpollSelectDispatcher;
     import ocean.transition;
 
     debug ( SwarmConn ) import ocean.io.Stdout;
@@ -448,13 +449,9 @@ public final class Connection: ConnectionBase
 
             case this.status_.Disconnected:
                 /* 
-                 * If the shutdown was requested during startup, report that
-                 * we are now stopping further connection attempts.
+                 * Shutdown was requested during startup, stopping further
+                 * connection attempts.
                  */
-                // TODO: do we need to notify the user at this stage?
-                // they are probably the one who requested the shutdown...
-                //~ if (this.startup_notifier !is null)
-                    //~ this.startup_notifier(this);
                 return false;
 
             default:

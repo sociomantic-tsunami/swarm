@@ -440,6 +440,8 @@ private class MessageReceiverBase
 
 class MessageReceiver: MessageReceiverBase
 {
+    import swarm.neo.protocol.ProtocolError;
+
     import ocean.io.select.protocol.generic.ErrnoIOException: IOError;
 
     import unistd = core.sys.posix.unistd: read;
@@ -598,6 +600,7 @@ unittest
     static class MessageReceiverTest: MessageReceiverBase
     {
         import swarm.neo.protocol.Message: MessageType, MessageHeader;
+        import swarm.neo.protocol.ProtocolError;
 
         import ocean.core.Test;
         import core.sys.posix.stdlib: erand48;

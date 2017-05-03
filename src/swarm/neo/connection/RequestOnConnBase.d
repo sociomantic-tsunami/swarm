@@ -76,12 +76,15 @@ module swarm.neo.connection.RequestOnConnBase;
 
 abstract class RequestOnConnBase
 {
-    import swarm.neo.protocol.Message: RequestId;
+    import Message = swarm.neo.protocol.Message;
     import swarm.neo.protocol.ProtocolError;
     import swarm.neo.connection.YieldedRequestOnConns;
     import Util = swarm.neo.util.Util;
 
     import ocean.transition;
+
+    /// Convenience alias for derived classes
+    protected alias Message.RequestId RequestId;
 
     /***************************************************************************
 
@@ -244,7 +247,7 @@ abstract class RequestOnConnBase
 
         ***********************************************************************/
 
-        private scope class Payload
+        public scope class Payload
         {
             import ocean.core.Traits : hasIndirections;
 
@@ -271,7 +274,7 @@ abstract class RequestOnConnBase
 
             *******************************************************************/
 
-            public this ( )
+            private this ( )
             {
                 assert(this.outer.outer.send_payload.length == 0);
             }
@@ -704,6 +707,26 @@ abstract class RequestOnConnBase
             return value;
         }
 
+        /***********************************************************************
+
+            Waits until a message for this request is received from the node.
+
+            Do not resume the fiber before this method has returned or thrown.
+
+            Params:
+                received = called with the payload of the next message that
+                           arrives for this request
+
+            Throws:
+                Exception on protocol or I/O error.
+
+        ***********************************************************************/
+
+        public void receive ( void delegate ( in void[] payload ) received )
+        {
+            int resume_code = this.receiveAndHandleEvents(received);
+            assert(resume_code <= 0, "receive: User unexpectedy resumed the fiber");
+        }
 
         /***********************************************************************
 
@@ -727,15 +750,6 @@ abstract class RequestOnConnBase
 
         ***********************************************************************/
 
-        // TODO: when this deprecated method is removed, replace it with a
-        // receive() which asserts on the return value of receiveAndHandleEvents
-        deprecated("Replace calls to EventDispatcher.receive with receiveAndHandleEvents")
-        public int receive ( void delegate ( in void[] payload ) received )
-        {
-            return this.receiveAndHandleEvents(received);
-        }
-
-        /// ditto
         public int receiveAndHandleEvents (
             void delegate ( in void[] payload ) received )
         in

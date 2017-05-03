@@ -6,6 +6,10 @@
           connected.
         * A method to block the current task until at least one registered node
           is connected.
+        * A Task-derivative which connects to all registered nodes. (Intended
+          for use with Scheduler.await().)
+        * A Task-derivative which connects to at least the specified number of
+          nodes. (Intended for use with Scheduler.await().)
 
     Copyright: Copyright (c) 2016-2017 sociomantic labs GmbH. All rights reserved
 
@@ -64,6 +68,79 @@ template TaskBlockingCore ( )
 
     /***************************************************************************
 
+        Task class which connects to all registered nodes. Intended for use
+        with Scheduler.await().
+
+    ***************************************************************************/
+
+    public class AllNodesConnected : Task
+    {
+        /***********************************************************************
+
+            Task main method. Exits when the client has established a connection
+            to all registered nodes.
+
+        ***********************************************************************/
+
+        public override void run ( )
+        {
+            this.outer.waitAllNodesConnected();
+        }
+    }
+
+    /***************************************************************************
+
+        Task class which connects to at least the specified number of nodes.
+        Intended for use with Scheduler.await() or Scheduler.awaitResult().
+
+    ***************************************************************************/
+
+    public class NodesConnected : Task
+    {
+        /// When the task exits, holds the number of nodes which are connected.
+        public size_t result;
+
+        /// The minimum number of nodes to connect to.
+        private size_t minimum_connected;
+
+        /***********************************************************************
+
+            Constructor.
+
+            Params:
+                minimum_connected = the minimum number of nodes to connect to
+
+        ***********************************************************************/
+
+        public this ( size_t minimum_connected )
+        {
+            this.minimum_connected = minimum_connected;
+        }
+
+        /***********************************************************************
+
+            Task main method. Exits only when the client has established
+            connections to at least this.minimum_connected nodes.
+
+        ***********************************************************************/
+
+        public override void run ( )
+        {
+            scope stats = this.outer.outer.neo.new Stats;
+
+            bool finished ( )
+            {
+                return stats.num_connected_nodes >= this.minimum_connected;
+            }
+
+            this.outer.waitConnect(&finished);
+
+            this.result = stats.num_connected_nodes;
+        }
+    }
+
+    /***************************************************************************
+
         Suspends the current task until the specified finished condition is
         satisifed.
 
@@ -81,9 +158,9 @@ template TaskBlockingCore ( )
 
         ConnectionSet.ConnectionNotifier user_conn_notifier;
 
-        void notifier ( IPAddress node_address, Exception e )
+        void notifier ( ConnectionSet.ConnNotification info )
         {
-            user_conn_notifier(node_address, e);
+            user_conn_notifier(info);
             task.resume();
         }
 

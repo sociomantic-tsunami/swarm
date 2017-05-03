@@ -26,10 +26,12 @@ import swarm.neo.client.RequestOnConn;
 /// ditto
 public final class ConnectionSet : RequestOnConn.IConnectionGetter
 {
-    import ocean.core.Exception_tango;
+    import ocean.core.ExceptionDefinitions;
+    import ocean.core.SmartUnion;
 
     import swarm.neo.client.Connection;
     import swarm.neo.client.RequestSet;
+    import swarm.neo.client.NotifierTypes;
     import swarm.neo.IPAddress;
     import swarm.neo.authentication.Credentials;
     import ocean.io.select.EpollSelectDispatcher;
@@ -102,20 +104,40 @@ public final class ConnectionSet : RequestOnConn.IConnectionGetter
 
     /***************************************************************************
 
+        Union of notifications about a connection.
+
+    ***************************************************************************/
+
+    private union ConnNotificationUnion
+    {
+        /// The connection has been successfully established.
+        NodeInfo connected;
+
+        /// An error (indicated by the `e` field) occurred while connecting. The
+        /// connection attempt will automatically be retried.
+        NodeExceptionInfo error_while_connecting;
+    }
+
+    /***************************************************************************
+
+        Smart-union of notifications about a connection.
+
+    ***************************************************************************/
+
+    public alias SmartUnion!(ConnNotificationUnion) ConnNotification;
+
+    /***************************************************************************
+
         User callback to be notified when a connection, which was added with
         `start()`,
-           1. finished connecting, because either the connection was established
-              or because it was removed with `stop()` while connecting, or
+           1. the connection was established, or
            2. detected an error -- for example, the node is unreachable or a
               socket I/O error, but also a failed protocol handshake or
               authentication -- and will try connecting again.
 
-        In case 1 `e is null`, in case 2 it reflects the error.
-
     ***************************************************************************/
 
-    public alias void delegate ( IPAddress node_address, Exception e )
-        ConnectionNotifier;
+    public alias void delegate ( ConnNotification info ) ConnectionNotifier;
 
     /// ditto
     private ConnectionNotifier conn_notifier;
@@ -416,10 +438,20 @@ public final class ConnectionSet : RequestOnConn.IConnectionGetter
     private void notifyConnectResult ( Connection connection,
         Exception e = null )
     {
-        if (e is null)
-            this.n_nodes_starting--;
+        ConnNotification info;
 
-        this.conn_notifier(connection.remote_address, e);
+        if (e is null)
+        {
+            this.n_nodes_starting--;
+            info.connected = NodeInfo(connection.remote_address);
+        }
+        else
+        {
+            info.error_while_connecting =
+                NodeExceptionInfo(connection.remote_address, e);
+        }
+
+        this.conn_notifier(info);
     }
 }
 

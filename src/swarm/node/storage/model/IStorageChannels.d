@@ -34,7 +34,7 @@ import ocean.util.container.map.Map;
 
 import ocean.util.container.pool.ObjectPool;
 
-import ocean.core.Exception_tango;
+import ocean.core.ExceptionDefinitions;
 
 import ocean.util.log.Log;
 

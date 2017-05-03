@@ -141,7 +141,7 @@ struct TreeMap ( Node = eb64_node )
 
     static if (is(typeof(Node.user_element_with_treemap_backlink) UserElement))
     {
-        import ocean.core.Traits_tango: isReferenceType;
+        import ocean.core.Traits: isReferenceType;
         static assert(isReferenceType!(UserElement));
 
         /***********************************************************************

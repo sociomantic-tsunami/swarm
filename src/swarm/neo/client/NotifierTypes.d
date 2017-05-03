@@ -18,6 +18,7 @@ module swarm.neo.client.NotifierTypes;
 *******************************************************************************/
 
 import ocean.transition;
+import Formatter = ocean.text.convert.Formatter;
 
 /*******************************************************************************
 
@@ -31,6 +32,27 @@ public struct NodeInfo
 
     /// Address of the remote node for which the notification is occurring.
     IPAddress node_addr;
+
+    /***************************************************************************
+
+        Formats a description of the notification to the provided sink delegate.
+
+        Params:
+            sink = delegate to feed formatted strings to
+
+    ***************************************************************************/
+
+    public void toString ( void delegate ( cstring chunk ) sink )
+    {
+        Formatter.sformat(
+            ( cstring chunk )
+            {
+                sink(chunk);
+                return chunk.length;
+            },
+            "Node {}:{}",
+            this.node_addr.address_bytes, this.node_addr.port);
+    }
 }
 
 /*******************************************************************************
@@ -49,30 +71,27 @@ public struct RequestNodeInfo
 
     /// Address of the remote node for which the notification is occurring.
     IPAddress node_addr;
-}
 
-/*******************************************************************************
+    /***************************************************************************
 
-    The address of a node plus an enum indicating a type of unsupported error.
+        Formats a description of the notification to the provided sink delegate.
 
-*******************************************************************************/
+        Params:
+            sink = delegate to feed formatted strings to
 
-deprecated("Use RequestNodeUnsupportedInfo instead")
-public struct NodeUnsupportedInfo
-{
-    import swarm.neo.IPAddress;
+    ***************************************************************************/
 
-    /// Address of the remote node for which the notification is occurring.
-    IPAddress node_addr;
-
-    enum Type
+    public void toString ( void delegate ( cstring chunk ) sink )
     {
-        RequestNotSupported,
-        RequestVersionNotSupported
+        Formatter.sformat(
+            ( cstring chunk )
+            {
+                sink(chunk);
+                return chunk.length;
+            },
+            "Request #{}, node {}:{}",
+            this.request_id, this.node_addr.address_bytes, this.node_addr.port);
     }
-
-    /// Type of unsupported error.
-    Type type;
 }
 
 /*******************************************************************************
@@ -100,6 +119,49 @@ public struct RequestNodeUnsupportedInfo
 
     /// Type of unsupported error.
     Type type;
+
+    /***************************************************************************
+
+        Formats a description of the notification to the provided sink delegate.
+
+        Params:
+            sink = delegate to feed formatted strings to
+
+    ***************************************************************************/
+
+    public void toString ( void delegate ( cstring chunk ) sink )
+    {
+        Formatter.sformat(
+            ( cstring chunk )
+            {
+                sink(chunk);
+                return chunk.length;
+            },
+            "Request #{}, node {}:{} reported that the {} is not supported",
+            this.request_id, this.node_addr.address_bytes, this.node_addr.port,
+            this.type_explanation);
+    }
+
+    /***************************************************************************
+
+        Returns:
+            a string explaining this.type
+
+    ***************************************************************************/
+
+    private istring type_explanation ( )
+    {
+        with ( Type ) switch ( this.type )
+        {
+            case RequestNotSupported:
+                return "request";
+            case RequestVersionNotSupported:
+                return "request version";
+            default:
+                assert(false);
+        }
+        assert(false);
+    }
 }
 
 /*******************************************************************************
@@ -117,6 +179,40 @@ public struct NodeExceptionInfo
 
     /// Exception associated with notification.
     Exception e;
+
+    /***************************************************************************
+
+        Formats a description of the notification to the provided sink delegate.
+
+        Params:
+            sink = delegate to feed formatted strings to
+
+    ***************************************************************************/
+
+    public void toString ( void delegate ( cstring chunk ) sink )
+    {
+        size_t size_sink ( cstring chunk )
+        {
+            sink(chunk);
+            return chunk.length;
+        }
+
+        if ( this.e !is null )
+        {
+            Formatter.sformat(&size_sink,
+                "Exception '{}' @ {}:{} occurred in the client while handling the "
+                "request on node {}:{}",
+                getMsg(this.e), this.e.file, this.e.line,
+                this.node_addr.address_bytes, this.node_addr.port);
+        }
+        else
+        {
+            Formatter.sformat(&size_sink,
+                "An undefined error (null Exception) occurred in the client "
+                "while handling the request on node {}:{}",
+                this.node_addr.address_bytes, this.node_addr.port);
+        }
+    }
 }
 
 /*******************************************************************************
@@ -138,19 +234,41 @@ public struct RequestNodeExceptionInfo
 
     /// Exception associated with notification.
     Exception e;
-}
 
-/*******************************************************************************
+    /***************************************************************************
 
-    A chunk of untyped data.
+        Formats a description of the notification to the provided sink delegate.
 
-*******************************************************************************/
+        Params:
+            sink = delegate to feed formatted strings to
 
-deprecated("Use RequestDataInfo instead")
-public struct DataInfo
-{
-    /// Data value associated with notification.
-    Const!(void)[] value;
+    ***************************************************************************/
+
+    public void toString ( void delegate ( cstring chunk ) sink )
+    {
+        size_t size_sink ( cstring chunk )
+        {
+            sink(chunk);
+            return chunk.length;
+        }
+
+        if ( this.e !is null )
+        {
+            Formatter.sformat(&size_sink,
+                "Exception '{}' @ {}:{} occurred in the client while handling "
+                "request #{} on node {}:{}",
+                getMsg(this.e), this.e.file, this.e.line, this.request_id,
+                this.node_addr.address_bytes, this.node_addr.port);
+        }
+        else
+        {
+            Formatter.sformat(&size_sink,
+                "An undefined error (null Exception) occurred in the client "
+                "while handling request #{} on node {}:{}",
+                this.request_id, this.node_addr.address_bytes,
+                this.node_addr.port);
+        }
+    }
 }
 
 /*******************************************************************************
@@ -168,6 +286,27 @@ public struct RequestDataInfo
 
     /// Data value associated with notification.
     Const!(void)[] value;
+
+    /***************************************************************************
+
+        Formats a description of the notification to the provided sink delegate.
+
+        Params:
+            sink = delegate to feed formatted strings to
+
+    ***************************************************************************/
+
+    public void toString ( void delegate ( cstring chunk ) sink )
+    {
+        Formatter.sformat(
+            ( cstring chunk )
+            {
+                sink(chunk);
+                return chunk.length;
+            },
+            "Request #{} provided the value {}",
+            this.request_id, this.value);
+    }
 }
 
 /*******************************************************************************
@@ -176,7 +315,22 @@ public struct RequestDataInfo
 
 *******************************************************************************/
 
-public struct NoInfo {}
+public struct NoInfo
+{
+    /***************************************************************************
+
+        Formats a description of the notification to the provided sink delegate.
+
+        Params:
+            sink = delegate to feed formatted strings to
+
+    ***************************************************************************/
+
+    public void toString ( void delegate ( cstring chunk ) sink )
+    {
+        sink("(empty notification)");
+    }
+}
 
 /*******************************************************************************
 
@@ -190,5 +344,25 @@ public struct RequestInfo
 
     /// ID of the request for which the notification is occurring.
     RequestId request_id;
-}
 
+    /***************************************************************************
+
+        Formats a description of the notification to the provided sink delegate.
+
+        Params:
+            sink = delegate to feed formatted strings to
+
+    ***************************************************************************/
+
+    public void toString ( void delegate ( cstring chunk ) sink )
+    {
+        Formatter.sformat(
+            ( cstring chunk )
+            {
+                sink(chunk);
+                return chunk.length;
+            },
+            "Request #{}",
+            this.request_id);
+    }
+}
