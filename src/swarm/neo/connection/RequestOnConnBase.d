@@ -122,7 +122,7 @@ abstract class RequestOnConnBase
 
     ***************************************************************************/
 
-    protected void[][] send_payload_;
+    protected Const!(void[])[] send_payload_;
 
     /***************************************************************************
 
@@ -131,7 +131,7 @@ abstract class RequestOnConnBase
 
     ***************************************************************************/
 
-    private void[][] send_payload;
+    private Const!(void)[][] send_payload;
 
     /***************************************************************************
 
@@ -303,7 +303,7 @@ abstract class RequestOnConnBase
             public void add ( T ) ( ref T elem )
             {
                 static assert(!hasIndirections!(T));
-                this.outer.outer.send_payload ~= (cast(void*)&elem)[0..T.sizeof];
+                this.outer.outer.send_payload ~= (cast(Const!(void*))&elem)[0..T.sizeof];
             }
 
             /*******************************************************************
@@ -351,9 +351,9 @@ abstract class RequestOnConnBase
 
             *******************************************************************/
 
-            public void addArray ( T ) ( ref T[] arr )
+            public void addArray ( T: Element[], Element ) ( ref T arr )
             {
-                static assert(!hasIndirections!(T));
+                static assert(!hasIndirections!(Element));
 
                 /*
                  * arr is a dynamic array. To slice the data of arr.length, we
@@ -383,9 +383,9 @@ abstract class RequestOnConnBase
                  * variable.
                  */
                 this.outer.outer.send_payload ~=
-                    (cast(void*)&arr)[0..size_t.sizeof];
+                    (cast(Const!(void)*)&arr)[0..size_t.sizeof];
                 this.outer.outer.send_payload ~=
-                    (cast(void*)arr.ptr)[0..arr.length * T.sizeof];
+                    (cast(Const!(void)*)arr.ptr)[0..arr.length * Element.sizeof];
             }
 
             /*******************************************************************
@@ -397,10 +397,10 @@ abstract class RequestOnConnBase
 
             unittest
             {
-                void[][] slices;
-                mstring arr = "Hello World!".dup;
-                slices ~= (cast(void*)&arr)[0..size_t.sizeof];
-                slices ~= (cast(void*)arr.ptr)[0..arr.length];
+                Const!(void)[][] slices;
+                istring arr = "Hello World!";
+                slices ~= (cast(Const!(void)*)&arr)[0..size_t.sizeof];
+                slices ~= (cast(Const!(void)*)arr.ptr)[0..arr.length];
                 assert(slices.length == 2);
                 assert(slices[0].length == size_t.sizeof);
                 assert(*cast(size_t*)(slices[0].ptr) == arr.length);
@@ -523,7 +523,7 @@ abstract class RequestOnConnBase
 
         ***********************************************************************/
 
-        public void send ( void[][] payload ... )
+        public void send ( in void[][] payload ... )
         {
             int resume_code = this.sendAndHandleEvents(payload);
             assert(resume_code <= 0, "send: User unexpectedy resumed the fiber");
@@ -583,7 +583,7 @@ abstract class RequestOnConnBase
 
         ***********************************************************************/
 
-        public int sendAndHandleEvents ( void[][] payload ... )
+        public int sendAndHandleEvents ( in void[][] payload ... )
         in
         {
             assert(payload.length, "sendAndHandleEvents: no payload to send");
@@ -1099,7 +1099,7 @@ abstract class RequestOnConnBase
 
         public void sendReceive (
             void delegate ( in void[] payload ) received,
-            void[][] payload ...
+            in void[][] payload ...
         )
         in
         {
@@ -1180,7 +1180,7 @@ abstract class RequestOnConnBase
 
         public int sendReceiveAndHandleEvents (
             void delegate ( in void[] recv_payload ) received,
-            void[][] payload ...
+            in void[][] payload ...
         )
         in
         {
@@ -1405,7 +1405,7 @@ abstract class RequestOnConnBase
 
     ***************************************************************************/
 
-    protected void getPayloadForSending ( void delegate ( void[][] payload ) send )
+    protected void getPayloadForSending ( void delegate ( in void[][] payload ) send )
     {
         try
             send(this.send_payload_);

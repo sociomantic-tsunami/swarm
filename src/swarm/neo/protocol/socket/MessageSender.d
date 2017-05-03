@@ -26,8 +26,8 @@ class MessageSender
 
     import ocean.io.select.protocol.generic.ErrnoIOException: IOError;
 
+    import swarm.neo.protocol.socket.uio_const;
     import core.sys.posix.sys.socket: setsockopt;
-    import core.sys.posix.sys.uio: iovec, writev;
     import core.sys.posix.netinet.in_: IPPROTO_TCP;
     import core.sys.linux.sys.netinet.tcp: TCP_CORK;
     import core.stdc.errno: errno, EAGAIN, EWOULDBLOCK, EINTR;
@@ -36,7 +36,6 @@ class MessageSender
 
     debug (Raw) import ocean.io.Stdout: Stderr;
 
-    import core.sys.posix.signal: signal, SIGPIPE, SIG_IGN, SIG_ERR;
     import core.stdc.stdio: fputs, stderr;
     import core.stdc.stdlib: exit, EXIT_FAILURE;
     import swarm.neo.protocol.socket.IOStats;
@@ -48,23 +47,6 @@ class MessageSender
     ***************************************************************************/
 
     public IOStats io_stats;
-
-    /***************************************************************************
-
-        Suppress the Broken Pipe signal for this process; `writev()` may trigger
-        it otherwise. It is safe to suppress it for the whole process because it
-        is useful only to abort if not handling I/O events.
-
-    ***************************************************************************/
-
-    static this ( )
-    {
-        if (signal(SIGPIPE, SIG_IGN) == SIG_ERR)
-        {
-            fputs("signal(SIGPIPE, SIG_IGN) failed\n".ptr, stderr);
-            exit(EXIT_FAILURE);
-        }
-    }
 
     /***************************************************************************
 
@@ -144,7 +126,7 @@ class MessageSender
 
     public bool assignProtocolVersion ( ubyte protocol_version )
     {
-        auto iov = iovec(&protocol_version, protocol_version.sizeof);
+        auto iov = iovec_const(&protocol_version, protocol_version.sizeof);
         auto tracker = IoVecTracker((&iov)[0 .. 1], iov.iov_len);
         return this.assign_(tracker);
     }
@@ -179,7 +161,7 @@ class MessageSender
 
      **************************************************************************/
 
-    public bool assign ( MessageType type, void[][] dynamic_fields, void[][] static_fields ... )
+    public bool assign ( MessageType type, in void[][] dynamic_fields, in void[][] static_fields ... )
     {
         auto tracker = this.iov_msg.setup(type, dynamic_fields, static_fields);
         this.io_stats.msg_body.countBytes(tracker.length - MessageHeader.sizeof);
@@ -217,7 +199,7 @@ class MessageSender
     }
     body
     {
-        auto iov = iovec(this.pending_data.ptr, this.pending_data.length);
+        auto iov = iovec_const(this.pending_data.ptr, this.pending_data.length);
         auto src = IoVecTracker((&iov)[0 .. 1], iov.iov_len);
 
         scope (exit)
@@ -388,7 +370,7 @@ class MessageSender
 
         errno = 0;
 // maybe do the vector I/O call + advance in IoVecTracker?
-        socket.ssize_t n = writev(this.socket.fd, src.fields.ptr, cast(int)src.fields.length);
+        socket.ssize_t n = sendv(this.socket.fd, src.fields, MSG_NOSIGNAL);
 
         if (n >= 0) // n == 0 cannot happen: write() returns it only if the
         {           // output data are empty, which we prevent in the precondition
