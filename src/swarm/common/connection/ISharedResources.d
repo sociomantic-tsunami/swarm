@@ -120,7 +120,7 @@ template SharedResources_T ( T )
         template NewFreeList ( T, size_t i )
         {
             const istring NewFreeList = "this." ~ FieldName!(i, T) ~ "_freelist"
-                " = new FreeList!(" ~ FieldType!(T, i).stringof ~ ");";
+                ~ " = new FreeList!(" ~ FieldType!(T, i).stringof ~ ");";
         }
 
         template NewFreeLists ( T, size_t i = 0 )
