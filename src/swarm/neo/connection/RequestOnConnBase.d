@@ -485,6 +485,28 @@ abstract class RequestOnConnBase
 
         /***********************************************************************
 
+            Resumes the request-on-conn fiber with the specified code, if it is
+            suspended.
+
+            Params:
+                code = code to resume request-on-conn fiber with
+
+            Returns:
+                true if the fiber was resumed, false if it was already running
+
+        ***********************************************************************/
+
+        public bool resumeFiber ( ubyte code )
+        {
+            if ( this.outer.is_running )
+                return false;
+
+            this.outer.resumeFiber(code);
+            return true;
+        }
+
+        /***********************************************************************
+
             Sends a message for this request to the node.
 
             Do not resume the fiber before this method has returned or thrown.
