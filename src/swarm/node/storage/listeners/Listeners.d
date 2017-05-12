@@ -53,6 +53,7 @@ public interface IListener
     {
         None = 0,
         DataReady,  // a record is ready for reading
+        Deletion,   // a record has been deleted
         Flush,      // the write buffer should be flushed
         Finish      // the listener should stop listening (e.g. in the case when
                     // the listen source is about to disappear
