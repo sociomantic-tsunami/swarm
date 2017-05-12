@@ -234,16 +234,16 @@ public template RequestResources_T ( Shared )
     template Getter ( T, size_t i )
     {
         const istring Getter =
-            GetterReturnType!(T, i).stringof ~ " " ~ FieldName!(i, T) ~ "()"
-            "{"
-                "if(!this.acquired." ~ FieldName!(i, T) ~ ")"
-                "{"
-                    "this.acquired." ~ FieldName!(i, T) ~ "="
-                    "this.shared_resources." ~ FieldName!(i, T) ~ "_freelist"
-                    ".get(this.new_" ~ FieldName!(i, T) ~ ");"
+            GetterReturnType!(T, i).stringof ~ " " ~ FieldName!(i, T) ~ "()" ~
+            "{" ~
+                "if(!this.acquired." ~ FieldName!(i, T) ~ ")" ~
+                "{" ~
+                    "this.acquired." ~ FieldName!(i, T) ~ "=" ~
+                    "this.shared_resources." ~ FieldName!(i, T) ~ "_freelist" ~
+                    ".get(this.new_" ~ FieldName!(i, T) ~ ");" ~
                     "this.init_" ~ FieldName!(i, T) ~
-                        "(this.acquired." ~ FieldName!(i, T) ~ ");"
-                "}"
+                        "(this.acquired." ~ FieldName!(i, T) ~ ");" ~
+                "}" ~
                 "return " ~ GetterReturnValue!(T, i) ~
             "}";
     }
@@ -365,10 +365,10 @@ public template RequestResources_T ( Shared )
     template Recycler ( T, size_t i )
     {
         const istring Recycler =
-            "if(this.acquired." ~ FieldName!(i, T) ~ ")"
-            "{"
-                "this.shared_resources." ~ FieldName!(i, T) ~ "_freelist"
-                ".recycle(this.acquired." ~ FieldName!(i, T) ~ ");"
+            "if(this.acquired." ~ FieldName!(i, T) ~ ")" ~
+            "{" ~
+                "this.shared_resources." ~ FieldName!(i, T) ~ "_freelist" ~
+                ".recycle(this.acquired." ~ FieldName!(i, T) ~ ");" ~
             "}";
     }
 
