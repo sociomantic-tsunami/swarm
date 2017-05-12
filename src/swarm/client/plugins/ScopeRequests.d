@@ -192,7 +192,7 @@ public class ScopeRequestsPlugin
                             ? this.outer.nodes.length : 1;
                         this.pending += num_requests;
 
-                        debug ( SwarmClient ) Stderr.formatln("ScopeReqeusts: "
+                        debug ( SwarmClient ) Stderr.formatln("ScopeReqeusts: " ~
                             "assigning command {}, {} remaining before resuming fiber",
                             params.command, this.pending);
                     });
@@ -253,7 +253,7 @@ public class ScopeRequestsPlugin
                     {
                         this.pending--;
 
-                        debug ( SwarmClient ) Stderr.formatln("ScopeReqeusts: "
+                        debug ( SwarmClient ) Stderr.formatln("ScopeReqeusts: " ~
                             "{} ({}) finished, {} remaining before resuming fiber",
                             info.command_description, info.command, this.pending);
                     }
@@ -267,7 +267,7 @@ public class ScopeRequestsPlugin
                 {
                     this.suspended = false;
 
-                    debug ( SwarmClient ) Stderr.formatln("ScopeReqeusts: "
+                    debug ( SwarmClient ) Stderr.formatln("ScopeReqeusts: " ~
                         "resuming fiber");
 
                     this.fiber.resume(RequestsFinished, this);
