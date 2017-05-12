@@ -612,7 +612,7 @@ public abstract class NodeConnectionPool
 
     public bool nextRequest ( IRequestParams params )
     {
-        debug ( SwarmClient ) Stderr.formatln("Next request ({} queued "
+        debug ( SwarmClient ) Stderr.formatln("Next request ({} queued " ~
             "{} overflowed{}) ----------------------------------------------------",
             this.request_queue.length, this.request_overflow.length(this.node_item),
             this.suspended_ ? " -- suspended" : "");
@@ -625,7 +625,7 @@ public abstract class NodeConnectionPool
         bool popped = this.popFromQueue(params);
         if ( !popped && this.request_overflow.pop(this.node_item) )
         {
-            debug ( SwarmClient ) Stderr.formatln("Restored request from "
+            debug ( SwarmClient ) Stderr.formatln("Restored request from " ~
                     "overflow for {}:{}. Overflow now contains {} requests.",
                     this.address, this.port,
                     this.request_overflow.length(this.node_item));
@@ -875,7 +875,7 @@ public abstract class NodeConnectionPool
         {
             if ( this.request_overflow.push(params, this.node_item) )
             {
-                debug ( SwarmClient ) Stderr.formatln("Overflowed request for {}:{}. "
+                debug ( SwarmClient ) Stderr.formatln("Overflowed request for {}:{}. " ~
                         "Overflow now contains {} requests.", this.address,
                         this.port, this.request_overflow.length(this.node_item));
             }
