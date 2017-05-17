@@ -38,7 +38,6 @@ class Test : Task
     import swarm.neo.client.requests.NotificationFormatter;
 
     import ocean.core.Enforce;
-    import ocean.io.Stdout;
 
     /// Example node.
     Node node;
@@ -78,9 +77,6 @@ class Test : Task
 
     private void connNotifier ( Client.Neo.ConnNotification info )
     {
-        mstring buf;
-        formatNotification(info, buf);
-        Stdout.formatln("Conn: {}", buf);
     }
 
     /***************************************************************************
@@ -95,22 +91,12 @@ class Test : Task
         mstring msg_buf;
 
         auto ok = this.client.blocking.put(23, "hello",
-            ( Client.Neo.Put.Notification info, Client.Neo.Put.Args args )
-            {
-                formatNotification(info, msg_buf);
-                Stdout.formatln("Put: {}", msg_buf);
-            }
-        );
+            ( Client.Neo.Put.Notification info, Client.Neo.Put.Args args ) { });
         enforce(ok, "Put request failed");
 
         void[] value;
         ok = this.client.blocking.get(23, value,
-            ( Client.Neo.Get.Notification info, Client.Neo.Get.Args args )
-            {
-                formatNotification(info, msg_buf);
-                Stdout.formatln("Get: {}", msg_buf);
-            }
-        );
+            ( Client.Neo.Get.Notification info, Client.Neo.Get.Args args ) { });
         enforce(ok, "Get request failed");
         enforce(value == cast(void[])"hello");
     }
