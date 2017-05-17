@@ -61,6 +61,7 @@ class Test : Task
         this.client.blocking.waitAllNodesConnected();
 
         this.testPutGet();
+        this.testPutGetAll();
 
         theScheduler.shutdown();
     }
@@ -112,6 +113,40 @@ class Test : Task
         );
         enforce(ok, "Get request failed");
         enforce(value == cast(void[])"hello");
+    }
+
+    /***************************************************************************
+
+        Runs a simple test where three records are written to the node with Put
+        and then fetched with GetAll.
+
+    ***************************************************************************/
+
+    private void testPutGetAll ( )
+    {
+        mstring msg_buf;
+
+        // Add some records.
+        cstring[hash_t] records =
+            [0x1 : "you"[], 0x2 : "say", 23 : "hello"];
+        foreach ( key, value; records )
+        {
+            auto ok = this.client.blocking.put(key, value,
+                ( Client.Neo.Put.Notification info, Client.Neo.Put.Args args ) { });
+            enforce(ok, "Put request failed");
+        }
+
+        // Check that they're all returned by GetAll.
+        auto records_iterator = this.client.blocking.getAll(
+            ( Client.Neo.GetAll.Notification info, Client.Neo.GetAll.Args args ) { });
+
+        size_t received_count;
+        foreach ( key, value; records_iterator )
+        {
+            enforce!("in")(key, records);
+            received_count++;
+        }
+        enforce!("==")(received_count, records.length);
     }
 }
 

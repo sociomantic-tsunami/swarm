@@ -5,9 +5,9 @@
           legacy protocol. The latter protocol is unused in this example.
         * Contains a simplistic key-value storage engine, with string values and
           hash_t keys.
-        * Supports tow requests: Put -- to add or update a value in the storage
-          engine -- and Get -- to retrieve a value from the storage engine, if
-          it exists.
+        * Supports three requests: Put -- to add or update a value in the storage
+          engine; Get -- to retrieve a value from the storage engine, if
+          it exists; GetAll -- to retrieve all records from the storage engine.
 
     Copyright:
         Copyright (c) 2017 sociomantic labs GmbH. All rights reserved
@@ -34,6 +34,7 @@ public class Node : NodeBase!(ConnHandler)
     import test.neo.node.Storage;
 
     import Get = test.neo.node.request.Get;
+    import GetAll = test.neo.node.request.GetAll;
     import Put = test.neo.node.request.Put;
 
     /// Storage engine.
@@ -62,6 +63,7 @@ public class Node : NodeBase!(ConnHandler)
         Options options;
         options.epoll = epoll;
         options.cmd_handlers[RequestCode.Get] = &Get.handle;
+        options.cmd_handlers[RequestCode.GetAll] = &GetAll.handle;
         options.cmd_handlers[RequestCode.Put] = &Put.handle;
         options.credentials_map["dummy"] = Key.init;
         options.shared_resources = this.storage;
