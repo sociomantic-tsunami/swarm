@@ -2,9 +2,10 @@
 
     Example client with the following features:
         * Connects to a single node, specified in the constructor.
-        * Supports two simple requests: Put -- to write a value to the node --
-          and Get -- to read a value from the node.
-        * A Task-blocking interface for connection and both requests.
+        * Supports three requests: Put -- to add or update a value in the node;
+          Get -- to retrieve a value from the node, if it exists; GetAll -- to
+          retrieve all records from the node.
+        * A Task-blocking interface for connection and all requests.
 
     Copyright:
         Copyright (c) 2017 sociomantic labs GmbH. All rights reserved
@@ -42,6 +43,7 @@ public class Client
         ***********************************************************************/
 
         public import Get = test.neo.client.request.Get;
+        public import GetAll = test.neo.client.request.GetAll;
         public import Put = test.neo.client.request.Put;
 
         /***********************************************************************
@@ -52,6 +54,7 @@ public class Client
 
         struct Internals
         {
+            import test.neo.client.request.internal.GetAll;
             import test.neo.client.request.internal.Get;
             import test.neo.client.request.internal.Put;
         }
@@ -60,7 +63,7 @@ public class Client
         mixin ClientCore!();
 
         /// Instantiation of RequestStatsTemplate.
-        alias RequestStatsTemplate!("Put", "Get") RequestStats;
+        alias RequestStatsTemplate!("Put", "Get", "GetAll") RequestStats;
 
         /***********************************************************************
 
@@ -109,6 +112,29 @@ public class Client
             );
 
             this.assign!(Internals.Get)(params);
+        }
+
+        /***********************************************************************
+
+            Assigns a GetAll request, retrieving all records in the node (if any
+            exist).
+
+            Params:
+                notifier = notifier, called when interesting events occur for
+                    this request
+
+        ***********************************************************************/
+
+        public void getAll ( GetAll.Notifier notifier )
+        {
+            auto params = Const!(Internals.GetAll.UserSpecifiedParams)(
+                Const!(GetAll.Args)(),
+                Const!(Internals.GetAll.UserSpecifiedParams.SerializedNotifier)(
+                    *(cast(Const!(ubyte[notifier.sizeof])*)&notifier)
+                )
+            );
+
+            this.assign!(Internals.GetAll)(params);
         }
     }
 
@@ -221,6 +247,95 @@ public class Client
                 task.suspend();
 
             return succeeded;
+        }
+
+        /***********************************************************************
+
+            GetAll iterator "fruct" (foreach struct).
+
+        ***********************************************************************/
+
+        private struct GetAllFruct
+        {
+            /// Neo client instance to use to assign the request.
+            private Neo neo;
+
+            /// User's notifier delegate.
+            private Neo.GetAll.Notifier notifier;
+
+
+            /*******************************************************************
+
+                foreach iteration over the records returned by a GetAll request.
+                The calling Task is blocked until the request finishes.
+
+                Note: in this simple example, the case where the caller breaks
+                the foreach loop is not handled. In a real request
+                implementation, this should cleanly abort the request.
+
+            *******************************************************************/
+
+            public int opApply (
+                int delegate ( ref hash_t key, ref Const!(void)[] value ) dg )
+            {
+                int res;
+
+                auto task = Task.getThis();
+                assert(task !is null);
+
+                bool rq_finished;
+                void internalNotifier ( Neo.GetAll.Notification info, Neo.GetAll.Args args )
+                {
+                    this.notifier(info, args);
+
+                    with ( info.Active ) switch ( info.active )
+                    {
+                        case record:
+                            res = dg(info.record.key, info.record.value);
+
+                            // This simple iterator implementation does not
+                            // support ending the request via breaking the
+                            // foreach loop.
+                            assert(!res);
+                            break;
+
+                        default:
+                            // Note that this simple wrapper implementation does
+                            // not differentiate between finishing due to an
+                            // error vs the request completing.
+                            rq_finished = true;
+                            break;
+                    }
+
+                    if ( rq_finished && task.suspended )
+                        task.resume();
+                }
+
+                this.neo.getAll(&internalNotifier);
+                if ( !rq_finished )
+                    task.suspend();
+
+                return res;
+            }
+        }
+
+        /***********************************************************************
+
+            Assigns a GetAll request, retrieving all records in the node (if any
+            exist). The calling Task is blocked until the request finishes.
+
+            Params:
+                notifier = notifier, called when interesting events occur for
+                    this request
+
+            Returns:
+                GetAll iterator
+
+        ***********************************************************************/
+
+        public GetAllFruct getAll ( Neo.GetAll.Notifier notifier )
+        {
+            return GetAllFruct(this.outer.neo, notifier);
         }
     }
 
