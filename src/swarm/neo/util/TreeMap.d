@@ -408,6 +408,29 @@ struct TreeMap ( Node = eb64_node )
 
         /***********************************************************************
 
+            Obtains the first or last node in the map.
+
+            Params:
+                first = `true`: obtain the first node,
+                        `false`: obtain the last node
+
+            Returns:
+                the first or last node or `null` if the map is empty.
+
+        ***********************************************************************/
+
+        public Node* getBoundary ( bool first = true ) ( )
+        {
+            static if (first)
+                alias eb64_first eb64_function;
+            else
+                alias eb64_last eb64_function;
+
+            return cast(Node*)eb64_function(&this.root);
+        }
+
+        /***********************************************************************
+
             foreach iterator over nodes in the tree. Any tree modification is
             permitted during iteration.
 
