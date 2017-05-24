@@ -404,3 +404,65 @@ public template RequestCore ( RequestType request_type_, ubyte request_code,
     }
 }
 
+///
+unittest
+{
+    // Example of using RequestCore.
+    struct ExampleRequest
+    {
+        import ocean.core.SmartUnion;
+
+        /***********************************************************************
+
+            Request API. (Usually defined in a separate module and imported into
+            the request internals struct.)
+
+        ***********************************************************************/
+
+        const ubyte RequestCode = 0;
+        const ubyte RequestVersion = 0;
+
+        struct Args
+        {
+            // Dummy
+        }
+
+        union NotificationUnion
+        {
+            import swarm.neo.client.NotifierTypes;
+
+            RequestNodeUnsupportedInfo unsupported;
+        }
+
+        alias SmartUnion!(NotificationUnion) Notification;
+
+        alias void delegate ( Notification, Args ) Notifier;
+
+        /***********************************************************************
+
+            Request internals.
+
+        ***********************************************************************/
+
+        private struct SharedWorking
+        {
+            // Dummy
+        }
+
+        private struct Working
+        {
+            // Dummy
+        }
+
+        /***********************************************************************
+
+            Request core. Mixes in the types `NotificationInfo`, `Notifier`,
+            `Params`, `Context` plus the static constants `request_type` and
+            `request_code`.
+
+        ***********************************************************************/
+
+        mixin RequestCore!(RequestType.AllNodes, RequestCode, RequestVersion,
+            Args, SharedWorking, Working, Notification);
+    }
+}
