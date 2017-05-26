@@ -45,8 +45,6 @@ import ocean.util.log.Log;
 
 import ocean.util.log.Stats;
 
-import ocean.text.convert.Layout;
-
 import swarm.Const : NodeItem;
 
 import swarm.client.model.IClient;
