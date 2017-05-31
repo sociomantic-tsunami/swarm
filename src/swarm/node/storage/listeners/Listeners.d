@@ -114,114 +114,38 @@ public class IListeners ( Data ... )
 
     ***************************************************************************/
 
-    protected static class ListenerSet
+    protected struct ListenerSet
     {
+        import swarm.neo.util.TreeMap;
+        import ocean.util.container.ebtree.c.eb64tree;
+
         /***********************************************************************
 
-            List of waiting listeners
+            The registered listeners sorted by object address.
 
         ***********************************************************************/
 
-        private Listener[] listeners;
-
+        private TreeMap!() listeners;
 
         /***********************************************************************
 
-            Index of current listener. Used by the next() method.
+            The current listener, used by `next`.
 
         ***********************************************************************/
 
-        private size_t current;
-
+        private eb64_node* current = null;
 
         /***********************************************************************
 
-            Set of waiting listeners (for fast lookup to tell whether a listener
-            is already registered or not)
+            The number of registered listeners.
 
         ***********************************************************************/
 
-        private static class ListenersSet : Set!(Listener)
-        {
-            /*******************************************************************
-
-                Constructor, sets the number of buckets to n * load_factor. n is
-                the estimated number of listeners per channel, and load_factor
-                is the desired ratio of buckets to set elements. Both these
-                values are defined as constants in the constructor.
-
-                TODO: would it be beneficial to be able to configure these
-                constants?
-
-                Params:
-                    load_factor = load factor
-
-            *******************************************************************/
-
-            public this ( )
-            {
-                const listeners_estimate = 50;
-                const float load_factor = 0.75;
-
-                super(listeners_estimate, load_factor);
-            }
-
-
-            /*******************************************************************
-
-                Calculates the hash value for a listener. The listener reference
-                is simply passed to the hashing function as a ubyte[].
-
-                Params:
-                    listener = listener to hash
-
-                Returns:
-                    the hash value that corresponds to listener.
-
-            *******************************************************************/
-
-            override public hash_t toHash ( Listener listener )
-            {
-                return StandardHash.toHash(
-                    (cast(ubyte*)&listener)[0..listener.sizeof]);
-            }
-        }
-
-        private ListenersSet listeners_set;
-
+        private uint n = 0;
 
         /***********************************************************************
 
-            Asserts that the list and the set always have the same number of
-            listeners.
-
-        ***********************************************************************/
-
-        invariant ( )
-        {
-            auto _this = cast(ListenerSet) this;
-            assert(
-                _this.listeners.length == _this.listeners_set.bucket_info.length,
-                typeof(this).stringof ~ ".invariant: listeners set & list are not the same length"
-            );
-        }
-
-
-        /***********************************************************************
-
-            Constructor
-
-        ***********************************************************************/
-
-        public this ( )
-        {
-            this.listeners_set = new ListenersSet;
-        }
-
-
-        /***********************************************************************
-
-            Pushes a listener to the set.
+            Adds a listener to the set.
 
             Params:
                 listener = listener to add to set
@@ -230,11 +154,9 @@ public class IListeners ( Data ... )
 
         public void add ( Listener listener )
         {
-            if ( !(listener in this.listeners_set) )
-            {
-                this.listeners ~= listener;
-                this.listeners_set.put(listener);
-            }
+            bool added;
+            this.listeners.put(cast(ulong)cast(void*)listener, added);
+            this.n += added;
         }
 
 
@@ -249,27 +171,17 @@ public class IListeners ( Data ... )
 
         public Listener next ( )
         {
-            scope ( exit )
-            {
-                // Increment index and wrap.
-                if ( ++this.current >= this.listeners.length )
-                {
-                    this.current = 0;
-                }
-            }
+            if (this.current is null)
+                this.current = this.listeners.getBoundary!()();
 
-            if ( this.listeners.length == 0 )
+            if (this.current !is null)
             {
+                auto listener = cast(Listener)cast(void*)(this.current.key);
+                this.current = this.current.next;
+                return listener;
+            }
+            else
                 return null;
-            }
-
-            // Ensure index is within bounds.
-            if ( this.current >= this.listeners.length )
-            {
-                this.current = 0;
-            }
-
-            return this.listeners[this.current];
         }
 
 
@@ -284,20 +196,16 @@ public class IListeners ( Data ... )
 
         public Listener remove ( Listener l )
         {
-            if ( this.listeners.length == 0 )
+            if (auto node = (cast(ulong)cast(void*)l) in this.listeners)
             {
-                return null;
-            }
-
-            if ( this.listeners_set.remove(l) )
-            {
-                this.listeners.length = .moveToEnd(this.listeners, l);
-                enableStomping(this.listeners);
-
+                if (node is this.current)
+                    this.current = null;
+                this.listeners.remove(*node);
+                this.n--;
                 return l;
             }
-
-            return null;
+            else
+                return null;
         }
 
 
@@ -310,7 +218,7 @@ public class IListeners ( Data ... )
 
         public size_t length ( )
         {
-            return this.listeners.length;
+            return this.n;
         }
 
 
@@ -322,16 +230,26 @@ public class IListeners ( Data ... )
 
         public int opApply ( int delegate ( ref Listener listener ) dg )
         {
-           int result = 0;
+            return this.listeners.opApply(
+                (ref eb64_node node)
+                {
+                    auto listener = cast(Listener)cast(void*)node.key;
+                    return dg(listener);
+                }
+            );
+        }
 
-           foreach ( l; this.listeners )
-           {
-               result = dg(l);
 
-               if (result) break;
-           }
+        /***********************************************************************
 
-           return result;
+            Returns:
+                true if there are listeners waiting or false if not.
+
+        ***********************************************************************/
+
+        public bool is_empty ( )
+        {
+            return this.listeners.is_empty;
         }
     }
 
@@ -343,18 +261,6 @@ public class IListeners ( Data ... )
     ***************************************************************************/
 
     protected ListenerSet listeners;
-
-
-    /***************************************************************************
-
-        Constructor
-
-    ***************************************************************************/
-
-    public this ( )
-    {
-        this.listeners = new ListenerSet;
-    }
 
 
     /***************************************************************************
@@ -404,7 +310,7 @@ public class IListeners ( Data ... )
 
     final public void trigger ( Listener.Code code, Data data )
     {
-        if ( this.listeners.length )
+        if ( !this.listeners.is_empty )
         {
             this.trigger_(code, data);
         }
@@ -425,7 +331,7 @@ public class IListeners ( Data ... )
     protected void trigger_ ( Listener.Code code, Data data )
     in
     {
-        assert(this.listeners.length, "trigger_() called with no listeners registered");
+        assert(!this.listeners.is_empty, "trigger_() called with no listeners registered");
     }
     body
     {
@@ -434,10 +340,133 @@ public class IListeners ( Data ... )
             listener.trigger(code, data);
         }
     }
+
+
+    /***************************************************************************
+
+        Each element in `this.listeners` is a `malloc`-allocated object so they
+        need to be removed to be deleted when this instance is garbage-
+        collected. This is safe because `this.listeners` does not refer to any
+        GC-allocated object.
+
+    ***************************************************************************/
+
+    ~this ( )
+    {
+        foreach (ref node; this.listeners)
+        {
+            this.listeners.remove(node);
+        }
+    }
 }
+
+version (UnitTest) import ocean.core.Test;
 
 unittest
 {
+    // Create a few template instances to make sure they compile. Only Instance1
+    // is used in further tests.
     alias IListeners!(uint) Instance1;
     alias IListeners!(uint, mstring) Instance2;
+
+    static class Listener: Instance1.Listener
+    {
+        override void trigger ( Code code, uint data ) { }
+    }
+
+    Instance1.ListenerSet liset;
+
+    // Tests the non-empty `liset`.
+    // `listeners` should contain the elements that are expected in `liset` in
+    // order; that is, unique elements sorted ascendingly by object pointer.
+    // `name` is the name of the test.
+    void testListenerSet ( istring name, Listener[] listeners ... )
+    in
+    {
+        assert(listeners.length);
+        foreach (i, listener; listeners[1 .. $])
+            assert(cast(void*)listeners[i] < cast(void*)listener,
+            "wrong order of listeners");
+    }
+    body
+    {
+        auto test = new NamedTest(name);
+
+        test.test(!liset.is_empty);
+        test.test!("==")(liset.length, listeners.length);
+
+        // Call `liset.next` until it returns `listeners[$ - 1]`. This should
+        // take at most `listeners.length` calls of `liset.next`.
+        for (uint i = 0; liset.next !is listeners[$ - 1]; i++)
+            test.test!("<")(i, listeners.length);
+
+        // In the first cycle of this loop `liset.next` should wrap around and
+        // return `listeners[0]`; in the following cycles it should return the
+        // expected listeners in order.
+        foreach (listener; listeners)
+            test.test!("is")(liset.next, listener);
+
+        // Again `liset.next` should wrap around and return `listeners[0]`.
+        test.test!("is")(liset.next, listeners[0]);
+    }
+
+    scope lis1 = new Listener,
+          lis2 = new Listener,
+          lis3 = new Listener;
+
+    // Make sure the order of addresses is lis1, lis2, lis3.
+    test!("<")(cast(void*)lis1, cast(void*)lis2);
+    test!("<")(cast(void*)lis2, cast(void*)lis3);
+
+    // Empty set of listeners.
+    test!("==")(liset.length, 0);
+    test(liset.next is null);
+    test(liset.is_empty);
+    foreach (lis; liset)
+        test(false);
+
+    liset.add(lis2);
+    testListenerSet("added lis2", lis2);
+
+    liset.add(lis1);
+    testListenerSet("added lis1", lis1, lis2);
+
+    liset.add(lis3);
+    testListenerSet("added lis3", lis1, lis2, lis3);
+
+    // Remove lis1 during iteration.
+    uint i = 0;
+    foreach (lis; liset)
+    {
+        switch (i++)
+        {
+            case 0:
+                test!("is")(lis, lis1);
+                test!("is")(liset.remove(lis), lis);
+                break;
+            case 1: test!("is")(lis, lis2); break;
+            case 2: test!("is")(lis, lis3); break;
+            default: test(false);
+        }
+    }
+    testListenerSet("removed lis2", lis2, lis3);
+
+    // Attempt to remove lis1, which is not in the set.
+    test(liset.remove(lis1) is null);
+    testListenerSet("attempted to remove lis1", lis2, lis3);
+
+    // Add lis3, which is already in the set, so the set shouldn't change.
+    liset.add(lis3);
+    testListenerSet("attempted to add duplicate lis3", lis2, lis3);
+
+    // Remove lis2, `liset.next` should move to lis3.
+    test!("is")(liset.remove(lis2), lis2);
+    test!("is")(liset.next, lis3);
+    testListenerSet("removed lis2", lis3);
+
+    // Remove lis3, the last listener in the set.
+    test!("is")(liset.remove(lis3), lis3);
+    test!("==")(liset.length, 0);
+    test(liset.next is null);
+    test(liset.is_empty);
 }
