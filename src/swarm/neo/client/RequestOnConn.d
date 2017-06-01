@@ -532,33 +532,6 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
                 this.connection = all_nodes.connection;
                 scope ed = this.new EventDispatcherAllNodes(this.request_id, all_nodes.connection);
                 all_nodes.dg(ed, this.request_context, this.working_data);
-
-/+
-                // Call the request handler repeatedly as long as it returns
-                // true, indicating it wants to be restarted.
-                while (all_nodes.dg(this, ed, this.request_context,
-                    this.working_data))
-                {
-                    // If the connection is down, register a fiber resuming
-                    // delegate with the connection that will be called when it
-                    // is available again, and suspend the fiber.
-                    if (
-                        all_nodes.connection.registerConnectedNotification({
-                            this.resumeFiber_(fiber.Message.init);
-                        })
-                    )
-                    {
-                        // FIXME: we can't simply suspend the fiber here, as it
-                        // may also be resumed by non-I/O events (a request
-                        // controller, for example). It seems that this situation
-                        // (restarting a request on reconnection) must be handled
-                        // directly by the request handler, which should catch
-                        // exceptions and then suspend the fiber and check for a
-                        // special (new) resume code.
-                        this.suspendFiber();
-                    }
-                }
-+/
                 break;
 
             case handler.active.round_robin:
