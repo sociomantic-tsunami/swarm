@@ -40,6 +40,10 @@ public enum MessageType : ubyte
     None,   // Invalid, default value
 
     Record, // Record transmitted; key/value present follow in this message
-    End     // All records transmitted; request finished
+    End,    // All records transmitted; request finished
+
+    Stop,   // Sent from the client to inform the node to stop iterating
+    Ack     // Sent from the node to let the client know that a control message
+            // (e.g. Stop) has been carried out
 }
 

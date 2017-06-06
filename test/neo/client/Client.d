@@ -119,6 +119,9 @@ public class Client
             Assigns a GetAll request, retrieving all records in the node (if any
             exist).
 
+            The GetAll request is hacked (as an example of sending control
+            messages) to stop the iteration after 5 records have been received.
+
             Params:
                 notifier = notifier, called when interesting events occur for
                     this request

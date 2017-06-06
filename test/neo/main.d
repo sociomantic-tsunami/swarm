@@ -106,16 +106,20 @@ class Test : Task
         Runs a simple test where three records are written to the node with Put
         and then fetched with GetAll.
 
+        The GetAll request is hacked (as an example of sending control messages)
+        to stop the iteration after 5 records have been received.
+
     ***************************************************************************/
 
     private void testPutGetAll ( )
     {
         mstring msg_buf;
 
-        // Add some records.
-        cstring[hash_t] records =
-            [0x1 : "you"[], 0x2 : "say", 23 : "hello"];
-        foreach ( key, value; records )
+        // Add some records. We use very large records so that they can't all be
+        // sent and parsed in a single write buffer.
+        mstring value;
+        value.length = 1024 * 64;
+        for ( hash_t key = 0; key < 100; key++ )
         {
             auto ok = this.client.blocking.put(key, value,
                 ( Client.Neo.Put.Notification info, Client.Neo.Put.Args args ) { });
@@ -129,10 +133,9 @@ class Test : Task
         size_t received_count;
         foreach ( key, value; records_iterator )
         {
-            enforce!("in")(key, records);
             received_count++;
         }
-        enforce!("==")(received_count, records.length);
+        enforce!(">=")(received_count, 5);
     }
 }
 

@@ -66,6 +66,107 @@ public void handle ( Object shared_resources, RequestOnConn connection,
 private scope class GetAllImpl_v0
 {
     import test.neo.common.GetAll;
+    import swarm.neo.util.MessageFiber;
+    import swarm.neo.request.RequestEventDispatcher;
+
+    /// Fiber which handles iterating and sending records to the client.
+    private class Writer
+    {
+        private MessageFiber fiber;
+
+        public this ( )
+        {
+            this.fiber = new MessageFiber(&this.fiberMethod, 64 * 1024);
+        }
+
+        void fiberMethod ( )
+        {
+            // Iterate over storage, sending records to client.
+            foreach ( key, value; this.outer.storage.map )
+            {
+                this.outer.request_event_dispatcher.send(this.fiber,
+                    ( RequestOnConn.EventDispatcher.Payload payload )
+                    {
+                        payload.addConstant(MessageType.Record);
+                        payload.add(key);
+                        payload.addArray(value);
+                    }
+                );
+            }
+
+            // Send the End message to the client.
+            this.outer.request_event_dispatcher.send(this.fiber,
+                ( RequestOnConn.EventDispatcher.Payload payload )
+                {
+                    payload.addConstant(MessageType.End);
+                }
+            );
+
+            // Kill the controller fiber.
+            this.outer.request_event_dispatcher.abort(
+                this.outer.controller.fiber);
+        }
+    }
+
+    /// Fiber which handles control messages from the client.
+    private class Controller
+    {
+        MessageFiber fiber;
+
+        this ( )
+        {
+            this.fiber = new MessageFiber(&this.fiberMethod, 64 * 1024);
+        }
+
+        void fiberMethod ( )
+        {
+            bool stop;
+            do
+            {
+                // Receive message from client.
+                auto message = this.outer.request_event_dispatcher.receive(this.fiber,
+                    Message(MessageType.Stop));
+                assert(message.type == MessageType.Stop);
+
+                // Send ACK. The protocol guarantees that the client will not
+                // send any further messages until it has received the ACK.
+                this.outer.request_event_dispatcher.send(this.fiber,
+                    ( RequestOnConn.EventDispatcher.Payload payload )
+                    {
+                        payload.addConstant(MessageType.Ack);
+                    }
+                );
+
+                // Carry out the specified control message.
+                with ( MessageType ) switch ( message.type )
+                {
+                    case Stop:
+                        stop = true;
+                        this.outer.request_event_dispatcher.abort(
+                            this.outer.writer.fiber);
+                        break;
+                    default:
+                        assert(false);
+                }
+            }
+            while ( !stop );
+        }
+    }
+
+    /// Storage instance to iterate over.
+    private Storage storage;
+
+    /// Connection event dispatcher.
+    private RequestOnConn.EventDispatcher conn;
+
+    /// Writer fiber.
+    private Writer writer;
+
+    /// Controller fiber.
+    private Controller controller;
+
+    /// Multi-fiber event dispatcher.
+    private RequestEventDispatcher request_event_dispatcher;
 
     /***************************************************************************
 
@@ -82,32 +183,25 @@ private scope class GetAllImpl_v0
     final public void handle ( Storage storage, RequestOnConn connection,
         Const!(void)[] msg_payload )
     {
-        auto ed = connection.event_dispatcher;
+        this.storage = storage;
+        this.conn = connection.event_dispatcher;
 
-        ed.send(
-            ( ed.Payload payload )
+        // Send initial status code response.
+        this.conn.send(
+            ( conn.Payload payload )
             {
                 payload.addConstant(RequestStatusCode.Started);
             }
         );
 
-        foreach ( key, value; storage.map )
-        {
-            ed.send(
-                ( ed.Payload payload )
-                {
-                    payload.addConstant(MessageType.Record);
-                    payload.add(key);
-                    payload.addArray(value);
-                }
-            );
-        }
+        // Now ready to start sending data from the storage and to handle
+        // control messages from the client. Each of these jobs is handled by a
+        // separate fiber.
+        this.writer = new Writer;
+        this.controller = new Controller;
 
-        ed.send(
-            ( ed.Payload payload )
-            {
-                payload.addConstant(MessageType.End);
-            }
-        );
+        this.controller.fiber.start();
+        this.writer.fiber.start();
+        this.request_event_dispatcher.eventLoop(this.conn);
     }
 }
