@@ -61,7 +61,7 @@ Dependencies
 ========== =======
 Dependency Version
 ========== =======
-ocean      v3.1.x
+ocean      v3.1.4
 makd       v1.5.x
 ========== =======
 
