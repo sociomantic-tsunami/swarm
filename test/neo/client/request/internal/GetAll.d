@@ -57,7 +57,11 @@ public struct GetAll
 
     private static struct SharedWorking
     {
-        // Dummy (not required by this request)
+        /// Flag set when the finished notification has been sent to the user.
+        /// Note that, in a real multi-node request, you need to track this
+        /// state across each node individually, not at the global level, like
+        /// this.
+        bool finish_notification_done;
     }
 
     /***************************************************************************
@@ -146,45 +150,8 @@ public struct GetAll
                 }
             }
 
-            // Handle messages from node
-            bool finished;
-            do
-            {
-                conn.receive(
-                    ( in void[] const_message )
-                    {
-                        Const!(void)[] message = const_message;
-                        auto msg_type = *conn.message_parser.
-                            getValue!(MessageType)(message);
-
-                        with ( MessageType ) switch ( msg_type )
-                        {
-                            case Record:
-                                auto key = *conn.message_parser.
-                                    getValue!(hash_t)(message);
-                                auto value = conn.message_parser.
-                                    getArray!(char)(message);
-
-                                Notification n;
-                                n.record = RequestKeyDataInfo(context.request_id,
-                                    key, value);
-                                GetAll.notify(context.user_params, n);
-                                break;
-
-                            case End:
-                                finished = true;
-                                break;
-
-                            default:
-                                Notification n;
-                                n.error = RequestInfo(context.request_id);
-                                GetAll.notify(context.user_params, n);
-                                goto case End;
-                        }
-                    }
-                );
-            }
-            while ( !finished );
+            scope handler = new Handler(conn, context_blob);
+            handler.run();
         }
         catch ( IOError e )
         {
@@ -193,6 +160,7 @@ public struct GetAll
             n.node_disconnected = RequestNodeExceptionInfo(
                 context.request_id, conn.remote_address, e);
             GetAll.notify(context.user_params, n);
+            context.shared_working.finish_notification_done = true;
         }
     }
 
@@ -213,8 +181,177 @@ public struct GetAll
     {
         auto context = GetAll.getContext(context_blob);
 
-        Notification n;
-        n.finished = RequestInfo(context.request_id);
-        GetAll.notify(context.user_params, n);
+        if ( !context.shared_working.finish_notification_done )
+        {
+            Notification n;
+            n.finished = RequestInfo(context.request_id);
+            GetAll.notify(context.user_params, n);
+        }
+    }
+}
+
+/*******************************************************************************
+
+    Multi-fiber GetAll handler implementation.
+
+*******************************************************************************/
+
+private scope class Handler
+{
+    import swarm.neo.request.RequestEventDispatcher;
+    import swarm.neo.client.RequestOnConn;
+    import test.neo.common.GetAll;
+    import test.neo.client.NotifierTypes;
+    import swarm.neo.util.MessageFiber;
+
+    /// Token passed to fiber suspend/resume calls.
+    private static MessageFiber.Token token =
+        MessageFiber.Token("GetAll Handler");
+
+    /// Connection event dispatcher.
+    private RequestOnConn.EventDispatcherAllNodes conn;
+
+    /// Request context.
+    private GetAll.Context* context;
+
+    /// Reader fiber.
+    private Reader reader;
+
+    /// Controller fiber.
+    private Controller controller;
+
+    /// Multi-fiber event dispatcher.
+    private RequestEventDispatcher request_event_dispatcher;
+
+    /// Enum of signals used by the request fibers.
+    private enum Signals
+    {
+        Stop = 1
+    }
+
+    /// Fiber which handles iterating and sending records to the client.
+    private class Reader
+    {
+        private MessageFiber fiber;
+
+        public this ( )
+        {
+            this.fiber = new MessageFiber(&this.fiberMethod, 64 * 1024);
+        }
+
+        void fiberMethod ( )
+        {
+            uint count;
+            bool finished;
+            do
+            {
+                auto message = this.outer.request_event_dispatcher.receive(this.fiber,
+                    Message(MessageType.Record), Message(MessageType.End));
+                with ( MessageType ) switch ( message.type )
+                {
+                    case Record:
+                        count++;
+
+                        auto key = *conn.message_parser.
+                            getValue!(hash_t)(message.payload);
+                        auto value = conn.message_parser.
+                            getArray!(char)(message.payload);
+
+                        GetAll.Notification n;
+                        n.record = RequestKeyDataInfo(context.request_id,
+                            key, value);
+                        GetAll.notify(context.user_params, n);
+                        break;
+
+                    case End:
+                        finished = true;
+                        break;
+
+                    default:
+                        assert(false);
+                }
+
+                // Stop the GetAll after some records have been received.
+                // In a real client, the request would only be stopped if
+                // requested via the user-facing API. In this example, for
+                // simplicity, the Reader triggers a Stop message.
+                if ( count == 5 )
+                    this.outer.request_event_dispatcher.signal(this.outer.conn,
+                        Signals.Stop);
+            }
+            while ( !finished );
+
+            // Kill the controller fiber.
+            this.outer.request_event_dispatcher.abort(
+                this.outer.controller.fiber);
+        }
+    }
+
+    /// Fiber which handles control messages from the client.
+    private class Controller
+    {
+        MessageFiber fiber;
+
+        this ( )
+        {
+            this.fiber = new MessageFiber(&this.fiberMethod, 64 * 1024);
+        }
+
+        void fiberMethod ( )
+        {
+            // Wait for a control message to be initiated.
+            // In a real client, there would be a user-facing API to do this. In
+            // this example, for simplicity, the Reader triggers a control
+            // message.
+            auto event = this.outer.request_event_dispatcher.nextEvent(
+                this.fiber, Signal(Signals.Stop));
+            assert(event.signal.code == Signals.Stop);
+
+            // Send Stop message to node.
+            this.outer.request_event_dispatcher.send(this.fiber,
+                ( RequestOnConn.EventDispatcher.Payload payload )
+                {
+                    payload.addConstant(MessageType.Stop);
+                }
+            );
+
+            // Receive ACK from node.
+            auto message = this.outer.request_event_dispatcher.receive(this.fiber,
+                Message(MessageType.Ack));
+            assert(message.type == MessageType.Ack);
+
+            // Kill the reader fiber.
+            this.outer.request_event_dispatcher.abort(
+                this.outer.reader.fiber);
+        }
+    }
+
+    /***************************************************************************
+
+        Constructor.
+
+        Params:
+            conn = Event dispatcher for this connection
+            context_blob = serialized request context
+
+    ***************************************************************************/
+
+    public this ( RequestOnConn.EventDispatcherAllNodes conn,
+                  void[] context_blob )
+    {
+        this.conn = conn;
+        this.context = GetAll.getContext(context_blob);
+    }
+
+    public void run ( )
+    {
+        // Start reading data from the node and handling control messages. Each
+        // of these jobs is handled by a separate fiber.
+        this.reader = new Reader;
+        this.controller = new Controller;
+
+        this.controller.fiber.start();
+        this.reader.fiber.start();
+        this.request_event_dispatcher.eventLoop(this.conn);
     }
 }
