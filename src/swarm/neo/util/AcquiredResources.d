@@ -372,6 +372,167 @@ unittest
 
 /*******************************************************************************
 
+    Singleton (per-request) acquired resource of the templated type. An
+    external source of elements of this type -- a FreeList!(T) -- is required.
+    When the singleton resource is acquired (via the acquire() method), it is
+    requested from the free list and stored internally. All subsequent calls to
+    acquire() return the same instance. When the resource is no longer required,
+    the relinquish() method will return it to the free list.
+
+    Params:
+        T = type of resource
+
+*******************************************************************************/
+
+public struct AcquiredSingleton ( T )
+{
+    import ocean.util.container.pool.FreeList;
+
+    /***************************************************************************
+
+        Determine the type of a new resource.
+
+    ***************************************************************************/
+
+    static if ( is(typeof({T* t = new T;})) )
+    {
+        alias T* Elem;
+    }
+    else
+    {
+        alias T Elem;
+    }
+
+    /***************************************************************************
+
+        Externally owned pool of T, passed in via initialise().
+
+    ***************************************************************************/
+
+    private FreeList!(T) t_pool;
+
+    /***************************************************************************
+
+        Acquired resource.
+
+    ***************************************************************************/
+
+    private Elem acquired;
+
+    /***************************************************************************
+
+        Initialises this instance. (No other methods may be called before
+        calling this method.)
+
+        Params:
+            t_pool = shared pool of T
+
+    ***************************************************************************/
+
+    public void initialise ( FreeList!(T) t_pool )
+    {
+        this.t_pool = t_pool;
+    }
+
+    /***************************************************************************
+
+        Gets the singleton T instance.
+
+        Params:
+            new_t = lazily initialised new resource
+
+        Returns:
+            singleton T instance
+
+    ***************************************************************************/
+
+    public Elem acquire ( lazy Elem new_t )
+    in
+    {
+        assert(this.t_pool !is null);
+    }
+    body
+    {
+        if ( this.acquired is null )
+            this.acquired = this.t_pool.get(new_t);
+
+        assert(this.acquired !is null);
+        return this.acquired;
+    }
+
+    /***************************************************************************
+
+        Relinquishes singleton shared resources acquired by this instance.
+
+    ***************************************************************************/
+
+    public void relinquish ( )
+    in
+    {
+        assert(this.t_pool !is null);
+    }
+    body
+    {
+        if ( this.acquired !is null )
+            this.t_pool.recycle(this.acquired);
+    }
+}
+
+///
+unittest
+{
+    // Type of a specialised resource which may be required by requests.
+    struct MyResource
+    {
+    }
+
+    // Demonstrates how a typical global shared resources container should look.
+    // A single instance of this would be owned at the top level of the client/
+    // node.
+    class SharedResources
+    {
+        import ocean.util.container.pool.FreeList;
+
+        // The pool of specialised resources required by AcquiredSingleton.
+        private FreeList!(MyResource) myresources;
+
+        this ( )
+        {
+            this.myresources = new FreeList!(MyResource);
+        }
+
+        // Objects of this class will be newed at scope and passed to request
+        // handlers. This allows the handler to acquire various shared resources
+        // and have them automatically relinquished when the handler exits.
+        class RequestResources
+        {
+            private AcquiredSingleton!(MyResource) myresource_singleton;
+
+            // Initialise the tracker in the ctor.
+            this ( )
+            {
+                this.myresource_singleton.initialise(this.outer.myresources);
+            }
+
+            // ...and be sure to relinquish all the acquired resources in the
+            // dtor.
+            ~this ( )
+            {
+                this.myresource_singleton.relinquish();
+            }
+
+            // Public method to get the resource singleton for this request,
+            // managed by the tracker.
+            public MyResource* myResource ( )
+            {
+                return this.myresource_singleton.acquire(new MyResource);
+            }
+        }
+    }
+}
+
+/*******************************************************************************
+
     Test that shared resources are acquired and relinquished correctly using the
     helper structs above.
 
@@ -406,6 +567,7 @@ unittest
         class RequestResources
         {
             private Acquired!(MyStruct) acquired_mystructs;
+            private AcquiredSingleton!(MyStruct) mystruct_singleton;
             private Acquired!(MyClass) acquired_myclasses;
             private AcquiredArraysOf!(void) acquired_void_arrays;
 
@@ -413,6 +575,7 @@ unittest
             {
                 this.acquired_mystructs.initialise(this.outer.buffers,
                     this.outer.mystructs);
+                this.mystruct_singleton.initialise(this.outer.mystructs);
                 this.acquired_myclasses.initialise(this.outer.buffers,
                     this.outer.myclasses);
                 this.acquired_void_arrays.initialise(this.outer.buffers);
@@ -421,6 +584,7 @@ unittest
             ~this ( )
             {
                 this.acquired_mystructs.relinquishAll();
+                this.mystruct_singleton.relinquish();
                 this.acquired_myclasses.relinquishAll();
                 this.acquired_void_arrays.relinquishAll();
             }
@@ -428,6 +592,11 @@ unittest
             public MyStruct* getMyStruct ( )
             {
                 return this.acquired_mystructs.acquire(new MyStruct);
+            }
+
+            public MyStruct* myStructSingleton ( )
+            {
+                return this.mystruct_singleton.acquire(new MyStruct);
             }
 
             public MyClass getMyClass ( )
@@ -458,6 +627,14 @@ unittest
         test!("==")(resources.myclasses.num_idle, 0);
         test!("==")(acquired.acquired_mystructs.acquired.length, 1);
 
+        // Acquire a struct singleton twice.
+        acquired.myStructSingleton();
+        acquired.myStructSingleton();
+        test!("==")(resources.buffers.num_idle, 0);
+        test!("==")(resources.mystructs.num_idle, 0);
+        test!("==")(resources.myclasses.num_idle, 0);
+        test!("==")(acquired.acquired_mystructs.acquired.length, 1);
+
         // Acquire a class.
         acquired.getMyClass();
         test!("==")(resources.buffers.num_idle, 0);
@@ -476,40 +653,40 @@ unittest
     // Test that the acquired resources appear in the free-lists, once the
     // acquired tracker goes out of scope.
     test!("==")(resources.buffers.num_idle, 4); // 3 container arrays + 1
-    test!("==")(resources.mystructs.num_idle, 1);
+    test!("==")(resources.mystructs.num_idle, 2);
     test!("==")(resources.myclasses.num_idle, 1);
 
     // Now do it again and test that the resources in the free-lists are reused.
     {
         scope acquired = resources.new RequestResources;
         test!("==")(resources.buffers.num_idle, 4);
-        test!("==")(resources.mystructs.num_idle, 1);
+        test!("==")(resources.mystructs.num_idle, 2);
         test!("==")(resources.myclasses.num_idle, 1);
 
         // Acquire a struct.
         acquired.getMyStruct();
         test!("==")(resources.buffers.num_idle, 3);
-        test!("==")(resources.mystructs.num_idle, 0);
+        test!("==")(resources.mystructs.num_idle, 1);
         test!("==")(resources.myclasses.num_idle, 1);
         test!("==")(acquired.acquired_mystructs.acquired.length, 1);
 
         // Acquire a class.
         acquired.getMyClass();
         test!("==")(resources.buffers.num_idle, 2);
-        test!("==")(resources.mystructs.num_idle, 0);
+        test!("==")(resources.mystructs.num_idle, 1);
         test!("==")(resources.myclasses.num_idle, 0);
         test!("==")(acquired.acquired_myclasses.acquired.length, 1);
 
         // Acquire an array.
         acquired.getVoidArray();
         test!("==")(resources.buffers.num_idle, 0);
-        test!("==")(resources.mystructs.num_idle, 0);
+        test!("==")(resources.mystructs.num_idle, 1);
         test!("==")(resources.myclasses.num_idle, 0);
         test!("==")(acquired.acquired_void_arrays.acquired.length, 1);
     }
 
     // No more resources should have been allocated.
     test!("==")(resources.buffers.num_idle, 4); // 3 container arrays + 1
-    test!("==")(resources.mystructs.num_idle, 1);
+    test!("==")(resources.mystructs.num_idle, 2);
     test!("==")(resources.myclasses.num_idle, 1);
 }
