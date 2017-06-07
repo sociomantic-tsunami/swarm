@@ -300,7 +300,8 @@ public template RequestCore ( RequestType request_type_, ubyte request_code,
 
     /***************************************************************************
 
-        Private helper function to call the user's notifier.
+        Helper function to call the user's notifier. (Public so that it can be
+        called from helpers which are not declared inside the request struct.)
 
         Params:
             params = the parameters specified by the user (i.e. the
@@ -309,7 +310,7 @@ public template RequestCore ( RequestType request_type_, ubyte request_code,
 
     ***************************************************************************/
 
-    private static void notify ( ref UserSpecifiedParams params,
+    public static void notify ( ref UserSpecifiedParams params,
         NotificationUnion type )
     {
         if ( auto notifier = params.getNotifier() )
