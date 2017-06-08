@@ -72,11 +72,15 @@ private scope class GetAllImpl_v0
     /// Fiber which handles iterating and sending records to the client.
     private class Writer
     {
+        import swarm.neo.util.DelayedSuspender;
+
         private MessageFiber fiber;
+        private DelayedSuspender suspender;
 
         public this ( )
         {
             this.fiber = new MessageFiber(&this.fiberMethod, 64 * 1024);
+            this.suspender = DelayedSuspender(this.fiber);
         }
 
         void fiberMethod ( )
@@ -84,6 +88,8 @@ private scope class GetAllImpl_v0
             // Iterate over storage, sending records to client.
             foreach ( key, value; this.outer.storage.map )
             {
+                this.suspender.suspendIfRequested();
+
                 this.outer.request_event_dispatcher.send(this.fiber,
                     ( RequestOnConn.EventDispatcher.Payload payload )
                     {
@@ -125,8 +131,8 @@ private scope class GetAllImpl_v0
             {
                 // Receive message from client.
                 auto message = this.outer.request_event_dispatcher.receive(this.fiber,
+                    Message(MessageType.Suspend), Message(MessageType.Resume),
                     Message(MessageType.Stop));
-                assert(message.type == MessageType.Stop);
 
                 // Send ACK. The protocol guarantees that the client will not
                 // send any further messages until it has received the ACK.
@@ -140,6 +146,12 @@ private scope class GetAllImpl_v0
                 // Carry out the specified control message.
                 with ( MessageType ) switch ( message.type )
                 {
+                    case Suspend:
+                        this.outer.writer.suspender.requestSuspension();
+                        break;
+                    case Resume:
+                        this.outer.writer.suspender.resumeIfSuspended();
+                        break;
                     case Stop:
                         stop = true;
                         this.outer.request_event_dispatcher.abort(
@@ -186,6 +198,10 @@ private scope class GetAllImpl_v0
         this.storage = storage;
         this.conn = connection.event_dispatcher;
 
+        // Read request setup info from client.
+        bool start_suspended;
+        this.conn.message_parser.parseBody(msg_payload, start_suspended);
+
         // Send initial status code response.
         this.conn.send(
             ( conn.Payload payload )
@@ -199,6 +215,9 @@ private scope class GetAllImpl_v0
         // separate fiber.
         this.writer = new Writer;
         this.controller = new Controller;
+
+        if ( start_suspended )
+            this.writer.suspender.requestSuspension();
 
         this.controller.fiber.start();
         this.writer.fiber.start();
