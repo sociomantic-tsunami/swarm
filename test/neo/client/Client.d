@@ -126,9 +126,12 @@ public class Client
                 notifier = notifier, called when interesting events occur for
                     this request
 
+            Returns:
+                the id of the assigned GetAll request
+
         ***********************************************************************/
 
-        public void getAll ( GetAll.Notifier notifier )
+        public RequestId getAll ( GetAll.Notifier notifier )
         {
             auto params = Const!(Internals.GetAll.UserSpecifiedParams)(
                 Const!(GetAll.Args)(),
@@ -137,7 +140,83 @@ public class Client
                 )
             );
 
-            this.assign!(Internals.GetAll)(params);
+            return this.assign!(Internals.GetAll)(params);
+        }
+
+        /***********************************************************************
+
+            Gets the type of the wrapper struct of the request associated with
+            the specified controller interface.
+
+            Params:
+                I = type of controller interface
+
+            Evaluates to:
+                the type of the request wrapper struct which contains an
+                implementation of the interface I
+
+        ***********************************************************************/
+
+        private template Request ( I )
+        {
+            static if ( is(I == GetAll.IController ) )
+            {
+                alias Internals.GetAll Request;
+            }
+            else
+            {
+                static assert(false, I.stringof ~ " does not match any request "
+                    ~ "controller");
+            }
+        }
+
+        /***********************************************************************
+
+            Gets access to a controller for the specified request. If the
+            request is still active, the controller is passed to the provided
+            delegate for use.
+
+            Important usage notes:
+                1. The controller is newed on the stack. This means that user
+                   code should never store references to it -- it must only be
+                   used within the scope of the delegate.
+                2. As the id which identifies the request is only known at run-
+                   time, it is not possible to statically enforce that the
+                   specified ControllerInterface type matches the request. This
+                   is asserted at run-time, though (see
+                   RequestSet.getRequestController()).
+
+            Params:
+                ControllerInterface = type of the controller interface (should
+                    be inferred by the compiler)
+                id = id of request to get a controller for (the return value of
+                    the method which assigned your request)
+                dg = delegate which is called with the controller, if the
+                    request is still active
+
+            Returns:
+                false if the specified request no longer exists; true if the
+                controller delegate was called
+
+        ***********************************************************************/
+
+        public bool control ( ControllerInterface ) ( RequestId id,
+            void delegate ( ControllerInterface ) dg )
+        {
+            alias Request!(ControllerInterface) R;
+
+            return this.controlImpl!(R)(id, dg);
+        }
+
+        /***********************************************************************
+
+            Test instantiating the `control` function template.
+
+        ***********************************************************************/
+
+        unittest
+        {
+            alias control!(GetAll.IController) getAllControl;
         }
     }
 

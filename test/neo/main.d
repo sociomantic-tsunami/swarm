@@ -61,6 +61,8 @@ class Test : Task
 
         this.testPutGet();
         this.testPutGetAll();
+        this.testPutGetAllStop();
+        this.testPutGetAllSuspend();
 
         theScheduler.shutdown();
     }
@@ -106,9 +108,6 @@ class Test : Task
         Runs a simple test where three records are written to the node with Put
         and then fetched with GetAll.
 
-        The GetAll request is hacked (as an example of sending control messages)
-        to stop the iteration after 5 records have been received.
-
     ***************************************************************************/
 
     private void testPutGetAll ( )
@@ -119,7 +118,8 @@ class Test : Task
         // sent and parsed in a single write buffer.
         mstring value;
         value.length = 1024 * 64;
-        for ( hash_t key = 0; key < 100; key++ )
+        const records_written = 100;
+        for ( hash_t key = 0; key < records_written; key++ )
         {
             auto ok = this.client.blocking.put(key, value,
                 ( Client.Neo.Put.Notification info, Client.Neo.Put.Args args ) { });
@@ -127,15 +127,176 @@ class Test : Task
         }
 
         // Check that they're all returned by GetAll.
-        auto records_iterator = this.client.blocking.getAll(
-            ( Client.Neo.GetAll.Notification info, Client.Neo.GetAll.Args args ) { });
-
         size_t received_count;
-        foreach ( key, value; records_iterator )
+        bool request_finished;
+        this.client.neo.getAll(
+            ( Client.Neo.GetAll.Notification info, Client.Neo.GetAll.Args args )
+            {
+                with ( info.Active ) switch ( info.active )
+                {
+                    case record:
+                        received_count++;
+                        break;
+
+                    case started:
+                    case suspended:
+                    case resumed:
+                        break;
+
+                    default:
+                        request_finished = true;
+                        if ( this.suspended )
+                            this.resume();
+                }
+            }
+        );
+
+        if ( !request_finished )
+            this.suspend();
+
+        enforce!("==")(received_count, records_written);
+    }
+
+    /***************************************************************************
+
+        Runs a simple test where three records are written to the node with Put
+        and then fetched with GetAll.
+
+        The GetAll request is hacked (as an example of sending control messages)
+        to stop the iteration after 5 records have been received.
+
+    ***************************************************************************/
+
+    private void testPutGetAllStop ( )
+    {
+        mstring msg_buf;
+
+        // Add some records. We use very large records so that they can't all be
+        // sent and parsed in a single write buffer.
+        mstring value;
+        value.length = 1024 * 64;
+        const records_written = 100;
+        for ( hash_t key = 0; key < records_written; key++ )
         {
-            received_count++;
+            auto ok = this.client.blocking.put(key, value,
+                ( Client.Neo.Put.Notification info, Client.Neo.Put.Args args ) { });
+            enforce(ok, "Put request failed");
         }
+
+        // Check that they're all returned by GetAll.
+        size_t received_count;
+        bool request_finished;
+        Client.Neo.RequestId getall_id;
+        getall_id = this.client.neo.getAll(
+            ( Client.Neo.GetAll.Notification info, Client.Neo.GetAll.Args args )
+            {
+                with ( info.Active ) switch ( info.active )
+                {
+                    case record:
+                        received_count++;
+                        // As soon as we receive something, stop the request.
+                        if ( received_count == 1 )
+                            this.client.neo.control(getall_id,
+                            ( Client.Neo.GetAll.IController controller )
+                            {
+                                controller.stop();
+                            }
+                        );
+
+                        break;
+
+                    case started:
+                    case suspended:
+                    case resumed:
+                        break;
+
+                    default:
+                        request_finished = true;
+                        if ( this.suspended )
+                            this.resume();
+                }
+            }
+        );
+
+        if ( !request_finished )
+            this.suspend();
+
         enforce!(">=")(received_count, 5);
+    }
+
+    /***************************************************************************
+
+        Runs a simple test where three records are written to the node with Put
+        and then fetched with GetAll. As soon as the first record is received,
+        the request is suspended. As soon as the suspension is ACKed by the
+        node, the request is resumed.
+
+    ***************************************************************************/
+
+    private void testPutGetAllSuspend ( )
+    {
+        mstring msg_buf;
+
+        // Add some records. We use very large records so that they can't all be
+        // sent and parsed in a single write buffer.
+        mstring value;
+        value.length = 1024 * 64;
+        const records_written = 100;
+        for ( hash_t key = 0; key < records_written; key++ )
+        {
+            auto ok = this.client.blocking.put(key, value,
+                ( Client.Neo.Put.Notification info, Client.Neo.Put.Args args ) { });
+            enforce(ok, "Put request failed");
+        }
+
+        // Check that they're all returned by GetAll.
+        size_t received_count;
+        bool request_finished;
+        Client.Neo.RequestId getall_id;
+        getall_id = this.client.neo.getAll(
+            ( Client.Neo.GetAll.Notification info, Client.Neo.GetAll.Args args )
+            {
+                with ( info.Active ) switch ( info.active )
+                {
+                    case record:
+                        received_count++;
+                        // As soon as we receive something, suspend the request.
+                        if ( received_count == 1 )
+                            this.client.neo.control(getall_id,
+                            ( Client.Neo.GetAll.IController controller )
+                            {
+                                controller.suspend();
+                            }
+                        );
+
+                        break;
+
+                    case started:
+                    case resumed:
+                        break;
+
+                    case suspended:
+                        // As soon as the request is suspended, resume it again.
+                        this.client.neo.control(getall_id,
+                            ( Client.Neo.GetAll.IController controller )
+                            {
+                                controller.resume();
+                            }
+                        );
+                        break;
+
+                    default:
+                        request_finished = true;
+                        if ( this.suspended )
+                            this.resume();
+                }
+            }
+        );
+
+        if ( !request_finished )
+            this.suspend();
+
+        enforce!("==")(received_count, records_written);
     }
 }
 

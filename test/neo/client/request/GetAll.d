@@ -35,6 +35,11 @@ public struct Args
 
 private union NotificationUnion
 {
+    /// All known nodes have either started handling the request or are not
+    /// currently connected. The request may now be suspended / resumed /
+    /// stopped, via the controller.
+    RequestInfo started;
+
     /// The request is finished. If no error notifications occurred, then all
     /// extant data was transmitted.
     RequestInfo finished;
@@ -54,6 +59,19 @@ private union NotificationUnion
     /// The request failed for an unknown reason, presumably an internal or
     /// protocol error.
     RequestInfo error;
+
+    /// All known nodes have either suspended the request (as requested by the
+    /// user, via the controller) or are not currently connected.
+    RequestInfo suspended;
+
+    /// All known nodes have either resumed the request (as requested by the
+    /// user, via the controller) or are not currently connected.
+    RequestInfo resumed;
+
+    /// All known nodes have either stopped the request (as requested by the
+    /// user, via the controller) or are not currently connected. The request is
+    /// now finished.
+    RequestInfo stopped;
 }
 
 /*******************************************************************************
@@ -71,3 +89,53 @@ public alias SmartUnion!(NotificationUnion) Notification;
 *******************************************************************************/
 
 public alias void delegate ( Notification, Args ) Notifier;
+
+/*******************************************************************************
+
+    Request controller, accessible via the client's `control()` method.
+
+    Note that only one control change message can be "in-flight" to the nodes at
+    a time. If the controller is used when a control change message is already
+    in-flight, the method will return false. The notifier is called when a
+    requested control change is carried through.
+
+*******************************************************************************/
+
+public interface IController
+{
+    /***************************************************************************
+
+        Tells the nodes to stop sending data to this request.
+
+        Returns:
+            false if the controller cannot be used because a control change is
+            already in progress
+
+    ***************************************************************************/
+
+    bool suspend ( );
+
+    /***************************************************************************
+
+        Tells the nodes to resume sending data to this request.
+
+        Returns:
+            false if the controller cannot be used because a control change is
+            already in progress
+
+    ***************************************************************************/
+
+    bool resume ( );
+
+    /***************************************************************************
+
+        Tells the nodes to cleanly end the request.
+
+        Returns:
+            false if the controller cannot be used because a control change is
+            already in progress
+
+    ***************************************************************************/
+
+    bool stop ( );
+}

@@ -43,7 +43,8 @@ public struct GetAll
     import test.neo.common.RequestCodes;
     import test.neo.client.NotifierTypes;
     import swarm.neo.client.mixins.RequestCore;
-    import swarm.neo.client.RequestHandlers : UseNodeDg;
+    import swarm.neo.client.mixins.SuspendableRequestCore;
+    import swarm.neo.client.mixins.AllNodesRequestCore;
 
     import ocean.io.select.protocol.generic.ErrnoIOException: IOError;
 
@@ -57,11 +58,11 @@ public struct GetAll
 
     private static struct SharedWorking
     {
-        /// Flag set when the finished notification has been sent to the user.
-        /// Note that, in a real multi-node request, you need to track this
-        /// state across each node individually, not at the global level, like
-        /// this.
-        bool finish_notification_done;
+        /// Shared working data required for core all-nodes request behaviour.
+        AllNodesRequestSharedWorkingData all_nodes;
+
+        /// Shared working data required for core suspendable behaviour.
+        SuspendableRequestSharedWorkingData suspendable_control;
     }
 
     /***************************************************************************
@@ -90,6 +91,15 @@ public struct GetAll
 
     /***************************************************************************
 
+        Suspendable controller scope class which implements the IController
+        interface declared in the API module for this request.
+
+    ***************************************************************************/
+
+    mixin SuspendableController!(GetAll, IController, MessageType);
+
+    /***************************************************************************
+
         Request handler. Called from RequestOnConn.runHandler().
 
         Params:
@@ -106,62 +116,8 @@ public struct GetAll
     {
         auto context = GetAll.getContext(context_blob);
 
-        try
-        {
-            // Send request info to node
-            conn.send(
-                ( conn.Payload payload )
-                {
-                    payload.add(GetAll.cmd.code);
-                    payload.add(GetAll.cmd.ver);
-                }
-            );
-
-            // Receive status from node
-            auto status = conn.receiveValue!(StatusCode)();
-            if ( GetAll.handleGlobalStatusCodes(status, context,
-                conn.remote_address) )
-            {
-                // Global codes (not supported / version not supported)
-                // (Notifier already called.)
-                return;
-            }
-            else
-            {
-                // GetAll-specific codes
-                with ( RequestStatusCode ) switch ( status )
-                {
-                    case Started:
-                        // Expected "request started" code
-                        break;
-
-                    case Error:
-                        // The node returned an error code. Notify the user and
-                        // end the request.
-                        Notification n;
-                        n.node_error = RequestNodeInfo(
-                            context.request_id, conn.remote_address);
-                        GetAll.notify(context.user_params, n);
-                        return;
-
-                    default:
-                        // Treat unknown codes as internal errors.
-                        goto case Error;
-                }
-            }
-
-            scope handler = new Handler(conn, context_blob);
-            handler.run();
-        }
-        catch ( IOError e )
-        {
-            // A connection error occurred. Notify the user.
-            Notification n;
-            n.node_disconnected = RequestNodeExceptionInfo(
-                context.request_id, conn.remote_address, e);
-            GetAll.notify(context.user_params, n);
-            context.shared_working.finish_notification_done = true;
-        }
+        scope request_impl = new GetAllImpl(conn, context);
+        request_impl.run();
     }
 
     /***************************************************************************
@@ -181,7 +137,8 @@ public struct GetAll
     {
         auto context = GetAll.getContext(context_blob);
 
-        if ( !context.shared_working.finish_notification_done )
+        if ( !context.shared_working.suspendable_control.
+            stopped_notification_done )
         {
             Notification n;
             n.finished = RequestInfo(context.request_id);
@@ -196,17 +153,20 @@ public struct GetAll
 
 *******************************************************************************/
 
-private scope class Handler
+private scope class GetAllImpl
 {
+    import swarm.neo.connection.RequestOnConnBase;
+    import swarm.neo.client.mixins.AllNodesRequestCore;
+    import swarm.neo.client.mixins.SuspendableRequestCore;
     import swarm.neo.request.RequestEventDispatcher;
     import swarm.neo.client.RequestOnConn;
-    import test.neo.common.GetAll;
-    import test.neo.client.NotifierTypes;
     import swarm.neo.util.MessageFiber;
 
-    /// Token passed to fiber suspend/resume calls.
-    private static MessageFiber.Token token =
-        MessageFiber.Token("GetAll Handler");
+    import test.neo.common.GetAll;
+    import test.neo.client.NotifierTypes;
+
+    import test.neo.common.GetAll;
+    import test.neo.client.NotifierTypes;
 
     /// Connection event dispatcher.
     private RequestOnConn.EventDispatcherAllNodes conn;
@@ -214,144 +174,258 @@ private scope class Handler
     /// Request context.
     private GetAll.Context* context;
 
-    /// Reader fiber.
-    private Reader reader;
-
-    /// Controller fiber.
-    private Controller controller;
-
-    /// Multi-fiber event dispatcher.
-    private RequestEventDispatcher request_event_dispatcher;
-
-    /// Enum of signals used by the request fibers.
-    private enum Signals
-    {
-        Stop = 1
-    }
-
-    /// Fiber which handles iterating and sending records to the client.
-    private class Reader
-    {
-        private MessageFiber fiber;
-
-        public this ( )
-        {
-            this.fiber = new MessageFiber(&this.fiberMethod, 64 * 1024);
-        }
-
-        void fiberMethod ( )
-        {
-            uint count;
-            bool finished;
-            do
-            {
-                auto message = this.outer.request_event_dispatcher.receive(this.fiber,
-                    Message(MessageType.Record), Message(MessageType.End));
-                with ( MessageType ) switch ( message.type )
-                {
-                    case Record:
-                        count++;
-
-                        auto key = *conn.message_parser.
-                            getValue!(hash_t)(message.payload);
-                        auto value = conn.message_parser.
-                            getArray!(char)(message.payload);
-
-                        GetAll.Notification n;
-                        n.record = RequestKeyDataInfo(context.request_id,
-                            key, value);
-                        GetAll.notify(context.user_params, n);
-                        break;
-
-                    case End:
-                        finished = true;
-                        break;
-
-                    default:
-                        assert(false);
-                }
-
-                // Stop the GetAll after some records have been received.
-                // In a real client, the request would only be stopped if
-                // requested via the user-facing API. In this example, for
-                // simplicity, the Reader triggers a Stop message.
-                if ( count == 5 )
-                    this.outer.request_event_dispatcher.signal(this.outer.conn,
-                        Signals.Stop);
-            }
-            while ( !finished );
-
-            // Kill the controller fiber.
-            this.outer.request_event_dispatcher.abort(
-                this.outer.controller.fiber);
-        }
-    }
-
-    /// Fiber which handles control messages from the client.
-    private class Controller
-    {
-        MessageFiber fiber;
-
-        this ( )
-        {
-            this.fiber = new MessageFiber(&this.fiberMethod, 64 * 1024);
-        }
-
-        void fiberMethod ( )
-        {
-            // Wait for a control message to be initiated.
-            // In a real client, there would be a user-facing API to do this. In
-            // this example, for simplicity, the Reader triggers a control
-            // message.
-            auto event = this.outer.request_event_dispatcher.nextEvent(
-                this.fiber, Signal(Signals.Stop));
-            assert(event.signal.code == Signals.Stop);
-
-            // Send Stop message to node.
-            this.outer.request_event_dispatcher.send(this.fiber,
-                ( RequestOnConn.EventDispatcher.Payload payload )
-                {
-                    payload.addConstant(MessageType.Stop);
-                }
-            );
-
-            // Receive ACK from node.
-            auto message = this.outer.request_event_dispatcher.receive(this.fiber,
-                Message(MessageType.Ack));
-            assert(message.type == MessageType.Ack);
-
-            // Kill the reader fiber.
-            this.outer.request_event_dispatcher.abort(
-                this.outer.reader.fiber);
-        }
-    }
-
     /***************************************************************************
 
         Constructor.
 
         Params:
-            conn = Event dispatcher for this connection
-            context_blob = serialized request context
+            conn = request-on-conn event dispatcher
+            context = request context
 
     ***************************************************************************/
 
     public this ( RequestOnConn.EventDispatcherAllNodes conn,
-                  void[] context_blob )
+        GetAll.Context* context )
     {
         this.conn = conn;
-        this.context = GetAll.getContext(context_blob);
+        this.context = context;
     }
+
+    /***************************************************************************
+
+        Runs the request handler.
+
+    ***************************************************************************/
 
     public void run ( )
     {
-        // Start reading data from the node and handling control messages. Each
-        // of these jobs is handled by a separate fiber.
-        this.reader = new Reader;
-        this.controller = new Controller;
+        auto request = createSuspendableRequest!(GetAll)(this.conn, this.context,
+            &this.connect, &this.disconnected, &this.fillPayload,
+            &this.handleStatusCode, &this.handle);
+        request.run();
+    }
 
-        this.controller.fiber.start();
-        this.reader.fiber.start();
-        this.request_event_dispatcher.eventLoop(this.conn);
+    /***************************************************************************
+
+        Connect policy, called from AllNodesRequest template to ensure the
+        connection to the node is up.
+
+        Returns:
+            true to continue handling the request; false to abort
+
+    ***************************************************************************/
+
+    private bool connect ( )
+    {
+        return suspendableRequestConnector(this.conn,
+            &this.context.shared_working.suspendable_control);
+    }
+
+    /***************************************************************************
+
+        Disconnected policy, called from AllNodesRequest template when an I/O
+        error occurs on the connection.
+
+        Params:
+            e = exception indicating error which occurred on the connection
+
+    ***************************************************************************/
+
+    private void disconnected ( Exception e )
+    {
+        // Notify the user of the disconnection. The user may use the
+        // controller, at this point, but as the request is not active
+        // on this connection, no special behaviour is needed.
+        GetAll.Notification notification;
+        notification.node_disconnected =
+            RequestNodeExceptionInfo(this.context.request_id,
+            this.conn.remote_address, e);
+        GetAll.notify(this.context.user_params, notification);
+    }
+
+    /***************************************************************************
+
+        FillPayload policy, called from SuspendableRequestInitialiser template
+        to add request-specific data to the initial message payload send to the
+        node to begin the request.
+
+    ***************************************************************************/
+
+    private void fillPayload ( RequestOnConnBase.EventDispatcher.Payload payload )
+    {
+        this.context.shared_working.suspendable_control.fillPayload(payload);
+    }
+
+    /***************************************************************************
+
+        HandleStatusCode policy, called from SuspendableRequestInitialiser
+        template to decide how to handle the status code received from the node.
+
+        Params:
+            status = status code received from the node in response to the
+                initial message
+
+        Returns:
+            true to continue handling the request (OK status); false to abort
+            (error status)
+
+    ***************************************************************************/
+
+    private bool handleStatusCode ( ubyte status )
+    {
+        auto getall_status = cast(RequestStatusCode)status;
+
+        if ( GetAll.handleGlobalStatusCodes(getall_status, this.context,
+            this.conn.remote_address) )
+            return false; // Global code, e.g. request/version not supported
+
+        // GetAll-specific codes
+        with ( RequestStatusCode ) switch ( getall_status )
+        {
+            case Started:
+                // Expected "request started" code
+                return true;
+
+            case Error:
+                // The node returned an error code. Notify the user and
+                // end the request.
+                GetAll.Notification n;
+                n.node_error = RequestNodeInfo(
+                    this.context.request_id, conn.remote_address);
+                GetAll.notify(this.context.user_params, n);
+                return false;
+
+            default:
+                // Treat unknown codes as internal errors.
+                goto case Error;
+        }
+
+        assert(false);
+    }
+
+    /***************************************************************************
+
+        Handler policy, called from AllNodesRequest template to run the
+        request's main handling logic.
+
+    ***************************************************************************/
+
+    private void handle ( )
+    {
+        RequestEventDispatcher request_event_dispatcher;
+        Reader reader;
+        Controller controller;
+
+        // Note: this request heap allocates two fibers each time it is handled.
+        // In a real client implementation, you would want to get these fibers
+        // from a pool, to avoid allocating each time.
+        reader = Reader(new MessageFiber(&reader.fiberMethod, 64 * 1024),
+            &request_event_dispatcher, this.conn, this.context, &controller);
+        controller = Controller(new MessageFiber(&controller.fiberMethod, 64 * 1024),
+            &request_event_dispatcher, this.conn, this.context, &reader);
+
+        controller.fiber.start();
+        reader.fiber.start();
+
+        if ( this.context.shared_working.all_nodes.num_initialising == 0 )
+        {
+            if ( this.context.shared_working.suspendable_control.
+                allInitialised!(GetAll)(this.context) )
+            {
+                request_event_dispatcher.signal(this.conn,
+                    SuspendableRequestSharedWorkingData.Signal.StateChangeRequested);
+            }
+        }
+
+        request_event_dispatcher.eventLoop(this.conn);
+
+        assert(controller.fiber.finished());
+        assert(reader.fiber.finished());
+    }
+}
+
+/// Fiber which handles iterating and sending records to the client.
+private struct Reader
+{
+    import swarm.neo.util.MessageFiber;
+    import swarm.neo.request.RequestEventDispatcher;
+    import swarm.neo.client.RequestOnConn;
+    import test.neo.common.GetAll;
+    import test.neo.client.NotifierTypes;
+
+    private MessageFiber fiber;
+    private RequestEventDispatcher* request_event_dispatcher;
+    private RequestOnConn.EventDispatcherAllNodes conn;
+    private GetAll.Context* context;
+    private Controller* controller;
+
+    void fiberMethod ( )
+    {
+        auto suspendable_control =
+            &this.context.shared_working.suspendable_control;
+
+        bool finished;
+        do
+        {
+            auto message = this.request_event_dispatcher.receive(this.fiber,
+                Message(MessageType.Record), Message(MessageType.End));
+            with ( MessageType ) switch ( message.type )
+            {
+                case Record:
+                    auto key = *this.conn.message_parser.
+                        getValue!(hash_t)(message.payload);
+                    auto value = this.conn.message_parser.
+                        getArray!(char)(message.payload);
+
+                    GetAll.Notification n;
+                    n.record = RequestKeyDataInfo(this.context.request_id,
+                        key, value);
+                    if ( suspendable_control.notifyAndCheckStateChange!(GetAll)(
+                        this.context, n) )
+                    {
+                        // The user used the controller in the notifier callback
+                        this.request_event_dispatcher.signal(this.conn,
+                            suspendable_control.Signal.StateChangeRequested);
+                    }
+                    break;
+
+                case End:
+                    finished = true;
+                    break;
+
+                default:
+                    assert(false);
+            }
+        }
+        while ( !finished );
+
+        // Kill the controller fiber.
+        this.request_event_dispatcher.abort(this.controller.fiber);
+    }
+}
+
+/// Fiber which handles control messages from the client.
+private struct Controller
+{
+    import swarm.neo.util.MessageFiber;
+    import swarm.neo.request.RequestEventDispatcher;
+    import swarm.neo.client.RequestOnConn;
+    import swarm.neo.client.mixins.SuspendableRequestCore;
+    import test.neo.common.GetAll;
+
+    private MessageFiber fiber;
+    private RequestEventDispatcher* request_event_dispatcher;
+    private RequestOnConn.EventDispatcherAllNodes conn;
+    private GetAll.Context* context;
+    private Reader* reader;
+
+    void fiberMethod ( )
+    {
+        SuspendableRequestControllerFiber!(GetAll, MessageType) controller;
+        controller.handle(this.conn, this.context,
+            this.request_event_dispatcher, this.fiber);
+
+        // Kill the reader fiber; the request is finished.
+        this.request_event_dispatcher.abort(this.reader.fiber);
     }
 }

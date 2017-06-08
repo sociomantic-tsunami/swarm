@@ -543,6 +543,19 @@ public struct AllNodesRequestSharedWorkingData
 
     /***************************************************************************
 
+        Returns:
+            the number of request-on-conns for this request which are in the
+            process of initialising.
+
+    ***************************************************************************/
+
+    public uint num_initialising ( )
+    {
+        return this.initialising;
+    }
+
+    /***************************************************************************
+
         Should be called when all active connections of an all-nodes request
         have been successfully initialised. (The usual location for this is at
         the start of the Handler policy, which is called immediately after
