@@ -562,30 +562,20 @@ template ClientCore ( )
         {
             this.outer.connections.request_set.stats.clear();
         }
-    }
 
-    /***************************************************************************
+        /***********************************************************************
 
-        Writes stats about all requests to the provided stats log.
+            Writes stats about all requests to the provided stats log.
 
-        Params:
-            logger = stats log to write the filled instance of Aggr to
+            Params:
+                logger = stats log to write the filled instance of Aggr to
 
-    ***************************************************************************/
+        ***********************************************************************/
 
-    private void logRequestStats ( StatsLog logger )
-    {
-        scope rq_stats = this.new RequestStats;
-        foreach ( rq, stats; rq_stats.allRequests() )
-            logger.addObject!("request")(rq, stats);
-    }
-
-    ///
-    unittest
-    {
-        void logClientRequestStats ( typeof(this) client, StatsLog logger )
+        private void log ( StatsLog logger )
         {
-            client.logRequestStats(logger);
+            foreach ( rq, stats; this.allRequests() )
+                logger.addObject!("request")(rq, stats);
         }
     }
 
