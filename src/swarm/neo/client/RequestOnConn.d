@@ -88,6 +88,19 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
 
         /***********************************************************************
 
+            Returns:
+                status of the connection used by this request-on-conn (i.e.
+                Disconnected, Connecting, Connected, Shutdown)
+
+        ***********************************************************************/
+
+        public Connection.Status connection_status ( )
+        {
+            return this.connection.status();
+        }
+
+        /***********************************************************************
+
             Waits for the connection to be reestablished if it is down.
 
             You can resume the fiber while it is suspended waiting for the
