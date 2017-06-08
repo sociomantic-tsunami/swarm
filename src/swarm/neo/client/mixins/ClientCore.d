@@ -22,6 +22,8 @@ template ClientCore ( )
 {
     import ocean.transition;
     import ocean.core.Enforce;
+    import ocean.core.Traits;
+    import ocean.util.log.Stats;
 
     import swarm.neo.IPAddress;
 
@@ -400,6 +402,59 @@ template ClientCore ( )
 
     /***************************************************************************
 
+        Using the provided stats getter, fills in a stats aggregate struct of
+        the specified type and writes it to the provided stats log.
+
+        Params:
+            Aggr = stats aggregate struct with one field per stats to log. The
+                names and types of the fields are expected to match the names
+                and return types of the getter methods of the provided stats
+                getter
+            Getter = type of stats getter struct (e.g. the Stats class defined
+                above or a derived class)
+            getter = instance of stats getter Getter
+            logger = stats log to write the filled instance of Aggr to
+
+    ***************************************************************************/
+
+    private void logStatsFromAggregate ( Aggr, Getter )
+        ( Getter getter, StatsLog logger )
+    {
+        static assert(is(Aggr == struct));
+
+        Aggr aggr;
+
+        foreach ( i, ref field; aggr.tupleof )
+            mixin("field = getter." ~ FieldName!(i, Aggr) ~ "();");
+        logger.add(aggr);
+    }
+
+    ///
+    unittest
+    {
+        void logClientStats ( typeof(this) client, StatsLog logger )
+        {
+            struct StatsAggregate
+            {
+                size_t num_active_requests;
+                size_t max_active_requests;
+                double active_requests_fraction;
+                size_t num_registered_nodes;
+                size_t num_initializing_nodes;
+                double initializing_nodes_fraction;
+                size_t num_connected_nodes;
+                bool all_nodes_connected;
+                double connected_nodes_fraction;
+            }
+
+            scope stats = client.new Stats;
+
+            client.logStatsFromAggregate!(StatsAggregate)(stats, logger);
+        }
+    }
+
+    /***************************************************************************
+
         Template for a per-request stats/information getter interface. May be
         newed on the stack.
 
@@ -506,6 +561,31 @@ template ClientCore ( )
         public void clear ( )
         {
             this.outer.connections.request_set.stats.clear();
+        }
+    }
+
+    /***************************************************************************
+
+        Writes stats about all requests to the provided stats log.
+
+        Params:
+            logger = stats log to write the filled instance of Aggr to
+
+    ***************************************************************************/
+
+    private void logRequestStats ( StatsLog logger )
+    {
+        scope rq_stats = this.new RequestStats;
+        foreach ( rq, stats; rq_stats.allRequests() )
+            logger.addObject!("request")(rq, stats);
+    }
+
+    ///
+    unittest
+    {
+        void logClientRequestStats ( typeof(this) client, StatsLog logger )
+        {
+            client.logRequestStats(logger);
         }
     }
 
