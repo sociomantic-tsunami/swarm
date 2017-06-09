@@ -347,7 +347,13 @@ public struct RequestEventDispatcher
     ***************************************************************************/
 
     public void abort ( MessageFiber fiber )
+    in
     {
+        assert(!fiber.running, "Cannot abort self");
+    }
+    body
+    {
+        auto original_length = this.waiting_fibers.length;
         this.waiting_fibers.length = Array.moveToEnd(this.waiting_fibers,
             WaitingFiber(fiber),
             ( Const!(WaitingFiber) e1, Const!(WaitingFiber) e2 )
@@ -357,6 +363,14 @@ public struct RequestEventDispatcher
         );
         enableStomping(this.waiting_fibers);
 
+        if ( fiber.finished )
+        {
+            assert(this.waiting_fibers.length == original_length,
+                "Terminated fiber still registered with request event dispatcher");
+            return;
+        }
+
+        assert(fiber.waiting);
         fiber.kill();
     }
 
