@@ -572,7 +572,7 @@ template ClientCore ( )
 
         ***********************************************************************/
 
-        private void log ( StatsLog logger )
+        public void log ( StatsLog logger )
         {
             foreach ( rq, stats; this.allRequests() )
                 logger.addObject!("request")(rq, stats);
