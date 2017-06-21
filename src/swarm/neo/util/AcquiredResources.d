@@ -457,6 +457,40 @@ public struct AcquiredSingleton ( T )
             this.acquired = this.t_pool.get(new_t);
 
         assert(this.acquired !is null);
+
+        return this.acquired;
+    }
+
+    /***************************************************************************
+
+        Gets the singleton T instance.
+
+        Params:
+            new_t = lazily initialised new resource
+            reset = delegate to call on the singleton instance when it is first
+                acquired from the pool. Should perform any logic required to
+                reset the instance to its initial state
+
+        Returns:
+            singleton T instance
+
+    ***************************************************************************/
+
+    public Elem acquire ( lazy Elem new_t, void delegate ( Elem ) reset )
+    in
+    {
+        assert(this.t_pool !is null);
+    }
+    body
+    {
+        if ( this.acquired is null )
+        {
+            this.acquired = this.t_pool.get(new_t);
+            reset(this.acquired);
+        }
+
+        assert(this.acquired !is null);
+
         return this.acquired;
     }
 
@@ -525,7 +559,14 @@ unittest
             // managed by the tracker.
             public MyResource* myResource ( )
             {
-                return this.myresource_singleton.acquire(new MyResource);
+                return this.myresource_singleton.acquire(new MyResource,
+                    ( MyResource* resource )
+                    {
+                        // When the singleton is first acquired, perform any
+                        // logic required to reset it to its initial state.
+                        *resource = MyResource.init;
+                    }
+                );
             }
         }
     }
