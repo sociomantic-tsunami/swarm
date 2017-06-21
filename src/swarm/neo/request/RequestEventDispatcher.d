@@ -235,6 +235,24 @@ public struct RequestEventDispatcher
 
     /***************************************************************************
 
+        Resets this instance to its initial state. This method should be called
+        when retrieving an instance from a pool or free list.
+
+    ***************************************************************************/
+
+    public void reset ( )
+    {
+        this.waiting_fibers.length = 0;
+        enableStomping(this.waiting_fibers);
+
+        this.queued_signals.length = 0;
+        enableStomping(this.queued_signals);
+
+        this.last_event = this.last_event.init;
+    }
+
+    /***************************************************************************
+
         Suspends `fiber` until one of the specified events occurs.
 
         Params:
