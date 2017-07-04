@@ -438,12 +438,9 @@ public struct RequestEventDispatcher
             this.dispatchQueuedSignals(conn);
 
             if ( this.waitingWriters() )
-            {
                 writer = this.popWaitingWriter();
-                this.sendAndHandleEvents(conn, writer);
-            }
-            else
-                this.handleNextEvent(conn);
+
+            this.handleNextEvent(conn, writer);
         }
         catch ( Exception e )
         {
@@ -468,19 +465,20 @@ public struct RequestEventDispatcher
 
     /***************************************************************************
 
-        Sends the payload requested by the provided writer fiber and handles
-        other events that occur in the meantime.
+        Sends the payload requested by the provided writer fiber (if non-null)
+        and handles other events that occur in the meantime.
 
         Params:
             conn = request-on-conn event dispatcher to multiplex fiber I/O
                 events over
-            writer = writer fiber / event to handle
+            writer = optional writer fiber / event to handle
 
     ***************************************************************************/
 
-    private void sendAndHandleEvents ( RequestOnConnBase.EventDispatcher conn,
+    private void handleNextEvent ( RequestOnConnBase.EventDispatcher conn,
         WaitingFiber writer )
     {
+        bool sending = writer != writer.init;
         bool sent;
         Const!(void)[] received;
 
@@ -488,68 +486,33 @@ public struct RequestEventDispatcher
         {
             this.dispatchQueuedSignals(conn);
 
-            auto resume_code = conn.sendReceiveAndHandleEvents(
-                ( in void[] recv_payload )
-                {
-                    received = recv_payload;
-                },
-                ( conn.Payload send_payload )
-                {
-                    writer.event.send.get_payload(send_payload);
-                }
-            );
+            RequestOnConnBase.EventDispatcher.NextEventFlags flags;
+            flags = flags.Receive;
 
-            switch ( resume_code )
+            auto event = conn.nextEvent(flags,
+                sending ? writer.event.send.get_payload : null);
+            switch ( event.active )
             {
-                // sent without suspending
-                case 0:
-                // sent while suspended
-                case RequestOnConnBase.FiberResumeCode.Sent:
+                case event.active.sent:
                     sent = true;
                     EventNotification fired_event;
                     fired_event.sent = Sent();
                     this.notifyWaitingFiber(writer.fiber, fired_event);
                     break;
-                // send interrupted by receiving a message
-                case RequestOnConnBase.FiberResumeCode.Received:
-                    this.dispatchReceivedPayload(conn, received);
+
+                case event.active.received:
+                    this.dispatchReceivedPayload(conn, event.received.payload);
                     break;
-                // other signal
+
+                case event.active.resumed:
+                    this.dispatchSignal(conn, event.resumed.code);
+                    break;
+
                 default:
-                    this.dispatchSignal(conn, resume_code);
-                    break;
+                    assert(false);
             }
         }
-        while ( !sent );
-    }
-
-    /***************************************************************************
-
-        Waits for an event to occur and dispatches it to the appropriate waiting
-        fiber.
-
-        Params:
-            conn = request-on-conn event dispatcher to multiplex fiber I/O
-                events over
-
-    ***************************************************************************/
-
-    private void handleNextEvent ( RequestOnConnBase.EventDispatcher conn )
-    {
-        Const!(void)[] received;
-
-        auto resume_code = conn.receiveAndHandleEvents(
-            ( in void[] recv_payload )
-            {
-                received = recv_payload;
-            });
-
-        // Interesting to note that resume_code:0 has no meaning here
-        // and could be used by the request implementation, in theory.
-        this.dispatchSignal(conn, resume_code);
-
-        if ( received.length )
-            this.dispatchReceivedPayload(conn, received);
+        while ( sending && !sent );
     }
 
     /***************************************************************************
