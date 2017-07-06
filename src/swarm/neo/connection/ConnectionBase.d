@@ -266,6 +266,8 @@ abstract class ConnectionBase: ISelectClient
 
                 try
                 {
+                    this.outer.sender.cork = true;
+
                     // Start the receive fiber, it will suspend itself immediately.
                     this.outer.recv_loop.start();
 
