@@ -69,6 +69,10 @@ private scope class GetAllImpl_v0
     import swarm.neo.util.MessageFiber;
     import swarm.neo.request.RequestEventDispatcher;
 
+    /// Set by the Writer when the iteration over the records has finished. Used
+    /// by the Controller to ignore incoming messages from that point.
+    private bool has_ended;
+
     /// Fiber which handles iterating and sending records to the client.
     private class Writer
     {
@@ -100,6 +104,8 @@ private scope class GetAllImpl_v0
                 );
             }
 
+            this.outer.has_ended = true;
+
             // Send the End message to the client.
             this.outer.request_event_dispatcher.send(this.fiber,
                 ( RequestOnConn.EventDispatcher.Payload payload )
@@ -107,6 +113,9 @@ private scope class GetAllImpl_v0
                     payload.addConstant(MessageType.End);
                 }
             );
+
+            this.outer.request_event_dispatcher.receive(this.fiber,
+                Message(MessageType.Ack));
 
             // Kill the controller fiber.
             this.outer.request_event_dispatcher.abort(
@@ -133,6 +142,12 @@ private scope class GetAllImpl_v0
                 auto message = this.outer.request_event_dispatcher.receive(this.fiber,
                     Message(MessageType.Suspend), Message(MessageType.Resume),
                     Message(MessageType.Stop));
+
+                // If the request has ended, ignore incoming control messages.
+                // We may receive a control message which the client sent before
+                // it received or processed the End message we sent.
+                if (this.outer.has_ended)
+                    continue;
 
                 // Send ACK. The protocol guarantees that the client will not
                 // send any further messages until it has received the ACK.
