@@ -399,6 +399,14 @@ private struct Reader
         }
         while ( !finished );
 
+        // Acknowledge the End signal. The protocol guarantees that the node
+        // will not send any further messages.
+        this.request_event_dispatcher.send(this.fiber,
+            ( RequestOnConn.EventDispatcher.Payload payload )
+            {
+                payload.addConstant(MessageType.Ack);
+            }
+        );
         // Kill the controller fiber.
         this.request_event_dispatcher.abort(this.controller.fiber);
     }
