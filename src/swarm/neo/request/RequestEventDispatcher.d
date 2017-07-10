@@ -6,6 +6,7 @@
         1. "Signals" (ubyte codes) sent between fibers.
         2. Messages received over the connection.
         3. Connection readiness to send a payload.
+        4. The passing of an epoll event-loop cycle.
 
     The types of events are handled somewhat differently, as follows:
         1. Only one request handler fiber may register to be notified of each
@@ -18,6 +19,10 @@
            notifications are handled in order of registration (i.e. fibers will
            be notified of successive send readiness in the order in which they
            registered to receive this notification.)
+        4. Each request handler fiber may only register once (at a time) for
+           notification of an epoll event-loop cycle ending, but when the
+           notification occurs, all fibers registered for this event are
+           resumed (in order of registration).
 
     Copyright: Copyright (c) 2017 sociomantic labs GmbH. All rights reserved
 
@@ -59,6 +64,9 @@ private union EventRegistrationUnion
 
     /// Waiting to send a message over the connection.
     Send send;
+
+    /// Waiting for an epoll event-loop cycle to occur.
+    Yield yield;
 }
 
 /*******************************************************************************
@@ -108,6 +116,19 @@ public struct Send
 
 /*******************************************************************************
 
+    Struct representing a fiber awaiting the completion of an epoll event-loop
+    cycle.
+
+*******************************************************************************/
+
+public struct Yield
+{
+    // Dummy struct with no data, used purely as a "flag" in the smart union to
+    // indicate the awaited event.
+}
+
+/*******************************************************************************
+
     Smart union of events which the dispatcher can notify clients of. An
     instance of this union is returned from the dispatcher method which
     suspended a waiting fiber (see RequestEventDispatcher.nextEvent), informing
@@ -133,6 +154,9 @@ private union EventNotificationUnion
 
     /// A message was sent over the connection.
     Sent sent;
+
+    /// An epoll event-loop cycle occurred.
+    YieldedThenResumed yielded_resumed;
 }
 
 /*******************************************************************************
@@ -179,6 +203,18 @@ public struct Sent
 
 /*******************************************************************************
 
+    Struct representing the completion of an epoll event-loop cycle.
+
+*******************************************************************************/
+
+public struct YieldedThenResumed
+{
+    // Dummy struct with no data, used purely as a "flag" in the smart union to
+    // indicate the event which occurred.
+}
+
+/*******************************************************************************
+
     Request event dispatcher for use with multi-fiber requests.
 
     Three types of events are handled:
@@ -219,6 +255,9 @@ public struct RequestEventDispatcher
 
     /// Fibers currently awaiting events.
     private WaitingFiber[] waiting_fibers;
+
+    /// List of fibers to be notified of an event. See resumeYieldedFibers().
+    private WaitingFiber[] fibers_to_notify;
 
     /// Event which has fired, to be returned by nextEvent(). (This value is set
     /// by notifyWaitingFiber(), just before resuming the waiting fiber.)
@@ -277,6 +316,8 @@ public struct RequestEventDispatcher
                 register_event.signal = event;
             else static if( is(typeof(event) == Send) )
                 register_event.send = event;
+            else static if( is(typeof(event) == Yield) )
+                register_event.yield = event;
             else
                 static assert(false, "Invalid event type");
 
@@ -295,6 +336,8 @@ public struct RequestEventDispatcher
                     unregister_event.signal = event;
                 else static if( is(typeof(event) == Send) )
                     unregister_event.send = event;
+                else static if( is(typeof(event) == Yield) )
+                    unregister_event.yield = event;
                 else
                     static assert(false, "Invalid event type");
 
@@ -353,6 +396,47 @@ public struct RequestEventDispatcher
         enforce(event.active == event.active.message,
             "Unexpected event: waiting only for message receipt");
         return event.message;
+    }
+
+    /***************************************************************************
+
+        Convenience wrapper around `nextEvent` for yielding only.
+
+        Params:
+            fiber = fiber to suspend until the an event-loop cycle has occurred
+
+    ***************************************************************************/
+
+    public void yield ( MessageFiber fiber )
+    {
+        auto event = this.nextEvent(fiber, Yield());
+        enforce(event.active == event.active.yielded_resumed,
+            "Unexpected event: waiting only for resumption after yield");
+    }
+
+    /***************************************************************************
+
+        Every `yield_after` calls, suspends `fiber` and resumes it on the next
+        event-loop cycle. Otherwise does nothing.
+
+        Params:
+            fiber = fiber to suspend until the an event-loop cycle has occurred
+            call_count = counter incremented each time this method is called
+            yield_after = the number of calls after which this method, when
+                called again, should yield
+
+    ***************************************************************************/
+
+    public void periodicYield ( MessageFiber fiber, ref uint call_count,
+        Const!(uint) yield_after )
+    {
+        if ( call_count >= yield_after )
+        {
+            call_count = 0;
+            this.yield(fiber);
+        }
+        else
+            call_count++;
     }
 
     /***************************************************************************
@@ -488,6 +572,8 @@ public struct RequestEventDispatcher
 
             RequestOnConnBase.EventDispatcher.NextEventFlags flags;
             flags = flags.Receive;
+            if ( this.waitingYielders() )
+                flags |= flags.Yield;
 
             auto event = conn.nextEvent(flags,
                 sending ? writer.event.send.get_payload : null);
@@ -506,6 +592,10 @@ public struct RequestEventDispatcher
 
                 case event.active.resumed:
                     this.dispatchSignal(conn, event.resumed.code);
+                    break;
+
+                case event.active.yielded_resumed:
+                    this.resumeYieldedFibers(conn);
                     break;
 
                 default:
@@ -533,6 +623,9 @@ public struct RequestEventDispatcher
             3. if sending a payload is being awaited and the fiber is already
                awaiting another payload being sent -- each fiber may only send
                one payload at a time.
+            4. if yielding then resuming is being awaited and the fiber is
+               already awaiting this event -- each fiber may only register one
+               yield event at a time.
 
     ***************************************************************************/
 
@@ -559,6 +652,12 @@ public struct RequestEventDispatcher
                     if ( waiting_fiber.event.active == send )
                         enforce(waiting_fiber.fiber != fiber,
                             "Each fiber may only send one thing at a time");
+                break;
+            case yield:
+                foreach ( waiting_fiber; this.waiting_fibers )
+                    if ( waiting_fiber.event.active == yield )
+                        enforce(waiting_fiber.fiber != fiber,
+                            "Each fiber may only yield once at a time");
                 break;
             default:
                 assert(false);
@@ -595,6 +694,22 @@ public struct RequestEventDispatcher
     {
         foreach ( waiting_fiber; this.waiting_fibers )
             if ( waiting_fiber.event.active == waiting_fiber.event.active.send )
+                return true;
+
+        return false;
+    }
+
+    /***************************************************************************
+
+        Returns:
+            true if any registered fibers wish to yield
+
+    ***************************************************************************/
+
+    private bool waitingYielders ( )
+    {
+        foreach ( waiting_fiber; this.waiting_fibers )
+            if ( waiting_fiber.event.active == waiting_fiber.event.active.yield )
                 return true;
 
         return false;
@@ -734,6 +849,48 @@ public struct RequestEventDispatcher
         }
 
         conn.shutdownWithProtocolError("Unhandled message");
+    }
+
+    /***************************************************************************
+
+        Helper function for eventLoop(). When the request-on-conn fiber is
+        resumed after being yielded, resumes any fibers which asked to be
+        resumed after yielding.
+
+        Params:
+            conn = request-on-conn event dispatcher (used to throw a protocol
+                error, if no fibers were waiting)
+
+        Throws:
+            if no waiting fiber asked to yield
+
+    ***************************************************************************/
+
+    private void resumeYieldedFibers ( RequestOnConnBase.EventDispatcher conn )
+    {
+        // Copy WaitingFibers which are registered to be woken up after yielding
+        // into a separate buffer. This is to avoid the array being iterated
+        // over being modified by one of the fibers which is resumed from inside
+        // the loop.
+        this.fibers_to_notify.length = 0;
+        enableStomping(this.fibers_to_notify);
+
+        foreach ( waiting_fiber; this.waiting_fibers )
+        {
+            if ( waiting_fiber.event.active == waiting_fiber.event.active.yield )
+                this.fibers_to_notify ~= waiting_fiber;
+        }
+
+        if ( this.fibers_to_notify.length == 0 )
+            conn.shutdownWithProtocolError("Unhandled resume after yield");
+
+        foreach ( fiber_to_notify; this.fibers_to_notify )
+        {
+            EventNotification fired_event;
+            fired_event.yielded_resumed = YieldedThenResumed();
+
+            this.notifyWaitingFiber(fiber_to_notify.fiber, fired_event);
+        }
     }
 
     /***************************************************************************
