@@ -228,6 +228,7 @@ abstract class RequestOnConnBase
         import swarm.neo.IPAddress;
         import swarm.neo.protocol.MessageParser;
         import ocean.core.Traits: hasIndirections, StripEnum;
+        import ocean.core.SmartUnion;
 
         alias RequestOnConnBase.FiberResumeCode FiberResumeCode;
 
@@ -239,6 +240,112 @@ abstract class RequestOnConnBase
                    this.classinfo.name ~ ": Currently not connected");
             assert(this.outer.request_id,
                    this.classinfo.name ~ ": Request id is 0");
+        }
+
+        /***********************************************************************
+
+            Bitfield enum to specify the events to wait on. Passed to the
+            nextEvent() method.
+
+        ***********************************************************************/
+
+        public enum NextEventFlags
+        {
+            /// Wait to receive a payload for this request over the connection.
+            Receive     = 1 << 0,
+
+            /// Wait for an epoll event-loop cycle to occur.
+            Yield       = 1 << 1
+        }
+
+        /// Type of a delegate to fill in a payload for sending.
+        alias void delegate ( RequestOnConnBase.EventDispatcher.Payload payload )
+            FillPayloadDg;
+
+        /***********************************************************************
+
+            Smart union of events which the dispatcher can notify clients of. An
+            instance of this union is returned from the dispatcher method which
+            suspends a waiting fiber (see nextEvent()), informing the caller of
+            the event which has occurred.
+
+        ***********************************************************************/
+
+        public alias SmartUnion!(EventNotificationUnion) EventNotification;
+
+        /***********************************************************************
+
+            Union of events which the dispatcher can notify about.
+
+        ***********************************************************************/
+
+        private union EventNotificationUnion
+        {
+            /*******************************************************************
+
+                A payload for this request received over the connection.
+
+            *******************************************************************/
+
+            public struct Received
+            {
+                /// The message payload.
+                Const!(void)[] payload;
+            }
+
+            /*******************************************************************
+
+                Struct representing the successful sending of a payload over the
+                connection.
+
+            *******************************************************************/
+
+            public struct Sent
+            {
+                // Dummy struct with no data, used purely as a "flag" in the
+                // union to indicate the event which occurred. (As each fiber is
+                // only allowed to send one thing at a time, there is no need
+                // for this struct to have any fields.
+            }
+
+            /*******************************************************************
+
+                Struct representing that the fiber was suspended and then
+                resumed after an epoll event-loop cycle has occurred.
+
+            *******************************************************************/
+
+            public struct YieldedThenResumed
+            {
+                // Dummy struct with no data, used purely as a "flag" in the
+                // union to indicate the event which occurred.
+            }
+
+            /*******************************************************************
+
+                Struct representing that the request-on-conn fiber was resumed
+                with a non-negative code. This has no built-in meaning; the
+                caller is expected to interpret the code.
+
+            *******************************************************************/
+
+            public struct ResumedWithCode
+            {
+                /// Code with which the fiber was resumed.
+                uint code;
+            }
+
+            /// A payload for this request was received over the connection.
+            public Received received;
+
+            /// A payload was sent over the connection.
+            public Sent sent;
+
+            /// An epoll event-loop cycle has passed.
+            public YieldedThenResumed yielded_resumed;
+
+            /// The request-on-conn fiber was resumed with a non-negative code.
+            public ResumedWithCode resumed;
         }
 
         /***********************************************************************
@@ -503,6 +610,187 @@ abstract class RequestOnConnBase
 
             this.outer.resumeFiber(code);
             return true;
+        }
+
+        /***********************************************************************
+
+            Waits for one of the specified events to occur and returns a
+            smart-union denoting which occurred.
+
+            There are four possible types of event:
+                1. Receiving a payload for this request.
+                2. Sending a payload.
+                3. The fiber being resumed after it was yielded and an epoll
+                   event-loop cycle occurred.
+                4. The fiber being resumed with a non-negative code.
+
+            The fiber is usually suspended while waiting for an event to occur.
+            The one exception is when sending -- the send may succeed
+            immediately, without needing to suspend the fiber.
+
+            Params:
+                flags = flags indicating whether to wait for receiving &/
+                    being resumed after yielding
+                fill_payload = optional delegate to fill in a payload to send.
+                    If this argument is null, sending does not occur
+
+            Returns:
+                an EventNotification instance denoting the event which occurred
+
+            Throws:
+                Exception on protocol or I/O error.
+
+        ***********************************************************************/
+
+        public EventNotification nextEvent (
+            NextEventFlags flags, FillPayloadDg fill_payload = null )
+        out ( fired_event )
+        {
+            auto fired_event_non_const = cast(EventNotification)fired_event;
+            assert(fired_event_non_const.active !=
+                fired_event_non_const.active.none);
+        }
+        body
+        {
+            EventNotification fired_event;
+
+            bool sending = fill_payload !is null;
+            bool receiving = (flags & NextEventFlags.Receive) > 0;
+            bool yielding = (flags & NextEventFlags.Yield) > 0;
+
+            // Set up sending, if required.
+            scope payload = this.new Payload;
+
+            if ( sending )
+            {
+                fill_payload(payload);
+                this.outer.send_payload_ = this.outer.send_payload;
+
+                // registerForSending may fail if called while connection
+                // shutdown is in progress
+                scope ( failure )
+                    this.outer.send_payload_ = null;
+
+                if (!this.outer.connection.registerForSending(
+                    this.outer.request_id))
+                {
+                    assert(false, "nextEvent: already sending");
+                }
+
+                // Sending may succeed immediately. send_payload_ is null, in
+                // this case.
+                if ( !this.outer.send_payload_ )
+                {
+                    fired_event.sent = EventNotificationUnion.Sent();
+                    return fired_event;
+                }
+            }
+
+            scope ( exit )
+            {
+                if ( sending )
+                    this.outer.connection.unregisterForSending(
+                        this.outer.request_id);
+            }
+
+            // Set up receiving, if required.
+            if ( receiving )
+            {
+                // registerForErrorNotification may fail if called while
+                // connection shutdown is in progress
+                scope ( failure )
+                    this.outer.recv_payload_ = null;
+
+                if (!this.outer.connection.registerForErrorNotification(
+                    this.outer.request_id))
+                {
+                    assert(false, "nextEvent: already receiving");
+                }
+            }
+
+            scope ( exit )
+            {
+                if ( receiving )
+                    this.outer.connection.unregisterForErrorNotification(
+                        this.outer.request_id);
+            }
+
+            // Set up yielding, if required.
+            scope yielded_rqonconn = this.outer.new YieldedRequestOnConn;
+
+            if ( yielding )
+            {
+                if (!this.outer.yielded_rqonconns.add(yielded_rqonconn))
+                    assert(false, "nextEvent: already added to the resumer");
+            }
+
+            scope ( exit )
+            {
+                if ( yielding )
+                    this.outer.yielded_rqonconns.remove(yielded_rqonconn);
+            }
+
+            // Suspend the fiber and wait for the next event to occur.
+            int resume_code = this.outer.suspendFiber();
+            switch ( resume_code )
+            {
+                case FiberResumeCode.Sent:
+                    if ( sending )
+                    {
+                        fired_event.sent = EventNotificationUnion.Sent();
+                        sending = false; // don't unregister on exit; already done
+                    }
+                    else
+                    {
+                        auto e = this.protocol_error.set(
+                            "RequestOnConn unexpectedly resumed with Sent");
+                        this.shutdownConnection(e);
+                        throw e;
+                    }
+                    break;
+
+                case FiberResumeCode.ResumedYielded:
+                    if ( yielding )
+                    {
+                        fired_event.yielded_resumed =
+                            EventNotificationUnion.YieldedThenResumed();
+                        yielding = false; // don't unregister on exit; already done
+                    }
+                    else
+                    {
+                        auto e = this.protocol_error.set(
+                            "RequestOnConn unexpectedly resumed with ResumedYielded");
+                        this.shutdownConnection(e);
+                        throw e;
+                    }
+                    break;
+
+                case FiberResumeCode.Received:
+                    if ( receiving )
+                    {
+                        fired_event.received = EventNotificationUnion.Received(
+                            this.withdrawRecvPayload());
+                        receiving = false; // don't unregister on exit; already done
+                    }
+                    else
+                    {
+                        auto e = this.protocol_error.set(
+                            "Unexpected incoming message");
+                        this.shutdownConnection(e);
+                        throw e;
+                    }
+                    break;
+
+                default:
+                    assert(resume_code >= 0, "nextEvent: " ~
+                           "Unsupported negative code used to resume " ~
+                           "RequestOnConn fiber");
+                    fired_event.resumed =
+                        EventNotificationUnion.ResumedWithCode(resume_code);
+                    break;
+            }
+
+            return fired_event;
         }
 
         /***********************************************************************
