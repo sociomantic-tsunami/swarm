@@ -407,6 +407,8 @@ private struct Reader
                 payload.addConstant(MessageType.Ack);
             }
         );
+        this.conn.flush();
+
         // Kill the controller fiber.
         this.request_event_dispatcher.abort(this.controller.fiber);
     }
