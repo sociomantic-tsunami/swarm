@@ -47,6 +47,8 @@ abstract class ConnectionBase: ISelectClient
 
     import ocean.transition;
 
+    import core.sys.posix.netinet.in_: SOL_SOCKET, IPPROTO_TCP, SO_KEEPALIVE;
+
     debug ( SwarmConn ) import ocean.io.Stdout;
 
 
@@ -106,6 +108,16 @@ abstract class ConnectionBase: ISelectClient
         ***********************************************************************/
 
         public bool loop_started;
+
+        /***********************************************************************
+
+            If this flag is true and `sendRequestPayload` is waiting for
+            `EPOLLOUT` then it will call `sender.flush` after it has sent the
+            remaining data.
+
+        ***********************************************************************/
+
+        public bool flush_requested;
 
         /***********************************************************************
 
@@ -256,6 +268,8 @@ abstract class ConnectionBase: ISelectClient
 
                 try
                 {
+                    this.outer.sender.cork = true;
+
                     // Start the receive fiber, it will suspend itself immediately.
                     this.outer.recv_loop.start();
 
@@ -357,6 +371,8 @@ abstract class ConnectionBase: ISelectClient
         {
             bool finish_sending = false;
 
+            scope (exit) this.flush_requested = false;
+
             this.outer.getPayloadForSending(
                 id,
                 ( in void[][] payload )
@@ -373,6 +389,8 @@ abstract class ConnectionBase: ISelectClient
                 // Register the socket for both input and output
                 this.outer.registerEpoll(true);
                 this.outer.sender.finishSending(this.suspend());
+                if (this.flush_requested)
+                    this.outer.sender.flush();
             }
         }
     }
@@ -670,6 +688,7 @@ abstract class ConnectionBase: ISelectClient
     protected this ( AddressIPSocket!() socket, EpollSelectDispatcher epoll )
     {
         this.socket               = socket;
+        this.enableKeepAlive();
         this.epoll                = epoll;
         this.protocol_error_      = new ProtocolError;
         this.parser.e             = this.protocol_error_;
@@ -949,6 +968,34 @@ abstract class ConnectionBase: ISelectClient
 
     /***************************************************************************
 
+        Sets up TCP keep-alive on the initialised socket.
+
+    ***************************************************************************/
+
+    protected void enableKeepAlive ( )
+    in
+    {
+        assert(this.socket !is null);
+    }
+    body
+    {
+        // Activates TCP's keepalive feature for this socket.
+        this.socket.setsockoptVal(SOL_SOCKET, SO_KEEPALIVE, true);
+
+        // Socket idle time in seconds after which TCP will start sending
+        // keepalive probes.
+        this.socket.setsockoptVal(IPPROTO_TCP, socket.TcpOptions.TCP_KEEPIDLE, 5);
+
+        // Maximum number of keepalive probes before the connection is declared
+        // dead and dropped.
+        this.socket.setsockoptVal(IPPROTO_TCP, socket.TcpOptions.TCP_KEEPCNT, 3);
+
+        // Time in seconds between keepalive probes.
+        this.socket.setsockoptVal(IPPROTO_TCP, socket.TcpOptions.TCP_KEEPINTVL, 3);
+    }
+
+    /***************************************************************************
+
         Performs the connection shutdown.
 
         This method should not throw.
@@ -1031,6 +1078,31 @@ abstract class ConnectionBase: ISelectClient
 
     abstract protected void getPayloadForSending ( RequestId id,
         void delegate ( in void[][] payload ) send );
+
+    /***************************************************************************
+
+        Requests to send outgoing data buffered by the OS for the socket
+        immediately. By default outgoing data are buffered to the maximum
+        payload of a TCP frame using the Linux TCP_CORK socket option.
+
+        This method is intended to be called right after `getPayloadForSending`
+        has called the `send` delegate.
+
+    ***************************************************************************/
+
+    public void flush ( )
+    {
+        // Flush the OS-maintained (TCP_CORK) socket output buffer. This will
+        // immediately send all data that have been accepted by `sendmsg(2)`.
+        this.sender.flush();
+        // `this.sender` may in addition buffer data that have not been accepted
+        // by `sendmsg` - that is, `send(2)` returned a value less than the
+        // buffer length argument - and wait for `EPOLLOUT` on the socket to
+        // call `sendmsg` again  with the remaining data. Set a flag to flush
+        // the OS-maintained (TCP_CORK) socket output buffer when `sendmsg`
+        // eventually accepted all outstanding data.
+        this.send_loop.flush_requested = true;
+    }
 
     /***************************************************************************
 
