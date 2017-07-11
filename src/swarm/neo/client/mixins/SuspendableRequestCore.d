@@ -812,6 +812,7 @@ public struct SuspendableRequestControllerFiber ( Request, MessageType )
                 payload.add(msg);
             }
         );
+        this.conn.flush();
 
         // Wait for ACK.
         this.request_event_dispatcher.receive(this.fiber,
