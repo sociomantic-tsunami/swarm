@@ -113,6 +113,7 @@ private scope class GetAllImpl_v0
                     payload.addConstant(MessageType.End);
                 }
             );
+            this.outer.conn.flush();
 
             this.outer.request_event_dispatcher.receive(this.fiber,
                 Message(MessageType.Ack));
@@ -157,6 +158,7 @@ private scope class GetAllImpl_v0
                         payload.addConstant(MessageType.Ack);
                     }
                 );
+                this.outer.conn.flush();
 
                 // Carry out the specified control message.
                 with ( MessageType ) switch ( message.type )
@@ -224,6 +226,7 @@ private scope class GetAllImpl_v0
                 payload.addConstant(RequestStatusCode.Started);
             }
         );
+        this.conn.flush();
 
         // Now ready to start sending data from the storage and to handle
         // control messages from the client. Each of these jobs is handled by a

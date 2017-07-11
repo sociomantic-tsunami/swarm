@@ -114,5 +114,6 @@ private scope class GetImpl_v0
                 }
             );
         }
+        ed.flush();
     }
 }
