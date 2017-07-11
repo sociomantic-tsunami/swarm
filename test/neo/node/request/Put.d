@@ -97,5 +97,6 @@ private scope class PutImpl_v0
                 payload.addConstant(RequestStatusCode.Succeeded);
             }
         );
+        ed.flush();
     }
 }

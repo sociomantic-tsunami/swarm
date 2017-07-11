@@ -136,6 +136,7 @@ public struct Get
                             payload.add(context.user_params.args.key);
                         }
                     );
+                    conn.flush();
 
                     // Receive status from node
                     auto status = conn.receiveValue!(StatusCode)();

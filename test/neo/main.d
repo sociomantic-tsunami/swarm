@@ -226,7 +226,7 @@ class Test : Task
 
     /***************************************************************************
 
-        Runs a simple test where three records are written to the node with Put
+        Runs a simple test where records are written to the node with Put
         and then fetched with GetAll. As soon as the first record is received,
         the request is suspended. As soon as the suspension is ACKed by the
         node, the request is resumed.

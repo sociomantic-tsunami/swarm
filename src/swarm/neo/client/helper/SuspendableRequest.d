@@ -602,6 +602,7 @@ struct SuspendableRequest
                     payload.add(control_msg);
                 }
             );
+            this.conn.flush();
 
             if ( !send_interrupted ) // The control message was sent
                 break;
