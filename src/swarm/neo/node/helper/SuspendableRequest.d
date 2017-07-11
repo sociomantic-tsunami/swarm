@@ -176,6 +176,7 @@ public struct SuspendableRequest
                     payload.add(channel_removed_msg);
                 }
             );
+            this.conn.flush();
         }
         while ( send_interrupted );
     }
@@ -478,5 +479,6 @@ public struct SuspendableRequest
                 payload.add(ack);
             }
         );
+        this.conn.flush();
     }
 }
