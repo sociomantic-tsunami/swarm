@@ -28,7 +28,8 @@
 
     Link with -lglib-2.0
 
-    copyright:      Copyright (c) 2016-2017 sociomantic labs GmbH. All rights reserved
+    copyright:
+        Copyright (c) 2016-2017 sociomantic labs GmbH. All rights reserved
 
     License:
         Boost Software License Version 1.0. See LICENSE_BOOST.txt for details.
@@ -194,7 +195,8 @@ class CredentialsFile
         {
             if (!ok)
             {
-                throw new ParseException(msg_base, filepath, line, src_file, src_line);
+                throw new ParseException(msg_base, filepath, line,
+                    src_file, src_line);
             }
         }
 
@@ -261,28 +263,29 @@ class CredentialsFile
         return keys.rehash;
     }
 
-    /*******************************************************************************
+    /***************************************************************************
 
         Specialised exception class containing the file and line where a parsing
         error occurred.
 
-    *******************************************************************************/
+    ***************************************************************************/
 
     static class ParseException: Exception
     {
-        /***************************************************************************
+        /***********************************************************************
 
             Constructor.
 
             Params:
-                msg = basic error message (the registry file and line are appended)
+                msg = basic error message (the registry file and line are
+                    appended)
                 reg_file = the name of the parsed input file
-                reg_file_line = the line in the parsed input file that contains the
-                    error
+                reg_file_line = the line in the parsed input file that contains
+                    the error
                 src_file = name of source file where exception was thrown
                 src_line = line in source file where exception was thrown
 
-        ***************************************************************************/
+        ***********************************************************************/
 
         public this ( cstring msg_base, cstring reg_file, uint reg_file_line,
             istring src_file = __FILE__, typeof(__LINE__) src_line = __LINE__ )
@@ -292,7 +295,7 @@ class CredentialsFile
     }
 }
 
-/*******************************************************************************/
+/******************************************************************************/
 
 version ( UnitTest )
 {
@@ -314,7 +317,8 @@ version ( UnitTest )
 
     ***************************************************************************/
 
-    void registryTest ( istring name, istring file_content, HmacDef.Key[istring] expected )
+    void registryTest ( istring name, istring file_content,
+        HmacDef.Key[istring] expected )
     {
         auto t = new NamedTest(name);
         auto reg = CredentialsFile.parse(file_content, name);
