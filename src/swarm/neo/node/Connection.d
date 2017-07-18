@@ -182,6 +182,8 @@ class Connection: ConnectionBase
 
         this.first_connect_attempt = false;
 
+        this.enableKeepAlive(this.socket);
+
         // If authentication fails the connection is simply disconnected and
         // returned to the pool.
 
