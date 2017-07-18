@@ -41,12 +41,13 @@ abstract class ConnectionBase: ISelectClient
     import ocean.io.select.protocol.generic.ErrnoIOException;
 
     import ocean.sys.socket.AddressIPSocket;
-    import core.sys.posix.netinet.in_: IPPROTO_TCP;
 
     import swarm.neo.util.TreeMap;
     import swarm.neo.protocol.socket.IOStats;
 
     import ocean.transition;
+
+    import core.sys.posix.netinet.in_: SOL_SOCKET, IPPROTO_TCP, SO_KEEPALIVE;
 
     debug ( SwarmConn ) import ocean.io.Stdout;
 
@@ -722,6 +723,7 @@ abstract class ConnectionBase: ISelectClient
         bool no_delay = false )
     {
         this.socket               = socket;
+        this.enableKeepAlive();
         this.epoll                = epoll;
         this.no_delay             = no_delay;
         this.protocol_error_      = new ProtocolError;
@@ -998,6 +1000,34 @@ abstract class ConnectionBase: ISelectClient
     public ProtocolError protocol_error ( )
     {
         return this.protocol_error_;
+    }
+
+    /***************************************************************************
+
+        Sets up TCP keep-alive on the initialised socket.
+
+    ***************************************************************************/
+
+    protected void enableKeepAlive ( )
+    in
+    {
+        assert(this.socket !is null);
+    }
+    body
+    {
+        // Activates TCP's keepalive feature for this socket.
+        this.socket.setsockoptVal(SOL_SOCKET, SO_KEEPALIVE, true);
+
+        // Socket idle time in seconds after which TCP will start sending
+        // keepalive probes.
+        this.socket.setsockoptVal(IPPROTO_TCP, socket.TcpOptions.TCP_KEEPIDLE, 5);
+
+        // Maximum number of keepalive probes before the connection is declared
+        // dead and dropped.
+        this.socket.setsockoptVal(IPPROTO_TCP, socket.TcpOptions.TCP_KEEPCNT, 3);
+
+        // Time in seconds between keepalive probes.
+        this.socket.setsockoptVal(IPPROTO_TCP, socket.TcpOptions.TCP_KEEPINTVL, 3);
     }
 
     /***************************************************************************
