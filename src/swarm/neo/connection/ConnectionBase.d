@@ -40,6 +40,7 @@ abstract class ConnectionBase: ISelectClient
     import ocean.io.select.EpollSelectDispatcher;
     import ocean.io.select.protocol.generic.ErrnoIOException;
 
+    import ocean.sys.ErrnoException;
     import ocean.sys.socket.AddressIPSocket;
 
     import swarm.neo.util.TreeMap;
@@ -1018,18 +1019,30 @@ abstract class ConnectionBase: ISelectClient
     body
     {
         // Activates TCP's keepalive feature for this socket.
-        socket.setsockoptVal(SOL_SOCKET, SO_KEEPALIVE, true);
+        if (socket.setsockoptVal(SOL_SOCKET, SO_KEEPALIVE, true) == -1)
+        {
+            throw (new ErrnoException).useGlobalErrno("Unable to set SO_KEEPALIVE");
+        }
 
         // Socket idle time in seconds after which TCP will start sending
         // keepalive probes.
-        socket.setsockoptVal(IPPROTO_TCP, socket.TcpOptions.TCP_KEEPIDLE, 5);
+        if (socket.setsockoptVal(IPPROTO_TCP, socket.TcpOptions.TCP_KEEPIDLE, 5) == -1)
+        {
+            throw (new ErrnoException).useGlobalErrno("Unable to set TCP_KEEPIDLE");
+        }
 
         // Maximum number of keepalive probes before the connection is declared
         // dead and dropped.
-        socket.setsockoptVal(IPPROTO_TCP, socket.TcpOptions.TCP_KEEPCNT, 3);
+        if (socket.setsockoptVal(IPPROTO_TCP, socket.TcpOptions.TCP_KEEPCNT, 3) == -1)
+        {
+            throw (new ErrnoException).useGlobalErrno("Unable to set TCP_KEEPCNT");
+        }
 
         // Time in seconds between keepalive probes.
-        socket.setsockoptVal(IPPROTO_TCP, socket.TcpOptions.TCP_KEEPINTVL, 3);
+        if (socket.setsockoptVal(IPPROTO_TCP, socket.TcpOptions.TCP_KEEPINTVL, 3) == -1)
+        {
+            throw (new ErrnoException).useGlobalErrno("Unable to set TCP_KEEPINTVL");
+        }
     }
 
     /***************************************************************************
