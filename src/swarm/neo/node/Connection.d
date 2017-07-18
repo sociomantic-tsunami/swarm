@@ -200,6 +200,8 @@ class Connection: ConnectionBase
             this.socket.setsockoptVal(IPPROTO_TCP,
                 socket.TcpOptions.TCP_NODELAY, true);
 
+        this.enableKeepAlive(this.socket);
+
         // If authentication fails the connection is simply disconnected and
         // returned to the pool.
 
