@@ -114,6 +114,50 @@ template ClientCore ( )
         Credentials cred;
         cred.name = auth_name.dup;
         cred.key.content[] = auth_key[];
+        this(cred, conn_notifier, request_resources);
+    }
+
+    /***************************************************************************
+
+        Constructor (private, so that only the client class where this template
+        is mixed-in can construct an instance).
+
+        Params:
+            auth_file = path of file from which to read the name/key of the
+                client, for authorisation
+            conn_notifier = delegate which is called when a connection
+                attempt succeeds or fails (including when a connection is
+                re-established). Of type:
+                void delegate ( IPAddress node_address, Exception e )
+            request_resources = object to acquire resources from
+
+    ***************************************************************************/
+
+    private this ( cstring auth_file, ConnectionNotifier conn_notifier,
+        Object request_resources = null )
+    {
+        auto cred = fromFile(auth_file);
+        this(cred, conn_notifier, request_resources);
+    }
+
+    /***************************************************************************
+
+        Constructor (private, so that only the client class where this template
+        is mixed-in can construct an instance).
+
+        Params:
+            cred = name/key of the client, for authorisation
+            conn_notifier = delegate which is called when a connection
+                attempt succeeds or fails (including when a connection is
+                re-established). Of type:
+                void delegate ( IPAddress node_address, Exception e )
+            request_resources = object to acquire resources from
+
+    ***************************************************************************/
+
+    private this ( Credentials cred, ConnectionNotifier conn_notifier,
+        Object request_resources = null )
+    {
         this.connections = new ConnectionSet(cred, this.outer.epoll,
             conn_notifier);
         this.request_resources = request_resources;
