@@ -15,6 +15,7 @@
 module test.neo.client.NotifierTypes;
 
 public import swarm.neo.client.NotifierTypes;
+import swarm.neo.util.Formatter;
 
 /*******************************************************************************
 
@@ -47,12 +48,7 @@ public struct RequestKeyDataInfo
 
     public void toString ( void delegate ( cstring chunk ) sink )
     {
-        Formatter.sformat(
-            ( cstring chunk )
-            {
-                sink(chunk);
-                return chunk.length;
-            },
+            sformat(sink,
             "Request #{} provided the key {} and the value {}",
             this.request_id, this.key, this.value);
     }

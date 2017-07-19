@@ -15,7 +15,7 @@ module swarm.neo.client.requests.NotificationFormatter;
 import ocean.transition;
 import ocean.core.SmartUnion;
 import ocean.core.Traits : TemplateInstanceArgs, hasMethod;
-import Formatter = ocean.text.convert.Formatter;
+import swarm.neo.util.Formatter;
 
 import swarm.neo.client.NotifierTypes;
 
@@ -70,13 +70,7 @@ public void formatNotification ( SU ) ( SU notification, Sink sink )
 {
     static assert(is(TemplateInstanceArgs!(SmartUnion, SU)));
 
-    Formatter.sformat(
-        ( cstring chunk )
-        {
-            sink(chunk);
-            return chunk.length;
-        },
-        "<{}>", notification.active_name
+        sformat(sink, "<{}>", notification.active_name
     );
 
     .format_sink = sink;
