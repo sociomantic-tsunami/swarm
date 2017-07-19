@@ -11,14 +11,16 @@
 
 module swarm.neo.authentication.ClientCredentials;
 
+import ocean.transition;
+
 /// ditto
 public struct Credentials
 {
     import swarm.neo.authentication.HmacDef: Key;
     import CredDef = swarm.neo.authentication.Credentials;
+    import swarm.neo.authentication.CredentialsFile;
 
-
-    import ocean.transition;
+    import ocean.core.Enforce;
 
     /***************************************************************************
 
@@ -66,6 +68,33 @@ public struct Credentials
 
     /***************************************************************************
 
+        Sets the name and key fields from the credentials found in the specified
+        file.
+
+        Params:
+            filepath = path of file to read credentials from
+
+        Throws:
+            - if the specified file contains > 1 name/key pair
+            - upon file parsing error
+              (see swarm.neo.authentication.CredentialsFile)
+
+    ***************************************************************************/
+
+    public void setFromFile ( cstring filepath )
+    {
+        auto credentials = parse(filepath);
+        enforce(credentials.length == 1,
+            "Client credentials file must contain only a single entry");
+        foreach ( name, key; credentials )
+        {
+            this.name = name.dup;
+            this.key = key;
+        }
+    }
+
+    /***************************************************************************
+
         Scans name for non-graph characters.
 
         Params:
@@ -79,4 +108,29 @@ public struct Credentials
 
     deprecated("Call validateNameCharacters in swarm.neo.authentication.Credentials")
     public alias CredDef.validateNameCharacters validateNameCharacters;
+}
+
+/*******************************************************************************
+
+    Creates a Credentials instance from the credentials found in the specified
+    file.
+
+    Params:
+        filepath = path of file to read credentials from
+
+    Returns:
+        Credentials instance with name and key read from file
+
+    Throws:
+        - if the specified file contains > 1 name/key pair
+        - upon file parsing error
+          (see swarm.neo.authentication.CredentialsFile)
+
+*******************************************************************************/
+
+public Credentials fromFile ( cstring filepath )
+{
+    Credentials credentials;
+    credentials.setFromFile(filepath);
+    return credentials;
 }
