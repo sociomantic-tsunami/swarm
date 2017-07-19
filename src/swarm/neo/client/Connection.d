@@ -27,7 +27,7 @@ public final class Connection: ConnectionBase
 
     import swarm.neo.client.ClientSocket;
     import swarm.neo.protocol.connect.ClientConnect;
-    import swarm.neo.authentication.Credentials;
+    import swarm.neo.authentication.ClientCredentials;
     import swarm.neo.IPAddress;
     import swarm.neo.util.TreeMap;
     import swarm.neo.client.RetryTimer;

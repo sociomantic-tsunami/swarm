@@ -22,7 +22,7 @@ class NodeConnect
 
     import swarm.neo.authentication.HmacAuthCode;
     import HmacDef = swarm.neo.authentication.HmacDef;
-    import swarm.neo.authentication.Credentials;
+    import Credentials = swarm.neo.authentication.Credentials;
     import swarm.neo.util.MessageFiber;
 
     import ocean.io.select.EpollSelectDispatcher;
