@@ -34,7 +34,7 @@ template ClientCore ( )
 
     import swarm.neo.protocol.Message: RequestId;
 
-    import swarm.neo.authentication.Credentials;
+    import swarm.neo.authentication.ClientCredentials;
     import swarm.neo.authentication.HmacDef : key_length;
 
     import swarm.client.helper.NodesConfigReader;

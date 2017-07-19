@@ -33,7 +33,7 @@ public final class ConnectionSet : RequestOnConn.IConnectionGetter
     import swarm.neo.client.RequestSet;
     import swarm.neo.client.NotifierTypes;
     import swarm.neo.IPAddress;
-    import swarm.neo.authentication.Credentials;
+    import swarm.neo.authentication.ClientCredentials;
     import ocean.io.select.EpollSelectDispatcher;
 
     import ocean.util.container.pool.ObjectPool;

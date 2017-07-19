@@ -556,7 +556,7 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
 {
     import ocean.net.server.unix.UnixListener;
     import ocean.net.server.unix.UnixConnectionHandler;
-    import swarm.neo.authentication.CredentialsFile;
+    import swarm.neo.authentication.NodeCredentials;
     import swarm.neo.authentication.HmacDef : Key;
 
     /***************************************************************************
@@ -675,7 +675,7 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
 
     ***************************************************************************/
 
-    private CredentialsFile credentials_file;
+    private Credentials credentials_file;
 
     /***************************************************************************
 
@@ -710,7 +710,7 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
         {
             assert(options.credentials_map is null);
             this.credentials_file =
-                new CredentialsFile(options.credentials_filename);
+                new Credentials(options.credentials_filename);
             credentials = this.credentials_file.credentials;
         }
         else

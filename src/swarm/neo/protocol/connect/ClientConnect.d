@@ -20,7 +20,7 @@ class ClientConnect
     import swarm.neo.protocol.socket.MessageSender;
     import swarm.neo.protocol.ProtocolError;
     import swarm.neo.authentication.HmacAuthCode;
-    import swarm.neo.authentication.Credentials;
+    import swarm.neo.authentication.ClientCredentials;
     import swarm.neo.authentication.HmacDef;
     import swarm.neo.IPAddress;
     import swarm.neo.util.MessageFiber;
