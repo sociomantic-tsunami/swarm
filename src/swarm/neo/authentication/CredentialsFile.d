@@ -1,6 +1,6 @@
 /*******************************************************************************
 
-    Reads the credentials, a mapping from client names to their keys, from a
+    Reads the credentials, a mapping from auth names to their keys, from a
     file.
 
     The file is expected to have the following format:
@@ -38,260 +38,206 @@
 
 module swarm.neo.authentication.CredentialsFile;
 
-/*******************************************************************************
-
-    Imports
-
-*******************************************************************************/
+import NodeCred = swarm.neo.authentication.NodeCredentials;
+import CredDef = swarm.neo.authentication.Credentials;
+import HmacDef = swarm.neo.authentication.HmacDef;
 
 import ocean.transition;
+import ocean.io.device.File;
+import ocean.net.util.QueryParams;
+import ocean.text.convert.Format;
 
 extern (C) private int g_ascii_xdigit_value ( char c ); // glib-2.0
 
-/******************************************************************************/
+deprecated("Replace imports of CredentialsFile with Credentials in "
+    "swarm.neo.authentication.NodeCredentials")
+public alias NodeCred.Credentials CredentialsFile;
 
-class CredentialsFile
+/***************************************************************************
+
+    Updates the credentials from the file, and changes this instance to
+    refer to the updated credentials on success. On error this instance will
+    keep referring to the same credentials.
+
+    Params:
+        filepath = the path of the file containing content
+
+    Returns:
+        the authorisation keys by name
+
+    Throws:
+        - IOException on file I/O error.
+        - ParseException on invalid file size or content; that is, if
+          - the file size is greater than Credentials.LengthLimit.File,
+          - a name
+            - is empty (zero length),
+            - is longer than Credentials.LengthLimit.File,
+            - contains non-graph characters,
+          - a key
+            - is empty (zero length),
+            - is longer than Credentials.LengthLimit.File * 2,
+            - has an odd (not even) length,
+            - contains non-hexadecimal digits.
+
+***************************************************************************/
+
+public HmacDef.Key[istring] parse ( cstring filepath )
 {
-    import swarm.neo.authentication.Credentials;
-    import HmacDef = swarm.neo.authentication.HmacDef;
+    scope file = new File(filepath, File.ReadExisting);
+    scope ( exit ) file.close;
 
-    import ocean.io.device.File;
+    size_t file_length = file.length;
 
-    import ocean.net.util.QueryParams;
+    if (file_length > CredDef.LengthLimit.File)
+    {
+        throw new CredentialsParseException(
+            Format("Key registry file too large: {} bytes", file_length),
+            filepath, 0);
+    }
 
-    import ocean.text.convert.Format;
+    auto file_content = new char[file_length];
+    file.read(file_content);
+    return parseContent(assumeUnique(file_content));
+}
 
-    /***************************************************************************
+/***************************************************************************
 
-        The credentials registry. A pointer to it can be obtained by
-        `credentials()`, it changes when `update()` is called.
+    Parses authorisation names & keys from content.
 
-    ***************************************************************************/
+    Params:
+        content  = input content string
+        filepath = the path of the file containing content, for error
+                    messages
 
-    private HmacDef.Key[istring] credentials_;
+    Returns:
+        the authorisation keys by name
 
-    /***************************************************************************
+    Throws:
+        - ParseException on invalid file content; that is, if
+          - a name
+            - is empty (zero length),
+            - is longer than Credentials.LengthLimit.File,
+            - contains non-graph characters,
+          - a key
+            - has a length different from Credentials.key.length * 2,
+            - contains non-hexadecimal digits.
 
-        The credentials file path.
+***************************************************************************/
 
-    ***************************************************************************/
+private HmacDef.Key[istring] parseContent ( istring content,
+    cstring filepath = null )
+{
+    int line = 0; // The current line in the input file.
 
-    private istring filepath;
+    /***********************************************************************
 
-    /***************************************************************************
+        Throws ParseException if ok is false, formatting the exception
+        message using msg_base the location in the parsed input file where
+        the error was found.
 
-        Constructor, reads the credentials from the file (by calling
-        `update()`).
+    ***********************************************************************/
+
+    void enforce ( bool ok, cstring msg_base, istring src_file = __FILE__,
+        typeof(__LINE__) src_line = __LINE__ )
+    {
+        if (!ok)
+        {
+            throw new CredentialsParseException(msg_base, filepath, line,
+                src_file, src_line);
+        }
+    }
+
+    scope parser = new QueryParams('\n', ':');
+
+    HmacDef.Key[istring] keys;
+
+    foreach (name, hex_key; parser.set(content))
+    {
+        debug ( SwarmConn )
+            Stdout.formatln("Adding credentials: '{}:{}'", name, hex_key);
+
+        line++;
+
+        enforce(!!name.length, "Empty name");
+        enforce(name.length <= CredDef.LengthLimit.Name, "Name too long");
+        enforce(hex_key.length == HmacDef.Key.length * 2,
+                Format("Invalid key length {} (should be {})", hex_key.length,
+                HmacDef.Key.length * 2));
+
+        if (auto x = CredDef.validateNameCharacters(name))
+        {
+            enforce(false, Format("Invalid name letter at position {}",
+                                  name.length - x));
+        }
+
+        size_t i = 0;
+
+        HmacDef.Key key;
+
+        foreach (ref b; key.content)
+        {
+            ubyte hexToByte ( char c )
+            {
+                auto n = g_ascii_xdigit_value(c);
+                enforce(n >= 0,
+                        Format("Invalid key letter at position {}", i));
+                return cast(ubyte)n;
+            }
+
+            b = cast(ubyte)(hexToByte(hex_key[i++]) << 4);
+            b |= hexToByte(hex_key[i++]);
+        }
+
+        assert(i == hex_key.length);
+
+        /*
+         * name is a cstring slice to the istring content so we don't need
+         * to idup it in order to use it as an associative array key. Assert
+         * the slice is correct, and cast it.
+         * Note that determining that name is a slice to content via pointer
+         * comparison relies on a flat memory model. In general comparing
+         * pointers that are not known to point to the same object is
+         * undefined behaviour according to the C specification which D
+         * inherits in this case. However, there is no other way, and x86-64
+         * has a flat memory model.
+         */
+        static assert(is(typeof(content) == istring));
+        assert(content.ptr <= name.ptr &&
+               name.ptr + name.length <= content.ptr + content.length);
+        keys[cast(istring)name] = key;
+    }
+
+    return keys.rehash;
+}
+
+/***************************************************************************
+
+    Specialised exception class containing the file and line where a parsing
+    error occurred.
+
+***************************************************************************/
+
+public class CredentialsParseException: Exception
+{
+    /***********************************************************************
+
+        Constructor.
 
         Params:
-            filepath = the credentials file path
+            msg = basic error message (the registry file and line are
+                appended)
+            reg_file = the name of the parsed input file
+            reg_file_line = the line in the parsed input file that contains
+                the error
+            src_file = name of source file where exception was thrown
+            src_line = line in source file where exception was thrown
 
-        Throws:
-            See `update()`.
+    ***********************************************************************/
 
-    ***************************************************************************/
-
-    public this ( istring filepath )
+    public this ( cstring msg_base, cstring reg_file, uint reg_file_line,
+        istring src_file = __FILE__, typeof(__LINE__) src_line = __LINE__ )
     {
-        this.filepath = filepath;
-        this.update();
-    }
-
-    /***************************************************************************
-
-        Obtains a pointer to the credentials, which change if `update` is
-        called.
-
-        Returns:
-            a pointer to the credentials.
-
-    ***************************************************************************/
-
-    public Const!(HmacDef.Key[istring])* credentials ( )
-    {
-        return &this.credentials_;
-    }
-
-    /***************************************************************************
-
-        Updates the credentials from the file, and changes this instance to
-        refer to the updated credentials on success. On error this instance will
-        keep referring to the same credentials.
-
-        Throws:
-            - IOException on file I/O error.
-            - ParseException on invalid file size or content; that is, if
-              - the file size is greater than Credentials.LengthLimit.File,
-              - a name
-                - is empty (zero length),
-                - is longer than Credentials.LengthLimit.File,
-                - contains non-graph characters,
-              - a key
-                - is empty (zero length),
-                - is longer than Credentials.LengthLimit.File * 2,
-                - has an odd (not even) length,
-                - contains non-hexadecimal digits.
-
-    ***************************************************************************/
-
-    public void update ( )
-    {
-        scope file = new File(filepath, File.ReadExisting);
-        scope ( exit ) file.close;
-
-        size_t file_length = file.length;
-
-        if (file_length > Credentials.LengthLimit.File)
-        {
-            throw new ParseException(
-                Format("Key registry file too large: {} bytes", file_length),
-                filepath, 0);
-        }
-
-        auto file_content = new char[file_length];
-        file.read(file_content);
-        this.credentials_ = this.parse(assumeUnique(file_content));
-    }
-
-    /***************************************************************************
-
-        Parses authorisation names & keys from content.
-
-        Params:
-            content  = input content string
-            filepath = the path of the file containing content, for error
-                        messages
-
-        Returns:
-            the authorisation keys by name
-
-        Throws:
-            - ParseException on invalid file content; that is, if
-              - a name
-                - is empty (zero length),
-                - is longer than Credentials.LengthLimit.File,
-                - contains non-graph characters,
-              - a key
-                - has a length different from Credentials.key.length * 2,
-                - contains non-hexadecimal digits.
-
-    ***************************************************************************/
-
-    private static HmacDef.Key[istring] parse ( istring content,
-                                                cstring filepath = null )
-    {
-        int line = 0; // The current line in the input file.
-
-        /***********************************************************************
-
-            Throws ParseException if ok is false, formatting the exception
-            message using msg_base the location in the parsed input file where
-            the error was found.
-
-        ***********************************************************************/
-
-        void enforce ( bool ok, cstring msg_base, istring src_file = __FILE__,
-            typeof(__LINE__) src_line = __LINE__ )
-        {
-            if (!ok)
-            {
-                throw new ParseException(msg_base, filepath, line,
-                    src_file, src_line);
-            }
-        }
-
-        scope parser = new QueryParams('\n', ':');
-
-        HmacDef.Key[istring] keys;
-
-        foreach (name, hex_key; parser.set(content))
-        {
-            debug ( SwarmConn )
-                Stdout.formatln("Adding credentials: '{}:{}'", name, hex_key);
-
-            line++;
-
-            enforce(!!name.length, "Empty name");
-            enforce(name.length <= Credentials.LengthLimit.Name, "Name too long");
-            enforce(hex_key.length == Credentials.key.length * 2,
-                    Format("Invalid key length {} (should be {})", hex_key.length,
-                    Credentials.key.length * 2));
-
-            if (auto x = Credentials.validateNameCharacters(name))
-            {
-                enforce(false, Format("Invalid name letter at position {}",
-                                      name.length - x));
-            }
-
-            size_t i = 0;
-
-            HmacDef.Key key;
-
-            foreach (ref b; key.content)
-            {
-                ubyte hexToByte ( char c )
-                {
-                    auto n = g_ascii_xdigit_value(c);
-                    enforce(n >= 0,
-                            Format("Invalid key letter at position {}", i));
-                    return cast(ubyte)n;
-                }
-
-                b = cast(ubyte)(hexToByte(hex_key[i++]) << 4);
-                b |= hexToByte(hex_key[i++]);
-            }
-
-            assert(i == hex_key.length);
-
-            /*
-             * name is a cstring slice to the istring content so we don't need
-             * to idup it in order to use it as an associative array key. Assert
-             * the slice is correct, and cast it.
-             * Note that determining that name is a slice to content via pointer
-             * comparison relies on a flat memory model. In general comparing
-             * pointers that are not known to point to the same object is
-             * undefined behaviour according to the C specification which D
-             * inherits in this case. However, there is no other way, and x86-64
-             * has a flat memory model.
-             */
-            static assert(is(typeof(content) == istring));
-            assert(content.ptr <= name.ptr &&
-                   name.ptr + name.length <= content.ptr + content.length);
-            keys[cast(istring)name] = key;
-        }
-
-        return keys.rehash;
-    }
-
-    /***************************************************************************
-
-        Specialised exception class containing the file and line where a parsing
-        error occurred.
-
-    ***************************************************************************/
-
-    static class ParseException: Exception
-    {
-        /***********************************************************************
-
-            Constructor.
-
-            Params:
-                msg = basic error message (the registry file and line are
-                    appended)
-                reg_file = the name of the parsed input file
-                reg_file_line = the line in the parsed input file that contains
-                    the error
-                src_file = name of source file where exception was thrown
-                src_line = line in source file where exception was thrown
-
-        ***********************************************************************/
-
-        public this ( cstring msg_base, cstring reg_file, uint reg_file_line,
-            istring src_file = __FILE__, typeof(__LINE__) src_line = __LINE__ )
-        {
-            super(Format("{} in registry file {} at line {}", msg_base, file, reg_file_line));
-        }
+        super(Format("{} in registry file {} at line {}", msg_base, file, reg_file_line));
     }
 }
 
@@ -299,14 +245,12 @@ class CredentialsFile
 
 version ( UnitTest )
 {
-    import swarm.neo.authentication.Credentials;
-    import HmacDef = swarm.neo.authentication.HmacDef;
     import ocean.core.Test;
     import ocean.core.ByteSwap;
 
     /***************************************************************************
 
-        Tests the functioning of parse().
+        Tests the functioning of parseContent().
         Params:
             name = name of test
             file_content = content of authorisation registration file
@@ -321,7 +265,7 @@ version ( UnitTest )
         HmacDef.Key[istring] expected )
     {
         auto t = new NamedTest(name);
-        auto reg = CredentialsFile.parse(file_content, name);
+        auto reg = parseContent(file_content, name);
 
         t.test!("==")(reg.keys.length, expected.length);
 
