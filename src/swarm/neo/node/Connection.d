@@ -77,19 +77,6 @@ class Connection: ConnectionBase
 
     /***************************************************************************
 
-        Flag controlling whether Nagle's algorithm is disabled (true) or left
-        enabled (false) on the underlying socket.
-
-        (The no-delay option is not generally suited to live servers, where
-        efficient packing of packets is desired, but can be useful for
-        low-bandwidth test setups.)
-
-    ***************************************************************************/
-
-    private bool no_delay;
-
-    /***************************************************************************
-
         Constructor.
 
         Params:
@@ -104,10 +91,10 @@ class Connection: ConnectionBase
                            multiple instances of this class
             task_resumer = global resumer to resume yielded `RequestOnConn`s
             no_delay = if false, data written to the socket will be buffered and
-                sent according to Nagle's algorithm. If true, no buffering will
-                occur. (The no-delay option is not generally suited to live
-                servers, where efficient packing of packets is desired, but can
-                be useful for low-bandwidth test setups.)
+                sent according to Nagle's algorithm and TCP Cork. If true, no
+                buffering will occur. (The no-delay option is not generally
+                suited to live servers, where efficient packing of packets is
+                desired, but can be useful for low-bandwidth test setups.)
 
     ***************************************************************************/
 
@@ -117,11 +104,10 @@ class Connection: ConnectionBase
                   void delegate ( ) when_closed, RequestPool request_pool,
                   YieldedRequestOnConns task_resumer, bool no_delay = false )
     {
-        super(socket, epoll);
+        super(socket, epoll, no_delay);
         this.request_set = new RequestSet(this, request_pool, task_resumer, request_handler);
         this.conn_init = new NodeConnect(credentials);
         this.when_closed = when_closed;
-        this.no_delay = no_delay;
     }
 
     /***************************************************************************
@@ -195,10 +181,6 @@ class Connection: ConnectionBase
             return false;
 
         this.first_connect_attempt = false;
-
-        if ( this.no_delay )
-            this.socket.setsockoptVal(IPPROTO_TCP,
-                socket.TcpOptions.TCP_NODELAY, true);
 
         this.enableKeepAlive(this.socket);
 
