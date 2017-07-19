@@ -96,7 +96,7 @@ public struct AllNodesRequest ( Request, Connector, Disconnected, Initialiser,
     Handler )
 {
     import swarm.neo.client.RequestOnConn;
-    import ocean.io.select.protocol.generic.ErrnoIOException : IOError;
+    import ocean.io.select.selector.EpollException;
 
     /// Policy object for handling connection establishment.
     private Connector connector;
@@ -142,7 +142,7 @@ public struct AllNodesRequest ( Request, Connector, Disconnected, Initialiser,
             }
             // Only retry in the case of a connection error. Other errors
             // indicate internal problems and should not be retried.
-            catch ( IOError e )
+            catch ( EpollException e )
             {
                 this.disconnected(e);
                 reconnect = true;
