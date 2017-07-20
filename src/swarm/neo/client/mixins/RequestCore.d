@@ -119,7 +119,7 @@ public template RequestCore ( RequestType request_type_, ubyte request_code,
     import ocean.util.serialize.contiguous.Contiguous;
 
     import swarm.neo.request.Command;
-    import swarm.neo.IPAddress;
+    import swarm.neo.AddrPort;
     import swarm.neo.client.NotifierTypes;
 
     /***************************************************************************
@@ -337,7 +337,7 @@ public template RequestCore ( RequestType request_type_, ubyte request_code,
     ***************************************************************************/
 
     private static bool handleGlobalStatusCodes ( StatusCode status,
-        Context* context, IPAddress remote_address )
+        Context* context, AddrPort remote_address )
     {
         switch ( status )
         {

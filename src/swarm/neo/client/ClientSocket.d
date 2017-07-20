@@ -16,7 +16,7 @@ module swarm.neo.client.ClientSocket;
 
 public class ClientSocket
 {
-    import swarm.neo.IPAddress;
+    import swarm.neo.AddrPort;
 
     import ocean.sys.socket.AddressIPSocket;
     import ocean.io.select.protocol.generic.ErrnoIOException: SocketError;
@@ -89,7 +89,7 @@ public class ClientSocket
 
     ***************************************************************************/
 
-    public bool connect ( IPAddress node )
+    public bool connect ( AddrPort node )
     {
         if (this.socket_.fd >= 0)
         {

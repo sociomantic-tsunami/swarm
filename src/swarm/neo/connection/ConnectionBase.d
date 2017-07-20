@@ -22,7 +22,7 @@ import ocean.io.select.client.model.ISelectClient;
 
 abstract class ConnectionBase: ISelectClient
 {
-    import swarm.neo.IPAddress;
+    import swarm.neo.AddrPort;
 
     import swarm.neo.util.TreeQueue;
 
@@ -737,14 +737,14 @@ abstract class ConnectionBase: ISelectClient
     /***************************************************************************
 
         Returns:
-            the address of the remote currently connected to or IPAddress.init
+            the address of the remote currently connected to or AddrPort.init
             (zero address & port) if currently not connected.
 
     ***************************************************************************/
 
-    public IPAddress remote_address ( )
+    public AddrPort remote_address ( )
     {
-        IPAddress client_address;
+        AddrPort client_address;
         return *client_address.set(this.socket.in_addr);
     }
 

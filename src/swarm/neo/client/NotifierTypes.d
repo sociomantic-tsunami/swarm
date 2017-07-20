@@ -28,10 +28,10 @@ import swarm.neo.util.Formatter;
 
 public struct NodeInfo
 {
-    import swarm.neo.IPAddress;
+    import swarm.neo.AddrPort;
 
     /// Address of the remote node for which the notification is occurring.
-    IPAddress node_addr;
+    AddrPort node_addr;
 
     /***************************************************************************
 
@@ -58,14 +58,14 @@ public struct NodeInfo
 
 public struct RequestNodeInfo
 {
-    import swarm.neo.IPAddress;
+    import swarm.neo.AddrPort;
     import swarm.neo.protocol.Message : RequestId;
 
     /// ID of the request for which the notification is occurring.
     RequestId request_id;
 
     /// Address of the remote node for which the notification is occurring.
-    IPAddress node_addr;
+    AddrPort node_addr;
 
     /***************************************************************************
 
@@ -93,14 +93,14 @@ public struct RequestNodeInfo
 
 public struct RequestNodeUnsupportedInfo
 {
-    import swarm.neo.IPAddress;
+    import swarm.neo.AddrPort;
     import swarm.neo.protocol.Message : RequestId;
 
     /// ID of the request for which the notification is occurring.
     RequestId request_id;
 
     /// Address of the remote node for which the notification is occurring.
-    IPAddress node_addr;
+    AddrPort node_addr;
 
     enum Type
     {
@@ -159,10 +159,10 @@ public struct RequestNodeUnsupportedInfo
 
 public struct NodeExceptionInfo
 {
-    import swarm.neo.IPAddress;
+    import swarm.neo.AddrPort;
 
     /// Address of the remote node for which the notification is occurring.
-    IPAddress node_addr;
+    AddrPort node_addr;
 
     /// Exception associated with notification.
     Exception e;
@@ -204,14 +204,14 @@ public struct NodeExceptionInfo
 
 public struct RequestNodeExceptionInfo
 {
-    import swarm.neo.IPAddress;
+    import swarm.neo.AddrPort;
     import swarm.neo.protocol.Message : RequestId;
 
     /// ID of the request for which the notification is occurring.
     RequestId request_id;
 
     /// Address of the remote node for which the notification is occurring.
-    IPAddress node_addr;
+    AddrPort node_addr;
 
     /// Exception associated with notification.
     Exception e;

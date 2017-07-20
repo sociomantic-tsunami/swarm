@@ -23,7 +23,7 @@ public struct RequestOnConnSet
 {
     import swarm.neo.client.RequestOnConn;
     import swarm.neo.util.TreeMap;
-    import swarm.neo.IPAddress;
+    import swarm.neo.AddrPort;
 
     /***************************************************************************
 
@@ -134,7 +134,7 @@ public struct RequestOnConnSet
 
     ***************************************************************************/
 
-    public RequestOnConn addMulti ( IPAddress remote_address,
+    public RequestOnConn addMulti ( AddrPort remote_address,
         RequestOnConn request_on_conn )
     {
         this.is_all_nodes = true;

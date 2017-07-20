@@ -22,7 +22,7 @@ class ClientConnect
     import swarm.neo.authentication.HmacAuthCode;
     import swarm.neo.authentication.ClientCredentials;
     import swarm.neo.authentication.HmacDef;
-    import swarm.neo.IPAddress;
+    import swarm.neo.AddrPort;
     import swarm.neo.util.MessageFiber;
 
     import ocean.io.select.EpollSelectDispatcher;
@@ -100,7 +100,7 @@ class ClientConnect
     ***************************************************************************/
 
     public void connect (
-        ClientSocket socket, IPAddress node_address, MessageFiber fiber,
+        ClientSocket socket, AddrPort node_address, MessageFiber fiber,
         EpollSelectDispatcher epoll, MessageReceiver receiver,
         MessageSender sender, ProtocolError protocol_e
     )
@@ -189,7 +189,7 @@ class ClientConnect
     ***************************************************************************/
 
     private void authenticate ( ConnectProtocol protocol,
-        IPAddress node_address )
+        AddrPort node_address )
     {
         debug ( SwarmConn )
             Stdout.formatln("{}:{}: ClientConnect.autenticate()",

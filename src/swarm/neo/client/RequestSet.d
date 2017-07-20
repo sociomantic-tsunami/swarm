@@ -41,7 +41,7 @@ public final class RequestSet: IRequestSet
     import swarm.neo.client.RequestHandlers;
     import swarm.neo.util.TreeMap;
     import ocean.transition;
-    import swarm.neo.IPAddress;
+    import swarm.neo.AddrPort;
     import swarm.neo.protocol.Message: RequestId;
 
     /***************************************************************************
@@ -417,7 +417,7 @@ public final class RequestSet: IRequestSet
 
         ***********************************************************************/
 
-        public RequestOnConn getHandler ( IPAddress node_address )
+        public RequestOnConn getHandler ( AddrPort node_address )
         {
             if (this.request_on_conns.is_all_nodes)
             {
@@ -600,7 +600,7 @@ public final class RequestSet: IRequestSet
 
         ***********************************************************************/
 
-        public Connection getConnectionForSingleNode ( IPAddress node_address )
+        public Connection getConnectionForSingleNode ( AddrPort node_address )
         in
         {
             assert(!this.request_on_conns.is_all_nodes);

@@ -117,7 +117,7 @@ public struct Put
         // In a real client, you'd have to have some way for a request to decide
         // which node to operate on. In this simple example, we just hard-code
         // the node's address/port.
-        IPAddress node;
+        AddrPort node;
         node.setAddress("127.0.0.1");
         node.port = 10_000;
 
