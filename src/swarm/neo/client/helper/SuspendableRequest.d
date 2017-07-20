@@ -37,9 +37,11 @@
 
 *******************************************************************************/
 
-module swarm.neo.client.helper.SuspendableRequest;
+deprecated module swarm.neo.client.helper.SuspendableRequest;
 
 /// ditto
+deprecated("Adapt your request to use RequestEventDispatcher and multiple fibers "
+    "instead. See swarm.neo.client.mixins.SuspendableRequestCore")
 struct SuspendableRequest
 {
     import ocean.transition;
