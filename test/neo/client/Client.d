@@ -455,6 +455,7 @@ public class Client
         auto auth_name = "dummy";
         ubyte[] auth_key = Key.init.content;
         this.neo = new Neo(auth_name, auth_key, this.conn_notifier);
+        this.neo.enableSocketNoDelay();
         this.neo.addNode(addr, port);
 
         this.blocking = new Blocking;
