@@ -27,7 +27,7 @@ module swarm.node.model.NeoNode;
 import ocean.transition;
 
 import swarm.Const : NodeItem;
-import swarm.neo.IPAddress;
+import swarm.neo.AddrPort;
 
 import swarm.node.model.INode;
 import swarm.node.model.INodeInfo;
@@ -158,11 +158,11 @@ public abstract class INodeBase : INode, INodeInfo
 
     /***************************************************************************
 
-        IPAddress that Neo's listener is binded to.
+        AddrPort that Neo's listener is binded to.
 
     ***************************************************************************/
 
-    private IPAddress neo_address_;
+    private AddrPort neo_address_;
 
     /***************************************************************************
 
@@ -485,7 +485,7 @@ public abstract class INodeBase : INode, INodeInfo
 
     ***************************************************************************/
 
-    public IPAddress neo_address ( )
+    public AddrPort neo_address ( )
     {
         return this.neo_address_;
     }

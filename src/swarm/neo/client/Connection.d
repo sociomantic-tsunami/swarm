@@ -28,7 +28,7 @@ public final class Connection: ConnectionBase
     import swarm.neo.client.ClientSocket;
     import swarm.neo.protocol.connect.ClientConnect;
     import swarm.neo.authentication.ClientCredentials;
-    import swarm.neo.IPAddress;
+    import swarm.neo.AddrPort;
     import swarm.neo.util.TreeMap;
     import swarm.neo.client.RetryTimer;
 
@@ -121,7 +121,7 @@ public final class Connection: ConnectionBase
 
     ***************************************************************************/
 
-    private IPAddress node_address;
+    private AddrPort node_address;
 
     /***************************************************************************
 
@@ -261,7 +261,7 @@ public final class Connection: ConnectionBase
 
     ***************************************************************************/
 
-    public Status start ( IPAddress node_address, StartupNotifier startup_notifier )
+    public Status start ( AddrPort node_address, StartupNotifier startup_notifier )
     {
         debug ( SwarmConn )
         {

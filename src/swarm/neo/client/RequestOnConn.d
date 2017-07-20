@@ -39,7 +39,7 @@ import swarm.neo.client.IRequestSet;
 
 public class RequestOnConn: RequestOnConnBase, IRequestOnConn
 {
-    import swarm.neo.IPAddress;
+    import swarm.neo.AddrPort;
     import swarm.neo.client.RequestHandlers;
     import swarm.neo.client.Connection;
     import ocean.transition;
@@ -64,7 +64,7 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
 
     public interface IConnectionGetter
     {
-        Connection get ( IPAddress );
+        Connection get ( AddrPort );
         int iterateRoundRobin ( int delegate ( Connection conn ) dg );
     }
 
@@ -629,7 +629,7 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
 
     ***************************************************************************/
 
-    public bool connectedTo ( IPAddress node_address )
+    public bool connectedTo ( AddrPort node_address )
     {
         return this.connection
             ? this.connection.remote_address == node_address
@@ -695,7 +695,7 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
 
     ***************************************************************************/
 
-    private bool useNode ( IPAddress node_address,
+    private bool useNode ( AddrPort node_address,
         void delegate ( EventDispatcher ed ) dg )
     {
         assert(this.connection is null,

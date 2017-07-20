@@ -27,7 +27,7 @@ module swarm.neo.client.RequestHandlers;
 
 *******************************************************************************/
 
-import swarm.neo.IPAddress;
+import swarm.neo.AddrPort;
 import swarm.neo.client.RequestOnConn;
 
 import ocean.core.SmartUnion;
@@ -83,7 +83,7 @@ public alias void function ( IRoundRobinConnIterator rr,
 
 *******************************************************************************/
 
-public alias bool delegate ( IPAddress node_address,
+public alias bool delegate ( AddrPort node_address,
     void delegate ( RequestOnConn.EventDispatcher ed ) dg ) UseNodeDg;
 
 /*******************************************************************************

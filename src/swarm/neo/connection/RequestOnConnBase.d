@@ -225,7 +225,7 @@ abstract class RequestOnConnBase
 
     public class EventDispatcher
     {
-        import swarm.neo.IPAddress;
+        import swarm.neo.AddrPort;
         import swarm.neo.protocol.MessageParser;
         import ocean.core.Traits: hasIndirections, StripEnum;
         import ocean.core.SmartUnion;
@@ -522,7 +522,7 @@ abstract class RequestOnConnBase
 
         ***********************************************************************/
 
-        public IPAddress remote_address ( )
+        public AddrPort remote_address ( )
         {
             return this.outer.connection.remote_address;
         }

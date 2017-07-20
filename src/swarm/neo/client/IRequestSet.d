@@ -47,8 +47,8 @@ interface IRequest
         void[] context_blob, IRequestWorkingData working_data_iter )
         FinishedNotifier;
 
-    import swarm.neo.IPAddress;
-    IRequestOnConn getHandler ( IPAddress node_address );
+    import swarm.neo.AddrPort;
+    IRequestOnConn getHandler ( AddrPort node_address );
 }
 
 /*******************************************************************************
@@ -92,6 +92,6 @@ interface IRequestController
 public interface IRequestWorkingData
 {
     int opApply (
-        int delegate ( /*ref IPAddress node_address,*/
+        int delegate ( /*ref AddrPort node_address,*/
             ref Const!(void)[] working_data ) dg );
 }

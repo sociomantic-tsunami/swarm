@@ -32,7 +32,7 @@ public final class ConnectionSet : RequestOnConn.IConnectionGetter
     import swarm.neo.client.Connection;
     import swarm.neo.client.RequestSet;
     import swarm.neo.client.NotifierTypes;
-    import swarm.neo.IPAddress;
+    import swarm.neo.AddrPort;
     import swarm.neo.authentication.ClientCredentials;
     import ocean.io.select.EpollSelectDispatcher;
 
@@ -259,7 +259,7 @@ public final class ConnectionSet : RequestOnConn.IConnectionGetter
 
     ***************************************************************************/
 
-    public bool start ( IPAddress node_address )
+    public bool start ( AddrPort node_address )
     {
         bool added;
         auto connection = this.connections.put(node_address, added,
@@ -299,7 +299,7 @@ public final class ConnectionSet : RequestOnConn.IConnectionGetter
 
     ***************************************************************************/
 
-    public bool stop ( IPAddress node_address )
+    public bool stop ( AddrPort node_address )
     {
         if (auto connection = node_address in this.connections)
         {
@@ -352,7 +352,7 @@ public final class ConnectionSet : RequestOnConn.IConnectionGetter
 
     ***************************************************************************/
 
-    public Connection get ( IPAddress node_address )
+    public Connection get ( AddrPort node_address )
     {
         return this.connections.get(node_address);
     }
@@ -486,7 +486,7 @@ private struct ConnectionRegistry ( C )
     import Array = ocean.core.Array : shuffle;
     import core.sys.posix.stdlib : drand48;
     import swarm.neo.util.TreeMap;
-    import swarm.neo.IPAddress;
+    import swarm.neo.AddrPort;
 
     /***************************************************************************
 
@@ -532,7 +532,7 @@ private struct ConnectionRegistry ( C )
 
     ***************************************************************************/
 
-    public Elem put ( IPAddress node_address, out bool added,
+    public Elem put ( AddrPort node_address, out bool added,
         lazy Elem new_conn )
     {
         return this.connection_map.put(node_address.cmp_id, added, new_conn);
@@ -550,7 +550,7 @@ private struct ConnectionRegistry ( C )
 
     ***************************************************************************/
 
-    public Elem get ( IPAddress node_address )
+    public Elem get ( AddrPort node_address )
     {
         return node_address.cmp_id in this.connection_map;
     }
@@ -783,7 +783,7 @@ private struct ConnectionRegistry ( C )
 version (UnitTest)
 {
     import swarm.neo.util.TreeMap;
-    import swarm.neo.IPAddress;
+    import swarm.neo.AddrPort;
 
     // Contains only the address, the ebtree node and the status.
     private struct MockConnection
@@ -801,7 +801,7 @@ version (UnitTest)
 
         TreeMapElement* treemap_backlink = null;
 
-        IPAddress remote_address;
+        AddrPort remote_address;
 
         Connection.Status status = Connection.Status.Connected;
     }
@@ -809,7 +809,7 @@ version (UnitTest)
 
 unittest
 {
-    static void setAddress ( ref IPAddress address, ubyte[] address_bytes ... )
+    static void setAddress ( ref AddrPort address, ubyte[] address_bytes ... )
     in
     {
         assert(address_bytes.length == 4, "expected 4 address bytes");
@@ -819,9 +819,9 @@ unittest
         address.address_bytes[] = address_bytes;
     }
 
-    static IPAddress newAddress ( ushort port, ubyte[] address_bytes ... )
+    static AddrPort newAddress ( ushort port, ubyte[] address_bytes ... )
     {
-        IPAddress address;
+        AddrPort address;
         setAddress(address, address_bytes);
         address.port = port;
         return address;
@@ -833,7 +833,7 @@ unittest
 
     {
         assert(set.connection_map.is_empty);
-        assert(set.get(IPAddress.init) is null);
+        assert(set.get(AddrPort.init) is null);
         assert(set.getBoundary!(false)() is null);
         assert(set.getBoundary!(true)() is null);
         assert(set.getNext!(true)(null) is null); // getNext should accept null

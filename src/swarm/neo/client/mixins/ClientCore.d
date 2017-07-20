@@ -25,7 +25,7 @@ template ClientCore ( )
     import ocean.core.Traits;
     import ocean.util.log.Stats;
 
-    import swarm.neo.IPAddress;
+    import swarm.neo.AddrPort;
 
     import swarm.neo.client.IRequestSet : IRequestController;
     import swarm.neo.client.RequestSet;
@@ -101,7 +101,7 @@ template ClientCore ( )
             conn_notifier = delegate which is called when a connection
                 attempt succeeds or fails (including when a connection is
                 re-established). Of type:
-                void delegate ( IPAddress node_address, Exception e )
+                void delegate ( AddrPort node_address, Exception e )
             request_resources = object to acquire resources from
 
     ***************************************************************************/
@@ -128,7 +128,7 @@ template ClientCore ( )
             conn_notifier = delegate which is called when a connection
                 attempt succeeds or fails (including when a connection is
                 re-established). Of type:
-                void delegate ( IPAddress node_address, Exception e )
+                void delegate ( AddrPort node_address, Exception e )
             request_resources = object to acquire resources from
 
     ***************************************************************************/
@@ -150,7 +150,7 @@ template ClientCore ( )
             conn_notifier = delegate which is called when a connection
                 attempt succeeds or fails (including when a connection is
                 re-established). Of type:
-                void delegate ( IPAddress node_address, Exception e )
+                void delegate ( AddrPort node_address, Exception e )
             request_resources = object to acquire resources from
 
     ***************************************************************************/
@@ -176,7 +176,7 @@ template ClientCore ( )
 
     public void addNode ( cstring host, ushort port )
     {
-        IPAddress ip;
+        AddrPort ip;
         auto addr_ok = ip.setAddress(host);
         enforce(addr_ok, cast(istring)("Invalid address: " ~ host));
         ip.port = port;
