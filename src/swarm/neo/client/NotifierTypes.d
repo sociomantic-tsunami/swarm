@@ -18,7 +18,7 @@ module swarm.neo.client.NotifierTypes;
 *******************************************************************************/
 
 import ocean.transition;
-import Formatter = ocean.text.convert.Formatter;
+import swarm.neo.util.Formatter;
 
 /*******************************************************************************
 
@@ -44,12 +44,7 @@ public struct NodeInfo
 
     public void toString ( void delegate ( cstring chunk ) sink )
     {
-        Formatter.sformat(
-            ( cstring chunk )
-            {
-                sink(chunk);
-                return chunk.length;
-            },
+        sformat(sink,
             "Node {}:{}",
             this.node_addr.address_bytes, this.node_addr.port);
     }
@@ -83,12 +78,8 @@ public struct RequestNodeInfo
 
     public void toString ( void delegate ( cstring chunk ) sink )
     {
-        Formatter.sformat(
-            ( cstring chunk )
-            {
-                sink(chunk);
-                return chunk.length;
-            },
+        sformat(
+            sink,
             "Request #{}, node {}:{}",
             this.request_id, this.node_addr.address_bytes, this.node_addr.port);
     }
@@ -131,12 +122,8 @@ public struct RequestNodeUnsupportedInfo
 
     public void toString ( void delegate ( cstring chunk ) sink )
     {
-        Formatter.sformat(
-            ( cstring chunk )
-            {
-                sink(chunk);
-                return chunk.length;
-            },
+        sformat(
+            sink,
             "Request #{}, node {}:{} reported that the {} is not supported",
             this.request_id, this.node_addr.address_bytes, this.node_addr.port,
             this.type_explanation);
@@ -191,15 +178,9 @@ public struct NodeExceptionInfo
 
     public void toString ( void delegate ( cstring chunk ) sink )
     {
-        size_t size_sink ( cstring chunk )
-        {
-            sink(chunk);
-            return chunk.length;
-        }
-
         if ( this.e !is null )
         {
-            Formatter.sformat(&size_sink,
+            sformat(sink,
                 "Exception '{}' @ {}:{} occurred in the client while handling the "
                 "request on node {}:{}",
                 getMsg(this.e), this.e.file, this.e.line,
@@ -207,7 +188,7 @@ public struct NodeExceptionInfo
         }
         else
         {
-            Formatter.sformat(&size_sink,
+            sformat(sink,
                 "An undefined error (null Exception) occurred in the client "
                 "while handling the request on node {}:{}",
                 this.node_addr.address_bytes, this.node_addr.port);
@@ -246,15 +227,9 @@ public struct RequestNodeExceptionInfo
 
     public void toString ( void delegate ( cstring chunk ) sink )
     {
-        size_t size_sink ( cstring chunk )
-        {
-            sink(chunk);
-            return chunk.length;
-        }
-
         if ( this.e !is null )
         {
-            Formatter.sformat(&size_sink,
+            sformat(sink,
                 "Exception '{}' @ {}:{} occurred in the client while handling "
                 "request #{} on node {}:{}",
                 getMsg(this.e), this.e.file, this.e.line, this.request_id,
@@ -262,7 +237,7 @@ public struct RequestNodeExceptionInfo
         }
         else
         {
-            Formatter.sformat(&size_sink,
+            sformat(sink,
                 "An undefined error (null Exception) occurred in the client "
                 "while handling request #{} on node {}:{}",
                 this.request_id, this.node_addr.address_bytes,
@@ -298,12 +273,7 @@ public struct RequestDataInfo
 
     public void toString ( void delegate ( cstring chunk ) sink )
     {
-        Formatter.sformat(
-            ( cstring chunk )
-            {
-                sink(chunk);
-                return chunk.length;
-            },
+        sformat(sink,
             "Request #{} provided the value {}",
             this.request_id, this.value);
     }
@@ -356,12 +326,7 @@ public struct RequestInfo
 
     public void toString ( void delegate ( cstring chunk ) sink )
     {
-        Formatter.sformat(
-            ( cstring chunk )
-            {
-                sink(chunk);
-                return chunk.length;
-            },
+        sformat(sink,
             "Request #{}",
             this.request_id);
     }

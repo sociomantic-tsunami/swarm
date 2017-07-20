@@ -40,6 +40,7 @@ abstract class ConnectionBase: ISelectClient
     import ocean.io.select.EpollSelectDispatcher;
     import ocean.io.select.protocol.generic.ErrnoIOException;
 
+    import ocean.sys.ErrnoException;
     import ocean.sys.socket.AddressIPSocket;
 
     import swarm.neo.util.TreeMap;
@@ -688,7 +689,6 @@ abstract class ConnectionBase: ISelectClient
     protected this ( AddressIPSocket!() socket, EpollSelectDispatcher epoll )
     {
         this.socket               = socket;
-        this.enableKeepAlive();
         this.epoll                = epoll;
         this.protocol_error_      = new ProtocolError;
         this.parser.e             = this.protocol_error_;
@@ -970,28 +970,43 @@ abstract class ConnectionBase: ISelectClient
 
         Sets up TCP keep-alive on the initialised socket.
 
+        Params:
+            socket = socket to enable TCP keep-alive on. It must be connected
+
     ***************************************************************************/
 
-    protected void enableKeepAlive ( )
+    protected static void enableKeepAlive ( AddressIPSocket!() socket )
     in
     {
-        assert(this.socket !is null);
+        assert(socket !is null);
     }
     body
     {
         // Activates TCP's keepalive feature for this socket.
-        this.socket.setsockoptVal(SOL_SOCKET, SO_KEEPALIVE, true);
+        if (socket.setsockoptVal(SOL_SOCKET, SO_KEEPALIVE, true) == -1)
+        {
+            throw (new ErrnoException).useGlobalErrno("Unable to set SO_KEEPALIVE");
+        }
 
         // Socket idle time in seconds after which TCP will start sending
         // keepalive probes.
-        this.socket.setsockoptVal(IPPROTO_TCP, socket.TcpOptions.TCP_KEEPIDLE, 5);
+        if (socket.setsockoptVal(IPPROTO_TCP, socket.TcpOptions.TCP_KEEPIDLE, 5) == -1)
+        {
+            throw (new ErrnoException).useGlobalErrno("Unable to set TCP_KEEPIDLE");
+        }
 
         // Maximum number of keepalive probes before the connection is declared
         // dead and dropped.
-        this.socket.setsockoptVal(IPPROTO_TCP, socket.TcpOptions.TCP_KEEPCNT, 3);
+        if (socket.setsockoptVal(IPPROTO_TCP, socket.TcpOptions.TCP_KEEPCNT, 3) == -1)
+        {
+            throw (new ErrnoException).useGlobalErrno("Unable to set TCP_KEEPCNT");
+        }
 
         // Time in seconds between keepalive probes.
-        this.socket.setsockoptVal(IPPROTO_TCP, socket.TcpOptions.TCP_KEEPINTVL, 3);
+        if (socket.setsockoptVal(IPPROTO_TCP, socket.TcpOptions.TCP_KEEPINTVL, 3) == -1)
+        {
+            throw (new ErrnoException).useGlobalErrno("Unable to set TCP_KEEPINTVL");
+        }
     }
 
     /***************************************************************************

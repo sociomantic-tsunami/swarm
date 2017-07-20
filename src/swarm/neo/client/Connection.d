@@ -496,6 +496,7 @@ public final class Connection: ConnectionBase
                 this.client_socket, this.node_address, this.send_loop,
                 this.epoll, this.receiver, this.sender, this.protocol_error
             );
+            enableKeepAlive(this.client_socket.socket);
 
             debug ( SwarmConn )
                 Stdout.formatln("{}:{}: Connection.tryConnect() succeeded",

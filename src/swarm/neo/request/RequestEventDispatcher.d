@@ -491,7 +491,16 @@ public struct RequestEventDispatcher
     public void signal ( RequestOnConnBase.EventDispatcher conn, ubyte code )
     {
         if ( !conn.resumeFiber(code) )
-            this.queued_signals ~= code;
+        {
+            // Each signal is only allowed to be handled by one registered
+            // fiber, so we must only add each signal once to the list -- the
+            // waiting fiber doesn't care how *often* the signal has fired.
+            // (Otherwise, a signal can be popped from the list, the waiting
+            // fiber resumed, then the signal popped again -- now there's no
+            // fiber waiting for it.)
+            if ( !Array.contains(this.queued_signals, code) )
+                this.queued_signals ~= code;
+        }
     }
 
     /***************************************************************************
