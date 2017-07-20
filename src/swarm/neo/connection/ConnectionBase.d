@@ -269,7 +269,11 @@ abstract class ConnectionBase: ISelectClient
 
                 try
                 {
-                    this.outer.sender.cork = true;
+                    if (this.outer.no_delay)
+                        this.outer.socket.setsockoptVal(IPPROTO_TCP,
+                            socket.TcpOptions.TCP_NODELAY, true);
+                    else
+                        this.outer.sender.cork = true;
 
                     // Start the receive fiber, it will suspend itself immediately.
                     this.outer.recv_loop.start();
@@ -675,6 +679,34 @@ abstract class ConnectionBase: ISelectClient
 
     /***************************************************************************
 
+        Flag controlling which TCP/IP `setsockopt(2)` socket options controlling
+        delayed sending of outgoing data should be used to accomplish either a
+        low delay or reduce the number of network data packets sent.
+
+        - `false` enables output buffering via `TCP_CORK` and leaves
+          `TCP_NODELAY` disabled. This aims to reduce the number of network data
+          packets sent but adds a delay if the output data rate is low. Note
+          that the delay does not reduce the data throughput rate if I/O
+          pipelining is used properly: Tests have shown that it can dramatically
+          increase the data throughput and the performance of both the server
+          and the client.
+
+        - `true` leaves output buffering via `TCP_CORK` disabled and enables
+          `TCP_NODELAY` (i.e. disable Nagle's algorithm). This is typically
+          necessary for tests where a client sends a sequence of requests,
+          waiting until the current request has finished before sending the
+          next. Because this method does not use I/O pipelining, it is suitable
+          only for tests, not for production where high data throughput is
+          desired. Tests have shown that in a production environment disabling
+          output buffering can dramatically decrease the data throughput and the
+          performance of both the server and the client.
+
+    ***************************************************************************/
+
+    protected Immut!(bool) no_delay;
+
+    /***************************************************************************
+
         Constructor.
 
         At this point the socket does not have to contain a valid file
@@ -683,13 +715,17 @@ abstract class ConnectionBase: ISelectClient
         Params:
             socket       = node/client connection socket
             epoll        = epoll select dispatcher for registering the socket
+            no_delay     = disables TCP socket output buffering (see comments on
+                           the no_delay field, above)
 
     ***************************************************************************/
 
-    protected this ( AddressIPSocket!() socket, EpollSelectDispatcher epoll )
+    protected this ( AddressIPSocket!() socket, EpollSelectDispatcher epoll,
+        bool no_delay = false )
     {
         this.socket               = socket;
         this.epoll                = epoll;
+        this.no_delay             = no_delay;
         this.protocol_error_      = new ProtocolError;
         this.parser.e             = this.protocol_error_;
         this.receiver             = new MessageReceiver(this.socket, this.protocol_error_);
