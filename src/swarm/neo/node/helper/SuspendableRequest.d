@@ -22,9 +22,11 @@
 
 *******************************************************************************/
 
-module swarm.neo.node.helper.SuspendableRequest;
+deprecated module swarm.neo.node.helper.SuspendableRequest;
 
 /// ditto
+deprecated("Adapt your request to use RequestEventDispatcher and multiple fibers "
+    "instead")
 public struct SuspendableRequest
 {
     import ocean.transition;
