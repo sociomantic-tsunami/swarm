@@ -184,8 +184,6 @@ class Connection: ConnectionBase
 
         this.enableKeepAlive(this.socket);
 
-        this.enableKeepAlive(this.socket);
-
         // If authentication fails the connection is simply disconnected and
         // returned to the pool.
 
