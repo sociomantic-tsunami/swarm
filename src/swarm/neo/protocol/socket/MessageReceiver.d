@@ -90,6 +90,23 @@ private class MessageReceiverBase
 
     protected size_t buffer_content_end = 0;
 
+    /***************************************************************************
+
+        The maximum number of subsequent `read` calls without an I/O-wait call.
+
+    ***************************************************************************/
+
+    private const uint read_iowait_max = 10;
+
+    /***************************************************************************
+
+        Counts the maximum number of subsequent `read` calls without an I/O-wait
+        call.
+
+    ***************************************************************************/
+
+    private uint read_iowait_count;
+
     /**************************************************************************/
 
     invariant ( )
@@ -402,10 +419,20 @@ private class MessageReceiverBase
             if (this.buffer.length < bytes_requested)
                 this.buffer.length = bytes_requested;
 
-            this.read();
+            auto event = Event.EPOLLIN;
+
+            if (++this.read_iowait_count >= this.read_iowait_max)
+            {
+                this.read_iowait_count = 0;
+                this.io_stats.num_iowait_calls++;
+                event = wait;
+            }
+
+            this.read(event);
 
             while (this.buffer_content_end < bytes_requested)
             {
+                this.read_iowait_count = 0;
                 this.io_stats.num_iowait_calls++;
                 this.read(wait);
             }
