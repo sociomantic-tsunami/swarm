@@ -239,7 +239,7 @@ public struct YieldedThenResumed
 public struct RequestEventDispatcher
 {
     import ocean.core.Enforce;
-    import Array = ocean.core.Array : moveToEnd, removeShift, contains;
+    import Array = ocean.core.Array : moveToEnd, removeShift, contains, copy;
     import swarm.neo.util.MessageFiber;
     import swarm.neo.connection.RequestOnConnBase;
 
@@ -542,7 +542,13 @@ public struct RequestEventDispatcher
             // can no longer function in a consistent manner.
             MessageFiber.Message msg;
             msg.exc = e;
-            foreach ( waiting_fiber; this.waiting_fibers )
+
+            // Copy all WaitingFibers into a separate buffer. This is to avoid
+            // the array being iterated over being modified by one of the fibers
+            // which is resumed from inside the loop.
+            this.waiting_fibers_to_iterate.copy(this.waiting_fibers);
+
+            foreach ( waiting_fiber; this.waiting_fibers_to_iterate )
                 if ( waiting_fiber.fiber.waiting )
                     waiting_fiber.fiber.resume(this.token, null, msg);
 
