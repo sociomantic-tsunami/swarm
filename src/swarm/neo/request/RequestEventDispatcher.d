@@ -239,7 +239,7 @@ public struct YieldedThenResumed
 public struct RequestEventDispatcher
 {
     import ocean.core.Enforce;
-    import Array = ocean.core.Array : moveToEnd, removeShift, contains;
+    import Array = ocean.core.Array : moveToEnd, removeShift, contains, copy;
     import swarm.neo.util.MessageFiber;
     import swarm.neo.connection.RequestOnConnBase;
 
@@ -256,8 +256,9 @@ public struct RequestEventDispatcher
     /// Fibers currently awaiting events.
     private WaitingFiber[] waiting_fibers;
 
-    /// List of fibers to be notified of an event. See resumeYieldedFibers().
-    private WaitingFiber[] fibers_to_notify;
+    /// Buffer into which waiting_fibers are copied when performing an iteration
+    /// that can modify the contents of waiting_fibers.
+    private WaitingFiber[] waiting_fibers_to_iterate;
 
     /// Event which has fired, to be returned by nextEvent(). (This value is set
     /// by notifyWaitingFiber(), just before resuming the waiting fiber.)
@@ -541,7 +542,13 @@ public struct RequestEventDispatcher
             // can no longer function in a consistent manner.
             MessageFiber.Message msg;
             msg.exc = e;
-            foreach ( waiting_fiber; this.waiting_fibers )
+
+            // Copy all WaitingFibers into a separate buffer. This is to avoid
+            // the array being iterated over being modified by one of the fibers
+            // which is resumed from inside the loop.
+            this.waiting_fibers_to_iterate.copy(this.waiting_fibers);
+
+            foreach ( waiting_fiber; this.waiting_fibers_to_iterate )
                 if ( waiting_fiber.fiber.waiting )
                     waiting_fiber.fiber.resume(this.token, null, msg);
 
@@ -881,19 +888,19 @@ public struct RequestEventDispatcher
         // into a separate buffer. This is to avoid the array being iterated
         // over being modified by one of the fibers which is resumed from inside
         // the loop.
-        this.fibers_to_notify.length = 0;
-        enableStomping(this.fibers_to_notify);
+        this.waiting_fibers_to_iterate.length = 0;
+        enableStomping(this.waiting_fibers_to_iterate);
 
         foreach ( waiting_fiber; this.waiting_fibers )
         {
             if ( waiting_fiber.event.active == waiting_fiber.event.active.yield )
-                this.fibers_to_notify ~= waiting_fiber;
+                this.waiting_fibers_to_iterate ~= waiting_fiber;
         }
 
-        if ( this.fibers_to_notify.length == 0 )
+        if ( this.waiting_fibers_to_iterate.length == 0 )
             conn.shutdownWithProtocolError("Unhandled resume after yield");
 
-        foreach ( fiber_to_notify; this.fibers_to_notify )
+        foreach ( fiber_to_notify; this.waiting_fibers_to_iterate )
         {
             EventNotification fired_event;
             fired_event.yielded_resumed = YieldedThenResumed();

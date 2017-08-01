@@ -402,7 +402,7 @@ private class MessageReceiverBase
             if (this.buffer.length < bytes_requested)
                 this.buffer.length = bytes_requested;
 
-            this.read();
+            this.read(wait);
 
             while (this.buffer_content_end < bytes_requested)
             {
