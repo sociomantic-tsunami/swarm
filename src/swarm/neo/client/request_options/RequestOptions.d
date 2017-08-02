@@ -17,6 +17,7 @@
 module swarm.neo.client.request_options.RequestOptions;
 
 import ocean.transition;
+import ocean.core.Tuple;
 
 /*******************************************************************************
 
@@ -181,11 +182,6 @@ template eraseFromArgs (TypeToErase, options ...)
     {
         alias Tuple!() eraseFromArgs;
     }
-}
-
-version (UnitTest)
-{
-    import ocean.core.Tuple;
 }
 
 unittest
