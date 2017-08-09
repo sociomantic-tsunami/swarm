@@ -90,8 +90,6 @@ class Test : Task
 
     private void testPutGet ( )
     {
-        mstring msg_buf;
-
         auto ok = this.client.blocking.put(23, "hello",
             ( Client.Neo.Put.Notification info, Client.Neo.Put.Args args ) { });
         enforce(ok, "Put request failed");
@@ -112,8 +110,6 @@ class Test : Task
 
     private void testPutGetAll ( )
     {
-        mstring msg_buf;
-
         // Add some records. We use very large records so that they can't all be
         // sent and parsed in a single write buffer.
         mstring value;
@@ -169,8 +165,6 @@ class Test : Task
 
     private void testPutGetAllStop ( )
     {
-        mstring msg_buf;
-
         // Add some records. We use very large records so that they can't all be
         // sent and parsed in a single write buffer.
         mstring value;
@@ -235,8 +229,6 @@ class Test : Task
 
     private void testPutGetAllSuspend ( )
     {
-        mstring msg_buf;
-
         // Add some records. We use very large records so that they can't all be
         // sent and parsed in a single write buffer.
         mstring value;
