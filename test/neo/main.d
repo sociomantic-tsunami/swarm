@@ -38,6 +38,9 @@ class Test : Task
     import swarm.neo.client.requests.NotificationFormatter;
 
     import ocean.core.Enforce;
+    import ocean.util.serialize.contiguous.Contiguous;
+    import ocean.util.serialize.contiguous.Serializer;
+    import ocean.util.serialize.contiguous.MultiVersionDecorator;
 
     /// Example node.
     Node node;
@@ -63,6 +66,8 @@ class Test : Task
         this.testPutGetAll();
         this.testPutGetAllStop();
         this.testPutGetAllSuspend();
+        this.testSerialize();
+        this.testSerializeVersioned();
 
         theScheduler.shutdown();
     }
@@ -289,6 +294,118 @@ class Test : Task
             this.suspend();
 
         enforce!("==")(received_count, records_written);
+    }
+
+    /***************************************************************************
+
+        Runs a simple test where a single record is serialized, written to the
+        node with Put, fetched with Get, then deserialized.
+
+    ***************************************************************************/
+
+    private void testSerialize ( )
+    {
+        struct Str
+        {
+            mstring name;
+            uint age;
+        }
+
+        Str str;
+        str.name = "Bob".dup;
+        str.age = 23;
+
+        void[] dst;
+        auto ok = this.client.blocking.put(23, Serializer.serialize(str, dst),
+            ( Client.Neo.Put.Notification info, Client.Neo.Put.Args args ) { });
+        enforce(ok, "Put request failed");
+
+        Contiguous!(Str) record;
+        bool request_finished;
+        bool err;
+        this.client.neo.get(23,
+            ( Client.Neo.Get.Notification info, Client.Neo.Get.Args args )
+            {
+                with ( info.Active ) switch (info.active )
+                {
+                    case received:
+                        info.received.deserialize(record);
+                        break;
+
+                    default:
+                        err = true;
+                        break;
+                }
+
+                request_finished = true;
+                this.resume();
+            }
+        );
+
+        if ( !request_finished )
+            this.suspend();
+
+        enforce(!err, "Get request failed");
+        enforce!("!is")(record.ptr, null);
+        enforce!("==")(record.ptr.name, "Bob");
+        enforce!("==")(record.ptr.age, 23);
+    }
+
+    /***************************************************************************
+
+        Runs a simple test where a versioned record is serialized, written to
+        the node with Put, fetched with Get, then deserialized.
+
+    ***************************************************************************/
+
+    private void testSerializeVersioned ( )
+    {
+        struct Str
+        {
+            const ubyte StructVersion = 23;
+            mstring name;
+            uint age;
+        }
+
+        Str str;
+        str.name = "Bob".dup;
+        str.age = 23;
+
+        auto version_decorator = new VersionDecorator;
+        void[] dst;
+        auto ok = this.client.blocking.put(23, version_decorator.store(str, dst),
+            ( Client.Neo.Put.Notification info, Client.Neo.Put.Args args ) { });
+        enforce(ok, "Put request failed");
+
+        Contiguous!(Str) record;
+        bool request_finished;
+        bool err;
+        this.client.neo.get(23,
+            ( Client.Neo.Get.Notification info, Client.Neo.Get.Args args )
+            {
+                with ( info.Active ) switch (info.active )
+                {
+                    case received:
+                        info.received.deserialize(record);
+                        break;
+
+                    default:
+                        err = true;
+                        break;
+                }
+
+                request_finished = true;
+                this.resume();
+            }
+        );
+
+        if ( !request_finished )
+            this.suspend();
+
+        enforce(!err, "Get request failed");
+        enforce!("!is")(record.ptr, null);
+        enforce!("==")(record.ptr.name, "Bob");
+        enforce!("==")(record.ptr.age, 23);
     }
 }
 
