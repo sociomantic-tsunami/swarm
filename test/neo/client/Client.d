@@ -467,23 +467,19 @@ public class Client
 
         Params:
             epoll = epoll instance to be used by the client
-            auth_file = path of file to read auth name/key from
-            addr = address of node to connect to
-            port = port on which the node is listening for neo protocol
-                connections
+            config = Config instance specifying paths of nodes/auth files
             conn_notifier = connection notifier
 
     ***************************************************************************/
 
-    public this ( EpollSelectDispatcher epoll, cstring auth_file,
-        cstring addr, ushort port, Neo.ConnectionNotifier conn_notifier )
+    public this ( EpollSelectDispatcher epoll, Neo.Config config,
+        Neo.ConnectionNotifier conn_notifier )
     {
         this.epoll = epoll;
         this.conn_notifier = conn_notifier;
 
-        this.neo = new Neo(auth_file, this.conn_notifier);
+        this.neo = new Neo(config, this.conn_notifier);
         this.neo.enableSocketNoDelay();
-        this.neo.addNode(addr, port);
 
         this.blocking = new Blocking;
     }
