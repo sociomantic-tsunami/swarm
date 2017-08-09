@@ -14,6 +14,7 @@
 
 module swarm.LibFeatures;
 
+const has_features_4_3 = true;
 const has_features_4_2 = true;
 const has_features_4_1 = true;
 const has_features_4_0 = true;
