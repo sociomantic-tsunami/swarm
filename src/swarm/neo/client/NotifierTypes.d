@@ -255,12 +255,16 @@ public struct RequestNodeExceptionInfo
 public struct RequestDataInfo
 {
     import swarm.neo.protocol.Message : RequestId;
+    import swarm.neo.client.mixins.DeserializeMethod;
 
     /// ID of the request for which the notification is occurring.
     RequestId request_id;
 
     /// Data value associated with notification.
     Const!(void)[] value;
+
+    /// Template method to deserialize `value` as a given struct.
+    mixin DeserializeMethod!(value);
 
     /***************************************************************************
 
