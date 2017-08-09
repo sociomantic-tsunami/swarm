@@ -10,13 +10,14 @@
     copyright: Copyright (c) 2016-2017 sociomantic labs GmbH. All rights reserved
 
     License:
-        Boost Software License Version 1.0. See LICENSE_BOOST.txt for details.
+        Boost Software License Version 1.0. See LICENSE.txt for details.
 
 *******************************************************************************/
 
 module swarm.neo.client.request_options.RequestOptions;
 
 import ocean.transition;
+import ocean.core.Tuple;
 
 /*******************************************************************************
 
@@ -181,11 +182,6 @@ template eraseFromArgs (TypeToErase, options ...)
     {
         alias Tuple!() eraseFromArgs;
     }
-}
-
-version (UnitTest)
-{
-    import ocean.core.Tuple;
 }
 
 unittest
