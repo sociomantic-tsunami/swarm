@@ -25,7 +25,7 @@ import swarm.neo.client.NotifierTypes;
 public struct Args
 {
     hash_t key;
-    mstring value;
+    void[] value;
 }
 
 /*******************************************************************************
