@@ -78,7 +78,7 @@ public class Client
 
         ***********************************************************************/
 
-        public void put ( hash_t key, cstring value, Put.Notifier notifier )
+        public void put ( hash_t key, in void[] value, Put.Notifier notifier )
         {
             auto params = Const!(Internals.Put.UserSpecifiedParams)(
                 Const!(Put.Args)(key, value),
@@ -251,7 +251,7 @@ public class Client
 
         ***********************************************************************/
 
-        public bool put ( hash_t key, cstring value, Neo.Put.Notifier notifier )
+        public bool put ( hash_t key, in void[] value, Neo.Put.Notifier notifier )
         {
             auto task = Task.getThis();
             assert(task !is null);
