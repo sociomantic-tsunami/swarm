@@ -11,7 +11,7 @@
     Copyright:      Copyright (c) 2014-2017 sociomantic labs GmbH. All rights reserved
 
     License:
-        Boost Software License Version 1.0. See LICENSE_BOOST.txt for details.
+        Boost Software License Version 1.0. See LICENSE.txt for details.
 
 *******************************************************************************/
 
