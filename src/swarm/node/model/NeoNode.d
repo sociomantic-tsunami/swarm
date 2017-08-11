@@ -240,6 +240,9 @@ public abstract class INodeBase : INode, INodeInfo
     public void connection_limit ( uint max )
     {
         this.listener.connection_limit(max);
+
+        if (this.neo_listener)
+            this.neo_listener.connection_limit(max);
     }
 
 
