@@ -261,6 +261,24 @@ public abstract class INodeBase : INode, INodeInfo
     }
 
 
+    /**************************************************************************
+
+        Returns:
+            the limit of the number of neo connections (i.e. the maximum number
+            of connections the node can handle in parallel) or 0 if limitation
+            is disabled or no neo listener exists
+
+     **************************************************************************/
+
+    override public size_t neo_connection_limit ( )
+    {
+        if (this.neo_listener)
+            return cast(size_t)this.neo_listener.connection_limit;
+        else
+            return 0;
+    }
+
+
     /***************************************************************************
 
         Registers any selectables in the node (including the listener) with the
@@ -340,12 +358,7 @@ public abstract class INodeBase : INode, INodeInfo
 
     override public size_t num_connections ( )
     {
-        size_t n = this.listener.poolInfo.length();
-
-        if (this.neo_listener)
-            n += this.neo_listener.poolInfo.length();
-
-        return n;
+        return this.listener.poolInfo.length();
     }
 
 
@@ -358,12 +371,39 @@ public abstract class INodeBase : INode, INodeInfo
 
     override public size_t num_open_connections ( )
     {
-        size_t n = this.listener.poolInfo.num_busy();
+        return this.listener.poolInfo.num_busy();
+    }
 
+
+    /***************************************************************************
+
+        Returns:
+            the number of neo connections in the pool
+
+    ***************************************************************************/
+
+    override public size_t num_neo_connections ( )
+    {
         if (this.neo_listener)
-            n += this.neo_listener.poolInfo.num_busy();
+            return this.neo_listener.poolInfo.length();
+        else
+            return 0;
+    }
 
-        return n;
+
+    /***************************************************************************
+
+        Returns:
+             the number of active neo connections being handled
+
+    ***************************************************************************/
+
+    override public size_t num_open_neo_connections ( )
+    {
+        if (this.neo_listener)
+            return this.neo_listener.poolInfo.num_busy();
+        else
+            return 0;
     }
 
 

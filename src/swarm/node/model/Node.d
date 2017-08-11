@@ -241,6 +241,21 @@ public abstract class INodeBase : INode, INodeInfo
     }
 
 
+    /**************************************************************************
+
+        Returns:
+            the limit of the number of neo connections (i.e. the maximum number
+            of connections the node can handle in parallel) or 0 if limitation
+            is disabled
+
+     **************************************************************************/
+
+    override public size_t neo_connection_limit ( )
+    {
+        return 0;
+    }
+
+
     /***************************************************************************
 
         Registers any selectables in the node (including the listener) with the
@@ -316,6 +331,32 @@ public abstract class INodeBase : INode, INodeInfo
     override public size_t num_open_connections ( )
     {
         return this.listener.poolInfo.num_busy();
+    }
+
+
+    /***************************************************************************
+
+        Returns:
+            the number of neo connections in the pool
+
+    ***************************************************************************/
+
+    override public size_t num_neo_connections ( )
+    {
+        return 0;
+    }
+
+
+    /***************************************************************************
+
+        Returns:
+             the number of active neo connections being handled
+
+    ***************************************************************************/
+
+    override public size_t num_open_neo_connections ( )
+    {
+        return 0;
     }
 
 

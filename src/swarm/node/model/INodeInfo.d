@@ -78,6 +78,40 @@ public interface INodeInfo
     /**************************************************************************
 
         Returns:
+            the number of neo connections in the pool
+
+     **************************************************************************/
+
+    public size_t num_neo_connections ( );
+
+
+    /**************************************************************************
+
+        Returns:
+            the number of active neo connections currently being handled
+            (Note: the number of idle connections in the pool can be calculated
+            by num_neo_connections - num_open_neo_connections)
+
+     **************************************************************************/
+
+    public size_t num_open_neo_connections ( );
+
+
+    /**************************************************************************
+
+        Returns:
+            the limit of the number of neo connections (i.e. the maximum number
+            of connections the node can handle in parallel) or 0 if limitation
+            is disabled
+
+     **************************************************************************/
+
+    public size_t neo_connection_limit ( );
+
+
+    /**************************************************************************
+
+        Returns:
             the statistics counters.
 
      **************************************************************************/
@@ -169,6 +203,9 @@ version ( UnitTest )
         size_t num_connections_;
         size_t num_open_connections_;
         size_t connection_limit_;
+        size_t num_neo_connections_;
+        size_t num_open_neo_connections_;
+        size_t neo_connection_limit_;
         ulong bytes_received_;
         ulong bytes_sent_;
         ulong records_handled_;
@@ -219,6 +256,21 @@ version ( UnitTest )
         override size_t connection_limit ( )
         {
             return this.connection_limit_;
+        }
+
+        override size_t num_neo_connections ( )
+        {
+            return this.num_neo_connections_;
+        }
+
+        override size_t num_open_neo_connections ( )
+        {
+            return this.num_open_neo_connections_;
+        }
+
+        override size_t neo_connection_limit ( )
+        {
+            return this.neo_connection_limit_;
         }
 
         override ulong bytes_received ( )
