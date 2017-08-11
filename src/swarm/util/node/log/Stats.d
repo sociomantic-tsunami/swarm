@@ -383,7 +383,7 @@ unittest
 {
     // No request or action stats.
     {
-        auto node = new TestNode([], []);
+        auto node = new TestNode([], [], []);
         auto log = new TestLogger;
         auto stats = new NodeStatsTemplate!(TestLogger)(node, log);
 
@@ -397,7 +397,7 @@ unittest
     // as the order of logging depends on the order in which they're stored in
     // an internal AA.)
     {
-        auto node = new TestNode([], ["Put"]);
+        auto node = new TestNode([], ["Put"], []);
         auto log = new TestLogger;
         auto stats = new NodeStatsTemplate!(TestLogger)(node, log);
 
@@ -416,7 +416,7 @@ unittest
     // as the order of logging depends on the order in which they're stored in
     // an internal AA.)
     {
-        auto node = new TestNode(["written"], []);
+        auto node = new TestNode(["written"], [], []);
         auto log = new TestLogger;
         auto stats = new NodeStatsTemplate!(TestLogger)(node, log);
 
@@ -429,7 +429,7 @@ unittest
 
     // One request and one action.
     {
-        auto node = new TestNode(["written"], ["Put"]);
+        auto node = new TestNode(["written"], ["Put"], []);
         auto log = new TestLogger;
         auto stats = new NodeStatsTemplate!(TestLogger)(node, log);
 
@@ -456,7 +456,7 @@ unittest
 {
     // Test for global counters
     {
-        auto node = new TestNode([], []);
+        auto node = new TestNode([], [], []);
         auto log = new TestLogger;
         auto stats = new NodeStatsTemplate!(TestLogger)(node, log);
 
@@ -477,7 +477,7 @@ unittest
 
     // Test for action stats
     {
-        auto node = new TestNode(["written"], []);
+        auto node = new TestNode(["written"], [], []);
         auto log = new TestLogger;
         auto stats = new NodeStatsTemplate!(TestLogger)(node, log);
 
@@ -499,7 +499,7 @@ unittest
 
     // Test for request stats
     {
-        auto node = new TestNode([], ["Put"]);
+        auto node = new TestNode([], ["Put"], []);
         auto log = new TestLogger;
         auto stats = new NodeStatsTemplate!(TestLogger)(node, log);
 
@@ -566,7 +566,7 @@ unittest
 {
     // No request, action, or channel stats.
     {
-        auto node = new TestChannelsNode([], [], []);
+        auto node = new TestChannelsNode([], [], [], []);
         auto log = new TestLogger;
         auto stats = new ChannelsNodeStatsTemplate!(TestLogger)(node, log);
 
@@ -579,7 +579,7 @@ unittest
 
     // One channel.
     {
-        auto node = new TestChannelsNode([], [], ["test"]);
+        auto node = new TestChannelsNode([], [], [], ["test"]);
         auto log = new TestLogger;
         auto stats = new ChannelsNodeStatsTemplate!(TestLogger)(node, log);
 

@@ -180,6 +180,16 @@ public interface INodeInfo
     ***************************************************************************/
 
     public RequestStats request_stats ( );
+
+
+    /***************************************************************************
+
+        Returns:
+            per-request neo stats tracking instance
+
+    ***************************************************************************/
+
+    public RequestStats neo_request_stats ( );
 }
 
 
@@ -211,6 +221,7 @@ version ( UnitTest )
         ulong records_handled_;
         RecordActionCounters record_action_counters_;
         RequestStats request_stats_;
+        RequestStats neo_request_stats_;
 
         /***********************************************************************
 
@@ -219,16 +230,22 @@ version ( UnitTest )
             Params:
                 actions = list of record action types to track stats for
                 requests = list of request types to track stats for
+                neo_requests = list of neo request types to track stats for
 
         ***********************************************************************/
 
-        this ( istring[] actions, istring[] requests )
+        this ( istring[] actions, istring[] requests, istring[] neo_requests )
         {
             this.record_action_counters_ = new RecordActionCounters(actions);
             this.request_stats_ = new RequestStats;
             foreach ( request; requests )
             {
                 this.request_stats_.init(request);
+            }
+            this.neo_request_stats_ = new RequestStats;
+            foreach ( request; neo_requests )
+            {
+                this.neo_request_stats_.init(request);
             }
         }
 
@@ -301,6 +318,11 @@ version ( UnitTest )
         override RequestStats request_stats ( )
         {
             return this.request_stats_;
+        }
+
+        override RequestStats neo_request_stats ( )
+        {
+            return this.neo_request_stats_;
         }
 
         override void resetCounters ( )
