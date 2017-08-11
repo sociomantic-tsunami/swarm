@@ -174,13 +174,15 @@ version ( UnitTest )
             Params:
                 actions = list of record action types to track stats for
                 requests = list of request types to track stats for
+                neo_requests = list of neo request types to track stats for
                 channels = list of channels to track stats for
 
         ***********************************************************************/
 
-        this ( istring[] actions, istring[] requests, istring[] channels )
+        this ( istring[] actions, istring[] requests, istring[] neo_requests,
+            istring[] channels )
         {
-            super(actions, requests);
+            super(actions, requests, neo_requests);
 
             foreach ( channel ; channels )
             {
