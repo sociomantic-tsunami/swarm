@@ -82,15 +82,16 @@ public scope class GetChannelsRequestTemplate ( Base : IRequest, Resources,
     {
         auto output = this.params.io_item.get_node_value();
 
-        do
-        {
-            this.reader.readArray(*this.resources.channel_buffer);
+        this.reader.readArray(*this.resources.channel_buffer);
 
+        while ( this.resources.channel_buffer.length )
+        {
             output(this.params.context, this.resources.conn_pool_info.address,
                 this.resources.conn_pool_info.port,
                 *this.resources.channel_buffer);
+
+            this.reader.readArray(*this.resources.channel_buffer);
         }
-        while ( this.resources.channel_buffer.length );
     }
 }
 
