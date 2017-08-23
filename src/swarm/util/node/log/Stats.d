@@ -9,7 +9,7 @@
 
 *******************************************************************************/
 
-module swarm.util.node.log.Stats;
+deprecated module swarm.util.node.log.Stats;
 
 
 /*******************************************************************************
@@ -35,6 +35,7 @@ import ocean.transition;
 
 *******************************************************************************/
 
+deprecated("Replace with a call to logStats() in swarm.node.simplified.NodeBase")
 public alias NodeStatsTemplate!(StatsLog) NodeStats;
 
 
@@ -50,6 +51,7 @@ public alias NodeStatsTemplate!(StatsLog) NodeStats;
 
 *******************************************************************************/
 
+deprecated("Replace with a call to logStats() in swarm.node.simplified.NodeBase")
 public alias ChannelsNodeStatsTemplate!(StatsLog) ChannelsNodeStats;
 
 
@@ -370,7 +372,7 @@ version ( UnitTest )
 
 *******************************************************************************/
 
-unittest
+deprecated unittest
 {
     // No request or action stats.
     {
@@ -439,7 +441,7 @@ unittest
 
 *******************************************************************************/
 
-unittest
+deprecated unittest
 {
     // Test for global counters
     {
@@ -541,7 +543,7 @@ unittest
 
 *******************************************************************************/
 
-unittest
+deprecated unittest
 {
     // No request, action, or channel stats.
     {

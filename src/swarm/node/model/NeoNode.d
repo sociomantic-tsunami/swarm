@@ -14,7 +14,7 @@
 
 *******************************************************************************/
 
-module swarm.node.model.NeoNode;
+deprecated module swarm.node.model.NeoNode;
 
 
 
@@ -77,6 +77,7 @@ static this ( )
 
 *******************************************************************************/
 
+deprecated("Replace with swarm.node.simplified.NodeBase")
 public abstract class INodeBase : INode, INodeInfo
 {
     /***************************************************************************
@@ -552,6 +553,7 @@ public abstract class INodeBase : INode, INodeInfo
 
 *******************************************************************************/
 
+deprecated("Replace with swarm.node.simplified.NodeTemplate")
 public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
 {
     import ocean.net.server.unix.UnixListener;
@@ -868,10 +870,9 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
     }
 }
 
-
-version (UnitTest)
+deprecated unittest
 {
-    private class TestConnectionHandler : ISwarmConnectionHandler
+    static class TestConnectionHandler : ISwarmConnectionHandler
     {
         public this (void delegate(IConnectionHandler) a, ConnectionSetupParams b)
         {
@@ -879,9 +880,6 @@ version (UnitTest)
         }
         override protected void handleCommand () {}
     }
-}
 
-unittest
-{
     alias NodeBase!(TestConnectionHandler) Instance;
 }

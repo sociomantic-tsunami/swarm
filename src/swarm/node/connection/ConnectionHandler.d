@@ -20,7 +20,7 @@
 
 *******************************************************************************/
 
-module swarm.node.connection.ConnectionHandler;
+deprecated module swarm.node.connection.ConnectionHandler;
 
 
 
@@ -160,6 +160,7 @@ public class ConnectionSetupParams
 
 *******************************************************************************/
 
+deprecated("Replace with swarm.node.simplified.LegacyConnectionHandlerTemplate")
 public abstract class ConnectionHandlerTemplate ( Commands : ICommandCodes )
     : ISwarmConnectionHandler
 {
@@ -379,6 +380,7 @@ public abstract class ConnectionHandlerTemplate ( Commands : ICommandCodes )
 
 *******************************************************************************/
 
+deprecated("Replace with swarm.node.simplified.LegacyConnectionHandlerBase")
 abstract public class ISwarmConnectionHandler : IFiberConnectionHandlerBase,
     Resettable, ISwarmConnectionHandlerInfo
 {

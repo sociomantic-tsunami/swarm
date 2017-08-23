@@ -63,7 +63,7 @@ public class RecordActionCounters
 
     ***************************************************************************/
 
-    package this ( in cstring[] ids )
+    public this ( in cstring[] ids )
     {
         foreach (id; ids)
         {

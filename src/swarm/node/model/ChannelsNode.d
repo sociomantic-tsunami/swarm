@@ -12,7 +12,7 @@
 
 *******************************************************************************/
 
-module swarm.node.model.ChannelsNode;
+deprecated module swarm.node.model.ChannelsNode;
 
 
 
@@ -46,6 +46,7 @@ import ocean.transition;
 
 *******************************************************************************/
 
+deprecated("Replace with swarm.node.simplified.ChannelsNodeTemplate")
 public class ChannelsNodeBase
     ( Storage : IStorageEngine, ConnHandler : ISwarmConnectionHandler )
     : NodeBase!(ConnHandler), IChannelsNodeInfo
@@ -206,8 +207,11 @@ public class ChannelsNodeBase
 version (UnitTest)
 {
     import ocean.net.server.connection.IConnectionHandler;
+}
 
-    private class TestConnectionHandler : ISwarmConnectionHandler
+deprecated unittest
+{
+    static class TestConnectionHandler : ISwarmConnectionHandler
     {
         public this (void delegate(IConnectionHandler) a, ConnectionSetupParams b)
         {
@@ -216,7 +220,7 @@ version (UnitTest)
         override protected void handleCommand () {}
     }
 
-    private class TestStorageEngine : IStorageEngine
+    static class TestStorageEngine : IStorageEngine
     {
         public this ()
         {
@@ -227,9 +231,6 @@ version (UnitTest)
         public ulong num_records () { return 42; }
         public ulong num_bytes () { return 42; }
     }
-}
 
-unittest
-{
     alias ChannelsNodeBase!(TestStorageEngine, TestConnectionHandler) Instance;
 }
