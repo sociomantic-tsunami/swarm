@@ -45,6 +45,9 @@ module swarm.neo.authentication.CredentialsFile;
 
 import ocean.transition;
 
+debug ( SwarmConn )
+    import ocean.io.Stdout;
+
 extern (C) private int g_ascii_xdigit_value ( char c ); // glib-2.0
 
 /******************************************************************************/
