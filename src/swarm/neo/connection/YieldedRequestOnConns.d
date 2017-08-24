@@ -20,6 +20,7 @@ module swarm.neo.connection.YieldedRequestOnConns;
 
 *******************************************************************************/
 
+import ocean.transition;
 import ocean.io.select.client.SelectEvent;
 
 /******************************************************************************/
@@ -143,6 +144,8 @@ class YieldedRequestOnConns: ISelectEvent
 
     private static struct YieldedQueue
     {
+        import ocean.core.Array : contains;
+
         /***********************************************************************
 
             The two queues of yielded `RequestOnConn`s.
@@ -158,6 +161,15 @@ class YieldedRequestOnConns: ISelectEvent
         ***********************************************************************/
 
         private bool active = false;
+
+        /// Flag set to true while swapAndPop is running.
+        private bool iterating;
+
+        /// List of request-on-conns removed from the active queue while
+        /// swapAndPop is iterating over the inactive queue. Items in this list
+        /// are skipped, it iterated over.
+        private YieldedRequestOnConns.IYieldedRequestOnConn[]
+            removed_while_iterating;
 
         /***********************************************************************
 
@@ -221,8 +233,15 @@ class YieldedRequestOnConns: ISelectEvent
         {
             this.active = !this.active;
 
+            this.iterating = true;
+            scope(exit) this.iterating = false;
+
+            this.removed_while_iterating.length = 0;
+            enableStomping(this.removed_while_iterating);
+
             foreach (roc; this.queue[!this.active])
-                dg(roc);
+                if ( !this.removed_while_iterating.contains(roc) )
+                    dg(roc);
         }
 
         /***********************************************************************
@@ -239,6 +258,8 @@ class YieldedRequestOnConns: ISelectEvent
 
         public bool remove ( IYieldedRequestOnConn roc )
         {
+            if ( this.iterating )
+                this.removed_while_iterating ~= roc;
             return this.queue[this.active].remove(roc);
         }
     }
