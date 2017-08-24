@@ -949,10 +949,10 @@ abstract class ConnectionBase: ISelectClient
         This method should not throw.
 
         Params:
+            e          = the exception reflecting the error
             request_id = the id of the request whose handler calls this method
                          and should not receive a shutdown notification or 0 if 
                          not calling from a request handler
-            e          = the exception reflecting the error
 
         In:
             This method must not be called in the sending fiber.
