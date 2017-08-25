@@ -155,7 +155,7 @@ struct IoVecTracker
 
     invariant ( )
     {
-        assert(this.length || this.fields is null);
+        assert(this.length || this.fields.length == 0);
     }
 
     /***************************************************************************
@@ -192,7 +192,8 @@ struct IoVecTracker
         {
             if (n == this.length)
             {
-                this.fields = null;
+                this.fields.length = 0;
+                enableStomping(this.fields);
             }
             else
             {
