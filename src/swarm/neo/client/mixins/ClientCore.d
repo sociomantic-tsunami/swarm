@@ -92,6 +92,24 @@ template ClientCore ( )
 
     /***************************************************************************
 
+        Config class which may be passed to the ctor. Designed for use with
+        ocean's ConfigFiller helper.
+
+    ***************************************************************************/
+
+    public static class Config
+    {
+        import ocean.util.config.ConfigFiller : Required;
+
+        /// Path of file specifying the addr/port of all nodes to connect with.
+        public Required!(istring) nodes_file;
+
+        /// Path of file containing the client's auth name/key.
+        public Required!(istring) credentials_file;
+    }
+
+    /***************************************************************************
+
         Constructor (private, so that only the client class where this template
         is mixed-in can construct an instance).
 
@@ -138,6 +156,34 @@ template ClientCore ( )
     {
         auto cred = fromFile(auth_file);
         this(cred, conn_notifier, request_resources);
+    }
+
+    /***************************************************************************
+
+        Constructor (private, so that only the client class where this template
+        is mixed-in can construct an instance).
+
+        Adds nodes from the file specified in the config argument.
+
+        Params:
+            config = Config object specifying the paths of the credentials and
+                nodes files to use
+            conn_notifier = delegate which is called when a connection
+                attempt succeeds or fails (including when a connection is
+                re-established). Of type:
+                void delegate ( AddrPort node_address, Exception e )
+            request_resources = object to acquire resources from
+
+    ***************************************************************************/
+
+    private this ( Config config, ConnectionNotifier conn_notifier,
+        Object request_resources = null )
+    {
+        Credentials cred;
+        cred.setFromFile(config.credentials_file());
+        this(cred, conn_notifier, request_resources);
+
+        this.addNodes(config.nodes_file());
     }
 
     /***************************************************************************
