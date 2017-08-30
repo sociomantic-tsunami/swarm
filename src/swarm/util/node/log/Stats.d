@@ -66,6 +66,7 @@ public alias ChannelsNodeStatsTemplate!(StatsLog) ChannelsNodeStats;
 private class NodeStatsTemplate ( Logger = StatsLog )
 {
     import swarm.node.model.INodeInfo;
+    import swarm.node.request.RequestStats;
 
     /***************************************************************************
 
@@ -128,11 +129,13 @@ private class NodeStatsTemplate ( Logger = StatsLog )
             return;
 
         this.logGlobalStats();
-        this.logRequestStats();
+        this.logRequestStats!("request")(this.node.request_stats);
+        this.logRequestStats!("neo_request")(this.node.neo_request_stats);
         this.logActionStats();
 
         this.node.resetCounters(); // also resets the action counters
         this.node.request_stats.resetCounters();
+        this.node.neo_request_stats.resetCounters();
     }
 
     /***************************************************************************
@@ -192,11 +195,16 @@ private class NodeStatsTemplate ( Logger = StatsLog )
 
     /***************************************************************************
 
-        Logs the per-request stats.
+        Logs per-request stats.
+
+        Params:
+            category = name of stats category
+            request_stats = request stats tracker to log from
 
     ***************************************************************************/
 
-    private void logRequestStats ( )
+    private void logRequestStats ( istring category )
+        ( RequestStats request_stats )
     {
         struct RequestStats
         {
@@ -211,7 +219,7 @@ private class NodeStatsTemplate ( Logger = StatsLog )
             ulong handled_over_100_ms;
         }
 
-        foreach ( id, request; this.node.request_stats.request_stats )
+        foreach ( id, request; request_stats.request_stats )
         {
             RequestStats stats;
             stats.max_active = request.max_active;
@@ -224,7 +232,7 @@ private class NodeStatsTemplate ( Logger = StatsLog )
             stats.handled_100_ms = request.handled_100_ms;
             stats.handled_over_100_ms = request.handled_over_100_ms;
 
-            this.stats_log.addObject!("request")(id, stats);
+            this.stats_log.addObject!(category)(id, stats);
         }
     }
 }
@@ -499,7 +507,7 @@ unittest
 
     // Test for request stats
     {
-        auto node = new TestNode([], ["Put"], []);
+        auto node = new TestNode([], ["Put"], ["Put"]);
         auto log = new TestLogger;
         auto stats = new NodeStatsTemplate!(TestLogger)(node, log);
 
@@ -513,7 +521,12 @@ unittest
             "request/Put/mean_handled_time_micros:-nan request/Put/handled_10_micros:0 "
             "request/Put/handled_100_micros:0 request/Put/handled_1_ms:0 "
             "request/Put/handled_10_ms:0 request/Put/handled_100_ms:0 "
-            "request/Put/handled_over_100_ms:0 ");
+            "request/Put/handled_over_100_ms:0 "
+            "neo_request/Put/max_active:0 neo_request/Put/handled:0 "
+            "neo_request/Put/mean_handled_time_micros:-nan neo_request/Put/handled_10_micros:0 "
+            "neo_request/Put/handled_100_micros:0 neo_request/Put/handled_1_ms:0 "
+            "neo_request/Put/handled_10_ms:0 neo_request/Put/handled_100_ms:0 "
+            "neo_request/Put/handled_over_100_ms:0 ");
 
         // Finish a request
         node.request_stats.finished("Put");
@@ -526,7 +539,48 @@ unittest
             "request/Put/mean_handled_time_micros:0.00 request/Put/handled_10_micros:0 "
             "request/Put/handled_100_micros:0 request/Put/handled_1_ms:0 "
             "request/Put/handled_10_ms:0 request/Put/handled_100_ms:0 "
-            "request/Put/handled_over_100_ms:0 ");
+            "request/Put/handled_over_100_ms:0 "
+            "neo_request/Put/max_active:0 neo_request/Put/handled:0 "
+            "neo_request/Put/mean_handled_time_micros:-nan neo_request/Put/handled_10_micros:0 "
+            "neo_request/Put/handled_100_micros:0 neo_request/Put/handled_1_ms:0 "
+            "neo_request/Put/handled_10_ms:0 neo_request/Put/handled_100_ms:0 "
+            "neo_request/Put/handled_over_100_ms:0 ");
+
+        // Start a neo request
+        node.neo_request_stats.started("Put");
+        log.output.length = 0;
+        stats.log();
+        test!("==")(log.output,
+            "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 "
+            "handling_neo_connections:0 handling_neo_connections_pcnt:0 "
+            "request/Put/max_active:0 request/Put/handled:0 "
+            "request/Put/mean_handled_time_micros:-nan request/Put/handled_10_micros:0 "
+            "request/Put/handled_100_micros:0 request/Put/handled_1_ms:0 "
+            "request/Put/handled_10_ms:0 request/Put/handled_100_ms:0 "
+            "request/Put/handled_over_100_ms:0 "
+            "neo_request/Put/max_active:1 neo_request/Put/handled:0 "
+            "neo_request/Put/mean_handled_time_micros:-nan neo_request/Put/handled_10_micros:0 "
+            "neo_request/Put/handled_100_micros:0 neo_request/Put/handled_1_ms:0 "
+            "neo_request/Put/handled_10_ms:0 neo_request/Put/handled_100_ms:0 "
+            "neo_request/Put/handled_over_100_ms:0 ");
+
+        // Finish a neo request
+        node.neo_request_stats.finished("Put");
+        log.output.length = 0;
+        stats.log();
+        test!("==")(log.output,
+            "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 "
+            "handling_neo_connections:0 handling_neo_connections_pcnt:0 "
+            "request/Put/max_active:0 request/Put/handled:0 "
+            "request/Put/mean_handled_time_micros:-nan request/Put/handled_10_micros:0 "
+            "request/Put/handled_100_micros:0 request/Put/handled_1_ms:0 "
+            "request/Put/handled_10_ms:0 request/Put/handled_100_ms:0 "
+            "request/Put/handled_over_100_ms:0 "
+            "neo_request/Put/max_active:1 neo_request/Put/handled:1 "
+            "neo_request/Put/mean_handled_time_micros:0.00 neo_request/Put/handled_10_micros:0 "
+            "neo_request/Put/handled_100_micros:0 neo_request/Put/handled_1_ms:0 "
+            "neo_request/Put/handled_10_ms:0 neo_request/Put/handled_100_ms:0 "
+            "neo_request/Put/handled_over_100_ms:0 ");
 
         // Logging again, all request stats should have been reset
         log.output.length = 0;
@@ -538,7 +592,12 @@ unittest
             "request/Put/mean_handled_time_micros:-nan request/Put/handled_10_micros:0 "
             "request/Put/handled_100_micros:0 request/Put/handled_1_ms:0 "
             "request/Put/handled_10_ms:0 request/Put/handled_100_ms:0 "
-            "request/Put/handled_over_100_ms:0 ");
+            "request/Put/handled_over_100_ms:0 "
+            "neo_request/Put/max_active:0 neo_request/Put/handled:0 "
+            "neo_request/Put/mean_handled_time_micros:-nan neo_request/Put/handled_10_micros:0 "
+            "neo_request/Put/handled_100_micros:0 neo_request/Put/handled_1_ms:0 "
+            "neo_request/Put/handled_10_ms:0 neo_request/Put/handled_100_ms:0 "
+            "neo_request/Put/handled_over_100_ms:0 ");
 
         // Start then finish a request with timing info
         node.request_stats.started("Put");
@@ -552,7 +611,31 @@ unittest
             "request/Put/mean_handled_time_micros:23.00 request/Put/handled_10_micros:0 "
             "request/Put/handled_100_micros:1 request/Put/handled_1_ms:0 "
             "request/Put/handled_10_ms:0 request/Put/handled_100_ms:0 "
-            "request/Put/handled_over_100_ms:0 ");
+            "request/Put/handled_over_100_ms:0 "
+            "neo_request/Put/max_active:0 neo_request/Put/handled:0 "
+            "neo_request/Put/mean_handled_time_micros:-nan neo_request/Put/handled_10_micros:0 "
+            "neo_request/Put/handled_100_micros:0 neo_request/Put/handled_1_ms:0 "
+            "neo_request/Put/handled_10_ms:0 neo_request/Put/handled_100_ms:0 "
+            "neo_request/Put/handled_over_100_ms:0 ");
+
+        // Start then finish a neo request with timing info
+        node.neo_request_stats.started("Put");
+        node.neo_request_stats.finished("Put", 23);
+        log.output.length = 0;
+        stats.log();
+        test!("==")(log.output,
+            "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 "
+            "handling_neo_connections:0 handling_neo_connections_pcnt:0 "
+            "request/Put/max_active:0 request/Put/handled:0 "
+            "request/Put/mean_handled_time_micros:-nan request/Put/handled_10_micros:0 "
+            "request/Put/handled_100_micros:0 request/Put/handled_1_ms:0 "
+            "request/Put/handled_10_ms:0 request/Put/handled_100_ms:0 "
+            "request/Put/handled_over_100_ms:0 "
+            "neo_request/Put/max_active:1 neo_request/Put/handled:1 "
+            "neo_request/Put/mean_handled_time_micros:23.00 neo_request/Put/handled_10_micros:0 "
+            "neo_request/Put/handled_100_micros:1 neo_request/Put/handled_1_ms:0 "
+            "neo_request/Put/handled_10_ms:0 neo_request/Put/handled_100_ms:0 "
+            "neo_request/Put/handled_over_100_ms:0 ");
     }
 }
 
