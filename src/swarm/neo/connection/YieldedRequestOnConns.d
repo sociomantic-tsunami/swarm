@@ -231,7 +231,9 @@ class YieldedRequestOnConns: ISelectEvent
 
         /***********************************************************************
 
-            Removes `roc` from the queue.
+            Removes `roc` from the queue. The RoC is removed from both the
+            active and the inactive queue to cover the case of it being removed
+            *during* an iteration.
 
             Params:
                 roc = the `RequestOnConn` to be removed
@@ -243,6 +245,7 @@ class YieldedRequestOnConns: ISelectEvent
 
         public bool remove ( IYieldedRequestOnConn roc )
         {
+            this.queue[!this.active].remove(roc);
             return this.queue[this.active].remove(roc);
         }
     }
