@@ -134,10 +134,14 @@ class YieldedRequestOnConns: ISelectEvent
         Manages the queue of `RequestOnConn`s, which are actually two queues: At
         each time only one, `queue[active]`, is active while the other queue,
         `queue[!active]`, is inactive.
+
         All methods except `swapAndPop()` use the active queue. `swapAndPop()`
         swaps the active and inactive queue, then pops all `RequestOnConn`s from
         the previously active and now inactive queue. This is to allow for
-        pushing and removing `RequestOnConn`s while in the loop of popping.
+        pushing `RequestOnConn`s while in the loop of popping. (Otherwise, an
+        RoC that was popped and resumed could re-add itself to the queue only to
+        be resumed again in the same iteration loop, i.e. without an epoll
+        select cycle actually having occurred.)
 
     ***************************************************************************/
 
