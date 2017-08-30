@@ -644,11 +644,15 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
     {
         /***********************************************************************
 
-            Map of command codes -> handler functions.
+            Map of command codes -> request handling info.
 
         ***********************************************************************/
 
-        public Neo.ConnectionHandler.CmdHandlers cmd_handlers;
+        public Neo.ConnectionHandler.RequestMap requests;
+
+        /// Alias to old name.
+        deprecated("Use the `requests` member instead.")
+        public alias requests cmd_handlers;
 
         /***********************************************************************
 
@@ -761,10 +765,8 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
                   int backlog )
     {
         assert(options.epoll !is null);
-        assert(options.cmd_handlers !is null);
 
         InetAddress!(false) addr, neo_addr;
-
         alias SelectListener!(Neo.ConnectionHandler,
             Neo.ConnectionHandler.SharedParams) NeoListener;
 
@@ -796,8 +798,8 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
 
         // Instantiate params object shared by all neo connection handlers.
         auto neo_conn_setup_params = new Neo.ConnectionHandler.SharedParams(
-            options.epoll, options.shared_resources, options.cmd_handlers,
-            options.no_delay, *credentials);
+            options.epoll, options.shared_resources, options.requests,
+            options.no_delay, *credentials, this);
 
         // Set up unix listener socket, if specified.
         UnixListener unix_listener;
@@ -826,6 +828,9 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
             ),
             unix_listener
         );
+
+        // Set up stats tracking for all named requests specified.
+        options.requests.initStats(this.neo_request_stats);
 
         // Copy actual bound ports into class members.
         enforce(this.socket.updateAddress() == 0, "socket.updateAddress() failed!");
