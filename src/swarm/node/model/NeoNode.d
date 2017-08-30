@@ -768,9 +768,11 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
         alias SelectListener!(Neo.ConnectionHandler,
             Neo.ConnectionHandler.SharedParams) NeoListener;
 
+        // Create listener sockets.
         this.socket = new AddressIPSocket!();
         this.neo_socket = new AddressIPSocket!();
 
+        // Load credentials from specified file.
         Const!(Key[istring])* credentials;
         if ( options.credentials_filename )
         {
@@ -779,6 +781,7 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
                 new Credentials(options.credentials_filename);
             credentials = this.credentials_file.credentials;
         }
+        // ...or copy the pre-configured credentials.
         else
         {
             assert(options.credentials_map !is null);
@@ -791,10 +794,12 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
             credentials = &s.cred;
         }
 
+        // Instantiate params object shared by all neo connection handlers.
         auto neo_conn_setup_params = new Neo.ConnectionHandler.SharedParams(
             options.epoll, options.shared_resources, options.cmd_handlers,
             options.no_delay, *credentials);
 
+        // Set up unix listener socket, if specified.
         UnixListener unix_listener;
         if ( options.unix_socket_path.length )
         {
@@ -809,6 +814,7 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
                 options.unix_socket_path, options.epoll, unix_socket_handlers);
         }
 
+        // Super ctor.
         super(node, conn_setup_params,
             this.listener = new Listener(
                 addr(node.Address, node.Port), this.socket, conn_setup_params,
@@ -821,6 +827,7 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
             unix_listener
         );
 
+        // Copy actual bound ports into class members.
         enforce(this.socket.updateAddress() == 0, "socket.updateAddress() failed!");
         enforce(this.neo_socket.updateAddress() == 0, "socket.updateAddress() failed!");
 
