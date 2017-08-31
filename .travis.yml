@@ -1,13 +1,29 @@
-# Don't use any predefined language env
-# (see https://github.com/travis-ci/travis-ci/issues/4895#issuecomment-150703192)
+# We will use docker to set up out environment, so don't use any particular
+# language in Travis itself
 language: generic
 
+# Enable docker
 sudo: required
+services:
+    - docker
 
-services: docker
+# Disable automatic submodule fetching (it's done recursively)
+git:
+    submodules: false
 
-install: ci/travis-install.sh
+# Do a shallow submodule fetch
+before_install: git submodule update --init
 
-script: ci/travis-script.sh
+env:
+    global:
+        # Make sure beaver is in the PATH
+        - PATH="$(git config -f .gitmodules submodule.beaver.path)/bin:$PATH"
+    matrix:
+        - DMD=1.080.0 DIST=xenial F=production AFTER_SCRIPT=1
+        - DMD=1.080.0 DIST=xenial F=devel
+        - DMD=2.070.2.s12 DIST=xenial F=production
+        - DMD=2.070.2.s12 DIST=xenial F=devel
 
-after_success: ci/travis-after-success.sh
+install: beaver dlang install
+
+script: beaver dlang make

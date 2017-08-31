@@ -60,6 +60,7 @@ struct IoVecMessage // MessageGenerator
     body
     {
         this.tracker.fields.length = 1 + static_fields.length + dynamic_fields.length;
+        enableStomping(this.tracker.fields);
 
         with (this.tracker.fields[0])
         {
@@ -155,7 +156,7 @@ struct IoVecTracker
 
     invariant ( )
     {
-        assert(this.length || this.fields is null);
+        assert(this.length || this.fields.length == 0);
     }
 
     /***************************************************************************
@@ -192,7 +193,8 @@ struct IoVecTracker
         {
             if (n == this.length)
             {
-                this.fields = null;
+                this.fields.length = 0;
+                enableStomping(this.fields);
             }
             else
             {
@@ -207,6 +209,7 @@ struct IoVecTracker
                         field.iov_base += field.iov_len - d;
                         field.iov_len  = d;
                         this.fields = this.fields[i .. $];
+                        enableStomping(this.fields);
                         break;
                     }
                 }
@@ -264,6 +267,7 @@ struct IoVecTracker
             assert(start == this.length);
 
             this.fields = this.fields[0 .. 1];
+            enableStomping(this.fields);
             this.fields[0] = iovec_const(dst.ptr, this.length);
         }
         else if (dst)

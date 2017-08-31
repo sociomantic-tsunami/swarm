@@ -217,15 +217,6 @@ class RequestSet
 
         /***********************************************************************
 
-            Called by the connection to report an error which requires aborting
-            this request.
-
-        ***********************************************************************/
-
-        alias resumeFiber error;
-
-        /***********************************************************************
-
             Resumes the fiber or starts it if it is new or terminated.
 
         ***********************************************************************/
@@ -254,6 +245,26 @@ class RequestSet
                 default:
                     assert(false, "Request unexpectedly running (fiber executing)");
             }
+        }
+
+        /***********************************************************************
+
+            Called by the connection to report an error which requires aborting
+            this request.
+
+        ***********************************************************************/
+
+        public void notifyShutdown ( Exception e )
+        {
+            // If the request is suspended, wake it up with an exception.
+            if ( !this.is_running() )
+                this.resumeFiber(e);
+            // If the request is *not* suspended, it is the fiber which called
+            // the connection's send loop (SendLoop.registerForSending()). We
+            // cannot pass it the exception here as it is not suspended.
+            // Instead, this request will be notified of the connection error by
+            // SendLoop.registerForSending() throwing. See that method for more
+            // details.
         }
 
         /***********************************************************************
@@ -468,9 +479,7 @@ class RequestSet
     public void shutdownAll ( Exception e )
     {
         foreach (req; this.active_requests)
-        {
-            req.error(e);
-        }
+            req.notifyShutdown(e);
     }
 
     /***************************************************************************

@@ -256,8 +256,6 @@ class Connection: ConnectionBase
     override protected void notifyShutdown ( RequestId id, Exception e )
     {
         if (auto request = this.request_set.getRequest(id))
-        {
-            request.error(e);
-        }
+            request.notifyShutdown(e);
     }
 }
