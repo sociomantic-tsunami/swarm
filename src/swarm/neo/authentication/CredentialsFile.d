@@ -47,6 +47,9 @@ import ocean.io.device.File;
 import ocean.net.util.QueryParams;
 import ocean.text.convert.Format;
 
+debug ( SwarmConn )
+    import ocean.io.Stdout;
+
 extern (C) private int g_ascii_xdigit_value ( char c ); // glib-2.0
 
 deprecated("Replace imports of CredentialsFile with Credentials in "
