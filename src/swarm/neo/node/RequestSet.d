@@ -74,9 +74,12 @@ class RequestSet
 
         /***********************************************************************
 
-            A flag telling whether `this.fiber` has been running before. If true
-            then the fiber should be in the "finished"/`TERM` state when this
-            request is started, otherwise it is in the "waiting"/`HOLD` state.
+            Set to true when starting `this.fiber`; needed in `resumeFiber_`
+            to distinguish two possibilities of the fiber HOLD state.
+
+            If `this.fiber` is in HOLD state then this flag tells whether
+             - false: the fiber has never been started since its creation or
+             - true: the fiber has been started and is suspended.
 
         ***********************************************************************/
 
@@ -189,6 +192,11 @@ class RequestSet
         public void setup ( RequestId id, Connection connection, RequestSet request_set )
         in
         {
+            /*
+             * Confirm that the fiber is in a state where it can be started i.e.
+             * it is not suspended or running.
+             */
+
             /* final */ switch (this.fiber.state)
             {
                 case fiber.state.HOLD:
@@ -217,22 +225,50 @@ class RequestSet
 
         /***********************************************************************
 
-            Resumes the fiber or starts it if it is new or terminated.
+            Resumes the fiber or starts it if it is new or terminated. If
+            resuming (not starting) the fiber, `msg` is passed to the waiting
+            `suspendFiber()` call.
+
+            This method is called when a message for this request arrives. The
+            base class implements the basic behaviour and resumes the fiber.
+            However, in the node there is a case that needs special handling:
+            the message that starts the request.
+            When this initial message is received then the new `Request` object,
+            a subclass of `RequestOnConnBase`, is either created or fetched from
+            the object pool, and its `setReceivedPayload` is called, which calls
+            `resumeFiber_`. Since this is a new request the fiber needs to be
+            started rather than resumed. For further arriving messages during
+            the lifetime of the request super class behaviour applies i.e. the
+            fiber is resumed.
+
+            Params:
+                msg = the fiber message
 
         ***********************************************************************/
 
         override protected void resumeFiber_ ( fiber.Message msg )
         {
+            /*
+             * Detect whether the fiber should be started or resumed:
+             * If the fiber is in TERM state we obviously need to start it.
+             * The HOLD state is unfortunately ambiguous: A newly created fiber
+             * is in HOLD state just like a fiber that has been started and is
+             * suspended. With the fiber_was_started flag we distinguish between
+             * these cases.
+             */
+
             /* final */ switch (this.fiber.state)
             {
                 case fiber.state.HOLD:
                     if (this.fiber_was_started)
                     {
+                        // Fiber is suspended: Call super to resume the fiber.
                         super.resumeFiber_(msg);
                         break;
                     }
                     else
                     {
+                        // The fiber is new: Fall through to start it.
                         this.fiber_was_started = true;
                         goto case;
                     }
