@@ -1,12 +1,11 @@
 /*******************************************************************************
 
     Example node with the following features:
-        * Listens on two ports: one with the neo protocol and one with the
-          legacy protocol. The latter protocol is unused in this example.
+        * Listens on one port with the neo protocol.
         * Contains a simplistic key-value storage engine, with string values and
           hash_t keys.
-        * Supports three requests: Put -- to add or update a value in the storage
-          engine; Get -- to retrieve a value from the storage engine, if
+        * Supports three requests: Put -- to add or update a value in the
+          storage engine; Get -- to retrieve a value from the storage engine, if
           it exists; GetAll -- to retrieve all records from the storage engine.
 
     Copyright:
@@ -20,12 +19,12 @@
 module test.neo.node.Node;
 
 import ocean.transition;
-import swarm.node.model.NeoNode;
-import swarm.node.connection.ConnectionHandler;
+import swarm.node.simplified.NodeBase;
+import swarm.node.simplified.LegacyConnectionHandlerTemplate;
 import swarm.Const : ICommandCodes, NodeItem;
 
 /// ditto
-public class Node : NodeBase!(ConnHandler)
+public class Node : NodeBase
 {
     import ocean.io.select.EpollSelectDispatcher;
     import swarm.neo.authentication.HmacDef: Key;
@@ -62,52 +61,21 @@ public class Node : NodeBase!(ConnHandler)
 
         Options options;
         options.epoll = epoll;
+        options.addr = addr;
+        options.legacy_port = cast(ushort)(neo_port - 1);
+        options.backlog = 1_000;
+
+        options.support_neo = true;
+        options.neo_port = neo_port;
         options.cmd_handlers[RequestCode.Get] = &Get.handle;
         options.cmd_handlers[RequestCode.GetAll] = &GetAll.handle;
         options.cmd_handlers[RequestCode.Put] = &Put.handle;
         options.credentials_map["dummy"] = Key.init;
         options.shared_resources = this.storage;
 
-        const backlog = 1_000;
-        auto legacy_port = NodeItem(addr.dup, cast(ushort)(neo_port - 1));
-        super(legacy_port, neo_port, new ConnectionSetupParams,
-            options, backlog);
+        super(options, null, null);
 
         // Register the listening ports with epoll.
-        this.register(epoll);
+        this.register();
     }
-
-    /***************************************************************************
-
-        Returns:
-            string identifying the type of this node
-
-    ***************************************************************************/
-
-    override protected cstring id ( )
-    {
-        return "example";
-    }
-}
-
-/*******************************************************************************
-
-    Legacy protocol connection handler. Required by NodeBase but unused in this
-    example.
-
-*******************************************************************************/
-
-private class ConnHandler : ConnectionHandlerTemplate!(ICommandCodes)
-{
-    import ocean.net.server.connection.IConnectionHandler;
-
-    public this ( void delegate(IConnectionHandler) finaliser,
-        ConnectionSetupParams params )
-    {
-        super(finaliser, params);
-    }
-
-    override protected void handleCommand () {}
-
-    override protected void handleNone () {}
 }

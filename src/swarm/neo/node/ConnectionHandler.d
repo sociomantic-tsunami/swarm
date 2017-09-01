@@ -20,7 +20,7 @@
 
 *******************************************************************************/
 
-module swarm.neo.node.ConnectionHandler;
+deprecated module swarm.neo.node.ConnectionHandler;
 
 /*******************************************************************************
 
@@ -46,6 +46,7 @@ static this ( )
 
 /******************************************************************************/
 
+deprecated("Replace with swarm.node.simplified.NeoConnectionHandler;")
 class ConnectionHandler : IConnectionHandler
 {
     import swarm.neo.node.Connection;

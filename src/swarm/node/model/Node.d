@@ -14,7 +14,7 @@
 
 *******************************************************************************/
 
-module swarm.node.model.Node;
+deprecated module swarm.node.model.Node;
 
 
 
@@ -75,6 +75,7 @@ static this ( )
 
 *******************************************************************************/
 
+deprecated("Replace with swarm.node.simplified.NodeBase")
 public abstract class INodeBase : INode, INodeInfo
 {
     /***************************************************************************
@@ -536,6 +537,7 @@ public abstract class INodeBase : INode, INodeInfo
 
 *******************************************************************************/
 
+deprecated("Replace with swarm.node.simplified.NodeTemplate")
 public class NodeBase ( ConnHandler : ISwarmConnectionHandler,
                         Setup : ConnectionSetupParams = ConnectionSetupParams ) : INodeBase
 {
@@ -658,10 +660,9 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler,
     }
 }
 
-
-version (UnitTest)
+deprecated unittest
 {
-    private class TestConnectionHandler : ISwarmConnectionHandler
+    static class TestConnectionHandler : ISwarmConnectionHandler
     {
         public this (void delegate(IConnectionHandler) a, ConnectionSetupParams b)
         {
@@ -669,9 +670,6 @@ version (UnitTest)
         }
         override protected void handleCommand () {}
     }
-}
 
-unittest
-{
     alias NodeBase!(TestConnectionHandler) Instance;
 }
