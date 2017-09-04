@@ -93,21 +93,7 @@ class ProtocolError: Exception
     private void setFmt_ ( T... ) ( istring file, long line, cstring fmt, T args )
     {
         this.reused_msg.reset();
-        // TODO: Remove the second branch (`else`) as it's meant to support
-        // the deprecated overload of ocean < v3.3.0
-        static if (is(FormatterSink))
-            sformat((cstring chunk) { this.reused_msg ~= chunk; }, fmt, args);
-        else
-            sformat(
-                (cstring chunk)
-                {
-                    this.reused_msg ~= chunk;
-                    return chunk.length;
-                },
-                fmt,
-                args
-            );
-
+        sformat(this.reused_msg, fmt, args);
         this.file = file;
         this.line = line;
     }
