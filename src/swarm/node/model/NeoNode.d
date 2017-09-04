@@ -905,7 +905,8 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
     ***************************************************************************/
 
     private void handleUpdateCredentials ( cstring args,
-        void delegate ( cstring response ) send_response )
+        void delegate ( cstring response ) send_response,
+        void delegate ( ref mstring response ) wait_reply )
     in
     {
         assert(this.credentials_file);
