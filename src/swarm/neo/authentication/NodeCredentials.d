@@ -21,7 +21,6 @@ public class Credentials
     import ocean.transition;
     import ocean.io.device.File;
     import ocean.net.util.QueryParams;
-    import ocean.text.convert.Format;
 
     /***************************************************************************
 

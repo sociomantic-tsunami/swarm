@@ -53,7 +53,7 @@ import ocean.io.compress.lzo.LzoChunkCompressor;
 
 import ocean.util.container.pool.model.IAggregatePool;
 
-import ocean.util.log.Log;
+import ocean.util.log.Logger;
 
 import ocean.core.Enforce;
 
@@ -870,7 +870,8 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
     ***************************************************************************/
 
     private void handleUpdateCredentials ( cstring args,
-        void delegate ( cstring response ) send_response )
+        void delegate ( cstring response ) send_response,
+        void delegate ( ref mstring response ) wait_reply )
     in
     {
         assert(this.credentials_file);
