@@ -791,7 +791,7 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
                 addr(node.Address, node.Port), this.socket, conn_setup_params,
                 backlog
             ),
-            new NeoListener(
+            this.neo_listener = new NeoListener(
                 neo_addr(node.Address, neo_port), this.neo_socket,
                 neo_conn_setup_params, backlog
             ),
