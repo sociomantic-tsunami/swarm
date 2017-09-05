@@ -276,6 +276,32 @@ class ConnectionHandler : IConnectionHandler
 
     /***************************************************************************
 
+        Returns:
+            the number of bytes sent over the connection since the last call to
+            this method
+
+    ***************************************************************************/
+
+    public ulong bytes_sent ( )
+    {
+        return this.connection.getIOStats(true, true).socket.total;
+    }
+
+    /***************************************************************************
+
+        Returns:
+            the number of bytes received over the connection since the last call
+            to this method
+
+    ***************************************************************************/
+
+    public ulong bytes_received ( )
+    {
+        return this.connection.getIOStats(false, true).socket.total;
+    }
+
+    /***************************************************************************
+
         Called when a new request was created, runs in the fiber of
         `connection`. Parses the command in `init_payload`, and calls the
         function that is registered in `cmd_handlers` for that command.

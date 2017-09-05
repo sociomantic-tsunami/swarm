@@ -806,6 +806,59 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
         this.neo_address_.port(this.neo_socket.port());
     }
 
+    /**************************************************************************
+
+        Returns:
+            number of bytes received
+
+        Note: as the neo connections already have their own stats tracking, we
+        just read that out here. super.receivedBytes() is not called from neo
+        connections.
+
+     **************************************************************************/
+
+    override public ulong bytes_received ( )
+    {
+        ulong ret = super.bytes_received();
+
+        foreach ( conn_info; this.neo_listener.poolInfo() )
+        {
+            auto conn = cast(Neo.ConnectionHandler)conn_info;
+            assert(conn !is null);
+
+            ret += conn.bytes_received;
+        }
+
+        return ret;
+    }
+
+
+    /**************************************************************************
+
+        Returns:
+            number of bytes sent
+
+        Note: as the neo connections already have their own stats tracking, we
+        just read that out here. super.sentBytes() is not called from neo
+        connections.
+
+     **************************************************************************/
+
+    override public ulong bytes_sent ( )
+    {
+        ulong ret = super.bytes_sent();
+
+        foreach ( conn_info; this.neo_listener.poolInfo() )
+        {
+            auto conn = cast(Neo.ConnectionHandler)conn_info;
+            assert(conn !is null);
+
+            ret += conn.bytes_sent;
+        }
+
+        return ret;
+    }
+
     /***************************************************************************
 
         Unix domain socket connection handler, updates the credentials.
