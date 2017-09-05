@@ -519,8 +519,13 @@ class ConnectProtocol: ISelectClient
 
     override public void finalize ( FinalizeStatus status )
     {
+        static Exception finalize_exception;
+        if ( finalize_exception is null )
+            finalize_exception = new Exception("ConnectProtocol: finalized",
+                __FILE__, __LINE__);
+
         fiber.Message msg;
-        msg.exc = new Exception("ConnectProtocol: finalized"); // TODO: reusable exception
+        msg.exc = finalize_exception;
         this.fiber.resume(this.fiber_token_hash.get(), this, msg);
     }
 
