@@ -828,9 +828,8 @@ abstract class RequestOnConnBase
 
         public void send ( void delegate ( Payload ) fill_payload )
         {
-            scope payload = this.new Payload;
-            fill_payload(payload);
-            this.send(this.outer.send_payload);
+            auto event = this.nextEvent(NextEventFlags.None, fill_payload);
+            assert(event.active == event.active.sent);
         }
 
         /***********************************************************************
@@ -1017,22 +1016,9 @@ abstract class RequestOnConnBase
                           "supported because it has indirections");
             T value;
 
-            int resume_code = this.receiveAndHandleEvents(
-                (in void[] payload)
-                {
-                    this.outer.connection.message_parser.parseBody!(T)(
-                        payload, value
-                    );
-                }
-            );
-
-            if (resume_code >= 0)
-            {
-                assert(on_other_resume_code !is null,
-                       "User unexpectedy resumed the fiber");
-                on_other_resume_code(resume_code);
-            }
-
+            auto event = this.nextEvent(NextEventFlags.Receive);
+            this.outer.connection.message_parser.parseBody!(T)(
+                event.received.payload, value);
             return value;
         }
 
@@ -1053,8 +1039,8 @@ abstract class RequestOnConnBase
 
         public void receive ( void delegate ( in void[] payload ) received )
         {
-            int resume_code = this.receiveAndHandleEvents(received);
-            assert(resume_code <= 0, "receive: User unexpectedy resumed the fiber");
+            auto event = this.nextEvent(NextEventFlags.Receive);
+            received(event.received.payload);
         }
 
         /***********************************************************************
