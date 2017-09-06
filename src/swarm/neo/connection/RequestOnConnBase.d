@@ -251,6 +251,9 @@ abstract class RequestOnConnBase
 
         public enum NextEventFlags
         {
+            /// No flags.
+            None = 0,
+
             /// Wait to receive a payload for this request over the connection.
             Receive     = 1 << 0,
 
