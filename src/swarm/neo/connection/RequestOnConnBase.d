@@ -846,6 +846,7 @@ abstract class RequestOnConnBase
 
         ***********************************************************************/
 
+        deprecated("Use the send method which accepts a delegate")
         public void send ( in void[][] payload ... )
         {
             int resume_code = this.sendAndHandleEvents(payload);
@@ -876,6 +877,7 @@ abstract class RequestOnConnBase
 
         ***********************************************************************/
 
+        deprecated("Use nextEvent instead")
         public int sendAndHandleEvents ( void delegate ( Payload ) fill_payload )
         {
             scope payload = this.new Payload;
@@ -906,6 +908,7 @@ abstract class RequestOnConnBase
 
         ***********************************************************************/
 
+        deprecated("Use nextEvent instead")
         public int sendAndHandleEvents ( in void[][] payload ... )
         in
         {
@@ -1073,6 +1076,7 @@ abstract class RequestOnConnBase
 
         ***********************************************************************/
 
+        deprecated("Use nextEvent instead")
         public int receiveAndHandleEvents (
             void delegate ( in void[] payload ) received )
         in
@@ -1145,6 +1149,7 @@ abstract class RequestOnConnBase
 
         ***********************************************************************/
 
+        deprecated("Use nextEvent instead")
         public int yieldAndHandleEvents ( )
         in
         {
@@ -1222,6 +1227,7 @@ abstract class RequestOnConnBase
 
         ***********************************************************************/
 
+        deprecated("Use nextEvent instead")
         public int yieldReceiveAndHandleEvents (
             void delegate ( in void[] payload ) received
         )
@@ -1315,6 +1321,8 @@ abstract class RequestOnConnBase
 
         ***********************************************************************/
 
+        deprecated("Use either nextEvent, with your own counter or"
+            "RequestEventDispatcher.periodicYield")
         public int periodicYieldAndHandleEvents ( ref uint call_count,
             Const!(uint) yield_after )
         {
@@ -1358,6 +1366,8 @@ abstract class RequestOnConnBase
 
         ***********************************************************************/
 
+        deprecated("Use either nextEvent, with your own counter or"
+            "RequestEventDispatcher.periodicYield")
         public int periodicYieldReceiveAndHandleEvents ( ref uint call_count,
             Const!(uint) yield_after, void delegate ( in void[] payload ) received )
         {
@@ -1393,6 +1403,7 @@ abstract class RequestOnConnBase
 
         ***********************************************************************/
 
+        deprecated("Use nextEvent instead")
         public void sendReceive ( void delegate ( in void[] payload ) received,
             void delegate ( Payload ) fill_payload )
         {
@@ -1420,6 +1431,7 @@ abstract class RequestOnConnBase
 
         ***********************************************************************/
 
+        deprecated("Use nextEvent instead")
         public void sendReceive (
             void delegate ( in void[] payload ) received,
             in void[][] payload ...
@@ -1463,6 +1475,7 @@ abstract class RequestOnConnBase
 
         ***********************************************************************/
 
+        deprecated("Use nextEvent instead")
         public int sendReceiveAndHandleEvents (
             void delegate ( in void[] payload ) received,
             void delegate ( Payload ) fill_payload )
@@ -1501,6 +1514,7 @@ abstract class RequestOnConnBase
 
         ***********************************************************************/
 
+        deprecated("Use nextEvent instead")
         public int sendReceiveAndHandleEvents (
             void delegate ( in void[] recv_payload ) received,
             in void[][] payload ...
