@@ -32,10 +32,10 @@ public final class ConnectionSet : RequestOnConn.IConnectionGetter
     import swarm.neo.client.Connection;
     import swarm.neo.client.RequestSet;
     import swarm.neo.client.NotifierTypes;
+    import swarm.neo.connection.YieldedRequestOnConns;
     import swarm.neo.AddrPort;
     import swarm.neo.authentication.ClientCredentials;
     import ocean.io.select.EpollSelectDispatcher;
-
     import ocean.util.container.pool.ObjectPool;
     import ocean.util.container.pool.FreeList;
 
@@ -154,6 +154,15 @@ public final class ConnectionSet : RequestOnConn.IConnectionGetter
     /// ditto
     private ConnectionNotifier conn_notifier;
 
+
+    /***************************************************************************
+
+        Set of yielded request-on-conns.
+
+    ***************************************************************************/
+
+    private YieldedRequestOnConns yielded_rqonconns;
+
     /***************************************************************************
 
         Constructor.
@@ -177,7 +186,10 @@ public final class ConnectionSet : RequestOnConn.IConnectionGetter
         this.credentials = credentials;
         this.connection_pool = new ObjectPool!(Connection);
         this.connection_list_pool = new FreeList!(Connection[]);
-        this.request_set_ = new RequestSet(this, this.epoll);
+        this.yielded_rqonconns = new YieldedRequestOnConns;
+        epoll.register(this.yielded_rqonconns);
+        this.request_set_ = new RequestSet(this, this.yielded_rqonconns,
+            this.epoll);
         this.conn_notifier = conn_notifier;
     }
 
@@ -323,6 +335,8 @@ public final class ConnectionSet : RequestOnConn.IConnectionGetter
 
     public void stopAll ( istring file = __FILE__, typeof(__LINE__) line = __LINE__ )
     {
+        this.epoll.unregister(this.yielded_rqonconns);
+
         for (auto conn = this.connections.getBoundary!(true)(); conn !is null;)
         {
             debug (SwarmConn)
