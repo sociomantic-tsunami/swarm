@@ -375,12 +375,14 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
 
         Params:
             connections = interface to the set of connections
+            yielded_rqonconns = resumes yielded `RequestOnConn`s
 
     ***************************************************************************/
 
-    public this ( IConnectionGetter connections )
+    public this ( IConnectionGetter connections,
+        YieldedRequestOnConns yielded_rqonconns )
     {
-        super(null);
+        super(yielded_rqonconns);
         this.connections = connections;
         this.abort_exception = new AbortException;
     }
