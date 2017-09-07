@@ -14,6 +14,113 @@ module swarm.neo.util.AcquiredResources;
 
 import ocean.transition;
 
+private struct WrappedArray ( T )
+{
+    static assert(!is(T == void));
+
+    private void[]* buffer;
+
+    invariant ( )
+    {
+        assert(this.buffer.length % T.sizeof == 0);
+    }
+
+    public size_t length ( )
+    {
+        return this.buffer.length / T.sizeof;
+    }
+
+    public void length ( size_t len )
+    {
+        this.buffer.length = len * T.sizeof;
+        enableStomping(*this.buffer);
+    }
+
+    public void opCatAssign ( T elem )
+    {
+        this.length = this.length + 1;
+        this.opIndexAssign(elem, this.length - 1);
+    }
+
+    public T* opIndex ( size_t t_index )
+    {
+        return this.getElement(t_index);
+    }
+
+    public void opIndexAssign ( T elem, size_t t_index )
+    {
+        *this.getElement(t_index) = elem;
+    }
+
+    public T[] opSlice ( )
+    {
+        return (cast(T*)this.buffer.ptr)[0..this.length];
+    }
+
+    public T[] opSlice ( size_t start, size_t end )
+    {
+        return (cast(T*)this.buffer.ptr)[start..end];
+    }
+
+    public int opApply ( int delegate ( ref T ) dg )
+    {
+        int res;
+        for ( size_t i = 0; i < this.length; i++ )
+        {
+            res = dg(*this.getElement(i));
+            if ( res )
+                break;
+        }
+        return res;
+    }
+
+    public int opApply ( int delegate ( ref size_t, ref T ) dg )
+    {
+        int res;
+        for ( size_t i = 0; i < this.length; i++ )
+        {
+            res = dg(i, *this.getElement(i));
+            if ( res )
+                break;
+        }
+        return res;
+    }
+
+    public int opApplyReverse ( int delegate ( ref T ) dg )
+    {
+        int res;
+        for ( size_t i = this.length - 1; i >= 0; i-- )
+        {
+            res = dg(*this.getElement(i));
+            if ( res )
+                break;
+        }
+        return res;
+    }
+
+    public int opApplyReverse ( int delegate ( ref size_t, ref T ) dg )
+    {
+        int res;
+        for ( size_t i = this.length - 1; i >= 0; i-- )
+        {
+            res = dg(i, *this.getElement(i));
+            if ( res )
+                break;
+        }
+        return res;
+    }
+
+    private T* getElement ( size_t t_index )
+    in
+    {
+        assert(t_index < this.length);
+    }
+    body
+    {
+        return cast(T*)(this.buffer.ptr + (t_index * T.sizeof));
+    }
+}
+
 /*******************************************************************************
 
     Set of acquired arrays of the templated type. An external source of untyped
@@ -35,6 +142,24 @@ public struct AcquiredArraysOf ( T )
 
     /***************************************************************************
 
+        Figure out the return type of this.acquire. It's pointless (and not
+        possible) to have a WrappedArray!(void), so if T is void, this.acquire
+        simply returns a void[]* directly. Otherwise, it returns a
+        WrappedArray!(T).
+
+    ***************************************************************************/
+
+    static if (is(T == void) )
+    {
+        private alias void[]* AcquireReturnType;
+    }
+    else
+    {
+        private alias WrappedArray!(T) AcquireReturnType;
+    }
+
+    /***************************************************************************
+
         Externally owned pool of untyped buffers, passed in via initialise().
 
     ***************************************************************************/
@@ -43,11 +168,21 @@ public struct AcquiredArraysOf ( T )
 
     /***************************************************************************
 
-        List of acquired buffers.
+        List of void[] backing buffers for acquired arrays of T. This array is
+        stored as a WrappedArray!(void[]) in order to be able to handle it as if
+        it's a void[][], where it's actually a simple void[] under the hood.
 
     ***************************************************************************/
 
-    private T[][] acquired;
+    private WrappedArray!(void[]) acquired;
+
+    /***************************************************************************
+
+        Backing buffer for this.acquired.
+
+    ***************************************************************************/
+
+    private void[] buffer;
 
     /***************************************************************************
 
@@ -100,11 +235,11 @@ public struct AcquiredArraysOf ( T )
         with the array's pointer).
 
         Returns:
-            a new array of T
+            a new array of T (wrapped, if T is not void)
 
     ***************************************************************************/
 
-    public T[]* acquire ( )
+    public AcquireReturnType acquire ( )
     in
     {
         assert(this.buffer_pool !is null);
@@ -121,15 +256,24 @@ public struct AcquiredArraysOf ( T )
         }
 
         // Acquire container buffer, if not already done.
-        if ( this.acquired is null )
+        if ( this.buffer is null )
         {
-            this.acquired = cast(T[][])newBuffer((T[]).sizeof * 4);
+            this.buffer = newBuffer((void[]).sizeof * 4);
+            this.acquired = WrappedArray!(void[])(&this.buffer);
         }
 
         // Acquire and re-initialise new buffer to return to the user. Store
         // it in the container buffer.
-        this.acquired ~= cast(T[])newBuffer(4);
-        return &this.acquired[$-1];
+        this.acquired ~= newBuffer(T.sizeof * 4);
+
+        static if (is(T == void) )
+        {
+            return this.acquired[this.acquired.length-1];
+        }
+        else
+        {
+            return WrappedArray!(T)(this.acquired[this.acquired.length-1]);
+        }
     }
 
     /***************************************************************************
@@ -145,14 +289,14 @@ public struct AcquiredArraysOf ( T )
     }
     body
     {
-        if ( this.acquired !is null )
+        if ( this.buffer !is null )
         {
             // Relinquish acquired buffers.
             foreach ( ref inst; this.acquired )
                 this.buffer_pool.recycle(cast(ubyte[])inst);
 
             // Relinquish container buffer.
-            this.buffer_pool.recycle(cast(ubyte[])this.acquired);
+            this.buffer_pool.recycle(cast(ubyte[])this.buffer);
         }
     }
 }
