@@ -32,6 +32,7 @@ import ocean.transition;
 public struct AcquiredArraysOf ( T )
 {
     import ocean.util.container.pool.FreeList;
+    import swarm.neo.util.VoidBufferAsArrayOf;
 
     /***************************************************************************
 
@@ -43,11 +44,22 @@ public struct AcquiredArraysOf ( T )
 
     /***************************************************************************
 
-        List of acquired buffers.
+        List of void[] backing buffers for acquired arrays of T. This array is
+        stored as a VoidBufferAsArrayOf!(void[]) in order to be able to handle
+        it as if it's a void[][], where it's actually a simple void[] under the
+        hood.
 
     ***************************************************************************/
 
-    private T[][] acquired;
+    private VoidBufferAsArrayOf!(void[]) acquired;
+
+    /***************************************************************************
+
+        Backing buffer for this.acquired.
+
+    ***************************************************************************/
+
+    private void[] buffer;
 
     /***************************************************************************
 
@@ -88,15 +100,18 @@ public struct AcquiredArraysOf ( T )
         }
 
         // Acquire container buffer, if not already done.
-        if ( this.acquired is null )
+        if ( this.buffer is null )
         {
-            this.acquired = cast(T[][])newBuffer((T[]).sizeof * 4);
+            this.buffer = newBuffer((void[]).sizeof * 4);
+            this.acquired = VoidBufferAsArrayOf!(void[])(&this.buffer);
         }
 
         // Acquire and re-initialise new buffer to return to the user. Store
         // it in the container buffer.
-        this.acquired ~= cast(T[])newBuffer(4);
-        return &this.acquired[$-1];
+        this.acquired ~= newBuffer(T.sizeof * 4);
+
+        auto array_as_t = cast(T[][])this.acquired.array();
+        return &array_as_t[$-1];
     }
 
     /***************************************************************************
@@ -112,14 +127,14 @@ public struct AcquiredArraysOf ( T )
     }
     body
     {
-        if ( this.acquired !is null )
+        if ( this.buffer !is null )
         {
             // Relinquish acquired buffers.
-            foreach ( ref inst; this.acquired )
+            foreach ( ref inst; this.acquired.array() )
                 this.buffer_pool.recycle(cast(ubyte[])inst);
 
             // Relinquish container buffer.
-            this.buffer_pool.recycle(cast(ubyte[])this.acquired);
+            this.buffer_pool.recycle(cast(ubyte[])this.buffer);
         }
     }
 }
