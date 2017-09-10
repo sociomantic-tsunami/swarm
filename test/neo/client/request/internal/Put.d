@@ -41,6 +41,10 @@ public struct Put
     import test.neo.common.Put;
     import test.neo.client.request.Put;
     import test.neo.common.RequestCodes;
+    import swarm.neo.AddrPort;
+    import swarm.neo.request.Command;
+    import swarm.neo.client.RequestOnConn;
+    import swarm.neo.client.NotifierTypes;
     import swarm.neo.client.mixins.RequestCore;
     import swarm.neo.client.RequestHandlers : UseNodeDg;
 
@@ -54,7 +58,7 @@ public struct Put
 
     ***************************************************************************/
 
-    private static struct SharedWorking
+    public static struct SharedWorking
     {
         /// Enum indicating the ways in which the request may end.
         public enum Result
@@ -77,7 +81,7 @@ public struct Put
 
     ***************************************************************************/
 
-    private static struct Working
+    public static struct Working
     {
         // Dummy (not required by this request)
     }

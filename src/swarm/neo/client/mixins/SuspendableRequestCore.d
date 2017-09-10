@@ -964,7 +964,7 @@ public struct SuspendableRequestSharedWorkingData
     }
 
     /// Enum of possible desired states of the request.
-    private enum DesiredState
+    public enum DesiredState
     {
         None,
         Running,
