@@ -109,7 +109,7 @@ public struct NodeItem
 
     ***************************************************************************/
 
-    public hash_t toHash ( )
+    public hash_t toHash ( ) /* d1to2fix_inject: const */
     {
         return Fnv1a(this.Address) ^ this.Port;
     }
