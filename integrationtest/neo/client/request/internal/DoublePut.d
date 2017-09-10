@@ -41,6 +41,10 @@ public struct DoublePut
     import integrationtest.neo.common.DoublePut;
     import integrationtest.neo.client.request.DoublePut;
     import integrationtest.neo.common.RequestCodes;
+    import swarm.neo.AddrPort;
+    import swarm.neo.request.Command;
+    import swarm.neo.client.RequestOnConn;
+    import swarm.neo.client.NotifierTypes;
     import swarm.neo.client.mixins.RequestCore;
     import swarm.neo.client.RequestHandlers : UseNodeDg;
 

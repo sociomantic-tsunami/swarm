@@ -25,7 +25,8 @@ import Config = ocean.util.config.ConfigFiller;
 import ocean.util.config.ConfigParser;
 
 version (UnitTest) {}
-else void main ( )
+else
+void main ( )
 {
     // Create temporary sandbox directory to write files to.
     auto sandbox = DirectorySandbox.create();

@@ -42,6 +42,7 @@ public struct GetAll
     import integrationtest.neo.client.request.GetAll;
     import integrationtest.neo.common.RequestCodes;
     import integrationtest.neo.client.NotifierTypes;
+    import swarm.neo.client.RequestOnConn;
     import swarm.neo.client.mixins.RequestCore;
     import swarm.neo.client.mixins.SuspendableRequestCore;
     import swarm.neo.client.mixins.AllNodesRequestCore;
@@ -56,7 +57,7 @@ public struct GetAll
 
     ***************************************************************************/
 
-    private static struct SharedWorking
+    public static struct SharedWorking
     {
         /// Shared working data required for core all-nodes request behaviour.
         AllNodesRequestSharedWorkingData all_nodes;
@@ -73,7 +74,7 @@ public struct GetAll
 
     ***************************************************************************/
 
-    private static struct Working
+    public static struct Working
     {
         // Dummy (not required by this request)
     }
