@@ -523,6 +523,7 @@ public template SuspendableController ( Request, IController, MessageType )
     {
         import ocean.core.Enforce;
         import swarm.neo.client.mixins.RequestCore : ControllerBase;
+        import swarm.neo.client.NotifierTypes;
 
         /***********************************************************************
 
@@ -964,7 +965,7 @@ public struct SuspendableRequestSharedWorkingData
     }
 
     /// Enum of possible desired states of the request.
-    private enum DesiredState
+    public enum DesiredState
     {
         None,
         Running,

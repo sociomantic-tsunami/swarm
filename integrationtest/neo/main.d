@@ -481,7 +481,8 @@ class Test : Task
 *******************************************************************************/
 
 version (UnitTest) {}
-else void main ( )
+else
+void main ( )
 {
     initScheduler(SchedulerConfiguration.init);
     theScheduler.schedule(new Test);
