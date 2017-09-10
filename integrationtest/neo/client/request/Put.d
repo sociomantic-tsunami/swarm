@@ -10,7 +10,7 @@
 
 *******************************************************************************/
 
-module test.neo.client.request.Put;
+module integrationtest.neo.client.request.Put;
 
 import ocean.transition;
 import ocean.core.SmartUnion;

@@ -1,6 +1,6 @@
 /*******************************************************************************
 
-    Common protocol definitions for the Get request.
+    Common protocol definitions for the Put request.
 
     Copyright:
         Copyright (c) 2017 sociomantic labs GmbH. All rights reserved
@@ -10,7 +10,7 @@
 
 *******************************************************************************/
 
-module test.neo.common.Get;
+module integrationtest.neo.common.Put;
 
 import swarm.neo.request.Command;
 
@@ -22,9 +22,8 @@ import swarm.neo.request.Command;
 
 public enum RequestStatusCode : StatusCode
 {
-    None,   // Invalid, default value
+    None,       // Invalid, default value
 
-    Value,  // Value fetched
-    Empty,  // Record empty
-    Error   // Internal node error occurred
+    Succeeded,  // Value fetched
+    Error       // Internal node error occurred
 }

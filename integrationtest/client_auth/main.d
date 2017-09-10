@@ -10,9 +10,9 @@
 
 *******************************************************************************/
 
-module test.client_auth.main;
+module integrationtest.client_auth.main;
 
-import test.neo.client.Client;
+import integrationtest.neo.client.Client;
 
 import swarm.neo.authentication.CredentialsFile;
 
@@ -24,6 +24,8 @@ import ocean.io.select.EpollSelectDispatcher;
 import Config = ocean.util.config.ConfigFiller;
 import ocean.util.config.ConfigParser;
 
+version (UnitTest) {}
+else
 void main ( )
 {
     // Create temporary sandbox directory to write files to.
