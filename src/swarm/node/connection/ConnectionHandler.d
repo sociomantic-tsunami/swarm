@@ -76,15 +76,13 @@ import IPSocket = ocean.sys.socket.IPSocket;
 
 import core.sys.posix.netinet.in_: SOL_SOCKET, IPPROTO_TCP, SO_KEEPALIVE;
 
-import ocean.util.log.Log;
-
 import core.memory;
 
 debug ( ConnectionHandler ) import ocean.io.Stdout;
 
 import ocean.core.Traits : isArrayType;
 
-
+import ocean.util.log.Logger;
 
 /*******************************************************************************
 

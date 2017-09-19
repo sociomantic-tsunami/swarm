@@ -27,7 +27,7 @@ import ocean.core.Array;
 import ocean.core.Enum;
 
 import ocean.transition;
-import ocean.text.convert.Format;
+import ocean.text.convert.Formatter;
 
 import swarm.client.ClientExceptions : TimedOutException,
     ConnectionTimedOutException;
@@ -273,7 +273,7 @@ public scope class IRequestNotification
 
         if ( this.exception is null )
         {
-            Format.format(message_, "{}: {}:{}, {} request, status {}",
+            sformat(message_, "{}: {}:{}, {} request, status {}",
                 this.notification_description,
                 this.nodeitem.Address, this.nodeitem.Port,
                 this.command_description, this.status_description);
@@ -282,7 +282,7 @@ public scope class IRequestNotification
         {
             if ( this.exception.file.length )
             {
-                Format.format(message_, "{}: {}:{}, {} request, status {}, exception '{}' @{}:{}",
+                sformat(message_, "{}: {}:{}, {} request, status {}, exception '{}' @{}:{}",
                     this.notification_description,
                     this.nodeitem.Address, this.nodeitem.Port,
                     this.command_description, this.status_description,
@@ -290,7 +290,7 @@ public scope class IRequestNotification
             }
             else
             {
-                Format.format(message_, "{}: {}:{}, {} request, status {}, exception '{}'",
+                sformat(message_, "{}: {}:{}, {} request, status {}, exception '{}'",
                     this.notification_description,
                     this.nodeitem.Address, this.nodeitem.Port,
                     this.command_description, this.status_description,

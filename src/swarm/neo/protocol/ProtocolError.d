@@ -25,9 +25,12 @@ class ProtocolError: Exception
     import ocean.core.Exception: ReusableExceptionImplementation;
     mixin ReusableExceptionImplementation!();
 
-    import ocean.text.convert.Format;
     import core.stdc.stdarg;
     import ocean.transition;
+    import ocean.text.convert.Formatter;
+
+    static if (!is(FormatterSink))
+        alias Sink FormatterSink;
 
     /***************************************************************************
 
@@ -90,11 +93,18 @@ class ProtocolError: Exception
 
     ***************************************************************************/
 
-    private void setFmt_ ( istring file, long line, cstring fmt, ... )
+    private void setFmt_ ( T... ) ( istring file, long line, cstring fmt, T args )
     {
-        this.reused_msg.length = 0;
-        auto msg = this.reused_msg[];
-        Format.vformat(msg, fmt, _arguments, _argptr);
+        this.reused_msg.reset();
+        sformat(
+            cast(FormatterSink) (cstring chunk) {
+                this.reused_msg ~= chunk;
+                return chunk.length;
+            },
+            fmt,
+            args
+        );
+
         this.file = file;
         this.line = line;
     }

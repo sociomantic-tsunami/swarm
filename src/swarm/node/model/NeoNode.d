@@ -53,7 +53,7 @@ import ocean.io.compress.lzo.LzoChunkCompressor;
 
 import ocean.util.container.pool.model.IAggregatePool;
 
-import ocean.util.log.Log;
+import ocean.util.log.Logger;
 
 import ocean.core.Enforce;
 

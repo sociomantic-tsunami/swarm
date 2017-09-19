@@ -45,7 +45,7 @@ import HmacDef = swarm.neo.authentication.HmacDef;
 import ocean.transition;
 import ocean.io.device.File;
 import ocean.net.util.QueryParams;
-import ocean.text.convert.Format;
+import ocean.text.convert.Formatter;
 
 debug ( SwarmConn )
     import ocean.io.Stdout;
@@ -94,7 +94,7 @@ public HmacDef.Key[istring] parse ( cstring filepath )
     if (file_length > CredDef.LengthLimit.File)
     {
         throw new CredentialsParseException(
-            Format("Key registry file too large: {} bytes", file_length),
+            format("Key registry file too large: {} bytes", file_length),
             filepath, 0);
     }
 
@@ -164,12 +164,12 @@ private HmacDef.Key[istring] parseContent ( istring content,
         enforce(!!name.length, "Empty name");
         enforce(name.length <= CredDef.LengthLimit.Name, "Name too long");
         enforce(hex_key.length == HmacDef.Key.length * 2,
-                Format("Invalid key length {} (should be {})", hex_key.length,
+                format("Invalid key length {} (should be {})", hex_key.length,
                 HmacDef.Key.length * 2));
 
         if (auto x = CredDef.validateNameCharacters(name))
         {
-            enforce(false, Format("Invalid name letter at position {}",
+            enforce(false, format("Invalid name letter at position {}",
                                   name.length - x));
         }
 
@@ -183,7 +183,7 @@ private HmacDef.Key[istring] parseContent ( istring content,
             {
                 auto n = g_ascii_xdigit_value(c);
                 enforce(n >= 0,
-                        Format("Invalid key letter at position {}", i));
+                        format("Invalid key letter at position {}", i));
                 return cast(ubyte)n;
             }
 
@@ -240,7 +240,7 @@ public class CredentialsParseException: Exception
     public this ( cstring msg_base, cstring reg_file, uint reg_file_line,
         istring src_file = __FILE__, typeof(__LINE__) src_line = __LINE__ )
     {
-        super(Format("{} in registry file {} at line {}", msg_base, file, reg_file_line));
+        super(format("{} in registry file {} at line {}", msg_base, file, reg_file_line));
     }
 }
 
