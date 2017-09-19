@@ -78,64 +78,95 @@ public struct AcquiredArraysOf ( T )
 
     /***************************************************************************
 
-        Gets a pointer to a new array, acquired from the shared resources pool.
-
-        Important note about array casting: care must be taken when casting an
-        array to a type of a different element size. Sizing the array first,
-        then casting is fine, e.g.:
-
-        ---
-            AcquiredArraysOf!(void) arrays;
-            arrays.initialise(buffer_pool); // buffer_pool is assumed to exist
-            auto void_array = arrays.acquire();
-
-            struct S { int i; hash_t h; }
-            (*void_array).length = 23 * S.sizeof;
-            auto s_array = cast(S[])*void_array;
-        ---
-
-        But casting the array then sizing it has been observed to cause
-        segfaults, e.g.:
-
-        ---
-            AcquiredArraysOf!(void) arrays;
-            arrays.initialise(buffer_pool); // buffer_pool is assumed to exist
-            auto void_array = arrays.acquire();
-
-            struct S { int i; hash_t h; }
-            auto s_array = cast(S[]*)void_array;
-            s_array.length = 23;
-        ---
-
-        The exact reason for the segfaults is not known, but it appears to lead
-        to corruption of internal GC data (possibly type metadata associated
-        with the array's pointer).
-
-        Returns:
-            a new array of T
+        Figure out the return type of this.acquire. It's pointless (and not
+        possible) to have a VoidBufferAsArrayOf!(void), so if T is void, we only
+        need a method to return a void[]* directly. If T is not void, we need a
+        method to return a VoidBufferAsArrayOf!(T).
 
     ***************************************************************************/
 
-    public T[]* acquire ( )
-    in
+    static if (is(T == void) )
     {
-        assert(this.buffer_pool !is null);
-    }
-    body
-    {
-        // Acquire container buffer, if not already done.
-        if ( this.buffer is null )
+        /***********************************************************************
+
+            Gets a pointer to a new array, acquired from the shared resources
+            pool.
+
+            Returns:
+                pointer to a new void[]
+
+        ***********************************************************************/
+
+        public void[]* acquire ( )
         {
-            this.buffer = acquireBuffer(this.buffer_pool, (void[]).sizeof * 4);
-            this.acquired = VoidBufferAsArrayOf!(void[])(&this.buffer);
+            return this.acquireNewBuffer();
+        }
+    }
+    else
+    {
+        /***********************************************************************
+
+            Gets a pointer to a new array, acquired from the shared resources
+            pool.
+
+            Important note about array casting: care must be taken when casting
+            an array to a type of a different element size. Sizing the array
+            first, then casting is fine, e.g.:
+
+            ---
+                AcquiredArraysOf!(void) arrays;
+                arrays.initialise(buffer_pool); // buffer_pool assumed to exist
+                auto void_array = arrays.acquire();
+
+                struct S { int i; hash_t h; }
+                (*void_array).length = 23 * S.sizeof;
+                auto s_array = cast(S[])*void_array;
+            ---
+
+            But casting the array then sizing it has been observed to cause
+            segfaults, e.g.:
+
+            ---
+                AcquiredArraysOf!(void) arrays;
+                arrays.initialise(buffer_pool); // buffer_pool assumed to exist
+                auto void_array = arrays.acquire();
+
+                struct S { int i; hash_t h; }
+                auto s_array = cast(S[]*)void_array;
+                s_array.length = 23;
+            ---
+
+            The exact reason for the segfaults is not known, but it appears to
+            lead to corruption of internal GC data (possibly type metadata
+            associated with the array's pointer).
+
+            Returns:
+                pointer to a new void[] cast to a pointer to a T[]
+
+        ***********************************************************************/
+
+        deprecated("Use the safely typed wrapper returned by acquireWrapped instead")
+        public T[]* acquire ( )
+        {
+            auto new_buf = this.acquireNewBuffer();
+            return cast(T[]*)new_buf;
         }
 
-        // Acquire and re-initialise new buffer to return to the user. Store
-        // it in the container buffer.
-        this.acquired ~= acquireBuffer(this.buffer_pool, T.sizeof * 4);
+        /***********************************************************************
 
-        auto array_as_t = cast(T[][])this.acquired.array();
-        return &array_as_t[$-1];
+            Gets a new void[] wrapped with an API allowing it to be used as a
+            T[], acquired from the shared resources pool.
+
+            Returns:
+                a void[] wrapped with an API allowing it to be used as a T[]
+
+        ***********************************************************************/
+
+        public VoidBufferAsArrayOf!(T) acquireWrapped ( )
+        {
+            auto new_buf = this.acquireNewBuffer();
+            return VoidBufferAsArrayOf!(T)(new_buf);
+        }
     }
 
     /***************************************************************************
@@ -160,6 +191,41 @@ public struct AcquiredArraysOf ( T )
             // Relinquish container buffer.
             this.buffer_pool.recycle(cast(ubyte[])this.buffer);
         }
+    }
+
+    /***************************************************************************
+
+        Gets a void[] from the pool of buffers, appends it to the list of
+        acquired buffers, then returns a pointer to element in the list.
+
+        Returns:
+            a pointer to a new void[] in the list of acquired buffers
+
+    ***************************************************************************/
+
+    private void[]* acquireNewBuffer ( )
+    in
+    {
+        assert(this.buffer_pool !is null);
+    }
+    body
+    {
+        const initial_array_capacity = 4;
+
+        // Acquire container buffer, if not already done.
+        if ( this.buffer is null )
+        {
+            this.buffer = acquireBuffer(this.buffer_pool,
+                (void[]).sizeof * initial_array_capacity);
+            this.acquired = VoidBufferAsArrayOf!(void[])(&this.buffer);
+        }
+
+        // Acquire and re-initialise new buffer to return to the user. Store
+        // it in the container buffer.
+        this.acquired ~= acquireBuffer(this.buffer_pool,
+            T.sizeof * initial_array_capacity);
+
+        return &(this.acquired.array()[$-1]);
     }
 }
 
