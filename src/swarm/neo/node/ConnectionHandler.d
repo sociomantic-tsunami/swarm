@@ -30,7 +30,7 @@ module swarm.neo.node.ConnectionHandler;
 
 import ocean.net.server.connection.IConnectionHandler;
 import ocean.sys.socket.AddressIPSocket;
-import ocean.util.log.Log;
+import ocean.util.log.Logger;
 
 /*******************************************************************************
 

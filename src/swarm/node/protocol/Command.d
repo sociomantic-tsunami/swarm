@@ -19,7 +19,7 @@ module swarm.node.protocol.Command;
 
 import swarm.node.request.model.IRequest;
 
-import ocean.text.convert.Format;
+import ocean.text.convert.Formatter;
 
 import ocean.transition;
 
@@ -87,7 +87,7 @@ public abstract scope class Command : IRequest
     {
         dst.length = 0;
         enableStomping(dst);
-        Format.format(dst, "{} request", this.name);
+        sformat(dst, "{} request", this.name);
         return dst;
     }
 

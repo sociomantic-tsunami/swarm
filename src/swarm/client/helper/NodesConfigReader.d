@@ -41,13 +41,13 @@ import ocean.core.Array;
 import ocean.core.Enforce;
 
 import ocean.text.util.StringSearch;
+import ocean.text.convert.Formatter;
 
 import ocean.core.TypeConvert : castFrom;
 
 import ocean.core.array.Search : find;
 import ocean.io.device.File;
 
-import ocean.text.convert.Format;
 import Integer = ocean.text.convert.Integer_tango;
 
 version (UnitTest)
@@ -162,7 +162,7 @@ static:
 
             enforce(
                 split_pos < line.length,
-                Format("IP address must be followed by a port name in line {}: {}",
+                format("IP address must be followed by a port name in line {}: {}",
                     line_idx, line)
             );
 
