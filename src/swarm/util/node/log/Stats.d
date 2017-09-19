@@ -347,7 +347,7 @@ version ( UnitTest )
     class TestLogger
     {
         import ocean.core.Traits : FieldName, hasMethod;
-        import ocean.text.convert.Layout_tango;
+        import ocean.text.convert.Formatter;
 
         mstring output;
 
@@ -356,8 +356,7 @@ version ( UnitTest )
             static assert(is(S == struct));
             foreach ( i, field; str.tupleof )
             {
-                Layout!(char).format(this.output, "{}:{} ",
-                    FieldName!(i, S), field);
+                sformat(this.output, "{}:{} ", FieldName!(i, S), field);
             }
         }
 
@@ -366,7 +365,7 @@ version ( UnitTest )
             static assert(is(S == struct));
             foreach ( i, field; str.tupleof )
             {
-                Layout!(char).format(this.output, "{}/{}/{}:{} ",
+                sformat(this.output, "{}/{}/{}:{} ",
                     category, id, FieldName!(i, S), field);
             }
         }
@@ -592,4 +591,3 @@ unittest
             "channel/test/bytes:0 channel/test/records:0 ");
     }
 }
-
