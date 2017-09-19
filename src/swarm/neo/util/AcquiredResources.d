@@ -13,6 +13,7 @@
 module swarm.neo.util.AcquiredResources;
 
 import ocean.transition;
+import ocean.util.container.pool.FreeList;
 
 /*******************************************************************************
 
@@ -31,7 +32,6 @@ import ocean.transition;
 
 public struct AcquiredArraysOf ( T )
 {
-    import ocean.util.container.pool.FreeList;
     import swarm.neo.util.VoidBufferAsArrayOf;
 
     /***************************************************************************
@@ -123,25 +123,16 @@ public struct AcquiredArraysOf ( T )
     }
     body
     {
-        void[] newBuffer ( size_t capacity )
-        {
-            auto buffer = this.buffer_pool.get(cast(ubyte[])new void[capacity]);
-            buffer.length = 0;
-            enableStomping(buffer);
-
-            return buffer;
-        }
-
         // Acquire container buffer, if not already done.
         if ( this.buffer is null )
         {
-            this.buffer = newBuffer((void[]).sizeof * 4);
+            this.buffer = acquireBuffer(this.buffer_pool, (void[]).sizeof * 4);
             this.acquired = VoidBufferAsArrayOf!(void[])(&this.buffer);
         }
 
         // Acquire and re-initialise new buffer to return to the user. Store
         // it in the container buffer.
-        this.acquired ~= newBuffer(T.sizeof * 4);
+        this.acquired ~= acquireBuffer(this.buffer_pool, T.sizeof * 4);
 
         auto array_as_t = cast(T[][])this.acquired.array();
         return &array_as_t[$-1];
@@ -238,7 +229,6 @@ unittest
 
 public struct Acquired ( T )
 {
-    import ocean.util.container.pool.FreeList;
     import swarm.neo.util.VoidBufferAsArrayOf;
 
     /***************************************************************************
@@ -324,19 +314,10 @@ public struct Acquired ( T )
     }
     body
     {
-        void[] newBuffer ( size_t capacity )
-        {
-            auto buffer = this.buffer_pool.get(cast(ubyte[])new void[capacity]);
-            buffer.length = 0;
-            enableStomping(buffer);
-
-            return buffer;
-        }
-
         // Acquire container buffer, if not already done.
         if ( this.buffer is null )
         {
-            this.buffer = newBuffer(Elem.sizeof * 4);
+            this.buffer = acquireBuffer(this.buffer_pool, Elem.sizeof * 4);
             this.acquired = VoidBufferAsArrayOf!(Elem)(&this.buffer);
         }
 
@@ -628,6 +609,30 @@ unittest
             }
         }
     }
+}
+
+/*******************************************************************************
+
+    Helper function used by the structs in this module to acquire a void[]
+    buffer from the specified free list.
+
+    Params:
+        buffer_pool = free list of void[]s to reuse, if one is available
+        capacity = if a new buffer is allocated (i.e. the free list is empty),
+            this argument specifies its initial dimension (in bytes)
+
+    Returns:
+        a buffer acquired from the free list or a newly allocated buffer
+
+*******************************************************************************/
+
+private void[] acquireBuffer ( FreeList!(ubyte[]) buffer_pool, size_t capacity )
+{
+    auto buffer = buffer_pool.get(cast(ubyte[])new void[capacity]);
+    buffer.length = 0;
+    enableStomping(buffer);
+
+    return buffer;
 }
 
 /*******************************************************************************
