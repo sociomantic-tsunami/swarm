@@ -129,10 +129,8 @@ Maintained Major Branches
 ====== ==================== ===============
 Major  Initial release date Supported until
 ====== ==================== ===============
-v3.x.x v3.2.0_: 17/01/2017  05/10/2017
 v4.x.x v4.0.0_: 05/04/2017  TBD
 ====== ==================== ===============
 
-.. _v3.2.0: https://github.com/sociomantic-tsunami/swarm/releases/tag/v3.2.0
 .. _v4.0.0: https://github.com/sociomantic-tsunami/swarm/releases/tag/v4.0.0
 
