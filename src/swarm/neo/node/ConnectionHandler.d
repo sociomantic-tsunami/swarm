@@ -148,6 +148,10 @@ class ConnectionHandler : IConnectionHandler
         }
     }
 
+    /// Alias to old name.
+    deprecated("Use the `RequestMap` struct instead.")
+    public alias RequestMap CmdHandlers;
+
     /***************************************************************************
 
         Connection handler shared parameters class. Passed to the constructor.
