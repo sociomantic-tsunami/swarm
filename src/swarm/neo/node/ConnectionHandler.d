@@ -144,7 +144,8 @@ class ConnectionHandler : IConnectionHandler
         public void initStats ( RequestStats request_stats )
         {
             foreach ( code, rq; this.map )
-                request_stats.init(rq.name);
+                if ( rq.name.length > 0 )
+                    request_stats.init(rq.name);
         }
     }
 
