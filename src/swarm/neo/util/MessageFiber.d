@@ -20,13 +20,13 @@ module swarm.neo.util.MessageFiber;
 
 import ocean.transition;
 
-import ocean.core.Thread : Fiber;
-
 import ocean.core.Array: copy;
 
 import ocean.core.SmartUnion;
 
 import ocean.io.digest.Fnv1;
+
+import core.thread : Fiber;
 
 debug ( MessageFiber )
 {
@@ -405,7 +405,7 @@ public class OceanMessageFiber
                 cast(void*) Fiber.getThis()
             ).flush();
         }
-     
+
         if (this.fiber.state == this.fiber.State.TERM)
         {
             this.fiber.reset();
