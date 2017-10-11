@@ -620,6 +620,7 @@ public abstract class INodeBase : INode, INodeInfo
 
 public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
 {
+    import ocean.core.VersionCheck;
     import ocean.net.server.unix.UnixListener;
     import ocean.net.server.unix.UnixConnectionHandler;
     import swarm.neo.authentication.NodeCredentials;
@@ -812,6 +813,12 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
                     &this.handleUpdateCredentials;
             }
 
+            static if ( hasFeaturesFrom!("ocean", 3, 6) )
+            {
+                unix_socket_handlers["drop-all-connections"] =
+                    &this.handleDropAllConnections;
+            }
+
             unix_socket_handlers["reset"] = &this.handleReset;
 
             unix_listener = new UnixListener(
@@ -930,6 +937,28 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
             send_response("Error updating credentials: ");
             send_response(getMsg(e));
             send_response("\n");
+        }
+    }
+
+    static if ( hasFeaturesFrom!("ocean", 3, 6) )
+    {
+        /***********************************************************************
+
+            Unix domain socket connection handler, causes all connections to be
+            finalised.
+
+            Params:
+                args = command arguments
+                send_response = delegate to write to the client socket
+
+        ***********************************************************************/
+
+        private void handleDropAllConnections ( cstring args,
+            void delegate ( cstring response ) send_response )
+        {
+            this.listener.closeAllConnections();
+            this.neo_listener.closeAllConnections();
+            send_response("Connections dropped.\n");
         }
     }
 
