@@ -812,6 +812,8 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
                     &this.handleUpdateCredentials;
             }
 
+            unix_socket_handlers["reset"] = &this.handleReset;
+
             unix_listener = new UnixListener(
                 options.unix_socket_path, options.epoll, unix_socket_handlers);
         }
@@ -929,6 +931,23 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
             send_response(getMsg(e));
             send_response("\n");
         }
+    }
+
+    /***************************************************************************
+
+        Unix domain socket connection handler, no-op. This command is required
+        by turtle when a test suite connects to a swarm node being tested.
+
+        Params:
+            args = command arguments
+            send_response = delegate to write to the client socket
+
+    ***************************************************************************/
+
+    private void handleReset ( cstring args,
+        void delegate ( cstring response ) send_response )
+    {
+        send_response("ACK");
     }
 
     /***************************************************************************
