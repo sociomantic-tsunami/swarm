@@ -808,8 +808,8 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
             BasicCommandHandler.Handler[istring] unix_socket_handlers;
             if ( this.credentials_file )
             {
-                unix_socket_handlers =
-                    ["update-credentials": &this.handleUpdateCredentials];
+                unix_socket_handlers["update-credentials"] =
+                    &this.handleUpdateCredentials;
             }
 
             unix_listener = new UnixListener(
