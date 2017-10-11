@@ -620,6 +620,7 @@ public abstract class INodeBase : INode, INodeInfo
 
 public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
 {
+    import ocean.core.VersionCheck;
     import ocean.net.server.unix.UnixListener;
     import ocean.net.server.unix.UnixConnectionHandler;
     import swarm.neo.authentication.NodeCredentials;
@@ -808,9 +809,17 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
             BasicCommandHandler.Handler[istring] unix_socket_handlers;
             if ( this.credentials_file )
             {
-                unix_socket_handlers =
-                    ["update-credentials": &this.handleUpdateCredentials];
+                unix_socket_handlers["update-credentials"] =
+                    &this.handleUpdateCredentials;
             }
+
+            static if ( hasFeaturesFrom!("ocean", 3, 6) )
+            {
+                unix_socket_handlers["drop-all-connections"] =
+                    &this.handleDropAllConnections;
+            }
+
+            unix_socket_handlers["reset"] = &this.handleReset;
 
             unix_listener = new UnixListener(
                 options.unix_socket_path, options.epoll, unix_socket_handlers);
@@ -929,6 +938,45 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
             send_response(getMsg(e));
             send_response("\n");
         }
+    }
+
+    static if ( hasFeaturesFrom!("ocean", 3, 6) )
+    {
+        /***********************************************************************
+
+            Unix domain socket connection handler, causes all connections to be
+            finalised.
+
+            Params:
+                args = command arguments
+                send_response = delegate to write to the client socket
+
+        ***********************************************************************/
+
+        private void handleDropAllConnections ( cstring args,
+            void delegate ( cstring response ) send_response )
+        {
+            this.listener.closeAllConnections();
+            this.neo_listener.closeAllConnections();
+            send_response("Connections dropped.\n");
+        }
+    }
+
+    /***************************************************************************
+
+        Unix domain socket connection handler, no-op. This command is required
+        by turtle when a test suite connects to a swarm node being tested.
+
+        Params:
+            args = command arguments
+            send_response = delegate to write to the client socket
+
+    ***************************************************************************/
+
+    private void handleReset ( cstring args,
+        void delegate ( cstring response ) send_response )
+    {
+        send_response("ACK");
     }
 
     /***************************************************************************
