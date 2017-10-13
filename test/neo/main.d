@@ -43,10 +43,10 @@ class Test : Task
     import ocean.util.serialize.contiguous.MultiVersionDecorator;
 
     /// Example node.
-    Node node;
+    private Node node;
 
     /// Example client.
-    Client client;
+    private Client client;
 
     /***************************************************************************
 
