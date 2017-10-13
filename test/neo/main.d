@@ -48,6 +48,16 @@ class Test : Task
     /// Example client.
     private Client client;
 
+    /// Connection notification count wrapper.
+    private struct ConnNotifications
+    {
+        uint connected;
+        uint error_while_connecting;
+    }
+
+    /// Connection notification counts.
+    private ConnNotifications conn_notifications;
+
     /***************************************************************************
 
         Task method to be run in a worker fiber.
@@ -61,6 +71,7 @@ class Test : Task
             &this.connNotifier);
 
         this.client.blocking.waitAllNodesConnected();
+        enforce(this.conn_notifications == ConnNotifications(1, 0));
 
         this.testPutGet();
         this.testPutGetAll();
@@ -84,6 +95,19 @@ class Test : Task
 
     private void connNotifier ( Client.Neo.ConnNotification info )
     {
+        with ( info.Active ) switch ( info.active )
+        {
+            case connected:
+                this.conn_notifications.connected++;
+                break;
+
+            case error_while_connecting:
+                this.conn_notifications.error_while_connecting++;
+                break;
+
+            default:
+                assert(false);
+        }
     }
 
     /***************************************************************************
