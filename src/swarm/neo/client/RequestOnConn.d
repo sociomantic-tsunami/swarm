@@ -640,6 +640,21 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
 
     /***************************************************************************
 
+        Checks if the fiber is in `HOLD` state so it can be resumed.
+
+        Returns:
+            true if the fiber is in `HOLD` state or false if it is in `EXEC` or
+            `TERM` state.
+
+    ***************************************************************************/
+
+    public bool can_be_resumed ( )
+    {
+        return this.fiber.state == fiber.state.HOLD;
+    }
+
+    /***************************************************************************
+
         Populates this instance with request parameters.
 
         Params:
