@@ -470,7 +470,7 @@ public final class RequestSet: IRequestSet
             {
                 foreach ( request_on_conn; this.request_on_conns.all_nodes )
                 {
-                    if ( !request_on_conn.is_running )
+                    if ( request_on_conn.can_be_resumed )
                         request_on_conn.resumeFiber(resume_code);
                 }
             }
