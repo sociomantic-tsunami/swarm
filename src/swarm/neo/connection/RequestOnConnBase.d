@@ -631,6 +631,17 @@ abstract class RequestOnConnBase
             The one exception is when sending -- the send may succeed
             immediately, without needing to suspend the fiber.
 
+            The caller indicates which type of event(s) to wait for via the
+            arguments, as follows:
+                1. Waiting to receive a payload is indicated by setting the
+                   NextEventFlags.Receive bit of `flags`.
+                2. Waiting to send a payload is indicated by passing a non-null
+                   delegate to `fill_payload`.
+                3. Yielding the fiber and waiting for it to be resumed is
+                   indicated by setting the NextEventFlags.Yield bit of `flags`.
+                4. It is not possible to explicitly request or not request that
+                   the fiber wait to be resumed with a non-negative code.
+
             Params:
                 flags = flags indicating whether to wait for receiving &/
                     being resumed after yielding
@@ -638,7 +649,11 @@ abstract class RequestOnConnBase
                     If this argument is null, sending does not occur
 
             Returns:
-                an EventNotification instance denoting the event which occurred
+                an EventNotification instance denoting the event which occurred.
+                Note that, whatever types of events to wait for are specified by
+                the arguments, it is always possible that a `resumed` event
+                (type 4, above) may be returned. The caller must take this into
+                account.
 
             Throws:
                 Exception on protocol or I/O error.
