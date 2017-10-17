@@ -79,6 +79,7 @@ class Test : Task
         this.testPutGetAllSuspend();
         this.testSerialize();
         this.testSerializeVersioned();
+        this.testDisconnect();
 
         theScheduler.shutdown();
     }
@@ -430,6 +431,20 @@ class Test : Task
         enforce!("!is")(record.ptr, null);
         enforce!("==")(record.ptr.name, "Bob");
         enforce!("==")(record.ptr.age, 23);
+    }
+
+    /***************************************************************************
+
+        Runs a simple test where the connection to the node is shutdown and
+        re-established.
+
+    ***************************************************************************/
+
+    private void testDisconnect ( )
+    {
+        this.client.neo.reconnect();
+        this.client.blocking.waitAllNodesConnected();
+        enforce(this.conn_notifications == ConnNotifications(2, 0));
     }
 }
 

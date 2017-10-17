@@ -356,6 +356,29 @@ public final class ConnectionSet : RequestOnConn.IConnectionGetter
 
     /***************************************************************************
 
+        Causes all connections to be dropped and re-established. This method is
+        only intended for use in tests.
+
+    ***************************************************************************/
+
+    public void reconnectAll ( )
+    {
+        for ( auto conn = this.connections.getBoundary!(true)(); conn !is null;
+            conn = this.connections.getNext!(true)(conn) )
+        {
+            debug (SwarmConn)
+            {
+                auto address = conn.remote_address;
+                Stdout.formatln("ConnectionSet: reconnect {}:{}",
+                    address.address_bytes, address.port);
+            }
+
+            conn.reconnect();
+        }
+    }
+
+    /***************************************************************************
+
         Gets the connection associated with the specified address.
 
         Params:
