@@ -203,6 +203,8 @@ version ( UnitTest )
 {
     public class TestNode : INodeInfo
     {
+        import ocean.core.array.Search : contains;
+
         /***********************************************************************
 
             Fields for the public getter/setter methods.
@@ -231,10 +233,13 @@ version ( UnitTest )
                 actions = list of record action types to track stats for
                 requests = list of request types to track stats for
                 neo_requests = list of neo request types to track stats for
+                disable_timing = list of names of neo requests to not track
+                    timing stats for
 
         ***********************************************************************/
 
-        this ( istring[] actions, istring[] requests, istring[] neo_requests )
+        this ( istring[] actions, istring[] requests, istring[] neo_requests,
+            istring[] disable_timing )
         {
             this.record_action_counters_ = new RecordActionCounters(actions);
             this.request_stats_ = new RequestStats;
@@ -245,7 +250,8 @@ version ( UnitTest )
             this.neo_request_stats_ = new RequestStats;
             foreach ( request; neo_requests )
             {
-                this.neo_request_stats_.init(request);
+                this.neo_request_stats_.init(
+                    request, !disable_timing.contains(request));
             }
         }
 
