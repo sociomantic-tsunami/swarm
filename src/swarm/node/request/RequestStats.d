@@ -38,6 +38,125 @@ version ( UnitTest )
     import ocean.core.Test;
 }
 
+
+/*******************************************************************************
+
+    Interface for the stats tracked for a single request type.
+
+*******************************************************************************/
+
+public interface ISingleRequestStats
+{
+    /***************************************************************************
+
+        Returns:
+            number of requests of this type which are currently active
+
+    ***************************************************************************/
+
+    public uint active ( );
+
+    /***************************************************************************
+
+        Returns:
+            maximum number of requests of this type which were active
+            simultaneously
+
+    ***************************************************************************/
+
+    public uint max_active ( );
+
+    /***************************************************************************
+
+        Returns:
+            number of requests of this type which were previously active
+
+    ***************************************************************************/
+
+    public uint finished ( );
+}
+
+
+/*******************************************************************************
+
+    Interface for the stats tracked for a single request type, including timing.
+
+*******************************************************************************/
+
+public interface ISingleRequestStatsWithTiming : ISingleRequestStats
+{
+    /***************************************************************************
+
+        Returns:
+            the mean time in microseconds spent handling requests of this
+            type
+
+    ***************************************************************************/
+
+    public double mean_handled_time_micros ( );
+
+    /***************************************************************************
+
+        Returns:
+            the number of requests of this type which took 10 microseconds
+            or less to handle
+
+    ***************************************************************************/
+
+    public ulong handled_10_micros ( );
+
+    /***************************************************************************
+
+        Returns:
+            the number of requests of this type which took more than 10 and
+            up to 100 microseconds to handle
+
+    ***************************************************************************/
+
+    public ulong handled_100_micros ( );
+
+    /***************************************************************************
+
+        Returns:
+            the number of requests of this type which took more than 100
+            microseconds and up to 1 millisecond to handle
+
+    ***************************************************************************/
+
+    public ulong handled_1_ms ( );
+
+    /***************************************************************************
+
+        Returns:
+            the number of requests of this type which took more than 1
+            millisecond and up to 10 milliseconds to handle
+
+    ***************************************************************************/
+
+    public ulong handled_10_ms ( );
+
+    /***************************************************************************
+
+        Returns:
+            the number of requests of this type which took more than 10
+            milliseconds and up to 100 milliseconds to handle
+
+    ***************************************************************************/
+
+    public ulong handled_100_ms ( );
+
+    /***************************************************************************
+
+        Returns:
+            the number of requests of this type which took more than 100
+            milliseconds to handle
+
+    ***************************************************************************/
+
+    public ulong handled_over_100_ms ( );
+}
+
+
 /*******************************************************************************
 
     Request stats tracker.
