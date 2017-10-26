@@ -54,6 +54,7 @@ class ConnectionHandler : IConnectionHandler
     import swarm.neo.request.Command;
 
     import ocean.io.select.EpollSelectDispatcher;
+    import ocean.time.StopWatch;
 
     import ClassicSwarm =
         swarm.node.connection.ConnectionHandler: ConnectionSetupParams;
@@ -419,15 +420,28 @@ class ConnectionHandler : IConnectionHandler
             if (auto rq =
                 command.code in this.shared_params.requests.map)
             {
+                StopWatch timer;
+
                 if ( rq.name )
+                {
                     this.shared_params.node_info.neo_request_stats
                         .started(rq.name);
+
+                    if ( rq.timing )
+                        timer.start();
+                }
 
                 scope ( exit )
                 {
                     if ( rq.name )
-                        this.shared_params.node_info.neo_request_stats
-                            .finished(rq.name);
+                    {
+                        if ( rq.timing )
+                            this.shared_params.node_info.neo_request_stats
+                                .finished(rq.name, timer.microsec);
+                        else
+                            this.shared_params.node_info.neo_request_stats
+                                .finished(rq.name);
+                    }
                 }
 
                 try
