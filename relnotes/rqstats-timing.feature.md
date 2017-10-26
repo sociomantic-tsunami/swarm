@@ -12,3 +12,12 @@
   Otherwise, timing stats have not been gathered and just the methods of
   `ISingleRequestStats` may be used for that request type.
 
+* `swarm.neo.node.ConnectionHandler`
+
+  `RequestMap.add` now accepts an additional bool argument, `timing`, which
+  allows a node implementation to specify which neo requests will have timing
+  stats tracked or not. The default is true (track timing stats for all
+  requests), but implementations may disable this for certain requests. It is
+  suggested that timing stats be disabled for all long-lived requests (e.g.
+  streaming or bulk requests).
+
