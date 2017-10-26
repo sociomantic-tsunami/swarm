@@ -325,7 +325,7 @@ public class RequestStats
 
     ***************************************************************************/
 
-    private static class SingleRequestStats : ISingleRequestStatsWithTiming
+    private static class SingleRequestStats : ISingleRequestStats
     {
         /***********************************************************************
 
@@ -348,38 +348,6 @@ public class RequestStats
         ***********************************************************************/
 
         private Counters counters;
-
-
-        /***********************************************************************
-
-            Buckets for timing distribution for this request type.
-
-        ***********************************************************************/
-
-        private BucketDistribution time_distribution;
-
-
-        /***********************************************************************
-
-            Total time (in microseconds) taken by requests of this type since
-            the last call to resetCounters().
-
-        ***********************************************************************/
-
-        private ulong total_handled_time_micros;
-
-
-        /***********************************************************************
-
-            Constructor.
-
-        ***********************************************************************/
-
-        public this ( )
-        {
-            this.time_distribution =
-                new BucketDistribution([10UL, 100UL, 1_000UL, 10_000UL, 100_000UL]);
-        }
 
 
         /***********************************************************************
@@ -419,6 +387,112 @@ public class RequestStats
         public uint finished ( )
         {
             return this.counters.finished;
+        }
+
+
+        /***********************************************************************
+
+            Called when a request of this type has started.
+
+        ***********************************************************************/
+
+        public void requestStarted ( )
+        out
+        {
+            assert(this.counters.active > 0);
+            assert(this.counters.active <= this.counters.max_active);
+        }
+        body
+        {
+            this.counters.active++;
+
+            if ( this.counters.active > this.counters.max_active )
+            {
+                this.counters.max_active = this.counters.active;
+            }
+        }
+
+
+        /***********************************************************************
+
+            Called when a request of this type has finished. Timing stats are
+            not known and not updated.
+
+        ***********************************************************************/
+
+        public void requestFinished ( )
+        in
+        {
+            assert(this.counters.active > 0);
+        }
+        body
+        {
+            this.counters.active--;
+            this.counters.finished++;
+        }
+
+
+        /***********************************************************************
+
+            Resets the stats counters for this type of request:
+                * counters.active is not modified -- it is updated only by the
+                  requestStarted() and requestFinished() methods.
+                * counters.finished is cleared -- it's a simple counter of
+                  events which occurred since the last reset.
+                * counters.max_active is set to the current value of
+                  counters.active -- entering the new stats tracking period
+                  (i.e. resetCounters() being called), the maximum number of
+                  active requests of this type is equal to the number which are
+                  currently active.
+
+        ***********************************************************************/
+
+        public void resetCounters ( )
+        {
+            this.counters.finished = 0;
+            this.counters.max_active = this.counters.active;
+        }
+    }
+
+
+    /***************************************************************************
+
+        Container for stats about a single type of request, including timing.
+
+    ***************************************************************************/
+
+    private static class SingleRequestStatsWithTiming : SingleRequestStats,
+        ISingleRequestStatsWithTiming
+    {
+        /***********************************************************************
+
+            Buckets for timing distribution for this request type.
+
+        ***********************************************************************/
+
+        private BucketDistribution time_distribution;
+
+
+        /***********************************************************************
+
+            Total time (in microseconds) taken by requests of this type since
+            the last call to resetCounters().
+
+        ***********************************************************************/
+
+        private ulong total_handled_time_micros;
+
+
+        /***********************************************************************
+
+            Constructor.
+
+        ***********************************************************************/
+
+        public this ( )
+        {
+            this.time_distribution =
+                new BucketDistribution([10UL, 100UL, 1_000UL, 10_000UL, 100_000UL]);
         }
 
 
@@ -520,49 +594,6 @@ public class RequestStats
             return this.time_distribution.bucket_count[5];
         }
 
-
-        /***********************************************************************
-
-            Called when a request of this type has started.
-
-        ***********************************************************************/
-
-        public void requestStarted ( )
-        out
-        {
-            assert(this.counters.active > 0);
-            assert(this.counters.active <= this.counters.max_active);
-        }
-        body
-        {
-            this.counters.active++;
-
-            if ( this.counters.active > this.counters.max_active )
-            {
-                this.counters.max_active = this.counters.active;
-            }
-        }
-
-
-        /***********************************************************************
-
-            Called when a request of this type has finished. Timing stats are
-            not known and not updated.
-
-        ***********************************************************************/
-
-        public void requestFinished ( )
-        in
-        {
-            assert(this.counters.active > 0);
-        }
-        body
-        {
-            this.counters.active--;
-            this.counters.finished++;
-        }
-
-
         /***********************************************************************
 
             Called when a request of this type has finished and we know how long
@@ -575,7 +606,7 @@ public class RequestStats
 
         public void requestFinished ( ulong microseconds )
         {
-            this.requestFinished();
+            super.requestFinished();
 
             this.time_distribution.add(microseconds);
             this.total_handled_time_micros += microseconds;
@@ -585,22 +616,16 @@ public class RequestStats
         /***********************************************************************
 
             Resets the stats counters for this type of request:
-                * counters.active is not modified -- it is updated only by the
-                  requestStarted() and requestFinished() methods.
-                * counters.finished is cleared -- it's a simple counter of
-                  events which occurred since the last reset.
-                * counters.max_active is set to the current value of
-                  counters.active -- entering the new stats tracking period
-                  (i.e. resetCounters() being called), the maximum number of
-                  active requests of this type is equal to the number which are
-                  currently active.
+                * Performs the super class' reset logic.
+                * Clears the request time distribution.
+                * Resets the count of total handling time.
 
         ***********************************************************************/
 
-        public void resetCounters ( )
+        override public void resetCounters ( )
         {
-            this.counters.finished = 0;
-            this.counters.max_active = this.counters.active;
+            super.resetCounters();
+
             this.time_distribution.clear();
             this.total_handled_time_micros = 0;
         }
@@ -622,14 +647,19 @@ public class RequestStats
 
         Params:
             rq = name of request
+            timing = if true, timing stats will be tracked about the request
+                type (an instance of SingleRequestStatsWithTiming will be newed)
 
     ***************************************************************************/
 
-    public void init ( istring rq )
+    public void init ( istring rq, bool timing = true )
     {
         assert(!(rq in this.request_stats), "command stats " ~ rq ~ " initialised twice");
 
-        this.request_stats[rq] = new SingleRequestStats;
+        if ( timing )
+            this.request_stats[rq] = new SingleRequestStatsWithTiming;
+        else
+            this.request_stats[rq] = new SingleRequestStats;
     }
 
 
@@ -695,10 +725,10 @@ public class RequestStats
         auto stats_i = rq in this.request_stats;
         assert(stats_i, "command stats " ~ rq ~" not initialised");
 
-        auto stats = cast(SingleRequestStats)*stats_i;
-        assert(stats !is null);
+        auto timed_stats = cast(SingleRequestStatsWithTiming)*stats_i;
+        assert(timed_stats !is null);
 
-        stats.requestFinished(microseconds);
+        timed_stats.requestFinished(microseconds);
     }
 
 
@@ -719,4 +749,3 @@ public class RequestStats
         }
     }
 }
-
