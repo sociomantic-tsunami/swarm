@@ -93,6 +93,10 @@ class ConnectionHandler : IConnectionHandler
             /// The request handler function, called when a request of this type
             /// is initiated.
             Handler handler;
+
+            /// Indicates whether timing stats should be gathered about the
+            /// request.
+            bool timing;
         }
 
         /// Map of request info by command code.
@@ -106,12 +110,15 @@ class ConnectionHandler : IConnectionHandler
                 code = command code to initiate request
                 name = name of request
                 handler = function called to handle this request type
+                timing = if true, timing stats about request of this type are
+                    tracked
 
         ***********************************************************************/
 
-        public void add ( Command.Code code, cstring name, Handler handler )
+        public void add ( Command.Code code, cstring name, Handler handler,
+            bool timing = true )
         {
-            this.map[code] = RequestInfo(idup(name), handler);
+            this.map[code] = RequestInfo(idup(name), handler, timing);
         }
 
         /***********************************************************************
@@ -129,7 +136,7 @@ class ConnectionHandler : IConnectionHandler
         deprecated("Use the `add` method instead, specifying a name for the request.")
         public void opIndexAssign ( Handler handler, Command.Code code )
         {
-            this.map[code] = RequestInfo(null, handler);
+            this.map[code] = RequestInfo(null, handler, true);
         }
 
         /***********************************************************************
@@ -145,7 +152,7 @@ class ConnectionHandler : IConnectionHandler
         {
             foreach ( code, rq; this.map )
                 if ( rq.name.length > 0 )
-                    request_stats.init(rq.name);
+                    request_stats.init(rq.name, rq.timing);
         }
     }
 
