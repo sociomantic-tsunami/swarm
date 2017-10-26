@@ -655,6 +655,31 @@ unittest
             "neo_request/Put/handled_10_ms:0 neo_request/Put/handled_100_ms:0 "
             "neo_request/Put/handled_over_100_ms:0 ");
     }
+
+    // Test for neo request stats without timing
+    {
+        auto node = new TestNode([], [], ["Put"], ["Put"]);
+        auto log = new TestLogger;
+        auto stats = new NodeStatsTemplate!(TestLogger)(node, log);
+
+        // Start a neo request
+        node.neo_request_stats.started("Put");
+        log.output.length = 0;
+        stats.log();
+        test!("==")(log.output,
+            "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 "
+            "handling_neo_connections:0 handling_neo_connections_pcnt:0 "
+            "neo_request/Put/max_active:1 neo_request/Put/handled:0 ");
+
+        // Finish a neo request
+        node.neo_request_stats.finished("Put");
+        log.output.length = 0;
+        stats.log();
+        test!("==")(log.output,
+            "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 "
+            "handling_neo_connections:0 handling_neo_connections_pcnt:0 "
+            "neo_request/Put/max_active:1 neo_request/Put/handled:1 ");
+    }
 }
 
 /*******************************************************************************
