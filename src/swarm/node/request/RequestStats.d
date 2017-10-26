@@ -325,7 +325,7 @@ public class RequestStats
 
     ***************************************************************************/
 
-    private static final class SingleRequestStats
+    private static class SingleRequestStats : ISingleRequestStatsWithTiming
     {
         /***********************************************************************
 
