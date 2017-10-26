@@ -210,6 +210,12 @@ private class NodeStatsTemplate ( Logger = StatsLog )
         {
             uint max_active;
             uint handled;
+        }
+
+        struct RequestStatsWithTiming
+        {
+            uint max_active;
+            uint handled;
             double mean_handled_time_micros;
             ulong handled_10_micros;
             ulong handled_100_micros;
@@ -221,18 +227,30 @@ private class NodeStatsTemplate ( Logger = StatsLog )
 
         foreach ( id, request; request_stats.request_stats )
         {
-            RequestStats stats;
-            stats.max_active = request.max_active;
-            stats.handled = request.finished;
-            stats.mean_handled_time_micros = request.mean_handled_time_micros;
-            stats.handled_10_micros = request.handled_10_micros;
-            stats.handled_100_micros = request.handled_100_micros;
-            stats.handled_1_ms = request.handled_1_ms;
-            stats.handled_10_ms = request.handled_10_ms;
-            stats.handled_100_ms = request.handled_100_ms;
-            stats.handled_over_100_ms = request.handled_over_100_ms;
+            if ( auto timed_request = cast(ISingleRequestStatsWithTiming)request )
+            {
+                RequestStatsWithTiming stats;
+                stats.max_active = timed_request.max_active;
+                stats.handled = timed_request.finished;
+                stats.mean_handled_time_micros =
+                    timed_request.mean_handled_time_micros;
+                stats.handled_10_micros = timed_request.handled_10_micros;
+                stats.handled_100_micros = timed_request.handled_100_micros;
+                stats.handled_1_ms = timed_request.handled_1_ms;
+                stats.handled_10_ms = timed_request.handled_10_ms;
+                stats.handled_100_ms = timed_request.handled_100_ms;
+                stats.handled_over_100_ms = timed_request.handled_over_100_ms;
 
-            this.stats_log.addObject!(category)(id, stats);
+                this.stats_log.addObject!(category)(id, stats);
+            }
+            else
+            {
+                RequestStats stats;
+                stats.max_active = request.max_active;
+                stats.handled = request.finished;
+
+                this.stats_log.addObject!(category)(id, stats);
+            }
         }
     }
 }
