@@ -527,7 +527,7 @@ public class RequestStats
 
         ***********************************************************************/
 
-        private void requestStarted ( )
+        public void requestStarted ( )
         out
         {
             assert(this.counters.active > 0);
@@ -551,7 +551,7 @@ public class RequestStats
 
         ***********************************************************************/
 
-        private void requestFinished ( )
+        public void requestFinished ( )
         in
         {
             assert(this.counters.active > 0);
@@ -573,7 +573,7 @@ public class RequestStats
 
         ***********************************************************************/
 
-        private void requestFinished ( ulong microseconds )
+        public void requestFinished ( ulong microseconds )
         {
             this.requestFinished();
 
@@ -597,7 +597,7 @@ public class RequestStats
 
         ***********************************************************************/
 
-        private void resetCounters ( )
+        public void resetCounters ( )
         {
             this.counters.finished = 0;
             this.counters.max_active = this.counters.active;
@@ -613,7 +613,7 @@ public class RequestStats
 
     ***************************************************************************/
 
-    public SingleRequestStats[istring] request_stats;
+    public ISingleRequestStats[istring] request_stats;
 
 
     /***************************************************************************
@@ -645,8 +645,11 @@ public class RequestStats
 
     public void started ( cstring rq )
     {
-        auto stats = rq in this.request_stats;
-        assert(stats, "command stats " ~ rq ~" not initialised");
+        auto stats_i = rq in this.request_stats;
+        assert(stats_i, "command stats " ~ rq ~" not initialised");
+
+        auto stats = cast(SingleRequestStats)*stats_i;
+        assert(stats !is null);
 
         stats.requestStarted();
     }
@@ -665,8 +668,11 @@ public class RequestStats
 
     public void finished ( cstring rq )
     {
-        auto stats = rq in this.request_stats;
-        assert(stats, "command stats " ~ rq ~" not initialised");
+        auto stats_i = rq in this.request_stats;
+        assert(stats_i, "command stats " ~ rq ~" not initialised");
+
+        auto stats = cast(SingleRequestStats)*stats_i;
+        assert(stats !is null);
 
         stats.requestFinished();
     }
@@ -686,8 +692,11 @@ public class RequestStats
 
     public void finished ( cstring rq, ulong microseconds )
     {
-        auto stats = rq in this.request_stats;
-        assert(stats, "command stats " ~ rq ~ " not initialised");
+        auto stats_i = rq in this.request_stats;
+        assert(stats_i, "command stats " ~ rq ~" not initialised");
+
+        auto stats = cast(SingleRequestStats)*stats_i;
+        assert(stats !is null);
 
         stats.requestFinished(microseconds);
     }
@@ -701,8 +710,11 @@ public class RequestStats
 
     public void resetCounters ( )
     {
-        foreach ( ref stats; this.request_stats )
+        foreach ( stats_i; this.request_stats )
         {
+            auto stats = cast(SingleRequestStats)stats_i;
+            assert(stats !is null);
+
             stats.resetCounters();
         }
     }
