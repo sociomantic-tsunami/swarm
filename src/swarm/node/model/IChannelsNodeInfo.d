@@ -176,13 +176,15 @@ version ( UnitTest )
                 requests = list of request types to track stats for
                 neo_requests = list of neo request types to track stats for
                 channels = list of channels to track stats for
+                disable_timing = list of names of neo requests to not track
+                    timing stats for
 
         ***********************************************************************/
 
         this ( istring[] actions, istring[] requests, istring[] neo_requests,
-            istring[] channels )
+            istring[] channels, istring[] disable_timing )
         {
-            super(actions, requests, neo_requests);
+            super(actions, requests, neo_requests, disable_timing);
 
             foreach ( channel ; channels )
             {
