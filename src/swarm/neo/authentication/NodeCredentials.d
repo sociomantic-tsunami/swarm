@@ -14,13 +14,10 @@ module swarm.neo.authentication.NodeCredentials;
 /// ditto
 public class Credentials
 {
-    import swarm.neo.authentication.Credentials;
     import CredFile = swarm.neo.authentication.CredentialsFile;
     import HmacDef = swarm.neo.authentication.HmacDef;
 
     import ocean.transition;
-    import ocean.io.device.File;
-    import ocean.net.util.QueryParams;
 
     /***************************************************************************
 
