@@ -40,6 +40,8 @@ class RequestSet
 
     static class Request: RequestOnConn
     {
+        import ocean.core.TypeConvert : downcast;
+
         /***********************************************************************
 
             The ebtree node for `Request.active_requests`.
@@ -129,6 +131,26 @@ class RequestSet
         public RequestId id ( ) /* d1to2fix_inject: const */
         {
             return this.request_id;
+        }
+
+        /***********************************************************************
+
+            Returns:
+                the name of the connected client
+
+        ***********************************************************************/
+
+        override public cstring getClientName ( )
+        out ( name )
+        {
+            assert(name.length > 0);
+        }
+        body
+        {
+            auto node_conn = downcast!(Connection)(this.connection);
+            assert(node_conn !is null);
+
+            return node_conn.connected_client;
         }
 
         /***********************************************************************

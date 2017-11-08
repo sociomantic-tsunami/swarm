@@ -71,6 +71,15 @@ abstract class RequestOnConn: RequestOnConnBase
 
     /***************************************************************************
 
+        Returns:
+            the name of the connected client
+
+    ***************************************************************************/
+
+    abstract public cstring getClientName ( );
+
+    /***************************************************************************
+
         Constructor.
 
         Params:
