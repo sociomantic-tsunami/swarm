@@ -127,6 +127,19 @@ class Connection: ConnectionBase
 
     /***************************************************************************
 
+        Returns:
+            the name of the connected client or an empty string, if the
+            connection has not been successfully established
+
+    ***************************************************************************/
+
+    public cstring connected_client ( )
+    {
+        return this.conn_init.connected_client;
+    }
+
+    /***************************************************************************
+
         Performs the connection shutdown.
 
         Params:
@@ -151,6 +164,9 @@ class Connection: ConnectionBase
         this.request_set.shutdownAll(e);
 
         this.when_closed();
+
+        // Clear client data from the connection helper.
+        this.conn_init.reset();
     }
 
     /***************************************************************************
