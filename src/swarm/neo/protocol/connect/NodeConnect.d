@@ -31,6 +31,7 @@ class NodeConnect
     import core.stdc.time: time_t, time;
     import core.stdc.ctype: isalnum;
     import ocean.core.Enforce;
+    import ocean.core.array.Mutation : copy;
     import ocean.transition;
 
     debug ( SwarmConn ) import ocean.io.Stdout_tango;
@@ -58,6 +59,9 @@ class NodeConnect
     ***************************************************************************/
 
     private HmacAuthCode.RejectedException e_auth_rejected;
+
+    /// Name of the client. Non-empty only after connection has succeeded.
+    private mstring client_name;
 
     /***************************************************************************
 
@@ -185,6 +189,7 @@ class NodeConnect
 
                     // Authentication successful.
                     success = true;
+                    this.client_name.copy(client_name);
                 }
                 else
                 {   // Client name not found: Extra check for invalid name,
@@ -221,6 +226,8 @@ class NodeConnect
 
         if (!success)
         {
+            this.client_name.length = 0;
+            enableStomping(this.client_name);
             throw this.e_auth_rejected;
         }
 
@@ -228,6 +235,32 @@ class NodeConnect
         // We should have thrown otherwise.
         assert(success, typeof(this).stringof ~
                ".authenticate should have thrown on rejected authentication");
+    }
+
+    /***************************************************************************
+
+        Returns:
+            the name of the connected client or an empty string, if the
+            connection has not been successfully established
+
+    ***************************************************************************/
+
+    public cstring connected_client ( )
+    {
+        return this.client_name;
+    }
+
+    /***************************************************************************
+
+        Resets fields with data received from the client. Intended to be called
+        when an established connection is shut down.
+
+    ***************************************************************************/
+
+    public void reset ( )
+    {
+        this.client_name.length = 0;
+        enableStomping(this.client_name);
     }
 
     /***************************************************************************
