@@ -162,21 +162,29 @@ class NodeConnect
         {
             try
             {
-                enforce(this.e_auth_rejected.set("Empty client name"),          // Validate the client name.
+                // Validate the client name.
+                enforce(this.e_auth_rejected.set("Empty client name"),
                         client_name.length);
                 enforce(this.e_auth_rejected.set("Client name too long"),
                         client_name.length <= Credentials.LengthLimit.Name);
-                if (auto key = client_name in (*this.credentials))              // Look up the key by client name.
+
+                // Look up the key by client name.
+                if (auto key = client_name in (*this.credentials))
                 {
-                    this.validateTimeStamp(client_timestamp, node_timestamp);   // Found: Validate the time stamp.
-                    enforce(                                                    // Do the authentication, throw if rejected.
+                    // Validate the time stamp.
+                    this.validateTimeStamp(client_timestamp, node_timestamp);
+
+                    // Do the authentication, throw if rejected.
+                    enforce(
                         this.e_auth_rejected.set("Client authentication rejected"),
                         HmacAuthCode.confirm(
                             (*key).content, client_timestamp, nonce.content,
                             client_code.content
                         )
                     );
-                    success = true;                                             // Authentication successful.
+
+                    // Authentication successful.
+                    success = true;
                 }
                 else
                 {   // Client name not found: Extra check for invalid name,
