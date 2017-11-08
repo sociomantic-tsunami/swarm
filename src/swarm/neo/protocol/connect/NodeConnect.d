@@ -158,7 +158,7 @@ class NodeConnect
         this.e_auth_rejected.resetAuthParams();
 
         // receive() callback, does the authentication.
-        void authenticate ( Const!(char)[] client_name, HmacDef.Code client_code )
+        void authenticate ( cstring client_name, HmacDef.Code client_code )
         {
             try
             {
