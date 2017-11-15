@@ -96,19 +96,6 @@ public struct DoublePut
 
     /***************************************************************************
 
-        Data which each request-on-conn needs while it is progress. An instance
-        of this struct is stored per connection on which the request runs and is
-        passed to the request handler.
-
-    ***************************************************************************/
-
-    private static struct Working
-    {
-        // Dummy (not required by this request)
-    }
-
-    /***************************************************************************
-
         Request core. Mixes in the types `NotificationInfo`, `Notifier`,
         `Params`, `Context` plus the static constants `request_type` and
         `request_code`.
@@ -116,7 +103,7 @@ public struct DoublePut
     ***************************************************************************/
 
     mixin RequestCore!(RequestType.MultiNode, RequestCode.DoublePut, 0, Args,
-        SharedWorking, Working, Notification);
+        SharedWorking, Notification);
 
     /***************************************************************************
 
@@ -226,13 +213,10 @@ public struct DoublePut
         Params:
             context_blob = untyped chunk of data containing the serialized
                 context of the request which is finishing
-            working_data_iter = iterator over the stored working data associated
-                with each connection on which this request was run
 
     ***************************************************************************/
 
-    public static void all_finished_notifier ( void[] context_blob,
-        IRequestWorkingData working_data_iter )
+    public static void all_finished_notifier ( void[] context_blob )
     {
         auto context = DoublePut.getContext(context_blob);
 
