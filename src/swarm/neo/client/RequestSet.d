@@ -39,6 +39,7 @@ public final class RequestSet: IRequestSet
     import swarm.neo.client.RequestOnConn;
     import swarm.neo.client.RequestOnConnSet;
     import swarm.neo.client.RequestHandlers;
+    import swarm.neo.connection.YieldedRequestOnConns;
     import swarm.neo.util.TreeMap;
     import ocean.transition;
     import swarm.neo.AddrPort;
@@ -469,7 +470,7 @@ public final class RequestSet: IRequestSet
             {
                 foreach ( request_on_conn; this.request_on_conns.all_nodes )
                 {
-                    if ( !request_on_conn.is_running )
+                    if ( request_on_conn.can_be_resumed )
                         request_on_conn.resumeFiber(resume_code);
                 }
             }
@@ -769,6 +770,14 @@ public final class RequestSet: IRequestSet
 
     /***************************************************************************
 
+        Resumes yielded `RequestOnConn`s.
+
+    ***************************************************************************/
+
+    private YieldedRequestOnConns yielded_rqonconns;
+
+    /***************************************************************************
+
         Reused exception, instantiated on demand.
 
     ***************************************************************************/
@@ -790,13 +799,16 @@ public final class RequestSet: IRequestSet
 
         Params:
             connections = the set of connections
+            yielded_rqonconns = resumes yielded `RequestOnConn`s
             epoll = epoll instance, required by the timeout manager
 
     ***************************************************************************/
 
-    public this ( ConnectionSet connections, EpollSelectDispatcher epoll )
+    public this ( ConnectionSet connections,
+        YieldedRequestOnConns yielded_rqonconns, EpollSelectDispatcher epoll )
     {
         this.connections = connections;
+        this.yielded_rqonconns = yielded_rqonconns;
         this.active_requests = new RequestMap(typeof(this).max_requests);
         this.request_on_conn_pool = new RequestOnConnPool;
         this.timeouts = new Timeouts(epoll, &this.requestTimedOut);
@@ -1156,7 +1168,9 @@ public final class RequestSet: IRequestSet
 
     private RequestOnConn newRequestOnConn ( )
     {
-        return this.request_on_conn_pool.get(new RequestOnConn(this.connections));
+        return this.request_on_conn_pool.get(
+            new RequestOnConn(this.connections, this.yielded_rqonconns)
+        );
     }
 
     /***************************************************************************

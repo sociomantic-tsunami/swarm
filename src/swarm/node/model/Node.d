@@ -51,7 +51,7 @@ import ocean.io.compress.lzo.LzoChunkCompressor;
 
 import ocean.util.container.pool.model.IAggregatePool;
 
-import ocean.util.log.Log;
+import ocean.util.log.Logger;
 
 import ocean.core.Enforce;
 
@@ -165,6 +165,15 @@ public abstract class INodeBase : INode, INodeInfo
 
     /***************************************************************************
 
+        Per-request neo stats tracker.
+
+    ***************************************************************************/
+
+    private RequestStats neo_request_stats_;
+
+
+    /***************************************************************************
+
         Constructor
 
         Params:
@@ -181,6 +190,7 @@ public abstract class INodeBase : INode, INodeInfo
         this.node_item_ = node;
 
         this.request_stats_ = new RequestStats;
+        this.neo_request_stats_ = new RequestStats;
 
         conn_setup_params.error_dg = &this.error;
 
@@ -457,6 +467,19 @@ public abstract class INodeBase : INode, INodeInfo
     override public RequestStats request_stats ( )
     {
         return this.request_stats_;
+    }
+
+
+    /***************************************************************************
+
+        Returns:
+            per-request neo stats tracking instance
+
+    ***************************************************************************/
+
+    override public RequestStats neo_request_stats ( )
+    {
+        return this.neo_request_stats_;
     }
 
 

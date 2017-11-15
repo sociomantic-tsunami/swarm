@@ -36,7 +36,7 @@ import ocean.util.container.pool.ObjectPool;
 
 import ocean.core.ExceptionDefinitions;
 
-import ocean.util.log.Log;
+import ocean.util.log.Logger;
 
 import ocean.transition;
 

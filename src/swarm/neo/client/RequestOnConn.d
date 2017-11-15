@@ -42,6 +42,7 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
     import swarm.neo.AddrPort;
     import swarm.neo.client.RequestHandlers;
     import swarm.neo.client.Connection;
+    import swarm.neo.connection.YieldedRequestOnConns;
     import ocean.transition;
     import ocean.util.serialize.contiguous.Contiguous;
     import ocean.util.serialize.contiguous.Serializer;
@@ -375,12 +376,14 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
 
         Params:
             connections = interface to the set of connections
+            yielded_rqonconns = resumes yielded `RequestOnConn`s
 
     ***************************************************************************/
 
-    public this ( IConnectionGetter connections )
+    public this ( IConnectionGetter connections,
+        YieldedRequestOnConns yielded_rqonconns )
     {
-        super(null);
+        super(yielded_rqonconns);
         this.connections = connections;
         this.abort_exception = new AbortException;
     }
@@ -634,6 +637,21 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
         return this.connection
             ? this.connection.remote_address == node_address
             : false;
+    }
+
+    /***************************************************************************
+
+        Checks if the fiber is in `HOLD` state so it can be resumed.
+
+        Returns:
+            true if the fiber is in `HOLD` state or false if it is in `EXEC` or
+            `TERM` state.
+
+    ***************************************************************************/
+
+    public bool can_be_resumed ( )
+    {
+        return this.fiber.state == fiber.state.HOLD;
     }
 
     /***************************************************************************

@@ -683,6 +683,18 @@ template ClientCore ( )
 
     /***************************************************************************
 
+        Causes all connections to be dropped and re-established. This method is
+        only intended for use in tests.
+
+    ***************************************************************************/
+
+    public void reconnect ( )
+    {
+        this.connections.reconnectAll();
+    }
+
+    /***************************************************************************
+
         Note: currently unimplemented.
 
         Aborts all requests. This will be useful for an application which

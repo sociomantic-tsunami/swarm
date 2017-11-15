@@ -54,7 +54,7 @@ debug ( SwarmClient ) import ocean.io.Stdout;
 import swarm.client.connection.FiberSocketConnection;
 
 import ocean.transition;
-import ocean.util.log.Log;
+import ocean.util.log.Logger;
 
 
 
@@ -108,6 +108,24 @@ public abstract class IRequestConnection :
      **************************************************************************/
 
     public size_t object_pool_index;
+
+
+    /***************************************************************************
+
+        Uniquely identifying integer for this instance.
+
+    ***************************************************************************/
+
+    private Immut!(size_t) id;
+
+
+    /***************************************************************************
+
+        Count of instances of this class.
+
+    ***************************************************************************/
+
+    static private size_t instance_count;
 
 
     /**************************************************************************
@@ -364,6 +382,8 @@ public abstract class IRequestConnection :
         assert(conn_pool !is null, typeof(this).stringof ~ ".ctor: connection pool interface must be non-null");
         assert(params !is null, typeof(this).stringof ~ ".ctor: request params instance must be non-null");
 
+        this.id = This.instance_count++;
+
         this.conn_pool = conn_pool;
 
         this.timeout_exception = new TimedOutException;
@@ -452,7 +472,7 @@ public abstract class IRequestConnection :
     public void error ( Exception e, IAdvancedSelectClient.Event event )
     {
         debug ( SwarmClient ) Stderr.formatln("[{}:{}.{}]: Select error in client",
-            this.conn_pool.address, this.conn_pool.port, this.object_pool_index);
+            this.conn_pool.address, this.conn_pool.port, this.id);
         this.conn_pool.had_error();
         this.exception = e;
     }
@@ -474,14 +494,14 @@ public abstract class IRequestConnection :
         if ( this.socket.had_timeout )
         {
             debug ( SwarmClient ) Stderr.formatln("[{}:{}.{}]: Connection timeout in client",
-                    this.conn_pool.address, this.conn_pool.port, this.object_pool_index);
+                    this.conn_pool.address, this.conn_pool.port, this.id);
             this.conn_pool.had_conn_timeout();
             this.exception = this.connection_timeout_exception;
         }
         else
         {
             debug ( SwarmClient ) Stderr.formatln("[{}:{}.{}]: I/O timeout in client",
-                    this.conn_pool.address, this.conn_pool.port, this.object_pool_index);
+                    this.conn_pool.address, this.conn_pool.port, this.id);
             this.conn_pool.had_io_timeout();
             this.exception = this.timeout_exception;
         }
@@ -546,14 +566,14 @@ public abstract class IRequestConnection :
                             restart_fiber = true;
                             debug ( SwarmClient ) Stderr.formatln("[{}:{}.{}]: Error while handling request -- re-establishing connection",
                                 this.conn_pool.address, this.conn_pool.port,
-                                this.object_pool_index);
+                                this.id);
                         }
                     break;
 
                     case EstablishConnection:
                         debug ( SwarmClient ) Stderr.formatln("[{}:{}.{}]: Error while re-establishing connection -- retrying",
                             this.conn_pool.address, this.conn_pool.port,
-                            this.object_pool_index);
+                            this.id);
 
                         restart_fiber = true;
                     break;
@@ -566,7 +586,7 @@ public abstract class IRequestConnection :
                 {
                     debug ( SwarmClient ) Stderr.formatln("[{}:{}.{}]: Restarting connection fiber",
                         this.conn_pool.address, this.conn_pool.port,
-                        this.object_pool_index);
+                        this.id);
                     this.fiber.start();
                 }
             }
@@ -574,7 +594,7 @@ public abstract class IRequestConnection :
             {
                 debug ( SwarmClient ) Stderr.formatln("[{}:{}.{}]: Connection fiber not restarted -- recycling connection",
                     this.conn_pool.address, this.conn_pool.port,
-                    this.object_pool_index);
+                    this.id);
                 this.recycleConnection();
             }
         }
@@ -607,7 +627,7 @@ public abstract class IRequestConnection :
     {
         debug ( SwarmClient ) Stderr.formatln("[{}:{}.{}]: Disconnect",
             this.conn_pool.address, this.conn_pool.port,
-            this.object_pool_index);
+            this.id);
 
         this.writer.reset();
         this.reader.reset();
@@ -638,7 +658,7 @@ public abstract class IRequestConnection :
         {
             Stderr.formatln("[{}:{}.{}]: Request fiber started",
                 this.conn_pool.address, this.conn_pool.port,
-                this.object_pool_index);
+                this.id);
         }
 
         with ( FiberMode ) switch ( this.mode )
@@ -657,7 +677,7 @@ public abstract class IRequestConnection :
 
         debug ( SwarmClient ) Stderr.formatln("[{}:{}.{}]: No requests pending -- recycling connection",
             this.conn_pool.address, this.conn_pool.port,
-            this.object_pool_index);
+            this.id);
 
         this.recycleConnection();
 
@@ -665,7 +685,7 @@ public abstract class IRequestConnection :
         {
             Stderr.formatln("[{}:{}.{}]: Request fiber finished",
                 this.conn_pool.address, this.conn_pool.port,
-                this.object_pool_index);
+                this.id);
         }
     }
 
@@ -687,13 +707,13 @@ public abstract class IRequestConnection :
     {
         debug ( SwarmClient ) Stderr.formatln("[{}:{}.{}]: Establishing connection",
             this.conn_pool.address, this.conn_pool.port,
-            this.object_pool_index);
+            this.id);
 
         this.handleExceptions({
             this.initConnection(0);
             debug ( SwarmClient ) Stderr.formatln("[{}:{}.{}]: Finished re-establishing connection",
                 this.conn_pool.address, this.conn_pool.port,
-                this.object_pool_index);
+                this.id);
             });
 
         if ( this.nextRequest() )
@@ -744,7 +764,7 @@ public abstract class IRequestConnection :
 
             debug ( SwarmClient ) Stderr.formatln("[{}:{}.{}]: Start request",
                 this.conn_pool.address, this.conn_pool.port,
-                this.object_pool_index);
+                this.id);
 
             this.requestStarted_();
 
@@ -797,14 +817,14 @@ public abstract class IRequestConnection :
             // connection.
             debug ( SwarmClient ) Stderr.formatln("[{}:{}.{}]: Caught fiber kill exception: {}",
                 this.conn_pool.address, this.conn_pool.port,
-                this.object_pool_index, getMsg(e));
+                this.id, getMsg(e));
             throw e;
         }
         catch ( Exception e )
         {
             debug ( SwarmClient ) Stderr.formatln("[{}:{}.{}]: Caught exception in fiber: {}",
                 this.conn_pool.address, this.conn_pool.port,
-                this.object_pool_index, getMsg(e));
+                this.id, getMsg(e));
             this.exception = e;
         }
     }
@@ -853,11 +873,11 @@ public abstract class IRequestConnection :
         {
             Stderr.formatln("[{}:{}.{}]: initConnection",
                            this.conn_pool.address, this.conn_pool.port,
-                           this.object_pool_index);
+                           this.id);
 
             scope (failure) Stderr.formatln("[{}:{}.{}]: initConnection failed",
                 this.conn_pool.address, this.conn_pool.port,
-                this.object_pool_index);
+                this.id);
         }
 
         // Setup I/O timeouts
@@ -901,7 +921,7 @@ public abstract class IRequestConnection :
     {
         debug ( SwarmClient ) Stderr.formatln("[{}:{}.{}]: Request {} finished",
             this.conn_pool.address, this.conn_pool.port,
-            this.object_pool_index, this.params.command);
+            this.id, this.params.command);
 
         this.notify(IRequestNotification.Type.Finished);
 
@@ -911,7 +931,7 @@ public abstract class IRequestConnection :
         {
             debug ( SwarmClient ) Stderr.formatln("[{}:{}.{}]: An exception was caught while handling the request: {}",
                 this.conn_pool.address, this.conn_pool.port,
-                this.object_pool_index, getMsg(this.exception));
+                this.id, getMsg(this.exception));
             this.disconnect();
         }
     }
@@ -1039,7 +1059,7 @@ public abstract class RequestConnectionTemplate ( Commands : IEnum )
             auto cmd_desc = this.params.command in Commands();
             Stderr.formatln("[{}:{}.{}]: Starting {} request handler",
                 this.conn_pool.address, this.conn_pool.port,
-                this.object_pool_index, cmd_desc ? *cmd_desc : "Invalid");
+                this.id, cmd_desc ? *cmd_desc : "Invalid");
         }
 
         switch ( this.params.command )

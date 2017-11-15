@@ -175,6 +175,15 @@ public abstract class INodeBase : INode, INodeInfo
 
     /***************************************************************************
 
+        Per-request neo stats tracker.
+
+    ***************************************************************************/
+
+    private RequestStats neo_request_stats_;
+
+
+    /***************************************************************************
+
         Constructor
 
         Params:
@@ -196,6 +205,7 @@ public abstract class INodeBase : INode, INodeInfo
         this.node_item_ = node;
 
         this.request_stats_ = new RequestStats;
+        this.neo_request_stats_ = new RequestStats;
 
         conn_setup_params.error_dg = &this.error;
 
@@ -510,6 +520,19 @@ public abstract class INodeBase : INode, INodeInfo
     /***************************************************************************
 
         Returns:
+            per-request neo stats tracking instance
+
+    ***************************************************************************/
+
+    override public RequestStats neo_request_stats ( )
+    {
+        return this.neo_request_stats_;
+    }
+
+
+    /***************************************************************************
+
+        Returns:
             Node item struct, containing node address, port & hash range.
 
     ***************************************************************************/
@@ -621,11 +644,15 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
     {
         /***********************************************************************
 
-            Map of command codes -> handler functions.
+            Map of command codes -> request handling info.
 
         ***********************************************************************/
 
-        public Neo.ConnectionHandler.CmdHandlers cmd_handlers;
+        public Neo.ConnectionHandler.RequestMap requests;
+
+        /// Alias to old name.
+        deprecated("Use the `requests` member instead.")
+        public alias requests cmd_handlers;
 
         /***********************************************************************
 
@@ -738,16 +765,16 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
                   int backlog )
     {
         assert(options.epoll !is null);
-        assert(options.cmd_handlers !is null);
 
         InetAddress!(false) addr, neo_addr;
-
         alias SelectListener!(Neo.ConnectionHandler,
             Neo.ConnectionHandler.SharedParams) NeoListener;
 
+        // Create listener sockets.
         this.socket = new AddressIPSocket!();
         this.neo_socket = new AddressIPSocket!();
 
+        // Load credentials from specified file.
         Const!(Key[istring])* credentials;
         if ( options.credentials_filename )
         {
@@ -756,6 +783,7 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
                 new Credentials(options.credentials_filename);
             credentials = this.credentials_file.credentials;
         }
+        // ...or copy the pre-configured credentials.
         else
         {
             assert(options.credentials_map !is null);
@@ -768,10 +796,12 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
             credentials = &s.cred;
         }
 
+        // Instantiate params object shared by all neo connection handlers.
         auto neo_conn_setup_params = new Neo.ConnectionHandler.SharedParams(
-            options.epoll, options.shared_resources, options.cmd_handlers,
-            options.no_delay, *credentials);
+            options.epoll, options.shared_resources, options.requests,
+            options.no_delay, *credentials, this);
 
+        // Set up unix listener socket, if specified.
         UnixListener unix_listener;
         if ( options.unix_socket_path.length )
         {
@@ -786,6 +816,7 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
                 options.unix_socket_path, options.epoll, unix_socket_handlers);
         }
 
+        // Super ctor.
         super(node, conn_setup_params,
             this.listener = new Listener(
                 addr(node.Address, node.Port), this.socket, conn_setup_params,
@@ -798,6 +829,10 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
             unix_listener
         );
 
+        // Set up stats tracking for all named requests specified.
+        options.requests.initStats(this.neo_request_stats);
+
+        // Copy actual bound ports into class members.
         enforce(this.socket.updateAddress() == 0, "socket.updateAddress() failed!");
         enforce(this.neo_socket.updateAddress() == 0, "socket.updateAddress() failed!");
 

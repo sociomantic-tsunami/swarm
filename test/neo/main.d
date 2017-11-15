@@ -43,10 +43,20 @@ class Test : Task
     import ocean.util.serialize.contiguous.MultiVersionDecorator;
 
     /// Example node.
-    Node node;
+    private Node node;
 
     /// Example client.
-    Client client;
+    private Client client;
+
+    /// Connection notification count wrapper.
+    private struct ConnNotifications
+    {
+        uint connected;
+        uint error_while_connecting;
+    }
+
+    /// Connection notification counts.
+    private ConnNotifications conn_notifications;
 
     /***************************************************************************
 
@@ -61,6 +71,7 @@ class Test : Task
             &this.connNotifier);
 
         this.client.blocking.waitAllNodesConnected();
+        enforce(this.conn_notifications == ConnNotifications(1, 0));
 
         this.testPutGet();
         this.testPutGetAll();
@@ -68,6 +79,7 @@ class Test : Task
         this.testPutGetAllSuspend();
         this.testSerialize();
         this.testSerializeVersioned();
+        this.testDisconnect();
 
         theScheduler.shutdown();
     }
@@ -84,6 +96,19 @@ class Test : Task
 
     private void connNotifier ( Client.Neo.ConnNotification info )
     {
+        with ( info.Active ) switch ( info.active )
+        {
+            case connected:
+                this.conn_notifications.connected++;
+                break;
+
+            case error_while_connecting:
+                this.conn_notifications.error_while_connecting++;
+                break;
+
+            default:
+                assert(false);
+        }
     }
 
     /***************************************************************************
@@ -406,6 +431,20 @@ class Test : Task
         enforce!("!is")(record.ptr, null);
         enforce!("==")(record.ptr.name, "Bob");
         enforce!("==")(record.ptr.age, 23);
+    }
+
+    /***************************************************************************
+
+        Runs a simple test where the connection to the node is shutdown and
+        re-established.
+
+    ***************************************************************************/
+
+    private void testDisconnect ( )
+    {
+        this.client.neo.reconnect();
+        this.client.blocking.waitAllNodesConnected();
+        enforce(this.conn_notifications == ConnNotifications(2, 0));
     }
 }
 

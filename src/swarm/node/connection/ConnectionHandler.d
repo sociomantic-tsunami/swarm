@@ -59,6 +59,7 @@ import ocean.io.select.protocol.generic.ErrnoIOException : SocketError;
 
 import swarm.protocol.FiberSelectWriter;
 import swarm.protocol.FiberSelectReader;
+import swarm.protocol.IAddrPort;
 
 import ocean.io.select.client.FiberSelectEvent;
 
@@ -378,7 +379,7 @@ public abstract class ConnectionHandlerTemplate ( Commands : ICommandCodes )
 *******************************************************************************/
 
 abstract public class ISwarmConnectionHandler : IFiberConnectionHandlerBase,
-    Resettable, ISwarmConnectionHandlerInfo
+    Resettable, ISwarmConnectionHandlerInfo, IAddrPort
 {
     /***************************************************************************
 
@@ -616,9 +617,11 @@ abstract public class ISwarmConnectionHandler : IFiberConnectionHandlerBase,
         this.reader = this.new Reader(this.socket, this.fiber,
             exception, exception);
         this.reader.error_reporter = this;
+        this.reader.addr_port = this;
 
         this.writer = this.new Writer(this.reader);
         this.writer.error_reporter = this;
+        this.writer.addr_port = this;
     }
 
 

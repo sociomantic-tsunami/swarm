@@ -98,4 +98,3 @@ class ProtocolError: Exception
         this.line = line;
     }
 }
-
