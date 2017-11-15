@@ -44,9 +44,6 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
     import swarm.neo.client.Connection;
     import swarm.neo.connection.YieldedRequestOnConns;
     import ocean.transition;
-    import ocean.util.serialize.contiguous.Contiguous;
-    import ocean.util.serialize.contiguous.Serializer;
-    import ocean.util.serialize.contiguous.Deserializer;
 
     /***************************************************************************
 
