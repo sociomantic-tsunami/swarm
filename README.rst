@@ -134,3 +134,8 @@ v4.x.x v4.0.0_: 05/04/2017  TBD
 
 .. _v4.0.0: https://github.com/sociomantic-tsunami/swarm/releases/tag/v4.0.0
 
+Contributing
+============
+
+See the guide for `contributing to Neptune-versioned libraries
+<https://github.com/sociomantic-tsunami/neptune/blob/master/doc/library-contributor.rst>`_.
