@@ -66,28 +66,6 @@ public final class RequestSet: IRequestSet
 
         /***********************************************************************
 
-            Iterator over the stored working data of the connections of this
-            request.
-
-        ***********************************************************************/
-
-        private scope class RequestWorkingData : IRequestWorkingData
-        {
-            public override int opApply (
-                int delegate ( ref Const!(void)[] working_data ) dg )
-            {
-                foreach ( roc; this.outer.request_on_conns )
-                {
-                    auto working_data = roc.getWorkingData();
-                    if ( auto ret = dg(working_data) )
-                        return ret;
-                }
-                return 0;
-            }
-        }
-
-        /***********************************************************************
-
             Union of possible request handlers.
 
         ***********************************************************************/
@@ -145,18 +123,6 @@ public final class RequestSet: IRequestSet
         ***********************************************************************/
 
         private void[] context;
-
-        /***********************************************************************
-
-            The serialised request-on-conn working data. This is passed to the
-            request handler, where it must be deserialized.
-
-            This array is empty (not necessarily `null`) while this request is
-            inactive.
-
-        ***********************************************************************/
-
-        private void[] initial_working_data;
 
         /***********************************************************************
 
@@ -234,23 +200,21 @@ public final class RequestSet: IRequestSet
                 handler = request handler
                 finished_notifier = called when the last hander has finished
                 context = request context
-                working = initial working data to serialize into the request
-                    connection
 
         ***********************************************************************/
 
-        public void startSingleNode ( RequestContext, WorkingData )
+        public void startSingleNode ( RequestContext )
             ( SingleNodeHandler handler, FinishedNotifier finished_notifier,
-            RequestContext context, WorkingData working )
+            RequestContext context )
         {
             this.handler.single_node = handler;
-            this.initRequest(finished_notifier, context, working);
+            this.initRequest(finished_notifier, context);
             this.request_on_conns.initialise(
                 RequestOnConnSet.RequestType.SingleNode);
             auto request_on_conn = this.request_on_conns.add(
                 this.outer.newRequestOnConn());
             request_on_conn.start(this.id, this.context,
-                this.initial_working_data, &this.handlerFinished, handler);
+                &this.handlerFinished, handler);
         }
 
         /***********************************************************************
@@ -307,23 +271,21 @@ public final class RequestSet: IRequestSet
                 handler = request handler
                 finished_notifier = called when the last hander has finished
                 context = request context
-                working = initial working data to serialize into the request
-                    connection
 
         ***********************************************************************/
 
-        public void startRoundRobin ( RequestContext, WorkingData ) (
+        public void startRoundRobin ( RequestContext ) (
             RoundRobinHandler handler, FinishedNotifier finished_notifier,
-            RequestContext context, WorkingData working )
+            RequestContext context )
         {
             this.handler.round_robin = handler;
-            this.initRequest(finished_notifier, context, working);
+            this.initRequest(finished_notifier, context);
             this.request_on_conns.initialise(
                 RequestOnConnSet.RequestType.SingleNode);
             auto request_on_conn = this.request_on_conns.add(
                     this.outer.newRequestOnConn());
             request_on_conn.start(this.id, this.context,
-                this.initial_working_data, &this.handlerFinished, handler);
+                &this.handlerFinished, handler);
         }
 
         /***********************************************************************
@@ -352,17 +314,15 @@ public final class RequestSet: IRequestSet
                 handler = request handler
                 finished_notifier = called when the last hander has finished
                 context = request context
-                working = initial working data to serialize into the request
-                    connections
 
         ***********************************************************************/
 
-        public void startAllNodes ( RequestContext, WorkingData )
+        public void startAllNodes ( RequestContext )
             ( AllNodesHandler handler, FinishedNotifier finished_notifier,
-            RequestContext context, WorkingData working )
+            RequestContext context )
         {
             this.handler.all_nodes = handler;
-            this.initRequest(finished_notifier, context, working);
+            this.initRequest(finished_notifier, context);
             this.request_on_conns.initialise(
                 RequestOnConnSet.RequestType.AllNodes);
 
@@ -371,8 +331,7 @@ public final class RequestSet: IRequestSet
                 auto request_on_conn = this.request_on_conns.add(
                     connection.remote_address, this.outer.newRequestOnConn());
                 request_on_conn.start(this.id, this.context,
-                    this.initial_working_data, &this.handlerFinished, handler,
-                    connection);
+                    &this.handlerFinished, handler, connection);
             }
         }
 
@@ -445,8 +404,7 @@ public final class RequestSet: IRequestSet
             auto request_on_conn = this.request_on_conns.add(
                 connection.remote_address, this.outer.newRequestOnConn());
             request_on_conn.start(this.id, this.context,
-                this.initial_working_data, &this.handlerFinished,
-                this.handler.all_nodes, connection);
+                &this.handlerFinished, this.handler.all_nodes, connection);
         }
 
         /***********************************************************************
@@ -529,24 +487,6 @@ public final class RequestSet: IRequestSet
 
         /***********************************************************************
 
-            IRequestController method. Passes an IRequestWorkingData iterator to
-            the provided delegate, granting access to the working data of each
-            request-on-conn of this request.
-
-            Params:
-                dg = delegate to receive the working data iterator
-
-        ***********************************************************************/
-
-        public void accessRequestWorkingData (
-            void delegate ( IRequestWorkingData ) dg )
-        {
-            scope working_data_iter = new RequestWorkingData;
-            dg(working_data_iter);
-        }
-
-        /***********************************************************************
-
             Packs handler_param into `this.request_context`.
 
             Params:
@@ -572,34 +512,6 @@ public final class RequestSet: IRequestSet
 
         /***********************************************************************
 
-            Serialises `working` into `this.initial_working_data`.
-            After serialisation `this.initial_working_data` is deserialised so
-            that it can be read by just casting its `ptr` to `T`.
-
-            Params:
-                working = working data of request
-
-            In:
-                `this.initial_working_data` is expected to be empty (i.e. was
-                properly reset if used before).
-
-        ***********************************************************************/
-
-        public void serializeWorkingData ( T ) ( ref T working )
-        in
-        {
-            assert(!this.initial_working_data.length, typeof(this).stringof ~
-                   "serializeWorkingData: this.working_data.length expected" ~
-                   " to be 0 as it ought to be if it was properly reset");
-        }
-        body
-        {
-            Serializer.serialize(working, this.initial_working_data);
-            Deserializer.deserialize!(T)(this.initial_working_data);
-        }
-
-        /***********************************************************************
-
             Recycles `request_on_conn` and decreases the counter of currently
             active request. Finalises this request if that counter reaches 0:
              - calls the request-finished notifier,
@@ -619,8 +531,7 @@ public final class RequestSet: IRequestSet
         {
             if (this.request_on_conns.finished())
             {
-                scope working_data_iter = new RequestWorkingData;
-                this.finished_notifier(this.context, working_data_iter);
+                this.finished_notifier(this.context);
 
                 /*
                  * Reset to default behaviour: A mock single-node request with
@@ -640,41 +551,6 @@ public final class RequestSet: IRequestSet
                 RequestContext = type of request context. Must be a type that
                     can be packed by swarm.neo.util.StructPacker
                 finished_notifier = called when the last hander has finished
-                context = request context
-                working = initial working data to serialize into the request
-                    connections
-
-            In:
-                this.id must not be 0, nor may there be handlers running. The
-                request must be in the set of active requests.
-
-        ***********************************************************************/
-
-        private void initRequest (RequestContext, WorkingData )
-            ( FinishedNotifier finished_notifier, RequestContext context,
-            WorkingData working )
-        in
-        {
-            assert(this.id);
-
-            auto rq = this.id in this.outer.active_requests;
-
-            assert(rq !is null);
-            assert(*rq is this);
-        }
-        body
-        {
-            this.initRequest(finished_notifier, context);
-
-            this.serializeWorkingData(working);
-        }
-
-        /***********************************************************************
-
-            Common request initialisation boiler-plate shared by the start*()
-            methods, above.
-
-            Params:
                 RequestContext = type of request context. Must be a type that
                     can be packed by swarm.neo.util.StructPacker
                 finished_notifier = called when the last hander has finished
@@ -730,8 +606,6 @@ public final class RequestSet: IRequestSet
             this.finished_notifier = null;
             this.context.length = 0;
             enableStomping(this.context);
-            this.initial_working_data.length = 0;
-            enableStomping(this.initial_working_data);
         }
     }
 
@@ -843,9 +717,8 @@ public final class RequestSet: IRequestSet
                 packed by swarm.neo.util.StructPacker
             handler = request handler
             finished_notifier = called when the last hander has finished
-            context = handler specific request context; passed to `handler`
-            working = initial working data to serialize into the request
-                connection
+            context = handler specific request context; `handler` can obtain
+                      these from the `RequestOnConn` it receives
 
         Throws:
             NoMoreRequests if starting a new request would exceed the maximum
@@ -853,16 +726,16 @@ public final class RequestSet: IRequestSet
 
     ***************************************************************************/
 
-    public RequestId startSingleNode ( RequestContext, WorkingData ) (
+    public RequestId startSingleNode ( RequestContext ) (
         SingleNodeHandler handler, Request.FinishedNotifier finished_notifier,
-        RequestContext context, WorkingData working )
+        RequestContext context )
     {
         assert(handler !is null);
         assert(finished_notifier !is null);
 
         auto rq = this.newRequest();
         assert(rq.id > 0);
-        rq.startSingleNode(handler, finished_notifier, context, working);
+        rq.startSingleNode(handler, finished_notifier, context);
         return rq.id;
     }
 
@@ -905,9 +778,8 @@ public final class RequestSet: IRequestSet
                 packed by swarm.neo.util.StructPacker
             handler = request handler
             finished_notifier = called when the last hander has finished
-            context = handler specific request context; passed to `handler`
-            working = initial working data to serialize into the request
-                connection
+            context = handler specific request context; `handler` can obtain
+                      these from the `RequestOnConn` it receives
 
         Throws:
             NoMoreRequests if starting a new request would exceed the maximum
@@ -915,16 +787,16 @@ public final class RequestSet: IRequestSet
 
     ***************************************************************************/
 
-    public RequestId startRoundRobin ( RequestContext, WorkingData ) (
+    public RequestId startRoundRobin ( RequestContext ) (
         RoundRobinHandler handler, Request.FinishedNotifier finished_notifier,
-        RequestContext context, WorkingData working )
+        RequestContext context )
     {
         assert(handler !is null);
         assert(finished_notifier !is null);
 
         auto rq = this.newRequest();
         assert(rq.id > 0);
-        rq.startRoundRobin(handler, finished_notifier, context, working);
+        rq.startRoundRobin(handler, finished_notifier, context);
         return rq.id;
     }
 
@@ -939,9 +811,9 @@ public final class RequestSet: IRequestSet
                 packed by swarm.neo.util.StructPacker
             handler = request handler
             finished_notifier = called when the last hander has finished
-            context = handler specific request context; passed to `handler`
-            working = initial working data to serialize into the request
-                connections
+            context = handler specific request context; `handler` can obtain
+                      these from the `RequestOnConn.EventDispatcher` it
+                      receives
 
         Throws:
             NoMoreRequests if starting a new request would exceed the maximum
@@ -949,16 +821,16 @@ public final class RequestSet: IRequestSet
 
     ***************************************************************************/
 
-    public RequestId startAllNodes ( RequestContext, WorkingData ) (
+    public RequestId startAllNodes ( RequestContext ) (
         AllNodesHandler handler, Request.FinishedNotifier finished_notifier,
-        RequestContext context, WorkingData working )
+        RequestContext context )
     {
         assert(handler !is null);
         assert(finished_notifier !is null);
 
         auto rq = this.newRequest();
         assert(rq.id > 0);
-        rq.startAllNodes(handler, finished_notifier, context, working);
+        rq.startAllNodes(handler, finished_notifier, context);
         return rq.id;
     }
 
