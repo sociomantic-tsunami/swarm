@@ -8,9 +8,6 @@
            varies by type of request.)
         2. The serialized request context (stored in `Request`). The request
            handler may modify this data, as necessary.
-        3. The serialized per-`RequestOnConn` working data (stored in the
-           `RequestOnConn`). The request handler may modify this data, as
-           necessary.
 
     Copyright: Copyright (c) 2016-2017 sociomantic labs GmbH. All rights reserved
 
@@ -42,7 +39,7 @@ import ocean.core.SmartUnion;
 *******************************************************************************/
 
 public alias void function ( UseNodeDg use_node,
-    void[] context_blob, void[] working ) SingleNodeHandler;
+    void[] context_blob ) SingleNodeHandler;
 
 /*******************************************************************************
 
@@ -53,7 +50,7 @@ public alias void function ( UseNodeDg use_node,
 *******************************************************************************/
 
 public alias void function ( RequestOnConn.EventDispatcherAllNodes ed,
-    void[] context_blob, void[] working ) AllNodesHandler;
+    void[] context_blob ) AllNodesHandler;
 
 /*******************************************************************************
 
@@ -65,7 +62,7 @@ public alias void function ( RequestOnConn.EventDispatcherAllNodes ed,
 *******************************************************************************/
 
 public alias void function ( IRoundRobinConnIterator rr,
-    void[] context_blob, void[] working ) RoundRobinHandler;
+    void[] context_blob ) RoundRobinHandler;
 
 /*******************************************************************************
 

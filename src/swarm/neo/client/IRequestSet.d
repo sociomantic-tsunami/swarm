@@ -43,9 +43,7 @@ interface IRequest
 {
     /// Request implementation function to be called when the last handler of
     /// the request has finished.
-    public alias void function (
-        void[] context_blob, IRequestWorkingData working_data_iter )
-        FinishedNotifier;
+    public alias void function ( void[] context_blob ) FinishedNotifier;
 
     import swarm.neo.AddrPort;
     IRequestOnConn getHandler ( AddrPort node_address );
@@ -78,20 +76,4 @@ interface IRequestController
     void[] context_blob ( );
 
     void resumeSuspendedHandlers ( int resume_code );
-
-    void accessRequestWorkingData ( void delegate ( IRequestWorkingData ) dg );
-}
-
-/*******************************************************************************
-
-    Interface to a request which provides an iterator over the working data of
-    its request-on-conns.
-
-*******************************************************************************/
-
-public interface IRequestWorkingData
-{
-    int opApply (
-        int delegate ( /*ref AddrPort node_address,*/
-            ref Const!(void)[] working_data ) dg );
 }
