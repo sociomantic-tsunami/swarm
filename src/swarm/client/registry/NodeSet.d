@@ -37,7 +37,7 @@ import ocean.util.container.map.Map : StandardKeyHashingMap;
 
 import ocean.transition;
 
-import ocean.text.convert.Format;
+import ocean.text.convert.Formatter;
 
 
 
@@ -101,7 +101,7 @@ public class NodeSet
             this.node_address = node_address;
             this.node_port = node_port;
 
-            this.msg = Format.convert("{}: {}:{} @{}:{}", super.msg,
+            this.msg = format("{}: {}:{} @{}:{}", super.msg,
                     this.node_address, this.node_port, this.file, this.line);
 
             return this;

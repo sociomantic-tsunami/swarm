@@ -62,9 +62,11 @@ public class Node : NodeBase!(ConnHandler)
 
         Options options;
         options.epoll = epoll;
-        options.cmd_handlers[RequestCode.Get] = &Get.handle;
-        options.cmd_handlers[RequestCode.GetAll] = &GetAll.handle;
-        options.cmd_handlers[RequestCode.Put] = &Put.handle;
+
+        options.requests.add(RequestCode.Get, "Get", &Get.handle);
+        options.requests.add(RequestCode.GetAll, "GetAll", &GetAll.handle);
+        options.requests.add(RequestCode.Put, "Put", &Put.handle);
+
         options.credentials_map["dummy"] = Key.init;
         options.shared_resources = this.storage;
 

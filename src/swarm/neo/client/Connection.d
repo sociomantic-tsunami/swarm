@@ -331,6 +331,27 @@ public final class Connection: ConnectionBase
 
     /***************************************************************************
 
+        Causes the connection to be dropped. It will be re-established as
+        normal. This method is only intended for use in tests.
+
+    ***************************************************************************/
+
+    public void reconnect ( )
+    {
+        /* We call `shutdown`, rather than `close`, here because `close` causes
+           the socket to cleanly exit and automatically unregisters it from
+           epoll. The connection fibers will be suspended waiting for an event
+           on the socket, which can now never happen, as it's no longer
+           registered in epoll. `shutdown`, on the other hand, mimics a
+           node-side disconnection by causing the socket to fire with a hangup
+           event, which is then handled with the normal error handling logic.
+        */
+        this.socket.shutdown();
+        this.status_ = this.status_.Disconnected;
+    }
+
+    /***************************************************************************
+
         Updates the status on a connection shutdown.
 
         This method should not throw.

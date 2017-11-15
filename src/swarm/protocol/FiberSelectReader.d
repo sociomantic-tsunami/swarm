@@ -45,6 +45,11 @@ import ocean.math.Math : min, max;
 
 public class FiberSelectReader : Ocean.FiberSelectReader
 {
+    import swarm.protocol.IAddrPort;
+
+    /// Address/port getter for underlying connection.
+    public IAddrPort addr_port;
+
     /***************************************************************************
 
         Constructor.
@@ -86,7 +91,6 @@ public class FiberSelectReader : Ocean.FiberSelectReader
     {
         super(socket, buffer_size);
     }
-
 
     /***************************************************************************
 

@@ -533,6 +533,8 @@ public struct RequestEventDispatcher
 
             if ( this.waitingWriters() )
                 writer = this.popWaitingWriter();
+            else if ( !this.waiting_fibers.length )
+                break;
 
             this.handleNextEvent(conn, writer);
         }

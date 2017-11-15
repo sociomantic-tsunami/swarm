@@ -42,6 +42,11 @@ import ocean.core.Array : copy;
 
 public class FiberSelectWriter : Ocean.BufferedFiberSelectWriter
 {
+    import swarm.protocol.IAddrPort;
+
+    /// Address/port getter for underlying connection.
+    public IAddrPort addr_port;
+
     /***************************************************************************
 
         Constructor

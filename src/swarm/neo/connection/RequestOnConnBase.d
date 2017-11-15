@@ -251,6 +251,9 @@ abstract class RequestOnConnBase
 
         public enum NextEventFlags
         {
+            /// No flags.
+            None = 0,
+
             /// Wait to receive a payload for this request over the connection.
             Receive     = 1 << 0,
 
@@ -628,6 +631,17 @@ abstract class RequestOnConnBase
             The one exception is when sending -- the send may succeed
             immediately, without needing to suspend the fiber.
 
+            The caller indicates which type of event(s) to wait for via the
+            arguments, as follows:
+                1. Waiting to receive a payload is indicated by setting the
+                   NextEventFlags.Receive bit of `flags`.
+                2. Waiting to send a payload is indicated by passing a non-null
+                   delegate to `fill_payload`.
+                3. Yielding the fiber and waiting for it to be resumed is
+                   indicated by setting the NextEventFlags.Yield bit of `flags`.
+                4. It is not possible to explicitly request or not request that
+                   the fiber wait to be resumed with a non-negative code.
+
             Params:
                 flags = flags indicating whether to wait for receiving &/
                     being resumed after yielding
@@ -635,7 +649,11 @@ abstract class RequestOnConnBase
                     If this argument is null, sending does not occur
 
             Returns:
-                an EventNotification instance denoting the event which occurred
+                an EventNotification instance denoting the event which occurred.
+                Note that, whatever types of events to wait for are specified by
+                the arguments, it is always possible that a `resumed` event
+                (type 4, above) may be returned. The caller must take this into
+                account.
 
             Throws:
                 Exception on protocol or I/O error.
@@ -825,9 +843,8 @@ abstract class RequestOnConnBase
 
         public void send ( void delegate ( Payload ) fill_payload )
         {
-            scope payload = this.new Payload;
-            fill_payload(payload);
-            this.send(this.outer.send_payload);
+            auto event = this.nextEvent(NextEventFlags.None, fill_payload);
+            assert(event.active == event.active.sent);
         }
 
         /***********************************************************************
@@ -846,6 +863,7 @@ abstract class RequestOnConnBase
 
         ***********************************************************************/
 
+        deprecated("Use the send method which accepts a delegate")
         public void send ( in void[][] payload ... )
         {
             int resume_code = this.sendAndHandleEvents(payload);
@@ -876,6 +894,7 @@ abstract class RequestOnConnBase
 
         ***********************************************************************/
 
+        deprecated("Use nextEvent instead")
         public int sendAndHandleEvents ( void delegate ( Payload ) fill_payload )
         {
             scope payload = this.new Payload;
@@ -906,6 +925,7 @@ abstract class RequestOnConnBase
 
         ***********************************************************************/
 
+        deprecated("Use nextEvent instead")
         public int sendAndHandleEvents ( in void[][] payload ... )
         in
         {
@@ -1011,22 +1031,9 @@ abstract class RequestOnConnBase
                           "supported because it has indirections");
             T value;
 
-            int resume_code = this.receiveAndHandleEvents(
-                (in void[] payload)
-                {
-                    this.outer.connection.message_parser.parseBody!(T)(
-                        payload, value
-                    );
-                }
-            );
-
-            if (resume_code >= 0)
-            {
-                assert(on_other_resume_code !is null,
-                       "User unexpectedy resumed the fiber");
-                on_other_resume_code(resume_code);
-            }
-
+            auto event = this.nextEvent(NextEventFlags.Receive);
+            this.outer.connection.message_parser.parseBody!(T)(
+                event.received.payload, value);
             return value;
         }
 
@@ -1047,8 +1054,8 @@ abstract class RequestOnConnBase
 
         public void receive ( void delegate ( in void[] payload ) received )
         {
-            int resume_code = this.receiveAndHandleEvents(received);
-            assert(resume_code <= 0, "receive: User unexpectedy resumed the fiber");
+            auto event = this.nextEvent(NextEventFlags.Receive);
+            received(event.received.payload);
         }
 
         /***********************************************************************
@@ -1073,6 +1080,7 @@ abstract class RequestOnConnBase
 
         ***********************************************************************/
 
+        deprecated("Use nextEvent instead")
         public int receiveAndHandleEvents (
             void delegate ( in void[] payload ) received )
         in
@@ -1145,6 +1153,7 @@ abstract class RequestOnConnBase
 
         ***********************************************************************/
 
+        deprecated("Use nextEvent instead")
         public int yieldAndHandleEvents ( )
         in
         {
@@ -1222,6 +1231,7 @@ abstract class RequestOnConnBase
 
         ***********************************************************************/
 
+        deprecated("Use nextEvent instead")
         public int yieldReceiveAndHandleEvents (
             void delegate ( in void[] payload ) received
         )
@@ -1315,6 +1325,8 @@ abstract class RequestOnConnBase
 
         ***********************************************************************/
 
+        deprecated("Use either nextEvent, with your own counter or"
+            "RequestEventDispatcher.periodicYield")
         public int periodicYieldAndHandleEvents ( ref uint call_count,
             Const!(uint) yield_after )
         {
@@ -1358,6 +1370,8 @@ abstract class RequestOnConnBase
 
         ***********************************************************************/
 
+        deprecated("Use either nextEvent, with your own counter or"
+            "RequestEventDispatcher.periodicYield")
         public int periodicYieldReceiveAndHandleEvents ( ref uint call_count,
             Const!(uint) yield_after, void delegate ( in void[] payload ) received )
         {
@@ -1393,6 +1407,7 @@ abstract class RequestOnConnBase
 
         ***********************************************************************/
 
+        deprecated("Use nextEvent instead")
         public void sendReceive ( void delegate ( in void[] payload ) received,
             void delegate ( Payload ) fill_payload )
         {
@@ -1420,6 +1435,7 @@ abstract class RequestOnConnBase
 
         ***********************************************************************/
 
+        deprecated("Use nextEvent instead")
         public void sendReceive (
             void delegate ( in void[] payload ) received,
             in void[][] payload ...
@@ -1463,6 +1479,7 @@ abstract class RequestOnConnBase
 
         ***********************************************************************/
 
+        deprecated("Use nextEvent instead")
         public int sendReceiveAndHandleEvents (
             void delegate ( in void[] payload ) received,
             void delegate ( Payload ) fill_payload )
@@ -1501,6 +1518,7 @@ abstract class RequestOnConnBase
 
         ***********************************************************************/
 
+        deprecated("Use nextEvent instead")
         public int sendReceiveAndHandleEvents (
             void delegate ( in void[] recv_payload ) received,
             in void[][] payload ...
