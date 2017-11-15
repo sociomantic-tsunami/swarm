@@ -34,7 +34,6 @@ public class Client
     public class Neo
     {
         import swarm.neo.client.mixins.ClientCore;
-        import swarm.neo.client.IRequestSet : IRequestWorkingData;
 
         /***********************************************************************
 

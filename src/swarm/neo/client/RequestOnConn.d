@@ -254,15 +254,6 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
 
     /***************************************************************************
 
-        Serialised working data, set when starting a new request and passed to
-        all request handlers when the request fiber is started.
-
-    ***************************************************************************/
-
-    private void[] working_data = null;
-
-    /***************************************************************************
-
         Client request handler to start in a fiber.
 
     ***************************************************************************/
@@ -387,38 +378,12 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
 
     /***************************************************************************
 
-        Gets the serialised working data of this instance.
-
-        Returns:
-            working data of this request-on-conn
-
-        In:
-            `this.working_data` is expected to be non-empty (i.e. was
-            properly set before use).
-
-    ***************************************************************************/
-
-    public Const!(void)[] getWorkingData ( )
-    in
-    {
-        assert(this.working_data.length, typeof(this).stringof ~
-            "getWorkingData: this.working_data.length expected" ~
-            " to be > 0, as it ought to have been set at the start of the request");
-    }
-    body
-    {
-        return this.working_data;
-    }
-
-    /***************************************************************************
-
         Starts the request handler for a single-node request.
 
         Params:
             id = the request id
             context_blob = the opaque data stored as the request's context. This
                 data is shared between all RoCs (sliced)
-            working_blob = the opaque data owned by this RoC (copied internally)
             finished_dg = delegate to be called when the handler is finished
             handler = the request handler to start in a fiber
 
@@ -427,7 +392,7 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
 
     ***************************************************************************/
 
-    public void start ( RequestId id, void[] context_blob, void[] working_blob,
+    public void start ( RequestId id, void[] context_blob,
         HandlerFinishedDg finished_dg, SingleNodeHandler handler )
     in
     {
@@ -435,7 +400,7 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
     }
     body
     {
-        this.setupRequest(id, context_blob, working_blob, finished_dg);
+        this.setupRequest(id, context_blob, finished_dg);
         this.handler.single_node = handler;
         this.fiber.start();
     }
@@ -449,7 +414,6 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
             id = the request id
             context_blob = the opaque data stored as the request's context. This
                 data is shared between all RoCs (sliced)
-            working_blob = the opaque data owned by this RoC (copied internally)
             finished_dg = delegate to be called when the handler is finished
             handler    = the request handler to start in a fiber
             connection = the connection with which handler should communicate
@@ -459,7 +423,7 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
 
     ***************************************************************************/
 
-    public void start ( RequestId id, void[] context_blob, void[] working_blob,
+    public void start ( RequestId id, void[] context_blob,
         HandlerFinishedDg finished_dg, AllNodesHandler handler, Connection connection )
     in
     {
@@ -467,7 +431,7 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
     }
     body
     {
-        this.setupRequest(id, context_blob, working_blob, finished_dg);
+        this.setupRequest(id, context_blob, finished_dg);
         this.handler.all_nodes = Handler.AllNodesWithConnection(connection,
             handler);
         this.fiber.start();
@@ -481,7 +445,6 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
             id = the request id
             context_blob = the opaque data stored as the request's context. This
                 data is shared between all RoCs (sliced)
-            working_blob = the opaque data owned by this RoC (copied internally)
             finished_dg = delegate to be called when the handler is finished
             handler = the request handler to start in a fiber
 
@@ -490,7 +453,7 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
 
     **************************************************************************/
 
-    public void start ( RequestId id, void[] context_blob, void[] working_blob,
+    public void start ( RequestId id, void[] context_blob,
         HandlerFinishedDg finished_dg, RoundRobinHandler handler )
     in
     {
@@ -498,7 +461,7 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
     }
     body
     {
-        this.setupRequest(id, context_blob, working_blob, finished_dg);
+        this.setupRequest(id, context_blob, finished_dg);
         this.handler.round_robin = handler;
         this.fiber.start();
     }
@@ -536,22 +499,20 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
         /*final*/ switch (this.handler.active)
         {
             case handler.active.single_node:
-                handler.single_node()(&this.useNode, this.request_context,
-                    this.working_data);
+                handler.single_node()(&this.useNode, this.request_context);
                 break;
 
             case handler.active.all_nodes:
                 auto all_nodes = handler.all_nodes;
                 this.connection = all_nodes.connection;
                 scope ed = this.new EventDispatcherAllNodes(this.request_id, all_nodes.connection);
-                all_nodes.dg(ed, this.request_context, this.working_data);
+                all_nodes.dg(ed, this.request_context);
                 break;
 
             case handler.active.round_robin:
                 scope ed = this.new EventDispatcher;
                 scope edrr = new EventDispatcherRoundRobin(ed);
-                handler.round_robin()(edrr, this.request_context,
-                    this.working_data);
+                handler.round_robin()(edrr, this.request_context);
                 break;
 
             default: case handler.active.none:
@@ -659,21 +620,16 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
             request = the request that called this.start().
             context_blob = the opaque data stored as the request's context. This
                 data is shared between all RoCs (sliced)
-            working_blob = the opaque data owned by this RoC (copied internally)
             finished_dg = delegate to be called when the handler is finished
 
     ***************************************************************************/
 
     private void setupRequest ( RequestId id, void[] context_blob,
-        void[] working_blob, HandlerFinishedDg finished_dg )
+        HandlerFinishedDg finished_dg )
     {
         this.request_id = id;
         this.request_context = context_blob;
         this.finished_dg = finished_dg;
-
-        this.working_data.length = working_blob.length;
-        enableStomping(this.working_data);
-        this.working_data[] = working_blob[];
     }
 
     /***************************************************************************
@@ -687,7 +643,6 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
     {
         this.handler = this.handler.init;
         this.connection = null;
-        this.working_data = null;
     }
 
     /***************************************************************************

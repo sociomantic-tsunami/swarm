@@ -1161,12 +1161,6 @@ private template ExampleRequestCore ( )
         SuspendableRequestSharedWorkingData suspendable_control;
     }
 
-    // Required by RequestCore
-    private struct Working
-    {
-        // Dummy
-    }
-
     /***************************************************************************
 
         Request core. Mixes in the types `NotificationInfo`, `Notifier`,
@@ -1176,6 +1170,6 @@ private template ExampleRequestCore ( )
     ***************************************************************************/
 
     mixin RequestCore!(RequestType.AllNodes, RequestCode, RequestVersion,
-        Args, SharedWorking, Working, Notification);
+        Args, SharedWorking, Notification);
 }
 
