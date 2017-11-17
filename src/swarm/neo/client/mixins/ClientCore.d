@@ -73,25 +73,6 @@ template ClientCore ( )
 
     /***************************************************************************
 
-        Intermediary buffer used when serializing user-specified parameters of
-        requests (see assign()). The user-specified params are expected to be
-        passed to assign() as const. As the actual request Context struct (where
-        the params are stored) cannot be const (it needs to be deserialized
-        into), we have to first serialize the const params separately. This
-        buffer is then deserialized into the (non-const) params field of a
-        Context instance, which is then serialized into the Request instance,
-        copying the serialized params (see Request.initRequest). At this point,
-        the data in this field is no longer needed. It is guaranteed that no
-        context switch can occur between the params being serialized here and
-        the serialized data being copied into the request, so it is safe to use
-        a single, shared buffer.
-
-    ***************************************************************************/
-
-    private ubyte[] serialized_user_specified_params;
-
-    /***************************************************************************
-
         Config class which may be passed to the ctor. Designed for use with
         ocean's ConfigFiller helper.
 
@@ -835,9 +816,7 @@ template ClientCore ( )
     {
         static assert(is(P : Const!(R.UserSpecifiedParams)));
 
-        R.Context context;
-        context.setUserSpecifiedParams(params, this.serialized_user_specified_params);
-        context.shared_resources = this.request_resources;
+        auto context = Const!(R.Context)(params, this.request_resources);
 
         static if ( R.request_type == R.request_type.SingleNode )
         {
