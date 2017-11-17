@@ -837,7 +837,7 @@ template ClientCore ( )
 
         R.Context context;
         context.setUserSpecifiedParams(params, this.serialized_user_specified_params);
-        context.request_resources.set(this.request_resources);
+        context.shared_resources = this.request_resources;
 
         static if ( R.request_type == R.request_type.SingleNode )
         {
