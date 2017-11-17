@@ -251,14 +251,6 @@ public template RequestCore ( RequestType request_type_, ubyte request_code,
 
         /***********************************************************************
 
-            Global working data required by the request.
-
-        ***********************************************************************/
-
-        public SharedWorking shared_working;
-
-        /***********************************************************************
-
             Object for acquiring shared resources required by the request.
 
         ***********************************************************************/
@@ -298,36 +290,20 @@ public template RequestCore ( RequestType request_type_, ubyte request_code,
 
         /***********************************************************************
 
+            Global working data required by the request.
+
+        ***********************************************************************/
+
+        public SharedWorking shared_working;
+
+        /***********************************************************************
+
             The ID of the request in the request set (set by RequestSet, passed
             to the notifier).
 
         ***********************************************************************/
 
         public RequestId request_id;
-
-        /***********************************************************************
-
-            Helper function to properly serialize user-specified params for the
-            request into the `user_params` field. An intermediary serialzation
-            buffer is used to safely convert from the const params provided by
-            the user to the mutable params required internally (in order to be
-            able to deserialize into a Context instance).
-
-            Params:
-                params = user-specified request parameters to store
-                serialize_buffer = intermediary serialization buffer
-
-        ***********************************************************************/
-
-        public void setUserSpecifiedParams ( Const!(UserSpecifiedParams) params,
-            ref ubyte[] serialize_buffer )
-        {
-            auto serialized = Serializer.serialize(params, serialize_buffer);
-            enableStomping(serialized);
-            auto deserialized = Deserializer.deserialize!(UserSpecifiedParams)(
-                serialized);
-            this.user_params = *deserialized.ptr;
-        }
     }
 
     /***************************************************************************

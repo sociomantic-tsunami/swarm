@@ -685,7 +685,15 @@ public final class RequestSet: IRequestSet
         body
         {
             this.packRequestContext(context);
+
+            // Now that we have the const user-provided info serialized, we can
+            // deserialize as a mutable RequestContext and modify fields.
+            auto mutable_context =
+                unpack!(Unqual!(RequestContext))(this.context);
+            mutable_context.request_id = this.id;
+
             this.serializeWorkingData(working);
+
             this.finished_notifier = finished_notifier;
             this.start_time_micros = MicrosecondsClock.now_us();
         }
@@ -843,7 +851,6 @@ public final class RequestSet: IRequestSet
 
         auto rq = this.newRequest();
         assert(rq.id > 0);
-        context.request_id = rq.id;
         rq.startSingleNode(handler, finished_notifier, context, working);
         return rq.id;
     }
@@ -878,7 +885,6 @@ public final class RequestSet: IRequestSet
 
         auto rq = this.newRequest();
         assert(rq.id > 0);
-        context.request_id = rq.id;
         rq.startRoundRobin(handler, finished_notifier, context, working);
         return rq.id;
     }
@@ -915,7 +921,6 @@ public final class RequestSet: IRequestSet
 
         auto rq = this.newRequest();
         assert(rq.id > 0);
-        context.request_id = rq.id;
         rq.startAllNodes(handler, finished_notifier, context, working);
         return rq.id;
     }
