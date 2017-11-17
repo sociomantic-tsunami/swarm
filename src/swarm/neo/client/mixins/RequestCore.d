@@ -121,6 +121,7 @@ public template RequestCore ( RequestType request_type_, ubyte request_code,
     import swarm.neo.request.Command;
     import swarm.neo.AddrPort;
     import swarm.neo.client.NotifierTypes;
+    import swarm.neo.util.StructPacker;
 
     /***************************************************************************
 
@@ -369,7 +370,7 @@ public template RequestCore ( RequestType request_type_, ubyte request_code,
 
     /***************************************************************************
 
-        Private helper function to convert the raw, serialized context into a
+        Private helper function to convert the raw, packed context into a
         Context instance.
 
         Params:
@@ -382,7 +383,7 @@ public template RequestCore ( RequestType request_type_, ubyte request_code,
 
     private static Context* getContext ( void[] context_blob )
     {
-        return Contiguous!(Context)(context_blob).ptr;
+        return unpack!(Context)(context_blob);
     }
 
     /***************************************************************************
