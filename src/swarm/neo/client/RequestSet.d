@@ -56,6 +56,7 @@ public final class RequestSet: IRequestSet
     public final class Request: IRequest, IRequestController
     {
         import swarm.neo.client.Connection;
+        import swarm.neo.util.StructPacker;
         import ocean.core.SmartUnion;
         import ocean.util.serialize.contiguous.Serializer;
         import ocean.util.serialize.contiguous.Deserializer;
@@ -146,8 +147,8 @@ public final class RequestSet: IRequestSet
 
         /***********************************************************************
 
-            The serialised request context data. This is passed to the request
-            handler, where it must be deserialized.
+            The packed request context data. This is passed to the request
+            handler, where it must be unpacked.
 
             This array is empty (not necessarily `null`) while this request is
             inactive.
@@ -533,9 +534,7 @@ public final class RequestSet: IRequestSet
 
         /***********************************************************************
 
-            Serialises handler_param into `this.request_context`.
-            After serialisation `this.request_context` is deserialised so that
-            it can be read by just casting its `ptr` to `HandlerParam`.
+            Packs handler_param into `this.request_context`.
 
             Params:
                 request_context = context of request
@@ -546,17 +545,16 @@ public final class RequestSet: IRequestSet
 
         ***********************************************************************/
 
-        private void serializeRequestContext ( T ) ( ref T request_context )
+        private void packRequestContext ( T ) ( ref T request_context )
         in
         {
             assert(!this.context.length, typeof(this).stringof ~
-                   "serializeRequestContext: this.context.length expected" ~
+                   "packRequestContext: this.context.length expected" ~
                    " to be 0 as it ought to be if it was properly reset");
         }
         body
         {
-            Serializer.serialize(request_context, this.context);
-            Deserializer.deserialize!(T)(this.context);
+            pack(request_context, this.context);
         }
 
         /***********************************************************************
@@ -686,7 +684,7 @@ public final class RequestSet: IRequestSet
         }
         body
         {
-            this.serializeRequestContext(context);
+            this.packRequestContext(context);
             this.serializeWorkingData(working);
             this.finished_notifier = finished_notifier;
             this.start_time_micros = MicrosecondsClock.now_us();
