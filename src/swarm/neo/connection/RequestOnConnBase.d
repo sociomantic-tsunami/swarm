@@ -1325,8 +1325,7 @@ abstract class RequestOnConnBase
 
         ***********************************************************************/
 
-        deprecated("Use either nextEvent, with your own counter or"
-            "RequestEventDispatcher.periodicYield")
+        deprecated("Use either nextEvent, with your own counter or RequestEventDispatcher.periodicYield")
         public int periodicYieldAndHandleEvents ( ref uint call_count,
             Const!(uint) yield_after )
         {
@@ -1370,8 +1369,7 @@ abstract class RequestOnConnBase
 
         ***********************************************************************/
 
-        deprecated("Use either nextEvent, with your own counter or"
-            "RequestEventDispatcher.periodicYield")
+        deprecated("Use either nextEvent, with your own counter or RequestEventDispatcher.periodicYield")
         public int periodicYieldReceiveAndHandleEvents ( ref uint call_count,
             Const!(uint) yield_after, void delegate ( in void[] payload ) received )
         {

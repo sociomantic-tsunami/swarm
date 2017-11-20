@@ -181,7 +181,7 @@ public struct NodeExceptionInfo
         if ( this.e !is null )
         {
             sformat(sink,
-                "Exception '{}' @ {}:{} occurred in the client while handling the "
+                "Exception '{}' @ {}:{} occurred in the client while handling the " ~
                 "request on node {}:{}",
                 getMsg(this.e), this.e.file, this.e.line,
                 this.node_addr.address_bytes, this.node_addr.port);
@@ -189,7 +189,7 @@ public struct NodeExceptionInfo
         else
         {
             sformat(sink,
-                "An undefined error (null Exception) occurred in the client "
+                "An undefined error (null Exception) occurred in the client " ~
                 "while handling the request on node {}:{}",
                 this.node_addr.address_bytes, this.node_addr.port);
         }
@@ -230,7 +230,7 @@ public struct RequestNodeExceptionInfo
         if ( this.e !is null )
         {
             sformat(sink,
-                "Exception '{}' @ {}:{} occurred in the client while handling "
+                "Exception '{}' @ {}:{} occurred in the client while handling " ~
                 "request #{} on node {}:{}",
                 getMsg(this.e), this.e.file, this.e.line, this.request_id,
                 this.node_addr.address_bytes, this.node_addr.port);
@@ -238,7 +238,7 @@ public struct RequestNodeExceptionInfo
         else
         {
             sformat(sink,
-                "An undefined error (null Exception) occurred in the client "
+                "An undefined error (null Exception) occurred in the client " ~
                 "while handling request #{} on node {}:{}",
                 this.request_id, this.node_addr.address_bytes,
                 this.node_addr.port);
