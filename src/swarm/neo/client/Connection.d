@@ -304,7 +304,7 @@ public final class Connection: ConnectionBase
     public void shutdownAndHalt ( istring file = __FILE__, typeof(__LINE__) line = __LINE__ )
     {
         this.restart_after_shutdown = false;
-        
+
         if (this.send_loop.running)
         {
             switch (this.status_)
@@ -313,7 +313,7 @@ public final class Connection: ConnectionBase
                     this.socket.close();
                     this.status_ = this.status_.Disconnected;
                     break;
-                
+
                 case this.status_.Connected:
                     throw new Exception(
                         "shutdownAndHalt() called from the send fiber while " ~
@@ -486,7 +486,7 @@ public final class Connection: ConnectionBase
                 return true;
 
             case this.status_.Disconnected:
-                /* 
+                /*
                  * Shutdown was requested during startup, stopping further
                  * connection attempts.
                  */
