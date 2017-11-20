@@ -535,7 +535,7 @@ public final class Connection: ConnectionBase
                 this.startup_notifier(this, e);
 
             debug ( SwarmConn )
-                Stdout.formatln("{}:{}: Connection.tryConnect() failed with "
+                Stdout.formatln("{}:{}: Connection.tryConnect() failed with " ~
                     "exception '{}' @{}:{}", node_address.address_bytes,
                     node_address.port, getMsg(e), e.file, e.line);
             return false;
