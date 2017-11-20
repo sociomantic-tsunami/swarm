@@ -1,6 +1,6 @@
 /*******************************************************************************
 
-    Internal implementation of the client's Get request.
+    Internal implementation of the client's Put request.
 
     Copyright:
         Copyright (c) 2017 sociomantic labs GmbH. All rights reserved
@@ -10,13 +10,13 @@
 
 *******************************************************************************/
 
-module test.neo.client.request.internal.Get;
+module integrationtest.neo.client.request.internal.Put;
 
 import ocean.transition;
 
 /*******************************************************************************
 
-    Get request implementation.
+    Put request implementation.
 
     Note that request structs act simply as namespaces for the collection of
     symbols required to implement a request. They are never instantiated and
@@ -36,11 +36,11 @@ import ocean.transition;
 
 *******************************************************************************/
 
-public struct Get
+public struct Put
 {
-    import test.neo.common.Get;
-    import test.neo.client.request.Get;
-    import test.neo.common.RequestCodes;
+    import integrationtest.neo.common.Put;
+    import integrationtest.neo.client.request.Put;
+    import integrationtest.neo.common.RequestCodes;
     import swarm.neo.AddrPort;
     import swarm.neo.request.Command;
     import swarm.neo.client.RequestOnConn;
@@ -65,8 +65,7 @@ public struct Get
         {
             Failure,    // Default value; unknown error (presumably in client)
             Error,      // Node or I/O error
-            Empty,      // Record not found
-            Received    // Received record
+            Put         // Put record
         }
 
         /// The way in which the request ended. Used by the finished notifier to
@@ -82,7 +81,7 @@ public struct Get
 
     ***************************************************************************/
 
-    mixin RequestCore!(RequestType.SingleNode, RequestCode.Get, 0, Args,
+    mixin RequestCore!(RequestType.SingleNode, RequestCode.Put, 0, Args,
         SharedWorking, Notification);
 
     /***************************************************************************
@@ -100,7 +99,7 @@ public struct Get
 
     public static void handler ( UseNodeDg use_node, void[] context_blob )
     {
-        auto context = Get.getContext(context_blob);
+        auto context = Put.getContext(context_blob);
         context.shared_working.result = SharedWorking.Result.Failure;
 
         // In a real client, you'd have to have some way for a request to decide
@@ -119,16 +118,17 @@ public struct Get
                     conn.send(
                         ( conn.Payload payload )
                         {
-                            payload.add(Get.cmd.code);
-                            payload.add(Get.cmd.ver);
+                            payload.add(Put.cmd.code);
+                            payload.add(Put.cmd.ver);
                             payload.add(context.user_params.args.key);
+                            payload.addArray(context.user_params.args.value);
                         }
                     );
                     conn.flush();
 
                     // Receive status from node
                     auto status = conn.receiveValue!(StatusCode)();
-                    if ( Get.handleGlobalStatusCodes(status, context,
+                    if ( Put.handleGlobalStatusCodes(status, context,
                         conn.remote_address) )
                     {
                         // Global codes (not supported / version not supported)
@@ -136,32 +136,12 @@ public struct Get
                     }
                     else
                     {
-                        // Get-specific codes
+                        // Put-specific codes
                         with ( RequestStatusCode ) switch ( status )
                         {
-                            case Value:
+                            case Succeeded:
                                 context.shared_working.result =
-                                    SharedWorking.Result.Received;
-
-                                // Receive record value from node.
-                                conn.receive(
-                                    ( in void[] const_payload )
-                                    {
-                                        Const!(void)[] payload = const_payload;
-                                        auto value =
-                                            conn.message_parser.getArray!(void)(payload);
-
-                                        Notification n;
-                                        n.received = RequestDataInfo(
-                                            context.request_id, value);
-                                        Get.notify(context.user_params, n);
-                                    }
-                                );
-                                break;
-
-                            case Empty:
-                                context.shared_working.result =
-                                    SharedWorking.Result.Empty;
+                                    SharedWorking.Result.Put;
                                 break;
 
                             case Error:
@@ -172,7 +152,7 @@ public struct Get
                                 Notification n;
                                 n.node_error = RequestNodeInfo(
                                     context.request_id, conn.remote_address);
-                                Get.notify(context.user_params, n);
+                                Put.notify(context.user_params, n);
                                 break;
 
                             default:
@@ -190,7 +170,7 @@ public struct Get
                     Notification n;
                     n.node_disconnected = RequestNodeExceptionInfo(
                         context.request_id, conn.remote_address, e);
-                    Get.notify(context.user_params, n);
+                    Put.notify(context.user_params, n);
                 }
             });
     }
@@ -207,22 +187,18 @@ public struct Get
 
     public static void all_finished_notifier ( void[] context_blob )
     {
-        auto context = Get.getContext(context_blob);
+        auto context = Put.getContext(context_blob);
 
         Notification n;
 
         with ( SharedWorking.Result ) switch ( context.shared_working.result )
         {
-            case Empty:
-                n.nothing = NoInfo();
-                break;
             case Failure:
                 n.error = NoInfo();
                 break;
-            case Received:
-                // Received notification was already handled in handle(), where
-                // the value received from the node is available.
-                return;
+            case Put:
+                n.succeeded = NoInfo();
+                break;
             case Error:
                 // Error notification was already handled in handle(), where
                 // we have access to the node's address &/ exception.
@@ -231,6 +207,6 @@ public struct Get
                 assert(false);
         }
 
-        Get.notify(context.user_params, n);
+        Put.notify(context.user_params, n);
     }
 }

@@ -17,7 +17,7 @@
 
 *******************************************************************************/
 
-module test.neo.node.Node;
+module integrationtest.neo.node.Node;
 
 import ocean.transition;
 import swarm.node.model.NeoNode;
@@ -30,12 +30,12 @@ public class Node : NodeBase!(ConnHandler)
     import ocean.io.select.EpollSelectDispatcher;
     import swarm.neo.authentication.HmacDef: Key;
 
-    import test.neo.common.RequestCodes;
-    import test.neo.node.Storage;
+    import integrationtest.neo.common.RequestCodes;
+    import integrationtest.neo.node.Storage;
 
-    import Get = test.neo.node.request.Get;
-    import GetAll = test.neo.node.request.GetAll;
-    import Put = test.neo.node.request.Put;
+    import Get = integrationtest.neo.node.request.Get;
+    import GetAll = integrationtest.neo.node.request.GetAll;
+    import Put = integrationtest.neo.node.request.Put;
 
     /// Storage engine.
     private Storage storage;

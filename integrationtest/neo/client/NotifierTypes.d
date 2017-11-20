@@ -12,7 +12,7 @@
 
 *******************************************************************************/
 
-module test.neo.client.NotifierTypes;
+module integrationtest.neo.client.NotifierTypes;
 
 public import swarm.neo.client.NotifierTypes;
 import swarm.neo.util.Formatter;

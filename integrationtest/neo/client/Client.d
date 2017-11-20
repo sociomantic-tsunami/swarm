@@ -15,7 +15,7 @@
 
 *******************************************************************************/
 
-module test.neo.client.Client;
+module integrationtest.neo.client.Client;
 
 import ocean.transition;
 
@@ -41,9 +41,9 @@ public class Client
 
         ***********************************************************************/
 
-        public import Get = test.neo.client.request.Get;
-        public import GetAll = test.neo.client.request.GetAll;
-        public import Put = test.neo.client.request.Put;
+        public import Get = integrationtest.neo.client.request.Get;
+        public import GetAll = integrationtest.neo.client.request.GetAll;
+        public import Put = integrationtest.neo.client.request.Put;
 
         /***********************************************************************
 
@@ -53,9 +53,9 @@ public class Client
 
         struct Internals
         {
-            import test.neo.client.request.internal.GetAll;
-            import test.neo.client.request.internal.Get;
-            import test.neo.client.request.internal.Put;
+            import integrationtest.neo.client.request.internal.GetAll;
+            import integrationtest.neo.client.request.internal.Get;
+            import integrationtest.neo.client.request.internal.Put;
         }
 
         /// Instantiation of ClientCore.

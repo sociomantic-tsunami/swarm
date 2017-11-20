@@ -10,7 +10,7 @@
 
 *******************************************************************************/
 
-module test.neo.client.request.internal.GetAll;
+module integrationtest.neo.client.request.internal.GetAll;
 
 import ocean.transition;
 
@@ -38,10 +38,10 @@ import ocean.transition;
 
 public struct GetAll
 {
-    import test.neo.common.GetAll;
-    import test.neo.client.request.GetAll;
-    import test.neo.common.RequestCodes;
-    import test.neo.client.NotifierTypes;
+    import integrationtest.neo.common.GetAll;
+    import integrationtest.neo.client.request.GetAll;
+    import integrationtest.neo.common.RequestCodes;
+    import integrationtest.neo.client.NotifierTypes;
     import swarm.neo.client.RequestOnConn;
     import swarm.neo.client.mixins.RequestCore;
     import swarm.neo.client.mixins.SuspendableRequestCore;
@@ -145,11 +145,11 @@ private scope class GetAllImpl
     import swarm.neo.client.RequestOnConn;
     import swarm.neo.util.MessageFiber;
 
-    import test.neo.common.GetAll;
-    import test.neo.client.NotifierTypes;
+    import integrationtest.neo.common.GetAll;
+    import integrationtest.neo.client.NotifierTypes;
 
-    import test.neo.common.GetAll;
-    import test.neo.client.NotifierTypes;
+    import integrationtest.neo.common.GetAll;
+    import integrationtest.neo.client.NotifierTypes;
 
     /// Connection event dispatcher.
     private RequestOnConn.EventDispatcherAllNodes conn;
@@ -333,8 +333,8 @@ private struct Reader
     import swarm.neo.util.MessageFiber;
     import swarm.neo.request.RequestEventDispatcher;
     import swarm.neo.client.RequestOnConn;
-    import test.neo.common.GetAll;
-    import test.neo.client.NotifierTypes;
+    import integrationtest.neo.common.GetAll;
+    import integrationtest.neo.client.NotifierTypes;
 
     private MessageFiber fiber;
     private RequestEventDispatcher* request_event_dispatcher;
@@ -404,7 +404,7 @@ private struct Controller
     import swarm.neo.request.RequestEventDispatcher;
     import swarm.neo.client.RequestOnConn;
     import swarm.neo.client.mixins.SuspendableRequestCore;
-    import test.neo.common.GetAll;
+    import integrationtest.neo.common.GetAll;
 
     private MessageFiber fiber;
     private RequestEventDispatcher* request_event_dispatcher;
