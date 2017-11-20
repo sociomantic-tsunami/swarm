@@ -252,7 +252,7 @@ public class NodeDeactivator
             // Do nothing if the maximum allowed fraction of nodes is already
             // disabled.
             auto fluid_registry = cast(FluidNodeRegistry)this.registry;
-            enforce(fluid_registry !is null, "NodeDeactivator plugin requires "
+            enforce(fluid_registry !is null, "NodeDeactivator plugin requires " ~
                 "FluidNodeRegistry");
             auto one_more_node = 1.0 / cast(float)this.nodes.length;
             debug ( NodeDeactivator ) Stderr.formatln("{}% of registry disabled",

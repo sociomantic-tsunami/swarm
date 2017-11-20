@@ -107,7 +107,6 @@ public class Credentials
 
     ***************************************************************************/
 
-    deprecated("Refer to CredentialsParseException in "
-        "swarm.neo.authentication.CredentialsFile directly")
+    deprecated("Refer to CredentialsParseException in swarm.neo.authentication.CredentialsFile directly")
     public alias CredFile.CredentialsParseException ParseException;
 }
