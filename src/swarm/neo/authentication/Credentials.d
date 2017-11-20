@@ -13,9 +13,7 @@ module swarm.neo.authentication.Credentials;
 
 import Client = swarm.neo.authentication.ClientCredentials;
 
-deprecated("Import client Credentials from swarm.neo.authentication.ClientCredentials;"
-    "remove `Credentials.` prefix from usages of LengthLimit constants and "
-    "validateNameCharacters function")
+deprecated("Import client Credentials from swarm.neo.authentication.ClientCredentials; remove `Credentials.` prefix from usages of LengthLimit constants and validateNameCharacters function")
 public alias Client.Credentials Credentials;
 
 import core.stdc.ctype: isgraph;
