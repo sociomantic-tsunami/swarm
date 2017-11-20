@@ -52,8 +52,7 @@ debug ( SwarmConn )
 
 extern (C) private int g_ascii_xdigit_value ( char c ); // glib-2.0
 
-deprecated("Replace imports of CredentialsFile with Credentials in "
-    "swarm.neo.authentication.NodeCredentials")
+deprecated("Replace imports of CredentialsFile with Credentials in swarm.neo.authentication.NodeCredentials")
 public alias NodeCred.Credentials CredentialsFile;
 
 /***************************************************************************

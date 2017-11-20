@@ -216,8 +216,7 @@ public template RequestCore ( RequestType request_type_, ubyte request_code,
 
             *******************************************************************/
 
-            deprecated("Construct a const UserSpecifiedParams instance at once; "
-                "do not set the notifier after construction.")
+            deprecated("Construct a const UserSpecifiedParams instance at once; do not set the notifier after construction.")
             public void set ( Notifier notifier )
             {
                 this.serialized_notifier[] =
