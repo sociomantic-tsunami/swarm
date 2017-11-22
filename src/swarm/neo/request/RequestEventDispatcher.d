@@ -327,23 +327,10 @@ public struct RequestEventDispatcher
 
         scope ( exit )
         {
-            foreach ( event; events )
-            {
-                EventRegistration unregister_event;
-
-                static if( is(typeof(event) == Message) )
-                    unregister_event.message = event;
-                else static if( is(typeof(event) == Signal) )
-                    unregister_event.signal = event;
-                else static if( is(typeof(event) == Send) )
-                    unregister_event.send = event;
-                else static if( is(typeof(event) == Yield) )
-                    unregister_event.yield = event;
-                else
-                    static assert(false, "Invalid event type");
-
-                this.unregister(fiber, unregister_event);
-            }
+            // This unregisters *all* events for this fiber. Since it's illegal
+            // for events to be registered for a fiber while it's not suspended,
+            // this is safe.
+            this.unregisterFiber(fiber);
 
             this.last_event = this.last_event.init;
             assert(this.last_event.active == this.last_event.active.none);
@@ -457,14 +444,7 @@ public struct RequestEventDispatcher
     body
     {
         auto original_length = this.waiting_fibers.length;
-        this.waiting_fibers.length = Array.moveToEnd(this.waiting_fibers,
-            WaitingFiber(fiber),
-            ( Const!(WaitingFiber) e1, Const!(WaitingFiber) e2 )
-            {
-                return e1.fiber == e2.fiber;
-            }
-        );
-        enableStomping(this.waiting_fibers);
+        this.unregisterFiber(fiber);
 
         if ( fiber.finished )
         {
@@ -698,6 +678,27 @@ public struct RequestEventDispatcher
     {
         this.waiting_fibers.length = Array.moveToEnd(this.waiting_fibers,
             WaitingFiber(fiber, event));
+        enableStomping(this.waiting_fibers);
+    }
+
+    /***************************************************************************
+
+        Unregisters all events for `fiber`.
+
+        Params:
+            fiber = fiber to unregister events for
+
+    ***************************************************************************/
+
+    private void unregisterFiber ( MessageFiber fiber )
+    {
+        this.waiting_fibers.length = Array.moveToEnd(this.waiting_fibers,
+            WaitingFiber(fiber),
+            ( Const!(WaitingFiber) e1, Const!(WaitingFiber) e2 )
+            {
+                return e1.fiber == e2.fiber;
+            }
+        );
         enableStomping(this.waiting_fibers);
     }
 
