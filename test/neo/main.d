@@ -285,11 +285,11 @@ class Test : Task
                         // As soon as we receive something, suspend the request.
                         if ( received_count == 1 )
                             this.client.neo.control(getall_id,
-                            ( Client.Neo.GetAll.IController controller )
-                            {
-                                controller.suspend();
-                            }
-                        );
+                                ( Client.Neo.GetAll.IController controller )
+                                {
+                                    controller.suspend();
+                                }
+                            );
 
                         break;
 
