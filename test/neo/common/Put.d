@@ -24,6 +24,6 @@ public enum RequestStatusCode : StatusCode
 {
     None,       // Invalid, default value
 
-    Succeeded,  // Value fetched
+    Succeeded,  // Value written
     Error       // Internal node error occurred
 }

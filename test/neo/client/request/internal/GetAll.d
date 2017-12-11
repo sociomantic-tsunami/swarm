@@ -344,7 +344,7 @@ private scope class GetAllImpl
     }
 }
 
-/// Fiber which handles iterating and sending records to the client.
+/// Fiber which handles reading messages from the node.
 private struct Reader
 {
     import swarm.neo.util.MessageFiber;
@@ -414,7 +414,7 @@ private struct Reader
     }
 }
 
-/// Fiber which handles control messages from the client.
+/// Fiber which handles sending control messages to the node.
 private struct Controller
 {
     import swarm.neo.util.MessageFiber;
