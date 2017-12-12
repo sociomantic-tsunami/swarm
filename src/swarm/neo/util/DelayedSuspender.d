@@ -2,12 +2,13 @@
 
     Request handler helper to delay suspension of a fiber until a suitable time.
 
-    It is common to have multiple fibers in a request handler, one of which
-    wants to suspend another, at some point. However, it is not possible to
-    suspend a fiber from the outside; the suspension must be handled from inside
-    the fiber to be suspended. This helper mediates this situation by tracking
-    pending suspension requests and allowing the fiber to handle them
-    (suspending itself) at an appropriate juncture.
+    It is common to have multiple fibers in a request handler (managed by a
+    RequestEventDispatcher), one of which wants to suspend another, at some
+    point. However, it is not possible to suspend a fiber from the outside; the
+    suspension must be handled from inside the fiber to be suspended. This
+    helper mediates this situation by tracking pending suspension requests and
+    allowing the fiber to handle them, suspending itself at an appropriate
+    juncture.
 
     Copyright: Copyright (c) 2017 sociomantic labs GmbH. All rights reserved
 
@@ -22,13 +23,20 @@ module swarm.neo.util.DelayedSuspender;
 struct DelayedSuspender
 {
     import swarm.neo.util.MessageFiber;
+    import swarm.neo.connection.RequestOnConnBase;
+    import swarm.neo.request.RequestEventDispatcher;
 
-    /// MessageFiber token to ensure matching suspend & resume calls.
-    private static MessageFiber.Token token
-        = MessageFiber.Token("DelayedSuspender");
+    /// The request event dispatcher being used to handle signal dispatch.
+    private RequestEventDispatcher* request_event_dispatcher;
+
+    /// The request-on-conn event dispatcher to dispatch signals via.
+    private RequestOnConnBase.EventDispatcher conn;
 
     /// The fiber being managed.
     private MessageFiber fiber;
+
+    /// The signal code to dispatch to resume a waiting fiber.
+    private ubyte signal_code;
 
     /// Enum of possible suspension states.
     private enum SuspendState
@@ -45,6 +53,13 @@ struct DelayedSuspender
 
     /// Current suspension state.
     private SuspendState state = SuspendState.None;
+
+    invariant ( )
+    {
+        assert(this.fiber !is null);
+        assert(this.request_event_dispatcher !is null);
+        assert(this.conn !is null);
+    }
 
     /***************************************************************************
 
@@ -91,7 +106,8 @@ struct DelayedSuspender
                 break;
             case Suspended:
                 this.state = None;
-                this.fiber.resume(this.token);
+                this.request_event_dispatcher.signal(this.conn,
+                    this.signal_code);
                 break;
             default: assert(false);
         }
@@ -113,7 +129,8 @@ struct DelayedSuspender
                 break;
             case Pending:
                 this.state = Suspended;
-                this.fiber.suspend(this.token);
+                this.request_event_dispatcher.nextEvent(this.fiber,
+                    Signal(this.signal_code));
                 break;
             default: assert(false);
         }
@@ -130,72 +147,91 @@ struct DelayedSuspender
 
 unittest
 {
-    class Worker
+    class RequestHandler
     {
-        private MessageFiber fiber;
-        DelayedSuspender suspender;
+        import swarm.neo.util.MessageFiber;
+        import swarm.neo.request.RequestEventDispatcher;
+        import swarm.neo.connection.RequestOnConnBase;
 
-        public this ( )
-        {
-            this.fiber = new MessageFiber(&this.fiberMethod, 64 * 1024);
-            this.suspender = DelayedSuspender(this.fiber);
-        }
+        /// RequestEventDispatcher instance handling fiber events.
+        private RequestEventDispatcher request_event_dispatcher;
 
-        // The worker fiber loops, doing some task one item at a time and then
-        // suspending, if requested by the controller fiber.
-        void fiberMethod ( )
+        /// Connection that request is operating on.
+        private RequestOnConnBase.EventDispatcher conn;
+
+        /// Signal code that suspended fiber waits for.
+        const ResumeSuspendedFiber = 23;
+
+        class Worker
         {
-            while ( true )
+            private MessageFiber fiber;
+            DelayedSuspender suspender;
+
+            public this ( )
             {
-                // Do some work that takes a while and should not be interrupted
-                // ...
-
-                // Pause, if requested from outside
-                this.suspender.suspendIfRequested();
+                this.fiber = new MessageFiber(&this.fiberMethod, 64 * 1024);
+                this.suspender = DelayedSuspender(
+                    &this.outer.request_event_dispatcher, this.outer.conn,
+                    this.fiber, ResumeSuspendedFiber);
             }
-        }
-    }
 
-    auto worker = new Worker;
-
-    class Controller
-    {
-        private MessageFiber fiber;
-
-        public this ( )
-        {
-            this.fiber = new MessageFiber(&this.fiberMethod, 64 * 1024);
-        }
-
-        // The controller fiber loops, receiving control messages from the
-        // outside and suspending or resuming the worker fiber accordingly.
-        void fiberMethod ( )
-        {
-            while ( true )
+            // The worker fiber loops, doing some task one item at a time and then
+            // suspending, if requested by the controller fiber.
+            void fiberMethod ( )
             {
-                // Receive incoming message
-                // ...
-                ubyte msg;
-
-                switch ( msg )
+                while ( true )
                 {
-                    case 0: // suspend
-                        worker.suspender.requestSuspension();
-                        break;
-                    case 1: // resume
-                        worker.suspender.resumeIfSuspended();
-                        break;
-                    default:
-                        assert(false); // unknown message type
+                    // Do some work that takes a while and should not be interrupted
+                    // ...
+
+                    // Pause, if requested from outside
+                    this.suspender.suspendIfRequested();
                 }
             }
         }
+
+        class Controller
+        {
+            private MessageFiber fiber;
+
+            private Worker worker;
+
+            public this ( Worker worker )
+            {
+                this.worker = worker;
+                this.fiber = new MessageFiber(&this.fiberMethod, 64 * 1024);
+            }
+
+            // The controller fiber loops, receiving control messages from the
+            // outside and suspending or resuming the worker fiber accordingly.
+            void fiberMethod ( )
+            {
+                while ( true )
+                {
+                    // Receive incoming message
+                    // ...
+                    ubyte msg;
+
+                    switch ( msg )
+                    {
+                        case 0: // suspend
+                            this.worker.suspender.requestSuspension();
+                            break;
+                        case 1: // resume
+                            this.worker.suspender.resumeIfSuspended();
+                            break;
+                        default:
+                            assert(false); // unknown message type
+                    }
+                }
+            }
+        }
+
+        this ( RequestOnConnBase.EventDispatcher conn )
+        {
+            this.conn = conn;
+            scope worker = new Worker;
+            scope controller = new Controller(worker);
+        }
     }
-
-    auto controller = new Controller;
-}
-
-version ( UnitTest )
-{
-    import swarm.neo.util.MessageFiber;
 }

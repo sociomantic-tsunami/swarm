@@ -73,6 +73,10 @@ private scope class GetAllImpl_v0
     /// by the Controller to ignore incoming messages from that point.
     private bool has_ended;
 
+    /// Code that suspended writer fiber waits for when the request is
+    /// suspended.
+    const ResumeSuspendedFiber = 1;
+
     /// Fiber which handles iterating and sending records to the client.
     private class Writer
     {
@@ -84,7 +88,9 @@ private scope class GetAllImpl_v0
         public this ( )
         {
             this.fiber = new MessageFiber(&this.fiberMethod, 64 * 1024);
-            this.suspender = DelayedSuspender(this.fiber);
+            this.suspender = DelayedSuspender(
+                &this.outer.request_event_dispatcher, this.outer.conn,
+                this.fiber, ResumeSuspendedFiber);
         }
 
         void fiberMethod ( )
