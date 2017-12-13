@@ -196,7 +196,6 @@ public final class RequestSet: IRequestSet
                 assert(this.request_on_conns.type
                     == RequestOnConnSet.RequestType.None);
                 assert(this.finished_notifier is null);
-                assert(!this.request_on_conns.num_active);
                 assert(!this.context.length);
             }
         }
@@ -584,7 +583,6 @@ public final class RequestSet: IRequestSet
         in
         {
             assert(this.id);
-            assert(!this.request_on_conns.num_active);
 
             auto rq = this.id in this.outer.active_requests;
 
