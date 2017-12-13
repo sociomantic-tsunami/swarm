@@ -82,7 +82,7 @@ public class OceanMessageFiber
 
     public struct Token
     {
-        debug (MessageFiberToken) import ocean.text.convert.Format;
+        debug (MessageFiberToken) import ocean.text.convert.Formatter;
 
         /***********************************************************************
 
@@ -137,7 +137,7 @@ public class OceanMessageFiber
         {
             Token token;
             token.hash = h;
-            debug (MessageFiberToken) token.str = Format("{}", h);
+            debug (MessageFiberToken) token.str = format("{}", h);
             return token;
         }
     }
