@@ -53,7 +53,7 @@ public struct RequestOnConnSet
     /// always equal to the number of request-on-conns in the set, as when a
     /// request-on-conn finishes, it is not removed from the set, but
     /// `num_active` is decremented.
-    public uint num_active;
+    private uint num_active;
 
     /// Request-on-conns list used by requests that contact one or more nodes
     /// simultaneously, where each request-on-conn may freely switch between
