@@ -525,9 +525,24 @@ template ClientCore ( )
     {
         void printClientStats ( typeof(this) client )
         {
+            // Acquire a stats interface.
             scope stats = client.new Stats;
+
+            // Basic stats getting.
             Stdout.formatln("{} requests currently active",
                 stats.num_active_requests);
+
+            // Connection I/O stats iteration.
+            foreach ( node, snd_stats, rcv_stats; stats.connection_io )
+                Stdout.formatln("{}:{}: snd {} bytes, rcv {} bytes",
+                    node.address_bytes, node.port, snd_stats.socket.total,
+                    rcv_stats.socket.total);
+
+            // Connection send queue stats iteration.
+            foreach ( node, stats; stats.connection_send_queue )
+                Stdout.formatln("{}:{}: total {} microseconds queued time",
+                    node.address_bytes, node.port,
+                    stats.time_histogram.total_time_micros);
         }
     }
 
