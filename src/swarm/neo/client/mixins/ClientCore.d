@@ -89,6 +89,17 @@ template ClientCore ( )
         public Required!(istring) credentials_file;
     }
 
+    /// Compile-time-configurable settings to be passed to the ctor.
+    public struct Settings
+    {
+        /// Delegate that is called when a connection attempt succeeds or fails
+        /// (including when a connection is re-established).
+        public ConnectionNotifier conn_notifier;
+
+        /// Object to acquire resources from.
+        public Object request_resources;
+    }
+
     /***************************************************************************
 
         Constructor (private, so that only the client class where this template
@@ -108,15 +119,42 @@ template ClientCore ( )
 
     ***************************************************************************/
 
+    deprecated("Use the ctor that accepts a Settings instance instead")
     private this ( cstring auth_name, in ubyte[] auth_key,
         ConnectionNotifier conn_notifier, Object request_resources = null )
+    {
+        Settings settings;
+        settings.conn_notifier = conn_notifier;
+        settings.request_resources = request_resources;
+        this(auth_name, auth_key, settings);
+    }
+
+    /***************************************************************************
+
+        Constructor (private, so that only the client class where this template
+        is mixed-in can construct an instance).
+
+        This constructor that accepts all arguments manually (i.e. not read from
+        config files) is mostly of use in tests.
+
+        Params:
+            auth_name = name of the client, for authorisation
+            auth_key = key of the client, for authorisation
+            settings = Settings instance specifying construction settings
+
+    ***************************************************************************/
+
+    private this ( cstring auth_name, in ubyte[] auth_key, Settings settings )
     {
         assert(auth_key.length == key_length);
 
         Credentials cred;
         cred.name = auth_name.dup;
         cred.key.content[] = auth_key[];
-        this(cred, conn_notifier, request_resources);
+
+        this.connections = new ConnectionSet(cred, this.outer.epoll,
+            settings.conn_notifier);
+        this.request_resources = settings.request_resources;
     }
 
     /***************************************************************************
@@ -161,12 +199,39 @@ template ClientCore ( )
 
     ***************************************************************************/
 
+    deprecated("Use the ctor that accepts a Settings instance instead")
     private this ( Config config, ConnectionNotifier conn_notifier,
         Object request_resources = null )
     {
+        Settings settings;
+        settings.conn_notifier = conn_notifier;
+        settings.request_resources = request_resources;
+
+        this(config, settings);
+    }
+
+    /***************************************************************************
+
+        Constructor (private, so that only the client class where this template
+        is mixed-in can construct an instance).
+
+        Adds nodes from the file specified in the config argument.
+
+        Params:
+            config = Config object specifying the paths of the credentials and
+                nodes files to use
+            settings = Settings instance specifying construction settings
+
+    ***************************************************************************/
+
+    private this ( Config config, Settings settings )
+    {
         Credentials cred;
         cred.setFromFile(config.credentials_file());
-        this(cred, conn_notifier, request_resources);
+
+        this.connections = new ConnectionSet(cred, this.outer.epoll,
+            settings.conn_notifier);
+        this.request_resources = settings.request_resources;
 
         this.addNodes(config.nodes_file());
     }
