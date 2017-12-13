@@ -415,6 +415,30 @@ template ClientCore ( )
                 }
                 return res;
             }
+
+            /*******************************************************************
+
+                foreach implementation over the address/ports and I/O stats for
+                the connections.
+
+            *******************************************************************/
+
+            public int opApply (
+                int delegate ( ref AddrPort node_address, ref IOStats sender,
+                    ref IOStats receiver ) dg )
+            {
+                int res;
+                foreach ( conn; this.connections )
+                {
+                    auto sender_stats = conn.getIOStats(true);
+                    auto receiver_stats = conn.getIOStats(false);
+                    auto addr = conn.remote_address;
+                    res = dg(addr, sender_stats, receiver_stats);
+                    if ( res )
+                        break;
+                }
+                return res;
+            }
         }
 
         /***********************************************************************
@@ -454,6 +478,28 @@ template ClientCore ( )
                 {
                     auto queue_stats = conn.getSendQueueStats();
                     res = dg(queue_stats);
+                    if ( res )
+                        break;
+                }
+                return res;
+            }
+
+            /*******************************************************************
+
+                foreach implementation over the address-ports and send queue
+                stats for the connections.
+
+            *******************************************************************/
+
+            public int opApply ( int delegate ( ref AddrPort node_address,
+                ref TreeQueueStats ) dg )
+            {
+                int res;
+                foreach ( conn; this.connections )
+                {
+                    auto queue_stats = conn.getSendQueueStats();
+                    auto addr = conn.remote_address;
+                    res = dg(addr, queue_stats);
                     if ( res )
                         break;
                 }
