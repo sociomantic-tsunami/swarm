@@ -75,25 +75,13 @@ public final class RequestSet: IRequestSet
             public override int opApply (
                 int delegate ( ref Const!(void)[] working_data ) dg )
             {
-                if ( this.outer.request_on_conns.is_all_nodes )
+                foreach ( roc; this.outer.request_on_conns )
                 {
-                    int ret;
-                    foreach ( request_on_conn; this.outer.request_on_conns.all_nodes )
-                    {
-                        auto working_data = request_on_conn.getWorkingData();
-                        ret = dg(working_data);
-                        if ( ret )
-                            break;
-                    }
-                    return ret;
+                    auto working_data = roc.getWorkingData();
+                    if ( auto ret = dg(working_data) )
+                        return ret;
                 }
-                else
-                {
-                    auto working_data =
-                        this.outer.request_on_conns.single_node.getWorkingData();
-                    dg(working_data);
-                    return 0;
-                }
+                return 0;
             }
         }
 
@@ -205,32 +193,12 @@ public final class RequestSet: IRequestSet
         {
             if (!this.id)
             {
-                assert(!this.request_on_conns.is_all_nodes);
-                assert(this.request_on_conns.single_node is null);
+                assert(this.request_on_conns.type
+                    == RequestOnConnSet.RequestType.None);
                 assert(this.finished_notifier is null);
                 assert(!this.request_on_conns.num_active);
                 assert(!this.context.length);
             }
-        }
-
-        /***********************************************************************
-
-            Constructor; initialises `this.single_node` to a zero address with a
-            `null` handler.
-
-            By default, i.e. as long as this request is inactive, the
-            `single_node` field is active and has its init value, and
-            is_all_nodes` is false. This for error/race condition robustness:
-            Should `getHandler()` be accidentally called while this request is
-            not active, it will apply well defined behaviour, find a zero
-            address/port with a null handler, and return null.
-
-        ***********************************************************************/
-
-        public this ( )
-        {
-            this.request_on_conns.single_node =
-                this.request_on_conns.single_node.init;
         }
 
         /***********************************************************************
@@ -275,8 +243,10 @@ public final class RequestSet: IRequestSet
         {
             this.handler.single_node = handler;
             this.initRequest(finished_notifier, context, working);
-            auto request_on_conn =
-                this.request_on_conns.setSingle(this.outer.newRequestOnConn());
+            this.request_on_conns.initialise(
+                RequestOnConnSet.RequestType.SingleNode);
+            auto request_on_conn = this.request_on_conns.add(
+                this.outer.newRequestOnConn());
             request_on_conn.start(this.id, this.context,
                 this.initial_working_data, &this.handlerFinished, handler);
         }
@@ -308,8 +278,10 @@ public final class RequestSet: IRequestSet
         {
             this.handler.round_robin = handler;
             this.initRequest(finished_notifier, context, working);
-            auto request_on_conn =
-                this.request_on_conns.setSingle(this.outer.newRequestOnConn());
+            this.request_on_conns.initialise(
+                RequestOnConnSet.RequestType.SingleNode);
+            auto request_on_conn = this.request_on_conns.add(
+                    this.outer.newRequestOnConn());
             request_on_conn.start(this.id, this.context,
                 this.initial_working_data, &this.handlerFinished, handler);
         }
@@ -350,13 +322,12 @@ public final class RequestSet: IRequestSet
         {
             this.handler.all_nodes = handler;
             this.initRequest(finished_notifier, context, working);
-
-            this.request_on_conns.all_nodes.reinit();
-            this.request_on_conns.is_all_nodes = true;
+            this.request_on_conns.initialise(
+                RequestOnConnSet.RequestType.AllNodes);
 
             foreach (connection; this.outer.connections)
             {
-                auto request_on_conn = this.request_on_conns.addMulti(
+                auto request_on_conn = this.request_on_conns.add(
                     connection.remote_address, this.outer.newRequestOnConn());
                 request_on_conn.start(this.id, this.context,
                     this.initial_working_data, &this.handlerFinished, handler,
@@ -397,7 +368,7 @@ public final class RequestSet: IRequestSet
             if ( this.getRequestOnConnForNode(connection.remote_address) !is null )
                 return;
 
-            auto request_on_conn = this.request_on_conns.addMulti(
+            auto request_on_conn = this.request_on_conns.add(
                 connection.remote_address, this.outer.newRequestOnConn());
             request_on_conn.start(this.id, this.context,
                 this.initial_working_data, &this.handlerFinished,
@@ -421,20 +392,7 @@ public final class RequestSet: IRequestSet
 
         public RequestOnConn getRequestOnConnForNode ( AddrPort node_address )
         {
-            if (this.request_on_conns.is_all_nodes)
-            {
-                return node_address.cmp_id in this.request_on_conns.all_nodes;
-            }
-            else if (this.request_on_conns.single_node !is null)
-            {
-                return this.request_on_conns.single_node.connectedTo(node_address)
-                    ? this.request_on_conns.single_node
-                    : null;
-            }
-            else
-            {
-                return null;
-            }
+            return this.request_on_conns.get(node_address);
         }
 
         /***********************************************************************
@@ -467,19 +425,9 @@ public final class RequestSet: IRequestSet
 
         public void resumeSuspendedHandlers ( int resume_code )
         {
-            if (this.request_on_conns.is_all_nodes)
-            {
-                foreach ( request_on_conn; this.request_on_conns.all_nodes )
-                {
-                    if ( request_on_conn.can_be_resumed )
-                        request_on_conn.resumeFiber(resume_code);
-                }
-            }
-            else
-            {
-                if ( !this.request_on_conns.single_node.is_running )
-                    this.request_on_conns.single_node.resumeFiber(resume_code);
-            }
+            foreach ( roc; this.request_on_conns )
+                if ( roc.can_be_resumed )
+                    roc.resumeFiber(resume_code);
         }
 
         /***********************************************************************
@@ -497,20 +445,11 @@ public final class RequestSet: IRequestSet
 
         private void abortSuspendedHandlers ( RequestOnConn.AbortReason reason )
         {
-            if (this.request_on_conns.is_all_nodes)
+            foreach ( roc; this.request_on_conns )
             {
-                foreach ( request_on_conn; this.request_on_conns.all_nodes )
-                {
-                    assert(!request_on_conn.is_running,
-                        "abort() may not be called from within one of the request's fibers");
-                    request_on_conn.abort(reason);
-                }
-            }
-            else
-            {
-                assert(!this.request_on_conns.single_node.is_running,
+                assert(!roc.is_running,
                     "abort() may not be called from within one of the request's fibers");
-                this.request_on_conns.single_node.abort(reason);
+                roc.abort(reason);
             }
         }
 
@@ -609,8 +548,6 @@ public final class RequestSet: IRequestSet
         in
         {
             assert(this.request_on_conns.num_active);
-            if ( !this.request_on_conns.is_all_nodes )
-                assert(this.request_on_conns.num_active == 1);
         }
         body
         {
