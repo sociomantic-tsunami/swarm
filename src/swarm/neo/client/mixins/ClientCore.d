@@ -94,6 +94,9 @@ template ClientCore ( )
         Constructor (private, so that only the client class where this template
         is mixed-in can construct an instance).
 
+        This constructor that accepts all arguments manually (i.e. not read from
+        config files) is mostly of use in tests.
+
         Params:
             auth_name = name of the client, for authorisation
             auth_key = key of the client, for authorisation
