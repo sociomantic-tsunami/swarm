@@ -590,7 +590,7 @@ public final class Connection: ConnectionBase
     {
         if (auto request = this.request_set.getRequest(id))
         {
-            return request.getHandler(this.node_address);
+            return request.getRequestOnConnForNode(this.node_address);
         }
         else
         {

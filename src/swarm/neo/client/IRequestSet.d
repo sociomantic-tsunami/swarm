@@ -48,7 +48,7 @@ interface IRequest
         FinishedNotifier;
 
     import swarm.neo.AddrPort;
-    IRequestOnConn getHandler ( AddrPort node_address );
+    IRequestOnConn getRequestOnConnForNode ( AddrPort node_address );
 }
 
 /*******************************************************************************
