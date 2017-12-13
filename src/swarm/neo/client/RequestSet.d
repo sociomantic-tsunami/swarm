@@ -589,30 +589,6 @@ public final class RequestSet: IRequestSet
 
         /***********************************************************************
 
-            Looks up the Connection object which can be used to exchange request
-            messages with a node.
-
-            Params:
-                node_address    = the address of the node to communicate with
-
-            Returns:
-                the connection to the node or `null` if currently not connected
-                to this node.
-
-        ***********************************************************************/
-
-        public Connection getConnectionForSingleNode ( AddrPort node_address )
-        in
-        {
-            assert(!this.request_on_conns.is_all_nodes);
-        }
-        body
-        {
-            return this.outer.connections.get(node_address);
-        }
-
-        /***********************************************************************
-
             Recycles `request_on_conn` and decreases the counter of currently
             active request. Finalises this request if that counter reaches 0:
              - calls the request-finished notifier,
