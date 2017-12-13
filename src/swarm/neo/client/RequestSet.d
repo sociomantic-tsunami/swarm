@@ -543,15 +543,8 @@ public final class RequestSet: IRequestSet
         ***********************************************************************/
 
         public void handlerFinished ( RequestOnConn request_on_conn )
-        in
         {
-            assert(this.request_on_conns.num_active);
-        }
-        body
-        {
-            this.request_on_conns.finished(request_on_conn);
-
-            if (!this.request_on_conns.num_active)
+            if (this.request_on_conns.finished())
             {
                 scope working_data_iter = new RequestWorkingData;
                 this.finished_notifier(this.context, working_data_iter);

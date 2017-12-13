@@ -250,19 +250,21 @@ public struct RequestOnConnSet
 
     /***************************************************************************
 
-        Registers the specified RequestOnConn instance as finished. This does
-        not modify anything about the RequestOnConn or the set, but simply
-        decrements the num_active counter.
+        Decrements the `num_active` counter and returns whether it is now 0.
 
-        Params:
-            request_on_conn = the RequestOnConn instance which has finished
-            (passed purely for the sake of sanity checking)
+        Returns:
+            true if `num_active` is 0
 
     ***************************************************************************/
 
-    public void finished ( RequestOnConn request_on_conn )
+    public bool finished ( )
+    in
     {
-        this.num_active--;
+        assert(this.num_active);
+    }
+    body
+    {
+        return --this.num_active == 0;
     }
 
     /***************************************************************************
