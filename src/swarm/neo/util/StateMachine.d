@@ -121,7 +121,7 @@ unittest
 unittest
 {
     test!("==")(genStateMachine(["One", "Two", "Three"]),
-        "private enum State:uint {Exit,One,Two,Three}" ~
+        "public enum State:uint {Exit,One,Two,Three}" ~
         "private State state;" ~
         "public void run ( State init_state ) {" ~
             "this.state = init_state; do {" ~
@@ -193,7 +193,7 @@ private istring genEnum ( istring[] states )
     assert(states.length);
 
     istring ret;
-    ret ~= "private enum State:uint {Exit";
+    ret ~= "public enum State:uint {Exit";
     foreach ( s; states )
     {
         ret ~= "," ~ s;
@@ -206,7 +206,7 @@ private istring genEnum ( istring[] states )
 unittest
 {
     test!("==")(genEnum(["One", "Two", "Three"]),
-        "private enum State:uint {Exit,One,Two,Three}");
+        "public enum State:uint {Exit,One,Two,Three}");
 }
 
 /*******************************************************************************
