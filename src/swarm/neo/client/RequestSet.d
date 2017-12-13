@@ -394,7 +394,7 @@ public final class RequestSet: IRequestSet
         }
         body
         {
-            if ( this.getHandler(connection.remote_address) !is null )
+            if ( this.getRequestOnConnForNode(connection.remote_address) !is null )
                 return;
 
             auto request_on_conn = this.request_on_conns.addMulti(
@@ -419,7 +419,7 @@ public final class RequestSet: IRequestSet
 
         ***********************************************************************/
 
-        public RequestOnConn getHandler ( AddrPort node_address )
+        public RequestOnConn getRequestOnConnForNode ( AddrPort node_address )
         {
             if (this.request_on_conns.is_all_nodes)
             {
