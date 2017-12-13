@@ -367,7 +367,8 @@ public final class RequestSet: IRequestSet
         /***********************************************************************
 
             Adds a request-on-conn for an all nodes request, starting the
-            request on a newly added node connection.
+            request on a newly added node connection. (Called from
+            newConnectionAdded().)
 
             Params:
                 connection = connection to start the new request-on-conn for. If
