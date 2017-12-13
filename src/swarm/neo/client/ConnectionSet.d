@@ -819,6 +819,7 @@ private struct ConnectionRegistry ( C )
 
 version (UnitTest)
 {
+    import ocean.core.Test;
     import swarm.neo.util.TreeMap;
     import swarm.neo.AddrPort;
 
@@ -869,15 +870,15 @@ unittest
     ConnectionRegistry!(MockConnection) set;
 
     {
-        assert(set.connection_map.is_empty);
-        assert(set.get(AddrPort.init) is null);
-        assert(set.getBoundary!(false)() is null);
-        assert(set.getBoundary!(true)() is null);
-        assert(set.getNext!(true)(null) is null); // getNext should accept null
-        assert(set.getNext!(false)(null) is null);
+        test(set.connection_map.is_empty);
+        test!("is")(set.get(AddrPort.init), null);
+        test!("is")(set.getBoundary!(false)(), null);
+        test!("is")(set.getBoundary!(true)(), null);
+        test!("is")(set.getNext!(true)(null), null); // getNext should accept null
+        test!("is")(set.getNext!(false)(null), null);
 
         foreach (conn; set)
-            assert(false);
+            test(false);
     }
 
     // One connection: 127.0.0.1:4711 ------------------------------------------
@@ -889,32 +890,32 @@ unittest
         bool added;
         conn1 = set.connection_map.put(address1.cmp_id, added, new MockConnection);
         conn1.remote_address = address1;
-        assert(added);
-        assert(!set.connection_map.is_empty);
-        assert(set.get(address1) is conn1);
+        test(added);
+        test(!set.connection_map.is_empty);
+        test!("is")(set.get(address1), conn1);
 
         {
             auto conn = set.getBoundary!(true);
-            assert(conn is conn1);
+            test!("is")(conn, conn1);
             conn = set.getNext!(true)(conn);
-            assert(conn is null);
+            test!("is")(conn, null);
         }
         {
             auto conn = set.getBoundary!(false);
-            assert(conn is conn1);
+            test!("is")(conn, conn1);
             conn = set.getNext!(false)(conn);
-            assert(conn is null);
+            test!("is")(conn, null);
         }
 
         {
             bool i = false;
             foreach (conn; set)
             {
-                assert(!i);
-                assert(conn is conn1);
+                test(!i);
+                test!("is")(conn, conn1);
                 i = true;
             }
-            assert(i);
+            test(i);
 
             i = false;
         }
@@ -923,30 +924,30 @@ unittest
 
             foreach_reverse (conn; set)
             {
-                assert(!i);
-                assert(conn is conn1);
+                test(!i);
+                test!("is")(conn, conn1);
                 i = true;
             }
-            assert(i);
+            test(i);
         }
 
         // Attempt to add the same connection again, should not be added but the
         // existing connection be returned.
 
-        assert(
+        test!("is")(
             set.connection_map.put(
                 address1.cmp_id, added,
-                function MockConnection* ( ) {assert(false);}()
-            ) is conn1
+                function MockConnection* ( ) {test(false); return null;}()
+            ), conn1
         );
-        assert(!added);
-        assert(!set.connection_map.is_empty);
-        assert(set.get(address1) is conn1);
+        test(!added);
+        test(!set.connection_map.is_empty);
+        test!("is")(set.get(address1), conn1);
 
-        assert(set.getBoundary!(false)() is conn1);
-        assert(set.getBoundary!(true)() is conn1);
-        assert(set.getNext!(false)(conn1) is null);
-        assert(set.getNext!(true)(conn1) is null);
+        test!("is")(set.getBoundary!(false)(), conn1);
+        test!("is")(set.getBoundary!(true)(), conn1);
+        test!("is")(set.getNext!(false)(conn1), null);
+        test!("is")(set.getNext!(true)(conn1), null);
     }
 
     // Second connection: 127.0.0.1:4712 ---------------------------------------
@@ -958,24 +959,24 @@ unittest
         bool added;
         conn2 = set.connection_map.put(address2.cmp_id, added, new MockConnection);
         conn2.remote_address = address2;
-        assert(added);
-        assert(set.get(address2) is conn2);
+        test(added);
+        test!("is")(set.get(address2), conn2);
 
         {
             auto conn = set.getBoundary!(true);
-            assert(conn is conn1);
+            test!("is")(conn, conn1);
             conn = set.getNext!(true)(conn);
-            assert(conn is conn2);
+            test!("is")(conn, conn2);
             conn = set.getNext!(true)(conn);
-            assert(conn is null);
+            test!("is")(conn, null);
         }
         {
             auto conn = set.getBoundary!(false);
-            assert(conn is conn2);
+            test!("is")(conn, conn2);
             conn = set.getNext!(false)(conn);
-            assert(conn is conn1);
+            test!("is")(conn, conn1);
             conn = set.getNext!(false)(conn);
-            assert(conn is null);
+            test!("is")(conn, null);
         }
 
         {
@@ -985,18 +986,19 @@ unittest
                 switch (++i)
                 {
                     case 1:
-                        assert(conn is conn1);
+                        test!("is")(conn, conn1);
                         break;
                     case 2:
-                        assert(conn is conn2);
+                        test!("is")(conn, conn2);
                         break;
                     default:
-                        assert(false, "too many iterations");
+                        test(false, "too many iterations");
+                        break;
                     case 0:
                         assert(false);
                 }
             }
-            assert(i == 2, "expected two iterations");
+            test!("==")(i, 2, "expected two iterations");
         }
         {
             uint i = 0;
@@ -1005,18 +1007,19 @@ unittest
                 switch (++i)
                 {
                     case 1:
-                        assert(conn is conn2);
+                        test!("is")(conn, conn2);
                         break;
                     case 2:
-                        assert(conn is conn1);
+                        test!("is")(conn, conn1);
                         break;
                     default:
-                        assert(false, "too many iterations");
+                        test(false, "too many iterations");
+                        break;
                     case 0:
                         assert(false);
                 }
             }
-            assert(i == 2, "expected two iterations");
+            test!("==")(i, 2, "expected two iterations");
         }
     }
 
@@ -1029,28 +1032,28 @@ unittest
         bool added;
         conn3 = set.connection_map.put(address3.cmp_id, added, new MockConnection);
         conn3.remote_address = address3;
-        assert(added);
-        assert(set.get(address3) is conn3);
+        test(added);
+        test!("is")(set.get(address3), conn3);
 
         {
             auto conn = set.getBoundary!(true);
-            assert(conn is conn1);
+            test!("is")(conn, conn1);
             conn = set.getNext!(true)(conn);
-            assert(conn is conn2);
+            test!("is")(conn, conn2);
             conn = set.getNext!(true)(conn);
-            assert(conn is conn3);
+            test!("is")(conn, conn3);
             conn = set.getNext!(true)(conn);
-            assert(conn is null);
+            test!("is")(conn, null);
         }
         {
             auto conn = set.getBoundary!(false);
-            assert(conn is conn3);
+            test!("is")(conn, conn3);
             conn = set.getNext!(false)(conn);
-            assert(conn is conn2);
+            test!("is")(conn, conn2);
             conn = set.getNext!(false)(conn);
-            assert(conn is conn1);
+            test!("is")(conn, conn1);
             conn = set.getNext!(false)(conn);
-            assert(conn is null);
+            test!("is")(conn, null);
         }
 
         {
@@ -1060,21 +1063,22 @@ unittest
                 switch (++i)
                 {
                     case 1:
-                        assert(conn is conn1);
+                        test!("is")(conn, conn1);
                         break;
                     case 2:
-                        assert(conn is conn2);
+                        test!("is")(conn, conn2);
                         break;
                     case 3:
-                        assert(conn is conn3);
+                        test!("is")(conn, conn3);
                         break;
                     default:
-                        assert(false, "too many iterations");
+                        test(false, "too many iterations");
+                        break;
                     case 0:
                         assert(false);
                 }
             }
-            assert(i == 3, "expected three iterations");
+            test!("==")(i, 3, "expected three iterations");
         }
         {
             uint i = 0;
@@ -1083,21 +1087,22 @@ unittest
                 switch (++i)
                 {
                     case 1:
-                        assert(conn is conn3);
+                        test!("is")(conn, conn3);
                         break;
                     case 2:
-                        assert(conn is conn2);
+                        test!("is")(conn, conn2);
                         break;
                     case 3:
-                        assert(conn is conn1);
+                        test!("is")(conn, conn1);
                         break;
                     default:
-                        assert(false, "too many iterations");
+                        test(false, "too many iterations");
+                        break;
                     case 0:
                         assert(false);
                 }
             }
-            assert(i == 3, "expected three iterations");
+            test!("==")(i, 3, "expected three iterations");
         }
     }
 
@@ -1105,23 +1110,23 @@ unittest
 
     {
         set.connection_map.remove(conn2);
-        assert(set.get(conn2.remote_address) is null);
+        test!("is")(set.get(conn2.remote_address), null);
 
         {
             auto conn = set.getBoundary!(true);
-            assert(conn is conn1);
+            test!("is")(conn, conn1);
             conn = set.getNext!(true)(conn);
-            assert(conn is conn3);
+            test!("is")(conn, conn3);
             conn = set.getNext!(true)(conn);
-            assert(conn is null);
+            test!("is")(conn, null);
         }
         {
             auto conn = set.getBoundary!(false);
-            assert(conn is conn3);
+            test!("is")(conn, conn3);
             conn = set.getNext!(false)(conn);
-            assert(conn is conn1);
+            test!("is")(conn, conn1);
             conn = set.getNext!(false)(conn);
-            assert(conn is null);
+            test!("is")(conn, null);
         }
 
         {
@@ -1131,18 +1136,19 @@ unittest
                 switch (++i)
                 {
                     case 1:
-                        assert(conn is conn1);
+                        test!("is")(conn, conn1);
                         break;
                     case 2:
-                        assert(conn is conn3);
+                        test!("is")(conn, conn3);
                         break;
                     default:
-                        assert(false, "too many iterations");
+                        test(false, "too many iterations");
+                        break;
                     case 0:
                         assert(false);
                 }
             }
-            assert(i == 2, "expected two iterations");
+            test!("==")(i, 2, "expected two iterations");
         }
         {
             uint i = 0;
@@ -1151,39 +1157,40 @@ unittest
                 switch (++i)
                 {
                     case 1:
-                        assert(conn is conn3);
+                        test!("is")(conn, conn3);
                         break;
                     case 2:
-                        assert(conn is conn1);
+                        test!("is")(conn, conn1);
                         break;
                     default:
-                        assert(false, "too many iterations");
+                        test(false, "too many iterations");
+                        break;
                     case 0:
                         assert(false);
                 }
             }
-            assert(i == 2, "expected two iterations");
+            test!("==")(i, 2, "expected two iterations");
         }
 
         // Test getNext() with conn2, which is not in the set, ...
 
-        assert(conn2.treemap_backlink is null);
+        test!("is")(conn2.treemap_backlink, null);
 
         // ... still getNext() should be able to find the next element by
         // looking it up using conn2.remote_address.
 
-        assert(set.getNext!(true)(conn2) is conn3);
-        assert(set.getNext!(false)(conn2) is conn1);
+        test!("is")(set.getNext!(true)(conn2), conn3);
+        test!("is")(set.getNext!(false)(conn2), conn1);
 
         // Get the next connection from conn2 where conn2.remote_address is the
         // same as the address of an element in the set, to test if getNext()
         // handles this case properly.
         conn2.remote_address = conn1.remote_address;
-        assert(set.getNext!(true)(conn2) is conn3);
-        assert(set.getNext!(false)(conn2) is null);
+        test!("is")(set.getNext!(true)(conn2), conn3);
+        test!("is")(set.getNext!(false)(conn2), null);
 
         conn2.remote_address = conn3.remote_address;
-        assert(set.getNext!(true)(conn2) is null);
-        assert(set.getNext!(false)(conn2) is conn1);
+        test!("is")(set.getNext!(true)(conn2), null);
+        test!("is")(set.getNext!(false)(conn2), conn1);
     }
 }
