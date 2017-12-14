@@ -251,9 +251,19 @@ public struct RequestEventDispatcher
 
         /// Event being awaited.
         EventRegistration event;
+
+        /// Is this instance currently enabled? If false, it will be ignored
+        /// when dispatching events.
+        bool enabled;
     }
 
-    /// Fibers currently awaiting events.
+    /// The total count of currently enabled events (see WaitingFiber.enabled).
+    private uint enabled_events;
+
+    /// Fibers currently awaiting events. Note that the WaitingFiber.enabled
+    /// flag means that it's never necessary to actually remove an element from
+    /// this array. This is an optimisation, as array remove operations were
+    /// found (by profiling) to be taking a significant number of CPU cycles.
     private WaitingFiber[] waiting_fibers;
 
     /// Buffer into which waiting_fibers are copied when performing an iteration
@@ -443,15 +453,10 @@ public struct RequestEventDispatcher
     }
     body
     {
-        auto original_length = this.waiting_fibers.length;
         this.unregisterFiber(fiber);
 
         if ( fiber.finished )
-        {
-            assert(this.waiting_fibers.length == original_length,
-                "Terminated fiber still registered with request event dispatcher");
             return;
-        }
 
         assert(fiber.waiting);
         fiber.kill();
@@ -505,7 +510,7 @@ public struct RequestEventDispatcher
     {
         WaitingFiber writer;
 
-        try while ( this.waiting_fibers.length )
+        try while ( this.enabled_events )
         {
             writer = writer.init;
 
@@ -513,7 +518,7 @@ public struct RequestEventDispatcher
 
             if ( this.waitingWriters() )
                 writer = this.popWaitingWriter();
-            else if ( !this.waiting_fibers.length )
+            else if ( !this.enabled_events )
                 break;
 
             this.handleNextEvent(conn, writer);
@@ -629,39 +634,56 @@ public struct RequestEventDispatcher
 
     private void register ( MessageFiber fiber, EventRegistration event )
     {
-        with ( event.Active ) switch ( event.active )
+        // See if a matching element is already in this.waiting_fibers.
+        WaitingFiber* in_list;
+        foreach ( ref waiting_fiber; this.waiting_fibers )
         {
-            case message:
-                foreach ( waiting_fiber; this.waiting_fibers )
-                    if ( waiting_fiber.event.active == message )
+            if ( waiting_fiber.fiber == fiber && waiting_fiber.event == event )
+            {
+                assert(in_list is null);
+                assert(!waiting_fiber.enabled);
+                in_list = &waiting_fiber;
+            }
+
+            // Ensure the user isn't trying to do anything crazy.
+            if ( waiting_fiber.enabled &&
+                waiting_fiber.event.active == event.active )
+            {
+                with ( event.Active ) switch ( event.active )
+                {
+                    case message:
                         enforce(waiting_fiber.event.message.type
                             != event.message.type,
                             "Only one fiber may handle each message type");
-                break;
-            case signal:
-                foreach ( waiting_fiber; this.waiting_fibers )
-                    if ( waiting_fiber.event.active == signal )
+                        break;
+                    case signal:
                         enforce(waiting_fiber.event.signal.code
                             != event.signal.code,
                             "Only one fiber may handle each signal");
-                break;
-            case send:
-                foreach ( waiting_fiber; this.waiting_fibers )
-                    if ( waiting_fiber.event.active == send )
+                        break;
+                    case send:
                         enforce(waiting_fiber.fiber != fiber,
                             "Each fiber may only send one thing at a time");
-                break;
-            case yield:
-                foreach ( waiting_fiber; this.waiting_fibers )
-                    if ( waiting_fiber.event.active == yield )
+                        break;
+                    case yield:
                         enforce(waiting_fiber.fiber != fiber,
                             "Each fiber may only yield once at a time");
-                break;
-            default:
-                assert(false);
+                        break;
+                    default:
+                        assert(false);
+                }
+            }
         }
 
-        this.waiting_fibers ~= WaitingFiber(fiber, event);
+        // Add the new fiber/event to the list, if it was not found.
+        if ( in_list is null )
+        {
+            this.waiting_fibers ~= WaitingFiber(fiber, event);
+            in_list = &this.waiting_fibers[$-1];
+        }
+
+        // Set the list element to enabled.
+        this.enable(*in_list);
     }
 
     /***************************************************************************
@@ -676,9 +698,14 @@ public struct RequestEventDispatcher
 
     private void unregister ( MessageFiber fiber, EventRegistration event )
     {
-        this.waiting_fibers.length = Array.moveToEnd(this.waiting_fibers,
-            WaitingFiber(fiber, event));
-        enableStomping(this.waiting_fibers);
+        foreach ( ref waiting_fiber; this.waiting_fibers )
+        {
+            if ( waiting_fiber.fiber == fiber && waiting_fiber.event == event )
+            {
+                this.disable(waiting_fiber);
+                break;
+            }
+        }
     }
 
     /***************************************************************************
@@ -692,14 +719,11 @@ public struct RequestEventDispatcher
 
     private void unregisterFiber ( MessageFiber fiber )
     {
-        this.waiting_fibers.length = Array.moveToEnd(this.waiting_fibers,
-            WaitingFiber(fiber),
-            ( Const!(WaitingFiber) e1, Const!(WaitingFiber) e2 )
-            {
-                return e1.fiber == e2.fiber;
-            }
-        );
-        enableStomping(this.waiting_fibers);
+        foreach ( ref waiting_fiber; this.waiting_fibers )
+        {
+            if ( waiting_fiber.fiber == fiber )
+                this.disable(waiting_fiber);
+        }
     }
 
     /***************************************************************************
@@ -712,7 +736,8 @@ public struct RequestEventDispatcher
     private bool waitingWriters ( )
     {
         foreach ( waiting_fiber; this.waiting_fibers )
-            if ( waiting_fiber.event.active == waiting_fiber.event.active.send )
+            if ( waiting_fiber.enabled &&
+                waiting_fiber.event.active == waiting_fiber.event.active.send )
                 return true;
 
         return false;
@@ -728,7 +753,8 @@ public struct RequestEventDispatcher
     private bool waitingYielders ( )
     {
         foreach ( waiting_fiber; this.waiting_fibers )
-            if ( waiting_fiber.event.active == waiting_fiber.event.active.yield )
+            if ( waiting_fiber.enabled &&
+                waiting_fiber.event.active == waiting_fiber.event.active.yield )
                 return true;
 
         return false;
@@ -748,6 +774,7 @@ public struct RequestEventDispatcher
     in
     {
         assert(this.waiting_fibers.length > 0);
+        assert(this.enabled_events > 0);
     }
     out ( const_waiting_fiber )
     {
@@ -756,12 +783,12 @@ public struct RequestEventDispatcher
     }
     body
     {
-        foreach ( i, waiting_fiber; this.waiting_fibers )
-            if ( waiting_fiber.event.active == waiting_fiber.event.active.send )
+        foreach ( ref waiting_fiber; this.waiting_fibers )
+            if ( waiting_fiber.enabled &&
+                waiting_fiber.event.active == waiting_fiber.event.active.send )
             {
-                WaitingFiber ret = waiting_fiber;
-                Array.removeShift(this.waiting_fibers, i);
-                return ret;
+                this.disable(waiting_fiber);
+                return waiting_fiber;
             }
 
         assert(false, "popWaitingWriter() should not be called if waitingWriters() is false");
@@ -818,7 +845,8 @@ public struct RequestEventDispatcher
 
         foreach ( waiting_fiber; this.waiting_fibers )
         {
-            if ( waiting_fiber.event.active == waiting_fiber.event.active.signal
+            if ( waiting_fiber.enabled &&
+                waiting_fiber.event.active == waiting_fiber.event.active.signal
                 && waiting_fiber.event.signal.code == signal_ubyte )
             {
                 EventNotification fired_event;
@@ -856,7 +884,8 @@ public struct RequestEventDispatcher
 
         foreach ( waiting_fiber; this.waiting_fibers )
         {
-            if ( waiting_fiber.event.active == waiting_fiber.event.active.message
+            if ( waiting_fiber.enabled &&
+                waiting_fiber.event.active == waiting_fiber.event.active.message
                 && waiting_fiber.event.message.type == message_type )
             {
                 EventNotification fired_event;
@@ -896,8 +925,11 @@ public struct RequestEventDispatcher
 
         foreach ( waiting_fiber; this.waiting_fibers )
         {
-            if ( waiting_fiber.event.active == waiting_fiber.event.active.yield )
+            if ( waiting_fiber.enabled &&
+                waiting_fiber.event.active == waiting_fiber.event.active.yield )
+            {
                 this.waiting_fibers_to_iterate ~= waiting_fiber;
+            }
         }
 
         if ( this.waiting_fibers_to_iterate.length == 0 )
@@ -909,6 +941,44 @@ public struct RequestEventDispatcher
             fired_event.yielded_resumed = YieldedThenResumed();
 
             this.notifyWaitingFiber(fiber_to_notify.fiber, fired_event);
+        }
+    }
+
+    /***************************************************************************
+
+        Sets the specified WaitingFiber instance to enabled and adjusts the
+        total enabled count as appropriate.
+
+        Params:
+            waiting_fiber = instance to enable
+
+    ***************************************************************************/
+
+    private void enable ( ref WaitingFiber waiting_fiber )
+    {
+        if ( !waiting_fiber.enabled )
+        {
+            waiting_fiber.enabled = true;
+            this.enabled_events++;
+        }
+    }
+
+    /***************************************************************************
+
+        Sets the specified WaitingFiber instance to disabled and adjusts the
+        total enabled count as appropriate.
+
+        Params:
+            waiting_fiber = instance to disable
+
+    ***************************************************************************/
+
+    private void disable ( ref WaitingFiber waiting_fiber )
+    {
+        if ( waiting_fiber.enabled )
+        {
+            waiting_fiber.enabled = false;
+            this.enabled_events--;
         }
     }
 
