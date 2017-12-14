@@ -154,6 +154,24 @@ public final class ConnectionSet : RequestOnConn.IConnectionGetter
     /// ditto
     private ConnectionNotifier conn_notifier;
 
+    /// Struct wrapping the information required by a connection queued for
+    /// initialisation.
+    private struct QueuedConnection
+    {
+        /// The connection object to be initialised.
+        Connection connection;
+
+        /// The node address/port to connect to, when initialised.
+        AddrPort node_address;
+    }
+
+    /// List of connections to be initialised upon calling `connectQueued`.
+    private QueuedConnection[] queued_conns;
+
+    /// If true, connections registered via `start` will be initialised
+    /// immediately. If false, they will be added to `queued_connections` and
+    /// initialised when `connectQueued` is called.
+    private bool auto_connect;
 
     /***************************************************************************
 
@@ -174,11 +192,13 @@ public final class ConnectionSet : RequestOnConn.IConnectionGetter
             credentials       = client authentication credentials
             epoll             = epoll select dispatcher
             conn_notifier     = connection notifier callback
+            auto_connect = if false, do not start connection procedure
+                automatically when a node is added
 
     ***************************************************************************/
 
     public this ( Const!(Credentials) credentials, EpollSelectDispatcher epoll,
-                  ConnectionNotifier conn_notifier )
+        ConnectionNotifier conn_notifier, bool auto_connect )
     {
         assert(conn_notifier !is null);
 
@@ -191,6 +211,7 @@ public final class ConnectionSet : RequestOnConn.IConnectionGetter
         this.request_set_ = new RequestSet(this, this.yielded_rqonconns,
             this.epoll);
         this.conn_notifier = conn_notifier;
+        this.auto_connect = auto_connect;
     }
 
     /***************************************************************************
@@ -287,10 +308,10 @@ public final class ConnectionSet : RequestOnConn.IConnectionGetter
                 Stdout.formatln("{}:{}: ConnectionSet.start() added",
                     node_address.address_bytes, node_address.port);
 
-            this.n_nodes_starting++;
-            connection.start(node_address, &this.notifyConnectResult);
-
-            this.request_set_.newConnectionAdded(connection);
+            if ( this.auto_connect )
+                this.initialiseConnection(connection, node_address);
+            else
+                this.queueConnection(connection, node_address);
         }
 
         return added;
@@ -375,6 +396,22 @@ public final class ConnectionSet : RequestOnConn.IConnectionGetter
 
             conn.reconnect();
         }
+    }
+
+    /***************************************************************************
+
+        Triggers initialisation of any queued connections. (See
+        queueConnection().)
+
+    ***************************************************************************/
+
+    public void connectQueued ( )
+    {
+        foreach ( conn; this.queued_conns )
+            this.initialiseConnection(conn.connection, conn.node_address);
+
+        this.queued_conns.length = 0;
+        enableStomping(this.queued_conns);
     }
 
     /***************************************************************************
@@ -470,6 +507,49 @@ public final class ConnectionSet : RequestOnConn.IConnectionGetter
     public int opApplyReverse ( int delegate ( ref Connection conn ) dg )
     {
         return this.connections.opApplyReverse(dg);
+    }
+
+    /***************************************************************************
+
+        Begins initialisation of the specified connection to the specified node.
+
+        Params:
+            connection = Connection object to initialise
+            node_address = the address of the node to connect to
+
+    ***************************************************************************/
+
+    private void initialiseConnection ( Connection connection,
+        AddrPort node_address )
+    {
+        debug ( SwarmConn )
+            Stdout.formatln("{}:{}: ConnectionSet: Initialising connection",
+                node_address.address_bytes, node_address.port);
+
+        this.n_nodes_starting++;
+        connection.start(node_address, &this.notifyConnectResult);
+
+        this.request_set_.newConnectionAdded(connection);
+    }
+
+    /***************************************************************************
+
+        Queues initialisation of the specified connection to the specified node.
+
+        Params:
+            connection = Connection object to queue
+            node_address = the address of the node to connect to
+
+    ***************************************************************************/
+
+    private void queueConnection ( Connection connection,
+        AddrPort node_address )
+    {
+        debug ( SwarmConn )
+            Stdout.formatln("{}:{}: ConnectionSet: Queueing connection",
+                node_address.address_bytes, node_address.port);
+
+        this.queued_conns ~= QueuedConnection(connection, node_address);
     }
 
     /***************************************************************************
