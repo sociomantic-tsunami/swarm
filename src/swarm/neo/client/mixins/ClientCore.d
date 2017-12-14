@@ -98,6 +98,12 @@ template ClientCore ( )
 
         /// Object to acquire resources from.
         public Object request_resources;
+
+        /// Toggles automatic connection. If true, the client will initiate the
+        /// connection procedure as soon as a node is added to the registry. If
+        /// false, the connection procedure only begins when `connect` is
+        /// called.
+        public bool auto_connect = true;
     }
 
     /***************************************************************************
@@ -153,7 +159,7 @@ template ClientCore ( )
         cred.key.content[] = auth_key[];
 
         this.connections = new ConnectionSet(cred, this.outer.epoll,
-            settings.conn_notifier);
+            settings.conn_notifier, settings.auto_connect);
         this.request_resources = settings.request_resources;
     }
 
@@ -230,7 +236,7 @@ template ClientCore ( )
         cred.setFromFile(config.credentials_file());
 
         this.connections = new ConnectionSet(cred, this.outer.epoll,
-            settings.conn_notifier);
+            settings.conn_notifier, settings.auto_connect);
         this.request_resources = settings.request_resources;
 
         this.addNodes(config.nodes_file());
@@ -256,7 +262,7 @@ template ClientCore ( )
         Object request_resources = null )
     {
         this.connections = new ConnectionSet(cred, this.outer.epoll,
-            conn_notifier);
+            conn_notifier, true);
         this.request_resources = request_resources;
     }
 
@@ -779,6 +785,19 @@ template ClientCore ( )
             foreach ( rq, stats; this.allRequests() )
                 logger.addObject!("request")(rq, stats);
         }
+    }
+
+    /***************************************************************************
+
+        Begins initialisation of connections if auto_connect was set to false in
+        the Settings instance passed to the constructor. (Otherwise, does
+        nothing; harmless.)
+
+    ***************************************************************************/
+
+    public void connect ( )
+    {
+        this.connections.connectQueued();
     }
 
     /***************************************************************************
