@@ -135,6 +135,7 @@ template ClientCore ( )
 
     ***************************************************************************/
 
+    deprecated("Use the ctor that accepts a Config instance instead")
     private this ( cstring auth_file, ConnectionNotifier conn_notifier,
         Object request_resources = null )
     {
@@ -185,6 +186,7 @@ template ClientCore ( )
 
     ***************************************************************************/
 
+    deprecated("Use the ctor that accepts a Config instance instead")
     private this ( Credentials cred, ConnectionNotifier conn_notifier,
         Object request_resources = null )
     {
