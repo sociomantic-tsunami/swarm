@@ -652,20 +652,28 @@ public struct RequestEventDispatcher
                 with ( event.Active ) switch ( event.active )
                 {
                     case message:
+                        // TODO: this `enforce` could be switched to `verify`
+                        // when we adapt assert statements.
                         enforce(waiting_fiber.event.message.type
                             != event.message.type,
                             "Only one fiber may handle each message type");
                         break;
                     case signal:
+                        // TODO: this `enforce` could be switched to `verify`
+                        // when we adapt assert statements.
                         enforce(waiting_fiber.event.signal.code
                             != event.signal.code,
                             "Only one fiber may handle each signal");
                         break;
                     case send:
+                        // TODO: this `enforce` could be switched to `verify`
+                        // when we adapt assert statements.
                         enforce(waiting_fiber.fiber != fiber,
                             "Each fiber may only send one thing at a time");
                         break;
                     case yield:
+                        // TODO: this `enforce` could be switched to `verify`
+                        // when we adapt assert statements.
                         enforce(waiting_fiber.fiber != fiber,
                             "Each fiber may only yield once at a time");
                         break;
