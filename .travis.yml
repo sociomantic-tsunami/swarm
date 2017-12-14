@@ -24,6 +24,25 @@ env:
         - DMD=2.070.2.s12 DIST=xenial F=production
         - DMD=2.070.2.s12 DIST=xenial F=devel
 
+# Don't build tags already converted to D2
+if: NOT tag =~ \+d2$
+
 install: beaver dlang install
 
 script: beaver dlang make
+
+jobs:
+    include:
+        - stage: D2 Release
+          # We need to include the exclusion of D2 tags because this "if"
+          # replaces the global one
+          if: tag IS present AND NOT tag =~ \+d2$
+          # env: is inherited from the first matrix row, for converting code to
+          # D2 it doesn't matter what compiler version or F we use, it only
+          # matters that we have a DIST and DMD variables defined, so we just
+          # use whatever the first row have.
+          # before_install: and install: are also inherited and we don't need
+          # to override them.
+          script: beaver dlang d2-release
+          # Overridden to NOP, otherwise is inherited
+          after_success: true
