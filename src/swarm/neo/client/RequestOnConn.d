@@ -62,7 +62,35 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
 
     public interface IConnectionGetter
     {
+        /***********************************************************************
+
+            Gets the connection associated with the specified address.
+
+            Params:
+                node_address = the address of the node to get the connection for
+
+            Returns:
+                the corresponding Connection or null if the node is not known
+
+        ***********************************************************************/
+
         Connection get ( AddrPort );
+
+        /***********************************************************************
+
+            Iterates over available connections, starting with a different
+            connection on each iteration.
+
+            Params:
+                dg = called for each connection iterating over; should return 0
+                    to continue or non-zero to stop the iteration
+
+            Returns:
+                0 if finished iterating over all nodes or the return value of
+                `dg` if `dg` returned non-zero to stop the iteration.
+
+        ***********************************************************************/
+
         int iterateRoundRobin ( int delegate ( Connection conn ) dg );
     }
 
