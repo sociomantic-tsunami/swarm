@@ -30,6 +30,11 @@ public enum RequestType
     /// are determined by a round-robin sequence.
     RoundRobin,
 
+    /// A request that initially operates on one node but can request to operate
+    /// on additional nodes. The nodes contacted are determined entirely by the
+    /// request handler.
+    MultiNode,
+
     /// A request that operates on all known nodes in parallel.
     AllNodes
 }

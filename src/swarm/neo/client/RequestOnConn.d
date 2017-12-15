@@ -395,6 +395,10 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
 
     private AbortException abort_exception;
 
+    /// Delegate passed to multi-node request handler, allowing it to start the
+    /// request on a new request-on-conn to a different node.
+    private void delegate ( ) start_on_new_connection;
+
     /***************************************************************************
 
         Constructor.
@@ -465,6 +469,39 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
     {
         this.setupRequest(id, context_blob, working_blob, finished_dg);
         this.handler.single_node = handler;
+        this.fiber.start();
+    }
+
+    /***************************************************************************
+
+        Starts the request handler for a multi-node request.
+
+        Params:
+            id = the request id
+            context_blob = the opaque data stored as the request's context. This
+                data is shared between all RoCs (sliced)
+            start_on_new_connection = delegate passed to the request handler,
+                allowing it to start the request on a new request-on-conn to a
+                different node
+            finished_dg = delegate to be called when the handler is finished
+            handler = the request handler to start in a fiber
+
+        In:
+            - No other handler must have been assigned already.
+
+    ***************************************************************************/
+
+    public void start ( RequestId id, void[] context_blob,
+        void delegate ( ) start_on_new_connection,
+        HandlerFinishedDg finished_dg, MultiNodeHandler handler )
+    in
+    {
+        assert(!this.handler.active);
+    }
+    body
+    {
+        this.setupRequest(id, context_blob, start_on_new_connection, finished_dg);
+        this.handler.multi_node = handler;
         this.fiber.start();
     }
 
@@ -566,6 +603,11 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
             case handler.active.single_node:
                 handler.single_node()(&this.useNode, this.request_context,
                     this.working_data);
+                break;
+
+            case handler.active.multi_node:
+                handler.multi_node()(&this.useNode,
+                    this.start_on_new_connection, this.request_context);
                 break;
 
             case handler.active.all_nodes:
@@ -702,6 +744,31 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
         this.working_data.length = working_blob.length;
         enableStomping(this.working_data);
         this.working_data[] = working_blob[];
+    }
+
+    /***************************************************************************
+
+        Populates this instance with request parameters.
+
+        Params:
+            request = the request that called this.start().
+            context_blob = the opaque data stored as the request's context. This
+                data is shared between all RoCs (sliced)
+            start_on_new_connection = delegate passed to the request handler,
+                allowing it to start the request on a new request-on-conn to a
+                different node
+            finished_dg = delegate to be called when the handler is finished
+
+    ***************************************************************************/
+
+    private void setupRequest ( RequestId id, void[] context_blob,
+        void delegate ( ) start_on_new_connection,
+        HandlerFinishedDg finished_dg )
+    {
+        this.request_id = id;
+        this.request_context = context_blob;
+        this.start_on_new_connection = start_on_new_connection;
+        this.finished_dg = finished_dg;
     }
 
     /***************************************************************************

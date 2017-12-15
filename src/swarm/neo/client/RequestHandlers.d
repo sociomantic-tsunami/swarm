@@ -81,6 +81,23 @@ public alias void function ( IRoundRobinConnIterator rr,
 
 /*******************************************************************************
 
+    Handler function type for a multi-node request.
+
+    Params:
+        use_node = delegate to be called from the handler to get access to an
+            `EventDispatcher` instance to communicate with the specified node
+        new_request_on_conn = delegate to be called from the handler to cause
+            the handler to be called again in a new `RequestOnConn`` instance
+        context_blob = packed request context struct
+
+*******************************************************************************/
+
+public alias void function ( UseNodeDg use_node,
+    NewRequestOnConnDg new_request_on_conn, void[] context_blob )
+    MultiNodeHandler;
+
+/*******************************************************************************
+
     Delegate type passed to a single-node-at-a-time request handler. Calls `dg`
     with an event dispatcher connected to the node specified by `node_address`.
 
@@ -97,6 +114,15 @@ public alias void function ( IRoundRobinConnIterator rr,
 
 public alias bool delegate ( AddrPort node_address,
     void delegate ( RequestOnConn.EventDispatcher ed ) dg ) UseNodeDg;
+
+/*******************************************************************************
+
+    Delegate type passed to a multi-node request handler. When called, acquires
+    a new `RequestOnConn` and calls the handler inside its fiber.
+
+*******************************************************************************/
+
+public alias void delegate ( ) NewRequestOnConnDg;
 
 /*******************************************************************************
 
@@ -169,6 +195,16 @@ public union Handler
     ***************************************************************************/
 
     SingleNodeHandler single_node;
+
+    /***************************************************************************
+
+        A multiple-nodes-at-a-time request callback.
+        This field is active only if the outer request is a multi-node
+        request.
+
+    ***************************************************************************/
+
+    MultiNodeHandler multi_node;
 
     /***************************************************************************
 

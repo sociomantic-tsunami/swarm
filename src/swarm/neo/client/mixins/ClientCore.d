@@ -915,6 +915,14 @@ template ClientCore ( )
             return this.connections.request_set.startSingleNode(&R.handler,
                 &R.all_finished_notifier, context, R.Working.init);
         }
+        else static if ( R.request_type == R.request_type.MultiNode )
+        {
+            enforce(this.connections.length,
+                "Cannot assign a multi-node request when there are no nodes registered");
+
+            return this.connections.request_set.startMultiNode(&R.handler,
+                &R.all_finished_notifier, context);
+        }
         else static if ( R.request_type == R.request_type.RoundRobin )
         {
             enforce(this.connections.length,
