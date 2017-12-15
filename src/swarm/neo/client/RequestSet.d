@@ -96,6 +96,7 @@ public final class RequestSet: IRequestSet
         {
             AllNodesHandler all_nodes;
             SingleNodeHandler single_node;
+            MultiNodeHandler multi_node;
             RoundRobinHandler round_robin;
         }
 
@@ -254,6 +255,43 @@ public final class RequestSet: IRequestSet
 
         /***********************************************************************
 
+            Starts a multi-node request.
+
+            `handler` is called once in a fiber, receiving:
+                1. A delegate allowing it to use an `EventDispatcher` instance,
+                   for a specified connection, within a limited scope. After
+                   leaving the scope, the request handler may call the delegate
+                   again to receive another `EventDispatcher` to communicate
+                   another node.
+                2. A delegate allowing it to cause `handler` to be called again
+                   in another request-on-conn fiber.
+
+            Note that, when this method returns, `handler` may be in the
+            suspended fiber, waiting for I/O to complete, or may have finished.
+
+            Params:
+                RequestContext = type of request context. Must be a type that
+                    can be packed by swarm.neo.util.StructPacker
+                handler = request handler
+                finished_notifier = called when the last hander has finished
+                context = request context
+
+        ***********************************************************************/
+
+        public void startMultiNode ( RequestContext )
+            ( MultiNodeHandler handler, FinishedNotifier finished_notifier,
+            RequestContext context )
+        {
+            this.handler.multi_node = handler;
+            this.initRequest(finished_notifier, context);
+            this.request_on_conns.initialise(
+                RequestOnConnSet.RequestType.MultiNode);
+
+            this.startOnNewConnection();
+        }
+
+        /***********************************************************************
+
             Starts a single round-robin node request.
 
             `handler` is called once in a fiber, receiving an interface allowing
@@ -336,6 +374,39 @@ public final class RequestSet: IRequestSet
                     this.initial_working_data, &this.handlerFinished, handler,
                     connection);
             }
+        }
+
+        /***********************************************************************
+
+            Adds a request-on-conn for a multi-node request, starting the
+            request on a newly added node connection. (Called from within the
+            request handler of a currently running request-on-conn of the same
+            request.)
+
+            In:
+                this.id must not be 0, the request must be in the set of active
+                requests, and the type of the request must be multi-node
+
+        ***********************************************************************/
+
+        public void startOnNewConnection ( )
+        in
+        {
+            assert(this.id);
+            assert(this.type == Type.multi_node);
+
+            auto rq = this.id in this.outer.active_requests;
+
+            assert(rq !is null);
+            assert(*rq is this);
+        }
+        body
+        {
+            auto request_on_conn = this.request_on_conns.add(
+                this.outer.newRequestOnConn());
+            request_on_conn.start(this.id, this.context,
+                &this.startOnNewConnection, &this.handlerFinished,
+                this.handler.multi_node);
         }
 
         /***********************************************************************
@@ -593,6 +664,41 @@ public final class RequestSet: IRequestSet
         }
         body
         {
+            this.initRequest(finished_notifier, context);
+
+            this.serializeWorkingData(working);
+        }
+
+        /***********************************************************************
+
+            Common request initialisation boiler-plate shared by the start*()
+            methods, above.
+
+            Params:
+                RequestContext = type of request context. Must be a type that
+                    can be packed by swarm.neo.util.StructPacker
+                finished_notifier = called when the last hander has finished
+                context = request context
+
+            In:
+                this.id must not be 0, nor may there be handlers running. The
+                request must be in the set of active requests.
+
+        ***********************************************************************/
+
+        private void initRequest ( RequestContext )
+            ( FinishedNotifier finished_notifier, RequestContext context )
+        in
+        {
+            assert(this.id);
+
+            auto rq = this.id in this.outer.active_requests;
+
+            assert(rq !is null);
+            assert(*rq is this);
+        }
+        body
+        {
             this.packRequestContext(context);
 
             // Now that we have the const user-provided info serialized, we can
@@ -600,8 +706,6 @@ public final class RequestSet: IRequestSet
             auto mutable_context =
                 unpack!(Unqual!(RequestContext))(this.context);
             mutable_context.request_id = this.id;
-
-            this.serializeWorkingData(working);
 
             this.finished_notifier = finished_notifier;
             this.start_time_micros = MicrosecondsClock.now_us();
@@ -759,6 +863,35 @@ public final class RequestSet: IRequestSet
         auto rq = this.newRequest();
         assert(rq.id > 0);
         rq.startSingleNode(handler, finished_notifier, context, working);
+        return rq.id;
+    }
+
+    /***************************************************************************
+
+        Starts a multi-node request, calling `handler` in a request-on-conn
+        fiber. Called from the public client API.
+
+        Params:
+            handler = request handler
+            finished_notifier = called when the last hander has finished
+            context = handler specific request context; passed to `handler`
+
+        Throws:
+            NoMoreRequests if starting a new request would exceed the maximum
+            allowed number of active requests at a time.
+
+    ***************************************************************************/
+
+    public RequestId startMultiNode ( RequestContext ) (
+        MultiNodeHandler handler, Request.FinishedNotifier finished_notifier,
+        RequestContext context )
+    {
+        assert(handler !is null);
+        assert(finished_notifier !is null);
+
+        auto rq = this.newRequest();
+        assert(rq.id > 0);
+        rq.startMultiNode(handler, finished_notifier, context);
         return rq.id;
     }
 
