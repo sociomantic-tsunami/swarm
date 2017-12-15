@@ -3,14 +3,7 @@
     Definitions for client request handlers.
 
     Request handler functions are the functions which define the client-side
-    logic to handle each request type. The "context" of such functions is:
-        1. A means of accessing one or more `RequestOnConn`s. (The exact means
-           varies by type of request.)
-        2. The serialized request context (stored in `Request`). The request
-           handler may modify this data, as necessary.
-        3. The serialized per-`RequestOnConn` working data (stored in the
-           `RequestOnConn`). The request handler may modify this data, as
-           necessary.
+    logic to handle each request type.
 
     Copyright: Copyright (c) 2016-2017 sociomantic labs GmbH. All rights reserved
 
