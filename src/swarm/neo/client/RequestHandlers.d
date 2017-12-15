@@ -34,10 +34,14 @@ import ocean.core.SmartUnion;
 
 /*******************************************************************************
 
-    Handler function type for a single-node-at-a-time request. The handler
-    should use `use_node(node_address)` to operate via an `EventDispatcher`
-    instance to exchange request messages with a node and `io_fiber` for
-    customised event handling.
+    Handler function type for a single-node-at-a-time request. Called once for
+    each request.
+
+    Params:
+        use_node = delegate to be called from the handler to get access to an
+            `EventDispatcher` instance to communicate with the specified node
+        context_blob = packed request context struct
+        working = serialized per-request-on-conn data
 
 *******************************************************************************/
 
@@ -46,9 +50,13 @@ public alias void function ( UseNodeDg use_node,
 
 /*******************************************************************************
 
-    Handler function type for an all-nodes request. The handler should use `ed`
-    to exchange request messages with the node and `io_fiber` for customised
-    event handling.
+    Handler function type for an all-nodes request. Called once per node for
+    each request.
+
+    Params:
+        ed = `EventDispatcher` instance to communicate with the node
+        context_blob = packed request context struct
+        working = serialized per-request-on-conn data
 
 *******************************************************************************/
 
@@ -57,10 +65,14 @@ public alias void function ( RequestOnConn.EventDispatcherAllNodes ed,
 
 /*******************************************************************************
 
-    Handler function type for a node-round-robin request. The handler should use
-    `rr` to get access to an event dispatcher to exchange request messages with
-    one or more nodes, in series, as required and `io_fiber` for customised
-    event handling.
+    Handler function type for a node-round-robin request. Called once for each
+    request.
+
+    Params:
+        rr = iterator to get access to `EventDispatcher` instances to
+            communicate with nodes in round-robin sequence
+        context_blob = packed request context struct
+        working = serialized per-request-on-conn data
 
 *******************************************************************************/
 
