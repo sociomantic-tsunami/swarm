@@ -228,6 +228,8 @@ public final class RequestSet: IRequestSet
             suspended fiber, waiting for I/O to complete, or may have finished.
 
             Params:
+                RequestContext = type of request context. Must be a type that
+                    can be packed by swarm.neo.util.StructPacker
                 handler = request handler
                 finished_notifier = called when the last hander has finished
                 context = request context, must be a Contiguous-serialisable
@@ -263,6 +265,8 @@ public final class RequestSet: IRequestSet
             suspended fiber, waiting for I/O to complete, or may have finished.
 
             Params:
+                RequestContext = type of request context. Must be a type that
+                    can be packed by swarm.neo.util.StructPacker
                 handler = request handler
                 finished_notifier = called when the last hander has finished
                 context = request context, must be a Contiguous-serialisable
@@ -307,6 +311,8 @@ public final class RequestSet: IRequestSet
             before this method returns or after it has returned.
 
             Params:
+                RequestContext = type of request context. Must be a type that
+                    can be packed by swarm.neo.util.StructPacker
                 handler = request handler
                 finished_notifier = called when the last hander has finished
                 context = request context, must be a Contiguous-serialisable
@@ -563,6 +569,8 @@ public final class RequestSet: IRequestSet
             methods, above.
 
             Params:
+                RequestContext = type of request context. Must be a type that
+                    can be packed by swarm.neo.util.StructPacker
                 finished_notifier = called when the last hander has finished
                 context = request context, must be a Contiguous-serialisable
                     struct
@@ -734,6 +742,8 @@ public final class RequestSet: IRequestSet
         messages with a node.
 
         Params:
+            RequestContext = type of request context. Must be a type that can be
+                packed by swarm.neo.util.StructPacker
             handler = request handler
             finished_notifier = called when the last hander has finished
             context = handler specific request context; `handler` can obtain
@@ -768,6 +778,8 @@ public final class RequestSet: IRequestSet
         should use to exchange request messages with a node.
 
         Params:
+            RequestContext = type of request context. Must be a type that can be
+                packed by swarm.neo.util.StructPacker
             handler = request handler
             finished_notifier = called when the last hander has finished
             context = handler specific request context; `handler` can obtain
@@ -803,6 +815,8 @@ public final class RequestSet: IRequestSet
         exchange request messages with a node.
 
         Params:
+            RequestContext = type of request context. Must be a type that can be
+                packed by swarm.neo.util.StructPacker
             handler = request handler
             finished_notifier = called when the last hander has finished
             context = handler specific request context; `handler` can obtain
