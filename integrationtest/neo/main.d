@@ -439,9 +439,10 @@ class Test : Task
 
     private void testDisconnect ( )
     {
+        this.conn_notifications = this.conn_notifications.init;
         this.client.neo.reconnect();
         this.client.blocking.waitAllNodesConnected();
-        enforce(this.conn_notifications == ConnNotifications(2, 0));
+        enforce(this.conn_notifications == ConnNotifications(1, 0));
     }
 }
 
