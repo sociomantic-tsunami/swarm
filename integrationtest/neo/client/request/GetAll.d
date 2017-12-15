@@ -10,11 +10,11 @@
 
 *******************************************************************************/
 
-module test.neo.client.request.GetAll;
+module integrationtest.neo.client.request.GetAll;
 
 import ocean.transition;
 import ocean.core.SmartUnion;
-import test.neo.client.NotifierTypes;
+import integrationtest.neo.client.NotifierTypes;
 
 /*******************************************************************************
 

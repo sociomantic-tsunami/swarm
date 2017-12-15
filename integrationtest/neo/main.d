@@ -10,7 +10,7 @@
 
 *******************************************************************************/
 
-module test.neo.main;
+module integrationtest.neo.main;
 
 import ocean.transition;
 import ocean.task.Scheduler;
@@ -32,8 +32,8 @@ import ocean.task.Task;
 
 class Test : Task
 {
-    import test.neo.client.Client;
-    import test.neo.node.Node;
+    import integrationtest.neo.client.Client;
+    import integrationtest.neo.node.Node;
 
     import swarm.neo.client.requests.NotificationFormatter;
 
@@ -454,7 +454,8 @@ class Test : Task
 
 *******************************************************************************/
 
-void main ( )
+version (UnitTest) {}
+else void main ( )
 {
     initScheduler(SchedulerConfiguration.init);
     theScheduler.schedule(new Test);

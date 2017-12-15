@@ -10,7 +10,7 @@
 
 *******************************************************************************/
 
-module test.neo.client.request.internal.Get;
+module integrationtest.neo.client.request.internal.Get;
 
 import ocean.transition;
 
@@ -38,9 +38,9 @@ import ocean.transition;
 
 public struct Get
 {
-    import test.neo.common.Get;
-    import test.neo.client.request.Get;
-    import test.neo.common.RequestCodes;
+    import integrationtest.neo.common.Get;
+    import integrationtest.neo.client.request.Get;
+    import integrationtest.neo.common.RequestCodes;
     import swarm.neo.client.mixins.RequestCore;
     import swarm.neo.client.RequestHandlers : UseNodeDg;
 
