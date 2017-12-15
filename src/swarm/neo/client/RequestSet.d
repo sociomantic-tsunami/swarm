@@ -232,8 +232,7 @@ public final class RequestSet: IRequestSet
                     can be packed by swarm.neo.util.StructPacker
                 handler = request handler
                 finished_notifier = called when the last hander has finished
-                context = request context, must be a Contiguous-serialisable
-                    struct
+                context = request context
                 working = initial working data to serialize into the request
                     connection
 
@@ -269,8 +268,7 @@ public final class RequestSet: IRequestSet
                     can be packed by swarm.neo.util.StructPacker
                 handler = request handler
                 finished_notifier = called when the last hander has finished
-                context = request context, must be a Contiguous-serialisable
-                    struct
+                context = request context
                 working = initial working data to serialize into the request
                     connection
 
@@ -315,8 +313,7 @@ public final class RequestSet: IRequestSet
                     can be packed by swarm.neo.util.StructPacker
                 handler = request handler
                 finished_notifier = called when the last hander has finished
-                context = request context, must be a Contiguous-serialisable
-                    struct
+                context = request context
                 working = initial working data to serialize into the request
                     connections
 
@@ -572,8 +569,7 @@ public final class RequestSet: IRequestSet
                 RequestContext = type of request context. Must be a type that
                     can be packed by swarm.neo.util.StructPacker
                 finished_notifier = called when the last hander has finished
-                context = request context, must be a Contiguous-serialisable
-                    struct
+                context = request context
                 working = initial working data to serialize into the request
                     connections
 
@@ -628,7 +624,6 @@ public final class RequestSet: IRequestSet
             this.id = 0;
             this.request_on_conns.reset(&this.outer.request_on_conn_pool.recycle);
             this.finished_notifier = null;
-            // Reset this.context like Contiguous.reset() does it.
             this.context.length = 0;
             enableStomping(this.context);
             this.initial_working_data.length = 0;
@@ -736,18 +731,15 @@ public final class RequestSet: IRequestSet
 
     /***************************************************************************
 
-        Called from the public client API.
-        Starts a single-node request, calling `handler` in a fiber, passing a
-        `RequestOnConn`, which `handler` should use to exchange request
-        messages with a node.
+        Starts a single-node request, calling `handler` in a request-on-conn
+        fiber. Called from the public client API.
 
         Params:
             RequestContext = type of request context. Must be a type that can be
                 packed by swarm.neo.util.StructPacker
             handler = request handler
             finished_notifier = called when the last hander has finished
-            context = handler specific request context; `handler` can obtain
-                      these from the `RequestOnConn` it receives
+            context = handler specific request context; passed to `handler`
             working = initial working data to serialize into the request
                 connection
 
@@ -772,18 +764,15 @@ public final class RequestSet: IRequestSet
 
     /***************************************************************************
 
-        Called from the public client API.
-        Starts a single round-robin node request, calling `handler` in a fiber,
-        passing a `RequestOnConn.RoundRobinEventDispatcher`, which `handler`
-        should use to exchange request messages with a node.
+        Starts a round-robin request, calling `handler` in a request-on-conn
+        fiber. Called from the public client API.
 
         Params:
             RequestContext = type of request context. Must be a type that can be
                 packed by swarm.neo.util.StructPacker
             handler = request handler
             finished_notifier = called when the last hander has finished
-            context = handler specific request context; `handler` can obtain
-                      these from the `RequestOnConn` it receives
+            context = handler specific request context; passed to `handler`
             working = initial working data to serialize into the request
                 connection
 
@@ -808,20 +797,16 @@ public final class RequestSet: IRequestSet
 
     /***************************************************************************
 
+        Starts an all-nodes request, calling `handler` in as many
+        request-on-conn fibers as there are nodes currently in the registry.
         Called from the public client API.
-        Starts an all-nodes request, calling `handler` in as many fibers as
-        there are nodes currently in the registry, passing a
-        `RequestOnConn.EventDispatcher`, which `handler` should use to
-        exchange request messages with a node.
 
         Params:
             RequestContext = type of request context. Must be a type that can be
                 packed by swarm.neo.util.StructPacker
             handler = request handler
             finished_notifier = called when the last hander has finished
-            context = handler specific request context; `handler` can obtain
-                      these from the `RequestOnConn.EventDispatcher` it
-                      receives
+            context = handler specific request context; passed to `handler`
             working = initial working data to serialize into the request
                 connections
 
