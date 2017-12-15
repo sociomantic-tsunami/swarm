@@ -42,9 +42,6 @@ class Test : Task
     import ocean.util.serialize.contiguous.Serializer;
     import ocean.util.serialize.contiguous.MultiVersionDecorator;
 
-    /// Example node.
-    private Node node;
-
     /// Example client.
     private Client client;
 
@@ -66,7 +63,7 @@ class Test : Task
 
     override public void run ( )
     {
-        this.node = new Node(theScheduler.epoll, "127.0.0.1", 10_000);
+        auto node = new Node(theScheduler.epoll, "127.0.0.1", 10_000);
         this.client = new Client(theScheduler.epoll, "127.0.0.1", 10_000,
             &this.connNotifier);
 
