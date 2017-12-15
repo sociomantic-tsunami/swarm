@@ -20,8 +20,17 @@ module swarm.neo.client.mixins.RequestCore;
 
 public enum RequestType
 {
+    /// A request that operates on one node at a time. The node currently being
+    /// operated on may change over the request's lifetime. The nodes contacted
+    /// are determined entirely by the request handler.
     SingleNode,
+
+    /// A request that operates on one node at a time. The node currently being
+    /// operated on may change over the request's lifetime. The nodes contacted
+    /// are determined by a round-robin sequence.
     RoundRobin,
+
+    /// A request that operates on all known nodes in parallel.
     AllNodes
 }
 
