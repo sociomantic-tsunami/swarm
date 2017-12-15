@@ -1,6 +1,6 @@
 /*******************************************************************************
 
-    List of request codes.
+    Super simplistic storage implementation of the example node.
 
     Copyright:
         Copyright (c) 2017 sociomantic labs GmbH. All rights reserved
@@ -10,12 +10,12 @@
 
 *******************************************************************************/
 
-module test.neo.common.RequestCodes;
+module integrationtest.neo.node.Storage;
 
-public enum RequestCode : ubyte
+import ocean.transition;
+
+public class Storage
 {
-    None,
-    Put,
-    Get,
-    GetAll
+    /// Values are simply stored in an associative array, indexed by key.
+    public mstring[hash_t] map;
 }

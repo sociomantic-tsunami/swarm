@@ -10,7 +10,7 @@
 
 *******************************************************************************/
 
-module test.neo.common.Get;
+module integrationtest.neo.common.Get;
 
 import swarm.neo.request.Command;
 

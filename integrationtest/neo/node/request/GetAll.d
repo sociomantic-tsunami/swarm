@@ -10,10 +10,10 @@
 
 *******************************************************************************/
 
-module test.neo.node.request.GetAll;
+module integrationtest.neo.node.request.GetAll;
 
 import ocean.transition;
-import test.neo.node.Storage;
+import integrationtest.neo.node.Storage;
 import swarm.neo.node.RequestOnConn;
 import swarm.neo.request.Command;
 
@@ -65,7 +65,7 @@ public void handle ( Object shared_resources, RequestOnConn connection,
 
 private scope class GetAllImpl_v0
 {
-    import test.neo.common.GetAll;
+    import integrationtest.neo.common.GetAll;
     import swarm.neo.util.MessageFiber;
     import swarm.neo.request.RequestEventDispatcher;
 

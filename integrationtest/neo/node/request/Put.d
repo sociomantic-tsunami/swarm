@@ -1,6 +1,6 @@
 /*******************************************************************************
 
-    Internal implementation of the node's Get request.
+    Internal implementation of the node's Put request.
 
     Copyright:
         Copyright (c) 2017 sociomantic labs GmbH. All rights reserved
@@ -10,10 +10,10 @@
 
 *******************************************************************************/
 
-module test.neo.node.request.Get;
+module integrationtest.neo.node.request.Put;
 
 import ocean.transition;
-import test.neo.node.Storage;
+import integrationtest.neo.node.Storage;
 import swarm.neo.node.RequestOnConn;
 import swarm.neo.request.Command;
 
@@ -41,7 +41,7 @@ public void handle ( Object shared_resources, RequestOnConn connection,
     switch ( cmdver )
     {
         case 0:
-            scope rq = new GetImpl_v0;
+            scope rq = new PutImpl_v0;
             rq.handle(storage, connection, msg_payload);
             break;
 
@@ -59,13 +59,13 @@ public void handle ( Object shared_resources, RequestOnConn connection,
 
 /*******************************************************************************
 
-    Implementation of the v0 Get request protocol.
+    Implementation of the v0 Put request protocol.
 
 *******************************************************************************/
 
-private scope class GetImpl_v0
+private scope class PutImpl_v0
 {
-    import test.neo.common.Get;
+    import integrationtest.neo.common.Put;
 
     /***************************************************************************
 
@@ -86,34 +86,17 @@ private scope class GetImpl_v0
         auto parser = ed.message_parser;
 
         hash_t key;
-        parser.parseBody(msg_payload, key);
+        cstring value;
+        parser.parseBody(msg_payload, key, value);
 
-        auto record = key in storage.map;
-        if ( record is null )
-        {
-            ed.send(
-                ( ed.Payload payload )
-                {
-                    payload.addConstant(RequestStatusCode.Empty);
-                }
-            );
-        }
-        else
-        {
-            ed.send(
-                ( ed.Payload payload )
-                {
-                    payload.addConstant(RequestStatusCode.Value);
-                }
-            );
+        storage.map[key] = value.dup;
 
-            ed.send(
-                ( ed.Payload payload )
-                {
-                    payload.addArray(*record);
-                }
-            );
-        }
+        ed.send(
+            ( ed.Payload payload )
+            {
+                payload.addConstant(RequestStatusCode.Succeeded);
+            }
+        );
         ed.flush();
     }
 }

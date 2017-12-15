@@ -10,7 +10,7 @@
 
 *******************************************************************************/
 
-module test.neo.client.request.internal.Put;
+module integrationtest.neo.client.request.internal.Put;
 
 import ocean.transition;
 
@@ -38,9 +38,9 @@ import ocean.transition;
 
 public struct Put
 {
-    import test.neo.common.Put;
-    import test.neo.client.request.Put;
-    import test.neo.common.RequestCodes;
+    import integrationtest.neo.common.Put;
+    import integrationtest.neo.client.request.Put;
+    import integrationtest.neo.common.RequestCodes;
     import swarm.neo.client.mixins.RequestCore;
     import swarm.neo.client.RequestHandlers : UseNodeDg;
 
