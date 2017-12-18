@@ -59,7 +59,17 @@ public alias byte StatusCode;
 
 *******************************************************************************/
 
-public enum GlobalStatusCode : StatusCode
+deprecated ("Use the SupportedStatus instead of GlobalStatusCode")
+public alias SupportedStatus GlobalStatusCode;
+
+/*******************************************************************************
+
+    Enum defining request supported status codes transmitted from the node ->
+    client, in response to a request.
+
+*******************************************************************************/
+
+public enum SupportedStatus : StatusCode
 {
     /// Both request code specified in the transmitted Command struct and the
     /// associated request version are supported and the request will start

@@ -503,7 +503,7 @@ class ConnectionHandler : IConnectionHandler
         ed.send(
             ( ed.Payload payload )
             {
-                auto code = GlobalStatusCode.RequestNotSupported;
+                auto code = SupportedStatus.RequestNotSupported;
                 payload.add(code);
             }
         );
