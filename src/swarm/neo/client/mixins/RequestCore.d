@@ -377,6 +377,57 @@ public template RequestCore ( RequestType request_type_, ubyte request_code,
 
     /***************************************************************************
 
+        Private helper function to handle notification of the global supported
+        codes, including the RequestSupported code.
+
+        Params:
+            status = code received from node
+            context = deserialized request context
+            remote_address = address of node which returned this status code
+
+        Returns:
+            false if `status` was a status error code and the user notified;
+            true if `status` is a RequestSupported code indicating that the
+            request is supported and that the request will start.
+
+    ***************************************************************************/
+
+    private static bool handleSupportedCodes ( SupportedStatus status,
+        Context* context, AddrPort remote_address )
+    {
+        switch ( status )
+        {
+            case SupportedStatus.RequestNotSupported:
+                NotificationUnion n;
+                n.unsupported = RequestNodeUnsupportedInfo();
+                n.unsupported.request_id = context.request_id;
+                n.unsupported.node_addr = remote_address;
+                n.unsupported.type = n.unsupported.type.RequestNotSupported;
+
+                notify(context.user_params, n);
+                return false;
+
+            case SupportedStatus.RequestVersionNotSupported:
+                NotificationUnion n;
+                n.unsupported = RequestNodeUnsupportedInfo();
+                n.unsupported.request_id = context.request_id;
+                n.unsupported.node_addr = remote_address;
+                n.unsupported.type = n.unsupported.type.RequestVersionNotSupported;
+
+                notify(context.user_params, n);
+                return false;
+
+            case SupportedStatus.RequestSupported:
+                return true;
+
+            default:
+                return false;
+        }
+        assert(false);
+    }
+
+    /***************************************************************************
+
         Private helper function to convert the raw, packed context into a
         Context instance.
 
