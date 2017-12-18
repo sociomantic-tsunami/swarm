@@ -61,6 +61,11 @@ public alias byte StatusCode;
 
 public enum GlobalStatusCode : StatusCode
 {
+    /// Both request code specified in the transmitted Command struct and the
+    /// associated request version are supported and the request will start
+    /// on this connection.
+    RequestSupported = -3,
+
     /// The request code specified in the transmitted Command struct is
     /// supported, but the associated request version is not.
     RequestVersionNotSupported = -2,
