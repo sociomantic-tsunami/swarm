@@ -38,15 +38,24 @@ public void handle ( Object shared_resources, RequestOnConn connection,
     auto storage = cast(Storage)shared_resources;
     assert(storage);
 
+    auto ed = connection.event_dispatcher;
+
     switch ( cmdver )
     {
         case 0:
+            ed.send(
+                ( ed.Payload payload )
+                {
+                    payload.addConstant(SupportedStatus.RequestSupported);
+                }
+            );
+            ed.flush();
+
             scope rq = new GetAllImpl_v0;
             rq.handle(storage, connection, msg_payload);
             break;
 
         default:
-            auto ed = connection.event_dispatcher;
             ed.send(
                 ( ed.Payload payload )
                 {
@@ -218,33 +227,36 @@ private scope class GetAllImpl_v0
     final public void handle ( Storage storage, RequestOnConn connection,
         Const!(void)[] msg_payload )
     {
-        this.storage = storage;
-        this.conn = connection.event_dispatcher;
+        try
+        {
+            this.storage = storage;
+            this.conn = connection.event_dispatcher;
 
-        // Read request setup info from client.
-        bool start_suspended;
-        this.conn.message_parser.parseBody(msg_payload, start_suspended);
+            // Read request setup info from client.
+            bool start_suspended;
+            this.conn.message_parser.parseBody(msg_payload, start_suspended);
 
-        // Send initial status code response.
-        this.conn.send(
-            ( conn.Payload payload )
-            {
-                payload.addConstant(RequestStatusCode.Started);
-            }
-        );
-        this.conn.flush();
+            // Now ready to start sending data from the storage and to handle
+            // control messages from the client. Each of these jobs is handled by a
+            // separate fiber.
+            this.writer = new Writer;
+            this.controller = new Controller;
 
-        // Now ready to start sending data from the storage and to handle
-        // control messages from the client. Each of these jobs is handled by a
-        // separate fiber.
-        this.writer = new Writer;
-        this.controller = new Controller;
+            if ( start_suspended )
+                this.writer.suspender.requestSuspension();
 
-        if ( start_suspended )
-            this.writer.suspender.requestSuspension();
-
-        this.controller.fiber.start();
-        this.writer.fiber.start();
-        this.request_event_dispatcher.eventLoop(this.conn);
+            this.controller.fiber.start();
+            this.writer.fiber.start();
+            this.request_event_dispatcher.eventLoop(this.conn);
+        }
+        catch (Exception e)
+        {
+            // Inform client about the error
+            this.conn.send(( RequestOnConn.EventDispatcher.Payload payload )
+                {
+                    payload.addConstant(MessageType.Error);
+                }
+            );
+        }
     }
 }

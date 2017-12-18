@@ -45,7 +45,9 @@ public enum MessageType : ubyte
     Suspend, // Sent from the client to inform the node to suspend the iteration
     Resume,  // Sent from the client to inform the node to resume the iteration
     Stop,    // Sent from the client to inform the node to stop iterating
-    Ack      // Sent from the node to let the client know that a control message
+    Ack,     // Sent from the node to let the client know that a control message
              // (e.g. Stop) has been carried out
+    Error    // Sent from the node to let the client know that the error happened
+             // during serving the request.
 }
 
