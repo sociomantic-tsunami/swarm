@@ -363,7 +363,7 @@ public template RequestCore ( RequestType request_type_, ubyte request_code,
     {
         switch ( status )
         {
-            case GlobalStatusCode.RequestNotSupported:
+            case SupportedStatus.RequestNotSupported:
                 NotificationUnion n;
                 n.unsupported = RequestNodeUnsupportedInfo();
                 n.unsupported.request_id = context.request_id;
@@ -373,7 +373,7 @@ public template RequestCore ( RequestType request_type_, ubyte request_code,
                 notify(context.user_params, n);
                 return true;
 
-            case GlobalStatusCode.RequestVersionNotSupported:
+            case SupportedStatus.RequestVersionNotSupported:
                 NotificationUnion n;
                 n.unsupported = RequestNodeUnsupportedInfo();
                 n.unsupported.request_id = context.request_id;
