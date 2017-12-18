@@ -158,6 +158,7 @@ private scope class GetAllImpl
     import swarm.neo.connection.RequestOnConnBase;
     import swarm.neo.client.mixins.AllNodesRequestCore;
     import swarm.neo.client.mixins.SuspendableRequestCore;
+    import swarm.neo.request.Command;
     import swarm.neo.request.RequestEventDispatcher;
     import swarm.neo.client.RequestOnConn;
     import swarm.neo.util.MessageFiber;
@@ -273,34 +274,10 @@ private scope class GetAllImpl
 
     private bool handleStatusCode ( ubyte status )
     {
-        auto getall_status = cast(RequestStatusCode)status;
+        auto request_status = cast(SupportedStatus)status;
 
-        if ( GetAll.handleGlobalStatusCodes(getall_status, this.context,
-            this.conn.remote_address) )
-            return false; // Global code, e.g. request/version not supported
-
-        // GetAll-specific codes
-        with ( RequestStatusCode ) switch ( getall_status )
-        {
-            case Started:
-                // Expected "request started" code
-                return true;
-
-            case Error:
-                // The node returned an error code. Notify the user and
-                // end the request.
-                GetAll.Notification n;
-                n.node_error = RequestNodeInfo(
-                    this.context.request_id, conn.remote_address);
-                GetAll.notify(this.context.user_params, n);
-                return false;
-
-            default:
-                // Treat unknown codes as internal errors.
-                goto case Error;
-        }
-
-        assert(false);
+        return GetAll.handleSupportedCodes(request_status, this.context,
+            this.conn.remote_address);
     }
 
     /***************************************************************************
@@ -364,11 +341,12 @@ private struct Reader
         auto suspendable_control =
             &this.context.shared_working.suspendable_control;
 
-        bool finished;
+        bool finished, error;
         do
         {
             auto message = this.request_event_dispatcher.receive(this.fiber,
-                Message(MessageType.Record), Message(MessageType.End));
+                Message(MessageType.Record), Message(MessageType.End),
+                Message(MessageType.Error));
             with ( MessageType ) switch ( message.type )
             {
                 case Record:
@@ -391,6 +369,29 @@ private struct Reader
 
                 case End:
                     finished = true;
+
+                    if (!error)
+                    {
+                        // Acknowledge the End signal. The protocol guarantees that the node
+                        // will not send any further messages.
+                        this.request_event_dispatcher.send(this.fiber,
+                            ( RequestOnConn.EventDispatcher.Payload payload )
+                            {
+                                payload.addConstant(MessageType.Ack);
+                            }
+                        );
+                        this.conn.flush();
+                    }
+                    break;
+
+                case Error:
+                    finished = true;
+                    error = true;
+
+                    GetAll.Notification n;
+                    n.node_error = RequestNodeInfo(this.context.request_id,
+                            this.conn.remote_address);
+                    GetAll.notify(this.context.user_params, n);
                     break;
 
                 default:
@@ -398,16 +399,6 @@ private struct Reader
             }
         }
         while ( !finished );
-
-        // Acknowledge the End signal. The protocol guarantees that the node
-        // will not send any further messages.
-        this.request_event_dispatcher.send(this.fiber,
-            ( RequestOnConn.EventDispatcher.Payload payload )
-            {
-                payload.addConstant(MessageType.Ack);
-            }
-        );
-        this.conn.flush();
 
         // Kill the controller fiber.
         this.request_event_dispatcher.abort(this.controller.fiber);
