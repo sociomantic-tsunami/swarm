@@ -45,6 +45,7 @@ public class Client
         public import Get = integrationtest.neo.client.request.Get;
         public import GetAll = integrationtest.neo.client.request.GetAll;
         public import Put = integrationtest.neo.client.request.Put;
+        public import DoublePut = integrationtest.neo.client.request.DoublePut;
 
         /***********************************************************************
 
@@ -57,13 +58,15 @@ public class Client
             import integrationtest.neo.client.request.internal.GetAll;
             import integrationtest.neo.client.request.internal.Get;
             import integrationtest.neo.client.request.internal.Put;
+            import integrationtest.neo.client.request.internal.DoublePut;
         }
 
         /// Instantiation of ClientCore.
         mixin ClientCore!();
 
         /// Instantiation of RequestStatsTemplate.
-        alias RequestStatsTemplate!("Put", "Get", "GetAll") RequestStats;
+        alias RequestStatsTemplate!("Put", "DoublePut", "Get", "GetAll")
+            RequestStats;
 
         /***********************************************************************
 
@@ -88,6 +91,32 @@ public class Client
             );
 
             this.assign!(Internals.Put)(params);
+        }
+
+        /***********************************************************************
+
+            Assigns a DoublePut request, instructing two nodes to associate the
+            specified value and key.
+
+            Params:
+                key = key of record to add to node
+                value = value of record to add to node
+                notifier = notifier, called when interesting events occur for
+                    this request
+
+        ***********************************************************************/
+
+        public void doublePut ( hash_t key, in void[] value,
+            DoublePut.Notifier notifier )
+        {
+            auto params = Const!(Internals.DoublePut.UserSpecifiedParams)(
+                Const!(DoublePut.Args)(key, value),
+                Const!(Internals.DoublePut.UserSpecifiedParams.SerializedNotifier)(
+                    *(cast(Const!(ubyte[notifier.sizeof])*)&notifier)
+                )
+            );
+
+            this.assign!(Internals.DoublePut)(params);
         }
 
         /***********************************************************************
@@ -270,6 +299,63 @@ public class Client
             }
 
             this.outer.neo.put(key, value, &internalNotifier);
+            if ( !finished )
+                task.suspend();
+
+            return succeeded;
+        }
+
+        /***********************************************************************
+
+            Assigns a DoublePut request, instructing two nodes to associate the
+            specified value and key. The calling Task is blocked until the
+            request finishes.
+
+            Params:
+                key = key of record to add to nodes
+                value = value of record to add to nodes
+                notifier = notifier, called when interesting events occur for
+                    this request
+
+            Returns:
+                true if the DoublePut request succeeded, false on error (on
+                either node)
+
+        ***********************************************************************/
+
+        public bool doublePut ( hash_t key, in void[] value,
+            Neo.DoublePut.Notifier notifier )
+        {
+            auto task = Task.getThis();
+            assert(task !is null);
+
+            bool succeeded, finished;
+            void internalNotifier ( Neo.DoublePut.Notification info,
+                Neo.DoublePut.Args args )
+            {
+                notifier(info, args);
+
+                switch ( info.active )
+                {
+                    case info.active.succeeded:
+                        succeeded = true;
+                        finished = true;
+                        break;
+                    case info.active.partial_success:
+                        finished = true;
+                        break;
+                    case info.active.failed:
+                        finished = true;
+                        break;
+                    default:
+                        // Do nothing; other notifications are non-final.
+                }
+
+                if ( finished && task.suspended )
+                    task.resume();
+            }
+
+            this.outer.neo.doublePut(key, value, &internalNotifier);
             if ( !finished )
                 task.suspend();
 

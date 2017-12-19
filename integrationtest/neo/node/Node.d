@@ -36,6 +36,7 @@ public class Node : NodeBase!(ConnHandler)
     import Get = integrationtest.neo.node.request.Get;
     import GetAll = integrationtest.neo.node.request.GetAll;
     import Put = integrationtest.neo.node.request.Put;
+    import DoublePut = integrationtest.neo.node.request.DoublePut;
 
     /// Storage engine.
     private Storage storage;
@@ -66,6 +67,7 @@ public class Node : NodeBase!(ConnHandler)
         options.requests.add(RequestCode.Get, "Get", &Get.handle);
         options.requests.add(RequestCode.GetAll, "GetAll", &GetAll.handle);
         options.requests.add(RequestCode.Put, "Put", &Put.handle);
+        options.requests.add(RequestCode.DoublePut, "DoublePut", &DoublePut.handle);
 
         options.credentials_map["dummy"] = Key.init;
         options.shared_resources = this.storage;
