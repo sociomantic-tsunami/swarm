@@ -62,6 +62,7 @@ public void handle ( Object shared_resources, RequestOnConn connection,
                     payload.addConstant(SupportedStatus.RequestVersionNotSupported);
                 }
             );
+            ed.flush();
             break;
     }
 }
