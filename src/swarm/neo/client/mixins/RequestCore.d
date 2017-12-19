@@ -16,6 +16,9 @@ module swarm.neo.client.mixins.RequestCore;
 
     Enum defining the different types of request that are possible.
 
+    See swarm.neo.client.RequestHandlers for more details on the different types
+    of request.
+
 *******************************************************************************/
 
 public enum RequestType
