@@ -64,6 +64,7 @@ class Test : Task
     override public void run ( )
     {
         auto node = new Node(theScheduler.epoll, "127.0.0.1", 10_000);
+
         this.client = new Client(theScheduler.epoll, "127.0.0.1", 10_000,
             &this.connNotifier);
 
@@ -77,6 +78,7 @@ class Test : Task
         this.testSerialize();
         this.testSerializeVersioned();
         this.testDisconnect();
+        this.testDoublePut();
 
         theScheduler.shutdown();
     }
@@ -443,6 +445,32 @@ class Test : Task
         this.client.neo.reconnect();
         this.client.blocking.waitAllNodesConnected();
         enforce(this.conn_notifications == ConnNotifications(1, 0));
+    }
+
+    /***************************************************************************
+
+        Runs a simple test where a second node is added to the client's registry
+        and a single record is written to the node with DoublePut.
+
+        Note that this test does not check that the record was written to both
+        nodes as the simple test client doesn't have a way of reading from
+        specific nodes.
+
+    ***************************************************************************/
+
+    private void testDoublePut ( )
+    {
+        auto node2 = new Node(theScheduler.epoll, "127.0.0.1", 10_010);
+
+        this.conn_notifications = this.conn_notifications.init;
+        this.client.neo.addNode("127.0.0.1", 10_010);
+
+        this.client.blocking.waitAllNodesConnected();
+        enforce(this.conn_notifications == ConnNotifications(1, 0));
+
+        auto ok = this.client.blocking.doublePut(23, "hello",
+            ( Client.Neo.DoublePut.Notification info, Client.Neo.DoublePut.Args args ) { });
+        enforce(ok, "DoublePut request failed");
     }
 }
 

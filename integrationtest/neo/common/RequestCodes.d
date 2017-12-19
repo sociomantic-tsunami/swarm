@@ -17,5 +17,6 @@ public enum RequestCode : ubyte
     None,
     Put,
     Get,
-    GetAll
+    GetAll,
+    DoublePut
 }
