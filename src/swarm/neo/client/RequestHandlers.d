@@ -5,6 +5,31 @@
     Request handler functions are the functions which define the client-side
     logic to handle each request type.
 
+    There are several different types of request:
+        1. Single-node requests: Require a single request-on-conn which is used
+           to communicate with a single node at a time. Such requests may query
+           multiple nodes, but strictly in sequence.
+        2. Round-robin requests: Require a single request-on-conn which is used
+           to communicate with a single node. The node is chosen automatically
+           by the client, rather than by the request itself.
+        3. Multi-node requests: Start with a single request-on-conn, but have
+           the ability to acquire more.
+        4. All-nodes requests: Require one request-on-conn per connected node.
+           We have encountered three sub-types of all-nodes requests, so far:
+            a. Short-lived, non-suspendable, getting requests. The nodes sends a
+               stream of messages, followed by a "finished" message.
+            b. Batch-based, suspendable requests. The node sends a batch of
+               records in a single message, then the client sends a response
+               telling the node to either send another batch or to end the
+               request. The request can be instantaneously suspended by the user
+               by halting iteration of the received batch in memory.
+            c. Stream-based, suspendable requests. The node sends a stream of
+               messages. The request can be suspended by the user, but this
+               requires a message to be sent to the nodes, meaning that the
+               suspension is not instantaneous.
+            d. One-shot commands. The client sends a command to all nodes and
+               the nodes respond with a status code.
+
     Copyright: Copyright (c) 2016-2017 sociomantic labs GmbH. All rights reserved
 
     License:
