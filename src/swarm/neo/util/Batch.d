@@ -318,6 +318,7 @@ public scope class BatchReader ( Record ... )
         // Read uncompressed length from first size_t.sizeof bytes.
         auto uncompressed_len = *(cast(size_t*)(batch.ptr));
         decompress_buf.length = uncompressed_len;
+        enableStomping(decompress_buf);
 
         // Decompress into this.batch.
         auto src = batch[size_t.sizeof .. $];
