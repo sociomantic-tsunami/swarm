@@ -116,10 +116,10 @@ class ConnectionHandler : IConnectionHandler
 
         ***********************************************************************/
 
-        public void add ( Command.Code code, cstring name, Handler handler,
+        public void add ( Command.Code code, cstring name, scope Handler handler,
             bool timing = true )
         {
-            this.map[code] = RequestInfo(idup(name), handler, timing);
+            (&this).map[code] = RequestInfo(idup(name), handler, timing);
         }
 
         /***********************************************************************
@@ -135,9 +135,9 @@ class ConnectionHandler : IConnectionHandler
         ***********************************************************************/
 
         deprecated("Use the `add` method instead, specifying a name for the request.")
-        public void opIndexAssign ( Handler handler, Command.Code code )
+        public void opIndexAssign ( scope Handler handler, Command.Code code )
         {
-            this.map[code] = RequestInfo(null, handler, true);
+            (&this).map[code] = RequestInfo(null, handler, true);
         }
 
         /***********************************************************************
@@ -151,7 +151,7 @@ class ConnectionHandler : IConnectionHandler
 
         public void initStats ( RequestStats request_stats )
         {
-            foreach ( code, rq; this.map )
+            foreach ( code, rq; (&this).map )
                 if ( rq.name.length > 0 )
                     request_stats.init(rq.name, rq.timing);
         }
@@ -326,7 +326,7 @@ class ConnectionHandler : IConnectionHandler
 
     ***************************************************************************/
 
-    public this ( FinalizeDg return_to_pool, SharedParams shared_params )
+    public this ( scope FinalizeDg return_to_pool, SharedParams shared_params )
     {
         auto socket = new AddressIPSocket!();
         super(socket, null, null);

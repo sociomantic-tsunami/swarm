@@ -199,7 +199,7 @@ public struct SuspendableRequestInitialiser ( Request, FillPayload,
 
         invariant ( )
         {
-            assert(this.suspendable_control !is null);
+            assert((&this).suspendable_control !is null);
         }
 
         /// Flag indicating whether the request's
@@ -223,19 +223,19 @@ public struct SuspendableRequestInitialiser ( Request, FillPayload,
         {
             if ( ready )
             {
-                if ( !this.ready_for_state_change )
+                if ( !(&this).ready_for_state_change )
                 {
-                    this.ready_for_state_change = true;
-                    this.suspendable_control.ready_for_state_change++;
+                    (&this).ready_for_state_change = true;
+                    (&this).suspendable_control.ready_for_state_change++;
                 }
             }
             else
             {
-                if ( this.ready_for_state_change )
+                if ( (&this).ready_for_state_change )
                 {
-                    assert(this.suspendable_control.ready_for_state_change > 0);
-                    this.ready_for_state_change = false;
-                    this.suspendable_control.ready_for_state_change--;
+                    assert((&this).suspendable_control.ready_for_state_change > 0);
+                    (&this).ready_for_state_change = false;
+                    (&this).suspendable_control.ready_for_state_change--;
                 }
             }
         }
@@ -261,12 +261,12 @@ public struct SuspendableRequestInitialiser ( Request, FillPayload,
 
     public bool initialise ( )
     {
-        this.ready_for_state_change.suspendable_control =
-            &this.all_nodes_initialiser.context.shared_working.
+        (&this).ready_for_state_change.suspendable_control =
+            &(&this).all_nodes_initialiser.context.shared_working.
                 suspendable_control;
 
         auto suspendable_control =
-            &this.all_nodes_initialiser.context.shared_working.suspendable_control;
+            &(&this).all_nodes_initialiser.context.shared_working.suspendable_control;
 
         // If the desired state is already Stopped, simply abort initialisation
         if ( suspendable_control.desired_state ==
@@ -274,10 +274,10 @@ public struct SuspendableRequestInitialiser ( Request, FillPayload,
             return false;
 
         // Perform standard all-nodes initialisation
-        if ( !this.all_nodes_initialiser.initialise() )
+        if ( !(&this).all_nodes_initialiser.initialise() )
             return false;
 
-        this.ready_for_state_change = true;
+        (&this).ready_for_state_change = true;
 
         return true;
     }
@@ -293,9 +293,9 @@ public struct SuspendableRequestInitialiser ( Request, FillPayload,
 
     public void reset ( )
     {
-        this.all_nodes_initialiser.reset();
+        (&this).all_nodes_initialiser.reset();
 
-        this.ready_for_state_change = false;
+        (&this).ready_for_state_change = false;
     }
 }
 
@@ -424,7 +424,7 @@ public
         ( RequestOnConn.EventDispatcherAllNodes conn, Request.Context* context,
           Connector connector, Disconnected disconnected,
           FillPayload fill_payload, HandleStatusCode handle_status_code,
-          Handler handler )
+          scope Handler handler )
 {
     auto initialiser = createSuspendableRequestInitialiser!(Request)(
         conn, context, fill_payload, handle_status_code);
@@ -738,13 +738,13 @@ public struct SuspendableRequestControllerFiber ( Request, MessageType )
         Request.Context* context, RequestEventDispatcher* request_event_dispatcher,
         MessageFiber fiber )
     {
-        this.conn = conn;
-        this.context = context;
-        this.request_event_dispatcher = request_event_dispatcher;
-        this.fiber = fiber;
+        (&this).conn = conn;
+        (&this).context = context;
+        (&this).request_event_dispatcher = request_event_dispatcher;
+        (&this).fiber = fiber;
 
         auto suspendable_control =
-            &this.context.shared_working.suspendable_control;
+            &(&this).context.shared_working.suspendable_control;
 
         bool stopped, state_changed_in_notifier;
         do
@@ -752,18 +752,18 @@ public struct SuspendableRequestControllerFiber ( Request, MessageType )
             if ( !state_changed_in_notifier )
             {
                 // Wait for user action.
-                auto event = this.request_event_dispatcher.nextEvent(this.fiber,
+                auto event = (&this).request_event_dispatcher.nextEvent((&this).fiber,
                     Signal(suspendable_control.Signal.StateChangeRequested));
                 assert(event.active == event.active.signal);
                 assert(event.signal.code == suspendable_control.Signal.StateChangeRequested);
             }
 
             // Send state change message to node and wait for ACK.
-            stopped = this.changeRequestState();
+            stopped = (&this).changeRequestState();
 
             // Notify the user that the state change has taken effect and handle
             // the case where they request a new state change in the notifier.
-            state_changed_in_notifier = this.notifyUser();
+            state_changed_in_notifier = (&this).notifyUser();
         }
         while ( !stopped );
     }
@@ -781,7 +781,7 @@ public struct SuspendableRequestControllerFiber ( Request, MessageType )
     private bool changeRequestState ( )
     {
         auto suspendable_control =
-            &this.context.shared_working.suspendable_control;
+            &(&this).context.shared_working.suspendable_control;
 
         suspendable_control.changing_state++;
         scope ( exit )
@@ -806,16 +806,16 @@ public struct SuspendableRequestControllerFiber ( Request, MessageType )
         }
 
         // Send message to node.
-        this.request_event_dispatcher.send(this.fiber,
+        (&this).request_event_dispatcher.send((&this).fiber,
             ( conn.Payload payload )
             {
                 payload.add(msg);
             }
         );
-        this.conn.flush();
+        (&this).conn.flush();
 
         // Wait for ACK.
-        this.request_event_dispatcher.receive(this.fiber,
+        (&this).request_event_dispatcher.receive((&this).fiber,
             Message(MessageType.Ack));
 
         return msg == MessageType.Stop;
@@ -836,7 +836,7 @@ public struct SuspendableRequestControllerFiber ( Request, MessageType )
     private bool notifyUser ( )
     {
         auto suspendable_control =
-            &this.context.shared_working.suspendable_control;
+            &(&this).context.shared_working.suspendable_control;
 
         bool state_changed_in_notifier;
 
@@ -850,15 +850,15 @@ public struct SuspendableRequestControllerFiber ( Request, MessageType )
             switch ( suspendable_control.desired_state )
             {
                 case Running:
-                    notification.resumed = RequestInfo(this.context.request_id);
+                    notification.resumed = RequestInfo((&this).context.request_id);
                     break;
                 case Suspended:
-                    notification.suspended = RequestInfo(this.context.request_id);
+                    notification.suspended = RequestInfo((&this).context.request_id);
                     break;
                 case Stopped:
-                    notification.stopped = RequestInfo(this.context.request_id);
+                    notification.stopped = RequestInfo((&this).context.request_id);
 
-                    this.context.shared_working.suspendable_control.
+                    (&this).context.shared_working.suspendable_control.
                         stopped_notification_done = true;
                     break;
                 default:
@@ -866,7 +866,7 @@ public struct SuspendableRequestControllerFiber ( Request, MessageType )
             }
 
             if ( suspendable_control.notifyAndCheckStateChange!(Request)(
-                this.context, notification) )
+                (&this).context, notification) )
             {
                 // The user used the controller in the notifier callback
                 state_changed_in_notifier = true;
@@ -1032,7 +1032,7 @@ public struct SuspendableRequestSharedWorkingData
 
     public void fillPayload ( RequestOnConnBase.EventDispatcher.Payload payload )
     {
-        bool start_suspended = this.desired_state == DesiredState.Suspended;
+        bool start_suspended = (&this).desired_state == DesiredState.Suspended;
         payload.addConstant(start_suspended);
     }
 
@@ -1059,9 +1059,9 @@ public struct SuspendableRequestSharedWorkingData
     public bool notifyAndCheckStateChange ( Request ) (
         Request.Context* context, Request.Notification n )
     {
-        auto desired_state_before_notify = this.desired_state;
+        auto desired_state_before_notify = (&this).desired_state;
         Request.notify(context.user_params, n);
-        return desired_state_before_notify != this.desired_state;
+        return desired_state_before_notify != (&this).desired_state;
     }
 
     /***************************************************************************
@@ -1091,10 +1091,10 @@ public struct SuspendableRequestSharedWorkingData
 
     public bool allInitialised ( Request ) ( Request.Context* context )
     {
-        auto desired_state_before_notify = this.desired_state;
+        auto desired_state_before_notify = (&this).desired_state;
 
         if ( context.shared_working.all_nodes.allInitialised!(Request)(context) )
-            return desired_state_before_notify != this.desired_state;
+            return desired_state_before_notify != (&this).desired_state;
 
         return false;
     }
@@ -1113,8 +1113,8 @@ private template ExampleRequestCore ( )
     import ocean.core.SmartUnion;
 
     // Required by RequestCore
-    const ubyte RequestCode = 0;
-    const ubyte RequestVersion = 0;
+    static immutable ubyte RequestCode = 0;
+    static immutable ubyte RequestVersion = 0;
 
     // Required by RequestCore
     struct Args

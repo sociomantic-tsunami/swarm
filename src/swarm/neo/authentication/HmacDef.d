@@ -12,9 +12,9 @@
 
 module swarm.neo.authentication.HmacDef;
 
-public const key_length = 1024 / 8;
-public const code_length = 512 / 8;
-public const nonce_length = 32 / 8;
+public static immutable key_length = 1024 / 8;
+public static immutable code_length = 512 / 8;
+public static immutable nonce_length = 32 / 8;
 
 
 /* TODO: in D2, we could simply use fixed-length arrays, as follows:
@@ -35,7 +35,7 @@ version (D_Version2)
 
 struct StaticArray ( T, size_t n )
 {
-    const length = n;
+    enum length = n;
 
     T[n] content;
 }

@@ -83,7 +83,7 @@ unittest
     {
         // List of strings defining the names of the possible states
         // (the state Exit is added automatically)
-        const istring[] states = ["One", "Two", "Three"];
+        enum istring[] states = ["One", "Two", "Three"];
 
         // Mixin the output of genStateMachine(), with your list of states
         mixin(genStateMachine(states));
@@ -147,25 +147,25 @@ unittest
 
         State stateOne ( )
         {
-            test!("==")(this.state, State.One);
-            this.state_count++;
-            test!("==")(this.state_count, 1);
+            test!("==")((&this).state, State.One);
+            (&this).state_count++;
+            test!("==")((&this).state_count, 1);
             return State.Two;
         }
 
         State stateTwo ( )
         {
-            test!("==")(this.state, State.Two);
-            this.state_count++;
-            test!("==")(this.state_count, 2);
+            test!("==")((&this).state, State.Two);
+            (&this).state_count++;
+            test!("==")((&this).state_count, 2);
             return State.Three;
         }
 
         State stateThree ( )
         {
-            test!("==")(this.state, State.Three);
-            this.state_count++;
-            test!("==")(this.state_count, 3);
+            test!("==")((&this).state, State.Three);
+            (&this).state_count++;
+            test!("==")((&this).state_count, 3);
             return State.Exit;
         }
     }

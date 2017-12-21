@@ -215,7 +215,7 @@ public abstract class INodeBase : INode, INodeInfo
 
      **************************************************************************/
 
-    public void error_callback ( ErrorDg error_dg )
+    public void error_callback ( scope ErrorDg error_dg )
     {
         this.error_dg = error_dg;
     }
@@ -686,7 +686,7 @@ version (UnitTest)
 {
     private class TestConnectionHandler : ISwarmConnectionHandler
     {
-        public this (void delegate(IConnectionHandler) a, ConnectionSetupParams b)
+        public this (scope void delegate(IConnectionHandler) a, ConnectionSetupParams b)
         {
             super(a, b);
         }

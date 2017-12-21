@@ -226,7 +226,7 @@ public abstract class NodeRegistry : INodeRegistry
 
     ***************************************************************************/
 
-    public void assign ( IRequestParams params, AssignErrorDg error_dg )
+    public void assign ( IRequestParams params, scope AssignErrorDg error_dg )
     {
         if ( params.isClientCommand() )
         {
@@ -270,7 +270,7 @@ public abstract class NodeRegistry : INodeRegistry
 
     ***************************************************************************/
 
-    private void assignToNode ( IRequestParams params, AssignErrorDg error_dg,
+    private void assignToNode ( IRequestParams params, scope AssignErrorDg error_dg,
         NodeConnectionPool node_conn_pool )
     {
         try
@@ -388,7 +388,7 @@ public abstract class NodeRegistry : INodeRegistry
 
     ***************************************************************************/
 
-    protected int opApply ( int delegate ( ref INodeConnectionPool connpool ) dg )
+    protected int opApply ( scope int delegate ( ref INodeConnectionPool connpool ) dg )
     {
         int result = 0;
 
@@ -412,7 +412,7 @@ public abstract class NodeRegistry : INodeRegistry
 
     ***************************************************************************/
 
-    public int opApply ( int delegate ( ref INodeConnectionPoolInfo ) dg )
+    public int opApply ( scope int delegate ( ref INodeConnectionPoolInfo ) dg )
     {
         int result = 0;
 

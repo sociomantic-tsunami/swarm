@@ -46,7 +46,7 @@ public class Timeouts
 
     ***************************************************************************/
 
-    public this ( EpollSelectDispatcher epoll, AbortRequestDg abort_request )
+    public this ( EpollSelectDispatcher epoll, scope AbortRequestDg abort_request )
     {
         this.timeouts = new TimeoutSet(epoll);
         this.timeout_requests = new RequestMap(IRequestSet.max_requests);

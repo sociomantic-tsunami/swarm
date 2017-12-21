@@ -106,7 +106,7 @@ public class ClientStats : StatsLog
 
     ***************************************************************************/
 
-    private const time_t default_period = 5;
+    private static immutable time_t default_period = 5;
 
 
     /***************************************************************************
@@ -164,7 +164,7 @@ public class ClientStats : StatsLog
     ***************************************************************************/
 
     public this ( EpollSelectDispatcher epoll, istring file_name,
-        Appender delegate ( istring file, Appender.Layout layout ) appender,
+        scope Appender delegate ( istring file, Appender.Layout layout ) appender,
         time_t period = default_period )
     {
         if ( appender is null )
@@ -268,7 +268,7 @@ public class ClientStats : StatsLog
 
     ***************************************************************************/
 
-    private void appendSection ( istring desc ) ( void delegate ( IClient client,
+    private void appendSection ( istring desc ) ( scope void delegate ( IClient client,
         cstring id, ref bool add_separator ) append_client )
     {
         bool add_separator;
