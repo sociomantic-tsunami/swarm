@@ -368,7 +368,7 @@ abstract class RequestOnConnBase
 
             *******************************************************************/
 
-            private ubyte[16] constants;
+            private ubyte[256] constants;
 
             /*******************************************************************
 
@@ -454,7 +454,10 @@ abstract class RequestOnConnBase
 
             /*******************************************************************
 
-                Adds a simple 1-dimensional array to the payload to be sent.
+                Adds a simple 1-dimensional array to the payload to be sent. For
+                the user's convenience, the length of the array is copied
+                internally, rather than being sliced. (This makes it possible to
+                pass array slices that are stored on the stack.)
 
                 Params:
                     array = reference to the array to add
@@ -465,56 +468,9 @@ abstract class RequestOnConnBase
             {
                 static assert(!hasIndirections!(Element));
 
-                /*
-                 * arr is a dynamic array. To slice the data of arr.length, we
-                 * use the implementation detail that a dynamic array is in fact
-                 * a struct:
-                 *
-                 * struct Array
-                 * {
-                 *     size_t length;
-                 *     Element* ptr;
-                 * }
-                 *
-                 * Array is of type array, and Array.length.offsetof = 0 so
-                 *
-                 *     &arr
-                 *
-                 * is equivalent to
-                 *
-                 *     &(arr.length)
-                 *
-                 * Using this we create a slice to the data of arr.length with
-                 *
-                 *     (cast(void*)(&arr))[0 .. size_t.sizeof]
-                 *
-                 * The unittest below verifies that this method works. This is a
-                 * hack to avoid having to store the array length in a separate
-                 * variable.
-                 */
-                this.outer.outer.send_payload ~=
-                    (cast(Const!(void)*)&arr)[0..size_t.sizeof];
+                this.addConstant(arr.length);
                 this.outer.outer.send_payload ~=
                     (cast(Const!(void)*)arr.ptr)[0..arr.length * Element.sizeof];
-            }
-
-            /*******************************************************************
-
-                Confirm that the array-length slicing hack used in addArray(),
-                above, works.
-
-            *******************************************************************/
-
-            unittest
-            {
-                Const!(void)[][] slices;
-                istring arr = "Hello World!";
-                slices ~= (cast(Const!(void)*)&arr)[0..size_t.sizeof];
-                slices ~= (cast(Const!(void)*)arr.ptr)[0..arr.length];
-                assert(slices.length == 2);
-                assert(slices[0].length == size_t.sizeof);
-                assert(*cast(size_t*)(slices[0].ptr) == arr.length);
-                assert(slices[1] is arr);
             }
         }
 
