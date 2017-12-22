@@ -377,7 +377,7 @@ private struct Reader
                         this.request_event_dispatcher.send(this.fiber,
                             ( RequestOnConn.EventDispatcher.Payload payload )
                             {
-                                payload.addConstant(MessageType.Ack);
+                                payload.addCopy(MessageType.Ack);
                             }
                         );
                         this.conn.flush();

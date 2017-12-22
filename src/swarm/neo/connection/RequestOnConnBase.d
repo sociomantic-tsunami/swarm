@@ -364,19 +364,19 @@ abstract class RequestOnConnBase
             /*******************************************************************
 
                 Fixed-size buffer for storing non-lvalues on the stack during
-                sending (see addConstant()).
+                sending (see addCopy()).
 
             *******************************************************************/
 
-            private ubyte[256] constants;
+            private ubyte[256] copied_values;
 
             /*******************************************************************
 
-                The number of bytes of `constants` which are occupied.
+                The number of bytes of `copied_values` which are occupied.
 
             *******************************************************************/
 
-            private size_t constants_used;
+            private size_t copied_values_used;
 
             /*******************************************************************
 
@@ -419,13 +419,13 @@ abstract class RequestOnConnBase
             /*******************************************************************
 
                 Adds a single element to the payload to be sent, copying it into
-                this instance's internal constants buffer.
+                this instance's internal buffer.
 
                 Notes:
-                1. constants passed to this function are stored in a fixed-size
+                1. values passed to this function are stored in a fixed-size
                    buffer owned by this Payload instance. This places a limit on
-                   the number of constants that can be added to the payload in
-                   this way.
+                   the number of values that can be added to the payload in this
+                   way.
                 2. this method exists as a convenient interface allowing
                    non-lvalues (e.g. enum members) to be added to the payload.
                    (The alternative is that the user has to manually create a
@@ -437,19 +437,28 @@ abstract class RequestOnConnBase
 
             *******************************************************************/
 
-            public void addConstant ( T ) ( T elem )
+            public void addCopy ( T ) ( T elem )
             {
                 static assert(is(T : long));
 
-                assert(this.constants_used + T.sizeof <= this.constants.length,
+                assert(this.copied_values_used + T.sizeof
+                    <= this.copied_values.length,
                     "Payload constants buffer insufficient to store requested value");
 
-                auto start = this.constants_used;
-                this.constants_used += T.sizeof;
-                auto slice = this.constants[start .. this.constants_used];
+                auto start = this.copied_values_used;
+                this.copied_values_used += T.sizeof;
+                auto slice =
+                    this.copied_values[start .. this.copied_values_used];
                 slice[] = (cast(ubyte*)&elem)[0..T.sizeof];
 
                 this.outer.outer.send_payload ~= slice;
+            }
+
+            /// ditto
+            deprecated("Renamed to addCopy")
+            public void addConstant ( T ) ( T elem )
+            {
+                this.addCopy(elem);
             }
 
             /*******************************************************************
@@ -468,7 +477,7 @@ abstract class RequestOnConnBase
             {
                 static assert(!hasIndirections!(Element));
 
-                this.addConstant(arr.length);
+                this.addCopy(arr.length);
                 this.outer.outer.send_payload ~=
                     (cast(Const!(void)*)arr.ptr)[0..arr.length * Element.sizeof];
             }

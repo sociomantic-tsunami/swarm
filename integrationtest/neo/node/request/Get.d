@@ -50,7 +50,7 @@ public void handle ( Object shared_resources, RequestOnConn connection,
             ed.send(
                 ( ed.Payload payload )
                 {
-                    payload.addConstant(SupportedStatus.RequestVersionNotSupported);
+                    payload.addCopy(SupportedStatus.RequestVersionNotSupported);
                 }
             );
             break;
@@ -94,7 +94,7 @@ private scope class GetImpl_v0
             ed.send(
                 ( ed.Payload payload )
                 {
-                    payload.addConstant(RequestStatusCode.Empty);
+                    payload.addCopy(RequestStatusCode.Empty);
                 }
             );
         }
@@ -103,7 +103,7 @@ private scope class GetImpl_v0
             ed.send(
                 ( ed.Payload payload )
                 {
-                    payload.addConstant(RequestStatusCode.Value);
+                    payload.addCopy(RequestStatusCode.Value);
                 }
             );
 

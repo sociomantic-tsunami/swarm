@@ -46,7 +46,7 @@ public void handle ( Object shared_resources, RequestOnConn connection,
             ed.send(
                 ( ed.Payload payload )
                 {
-                    payload.addConstant(SupportedStatus.RequestSupported);
+                    payload.addCopy(SupportedStatus.RequestSupported);
                 }
             );
             ed.flush();
@@ -59,7 +59,7 @@ public void handle ( Object shared_resources, RequestOnConn connection,
             ed.send(
                 ( ed.Payload payload )
                 {
-                    payload.addConstant(SupportedStatus.RequestVersionNotSupported);
+                    payload.addCopy(SupportedStatus.RequestVersionNotSupported);
                 }
             );
             ed.flush();
@@ -113,7 +113,7 @@ private scope class GetAllImpl_v0
                 this.outer.request_event_dispatcher.send(this.fiber,
                     ( RequestOnConn.EventDispatcher.Payload payload )
                     {
-                        payload.addConstant(MessageType.Record);
+                        payload.addCopy(MessageType.Record);
                         payload.add(key);
                         payload.addArray(value);
                     }
@@ -126,7 +126,7 @@ private scope class GetAllImpl_v0
             this.outer.request_event_dispatcher.send(this.fiber,
                 ( RequestOnConn.EventDispatcher.Payload payload )
                 {
-                    payload.addConstant(MessageType.End);
+                    payload.addCopy(MessageType.End);
                 }
             );
             this.outer.conn.flush();
@@ -171,7 +171,7 @@ private scope class GetAllImpl_v0
                 this.outer.request_event_dispatcher.send(this.fiber,
                     ( RequestOnConn.EventDispatcher.Payload payload )
                     {
-                        payload.addConstant(MessageType.Ack);
+                        payload.addCopy(MessageType.Ack);
                     }
                 );
                 this.outer.conn.flush();
@@ -255,7 +255,7 @@ private scope class GetAllImpl_v0
             // Inform client about the error
             this.conn.send(( RequestOnConn.EventDispatcher.Payload payload )
                 {
-                    payload.addConstant(MessageType.Error);
+                    payload.addCopy(MessageType.Error);
                 }
             );
         }

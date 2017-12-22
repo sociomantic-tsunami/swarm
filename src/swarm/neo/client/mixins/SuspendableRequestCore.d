@@ -1033,7 +1033,7 @@ public struct SuspendableRequestSharedWorkingData
     public void fillPayload ( RequestOnConnBase.EventDispatcher.Payload payload )
     {
         bool start_suspended = this.desired_state == DesiredState.Suspended;
-        payload.addConstant(start_suspended);
+        payload.addCopy(start_suspended);
     }
 
     /***************************************************************************
