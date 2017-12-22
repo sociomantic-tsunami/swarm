@@ -256,7 +256,7 @@ public struct SuspendableRequest
                     this.conn.send(
                         ( conn.Payload payload )
                         {
-                            payload.addConstant(data_msg);
+                            payload.addCopy(data_msg);
                             payload.addArray(data);
                         }
                     );
