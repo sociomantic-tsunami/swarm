@@ -162,7 +162,7 @@ public struct BatchWriter ( Record ... )
         destination buffer.
 
         Params:
-            lxo = LZO instance to use for compression
+            lzo = LZO instance to use for compression
             compress_buf = buffer to receive compressed batch
 
         Returns:
