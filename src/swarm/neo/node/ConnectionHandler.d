@@ -417,45 +417,9 @@ class ConnectionHandler : IConnectionHandler
         {
             auto command = *this.connection.message_parser.getValue!(Command)(init_payload);
 
-            if (auto rq =
-                command.code in this.shared_params.requests.map)
+            if (auto rq = command.code in this.shared_params.requests.map)
             {
-                StopWatch timer;
-
-                if ( rq.name )
-                {
-                    this.shared_params.node_info.neo_request_stats
-                        .started(rq.name);
-
-                    if ( rq.timing )
-                        timer.start();
-                }
-
-                scope ( exit )
-                {
-                    if ( rq.name )
-                    {
-                        if ( rq.timing )
-                            this.shared_params.node_info.neo_request_stats
-                                .finished(rq.name, timer.microsec);
-                        else
-                            this.shared_params.node_info.neo_request_stats
-                                .finished(rq.name);
-                    }
-                }
-
-                try
-                {
-                    (*rq.handler)(this.shared_params.shared_resources,
-                        connection, command.ver, init_payload);
-                }
-                catch ( Exception e )
-                {
-                    log.error("{}:{}: Exception thrown from request handler: {} @ {}:{}",
-                        this.connection.connected_client, rq.name,
-                        getMsg(e), e.file, e.line);
-                    throw e;
-                }
+                this.handleRequest(command, *rq, connection, init_payload);
             }
             else
             {
@@ -486,6 +450,60 @@ class ConnectionHandler : IConnectionHandler
     override protected bool io_error ( )
     {
         return false;
+    }
+
+    /***************************************************************************
+
+        Called when an incoming supported request is to be handled. Runs in the
+        fiber of `connection`.
+
+        Params:
+            command = request/version code read from the client
+            rq = request info struct (including handler function)
+            connection = manages the connection socket I/O and the fiber
+            init_payload = the payload of the first message for the request
+
+    ***************************************************************************/
+
+    private void handleRequest ( Command command, RequestMap.RequestInfo rq,
+        RequestOnConn connection, Const!(void)[] init_payload )
+    {
+        StopWatch timer;
+
+        if ( rq.name )
+        {
+            this.shared_params.node_info.neo_request_stats
+                .started(rq.name);
+
+            if ( rq.timing )
+                timer.start();
+        }
+
+        scope ( exit )
+        {
+            if ( rq.name )
+            {
+                if ( rq.timing )
+                    this.shared_params.node_info.neo_request_stats
+                        .finished(rq.name, timer.microsec);
+                else
+                    this.shared_params.node_info.neo_request_stats
+                        .finished(rq.name);
+            }
+        }
+
+        try
+        {
+            (*rq.handler)(this.shared_params.shared_resources,
+                connection, command.ver, init_payload);
+        }
+        catch ( Exception e )
+        {
+            log.error("{}:{}: Exception thrown from request handler: {} @ {}:{}",
+                this.connection.connected_client, rq.name,
+                getMsg(e), e.file, e.line);
+            throw e;
+        }
     }
 
     /***************************************************************************
