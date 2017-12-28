@@ -101,7 +101,14 @@ class ConnectionHandler : IConnectionHandler
         }
 
         /// Map of request info by command code.
+        // (When the deprecated add method is removed, this field can be too.)
         private RequestInfo[Command.Code] map;
+
+        /// Map of request info by request/version code.
+        private RequestInfo[Command] request_info;
+
+        /// Set of supported request codes.
+        private bool[Command.Code] supported_requests;
 
         /***********************************************************************
 
@@ -116,10 +123,42 @@ class ConnectionHandler : IConnectionHandler
 
         ***********************************************************************/
 
+        deprecated("Use the other version of `add` that provides info for "
+            "specific request versions")
         public void add ( Command.Code code, cstring name, Handler handler,
             bool timing = true )
         {
             this.map[code] = RequestInfo(idup(name), handler, timing);
+            this.supported_requests[code] = true;
+        }
+
+        /***********************************************************************
+
+            Adds a request/version to the map.
+
+            Params:
+                command = command (request/version code) to initiate request
+                name = name of request
+                handler = function called to handle this request type
+                timing = if true, timing stats about request of this type are
+                    tracked
+
+        ***********************************************************************/
+
+        public void add ( Command command, cstring name, Handler handler,
+            bool timing = true )
+        in
+        {
+            assert((command.code in this.map) is null,
+                "Either add a single handler for all versions of a request or "
+                ~ "separate handlers for each version");
+            assert(name.length > 0);
+            assert(handler !is null);
+        }
+        body
+        {
+            this.request_info[command] = RequestInfo(idup(name), handler, timing);
+            this.supported_requests[command.code] = true;
         }
 
         /***********************************************************************
@@ -154,6 +193,9 @@ class ConnectionHandler : IConnectionHandler
             foreach ( code, rq; this.map )
                 if ( rq.name.length > 0 )
                     request_stats.init(rq.name, rq.timing);
+
+            foreach ( command, rq; this.request_info )
+                request_stats.init(rq.name, rq.timing);
         }
     }
 
@@ -275,7 +317,7 @@ class ConnectionHandler : IConnectionHandler
             RequestMap requests, bool no_delay,
             ref Const!(Key[istring]) credentials, INodeInfo node_info )
         {
-            assert(requests.map.length > 0);
+            assert(requests.supported_requests.length > 0);
 
             this.epoll = epoll;
             this.shared_resources = shared_resources;
@@ -417,10 +459,30 @@ class ConnectionHandler : IConnectionHandler
         {
             auto command = *this.connection.message_parser.getValue!(Command)(init_payload);
 
+            // deprecated handlers without version handling
             if (auto rq = command.code in this.shared_params.requests.map)
             {
-                this.handleRequest(command, *rq, connection, init_payload);
+                handleRequest(command, *rq, connection, init_payload);
             }
+            // Supported request codes.
+            else if (command.code in
+                this.shared_params.requests.supported_requests)
+            {
+                // Supported version codes.
+                if (auto rq = command in this.shared_params.requests.request_info)
+                {
+                    this.sendSupportedStatus(connection,
+                        SupportedStatus.RequestSupported);
+                    handleRequest(command, *rq, connection, init_payload);
+                }
+                // Unsupported version codes.
+                else
+                {
+                    this.sendSupportedStatus(connection,
+                        SupportedStatus.RequestVersionNotSupported);
+                }
+            }
+            // Unsupported request codes.
             else
             {
                 this.sendSupportedStatus(connection,
