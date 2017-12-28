@@ -423,7 +423,8 @@ class ConnectionHandler : IConnectionHandler
             }
             else
             {
-                this.unsupportedRequest(connection);
+                this.sendSupportedStatus(connection,
+                    SupportedStatus.RequestNotSupported);
             }
         }
         else
@@ -508,20 +509,21 @@ class ConnectionHandler : IConnectionHandler
 
     /***************************************************************************
 
-        Sends the status code RequestNotSupported to the client.
+        Sends a supported status code to the client.
 
         Params:
             connection = connection to send the status code to
+            code = supported status code to send
 
     ***************************************************************************/
 
-    private void unsupportedRequest ( RequestOnConn connection )
+    private void sendSupportedStatus ( RequestOnConn connection,
+        SupportedStatus code )
     {
         auto ed = connection.event_dispatcher;
         ed.send(
             ( ed.Payload payload )
             {
-                auto code = SupportedStatus.RequestNotSupported;
                 payload.add(code);
             }
         );
