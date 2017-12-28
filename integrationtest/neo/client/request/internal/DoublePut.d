@@ -167,9 +167,9 @@ public struct DoublePut
                     );
                     conn.flush();
 
-                    // Receive status from node
-                    auto status = conn.receiveValue!(StatusCode)();
-                    if ( DoublePut.handleGlobalStatusCodes(status, context,
+                    // Receive supported status from node
+                    auto supported = conn.receiveValue!(SupportedStatus)();
+                    if ( !DoublePut.handleSupportedCodes(supported, context,
                         conn.remote_address) )
                     {
                         // Global codes (not supported / version not supported)
@@ -177,8 +177,10 @@ public struct DoublePut
                     }
                     else
                     {
-                        // DoublePut-specific codes
-                        with ( RequestStatusCode ) switch ( status )
+                        // Receive result code from node
+                        auto result = conn.receiveValue!(StatusCode)();
+
+                        with ( RequestStatusCode ) switch ( result )
                         {
                             case Succeeded:
                                 *state = SharedWorking.NodeState.Success;

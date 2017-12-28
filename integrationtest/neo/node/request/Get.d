@@ -32,29 +32,14 @@ import swarm.neo.request.Command;
 
 *******************************************************************************/
 
-public void handle ( Object shared_resources, RequestOnConn connection,
+public void handle_v0 ( Object shared_resources, RequestOnConn connection,
     Command.Version cmdver, Const!(void)[] msg_payload )
 {
     auto storage = cast(Storage)shared_resources;
     assert(storage);
 
-    switch ( cmdver )
-    {
-        case 0:
-            scope rq = new GetImpl_v0;
-            rq.handle(storage, connection, msg_payload);
-            break;
-
-        default:
-            auto ed = connection.event_dispatcher;
-            ed.send(
-                ( ed.Payload payload )
-                {
-                    payload.addCopy(SupportedStatus.RequestVersionNotSupported);
-                }
-            );
-            break;
-    }
+    scope rq = new GetImpl_v0;
+    rq.handle(storage, connection, msg_payload);
 }
 
 /*******************************************************************************

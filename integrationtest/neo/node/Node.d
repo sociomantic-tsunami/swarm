@@ -29,6 +29,7 @@ public class Node : NodeBase!(ConnHandler)
 {
     import ocean.io.select.EpollSelectDispatcher;
     import swarm.neo.authentication.HmacDef: Key;
+    import swarm.neo.request.Command;
 
     import integrationtest.neo.common.RequestCodes;
     import integrationtest.neo.node.Storage;
@@ -64,10 +65,14 @@ public class Node : NodeBase!(ConnHandler)
         Options options;
         options.epoll = epoll;
 
-        options.requests.add(RequestCode.Get, "Get", &Get.handle);
-        options.requests.add(RequestCode.GetAll, "GetAll", &GetAll.handle);
-        options.requests.add(RequestCode.Put, "Put", &Put.handle);
-        options.requests.add(RequestCode.DoublePut, "DoublePut", &DoublePut.handle);
+        options.requests.add(Command(RequestCode.Get, 0),
+            "Get", &Get.handle_v0);
+        options.requests.add(Command(RequestCode.GetAll, 0),
+            "GetAll", &GetAll.handle_v0);
+        options.requests.add(Command(RequestCode.Put, 0),
+            "Put", &Put.handle_v0);
+        options.requests.add(Command(RequestCode.DoublePut, 0),
+            "DoublePut", &DoublePut.handle_v0);
 
         options.credentials_map["dummy"] = Key.init;
         options.shared_resources = this.storage;
