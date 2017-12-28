@@ -138,9 +138,9 @@ public struct Get
                     );
                     conn.flush();
 
-                    // Receive status from node
-                    auto status = conn.receiveValue!(StatusCode)();
-                    if ( Get.handleGlobalStatusCodes(status, context,
+                    // Receive supported status from node
+                    auto supported = conn.receiveValue!(SupportedStatus)();
+                    if ( !Get.handleSupportedCodes(supported, context,
                         conn.remote_address) )
                     {
                         // Global codes (not supported / version not supported)
@@ -148,8 +148,10 @@ public struct Get
                     }
                     else
                     {
-                        // Get-specific codes
-                        with ( RequestStatusCode ) switch ( status )
+                        // Receive result code from node
+                        auto result = conn.receiveValue!(StatusCode)();
+
+                        with ( RequestStatusCode ) switch ( result )
                         {
                             case Value:
                                 context.shared_working.result =

@@ -138,9 +138,9 @@ public struct Put
                     );
                     conn.flush();
 
-                    // Receive status from node
-                    auto status = conn.receiveValue!(StatusCode)();
-                    if ( Put.handleGlobalStatusCodes(status, context,
+                    // Receive supported status from node
+                    auto supported = conn.receiveValue!(SupportedStatus)();
+                    if ( !Put.handleSupportedCodes(supported, context,
                         conn.remote_address) )
                     {
                         // Global codes (not supported / version not supported)
@@ -148,8 +148,10 @@ public struct Put
                     }
                     else
                     {
-                        // Put-specific codes
-                        with ( RequestStatusCode ) switch ( status )
+                        // Receive result code from node
+                        auto result = conn.receiveValue!(StatusCode)();
+
+                        with ( RequestStatusCode ) switch ( result )
                         {
                             case Succeeded:
                                 context.shared_working.result =
