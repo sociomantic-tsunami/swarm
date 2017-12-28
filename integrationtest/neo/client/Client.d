@@ -540,7 +540,8 @@ public class Client
 
         auto auth_name = "dummy";
         ubyte[] auth_key = Key.init.content;
-        this.neo = new Neo(auth_name, auth_key, this.conn_notifier);
+        this.neo = new Neo(auth_name, auth_key,
+            Neo.Settings(this.conn_notifier));
         this.neo.enableSocketNoDelay();
         this.neo.addNode(addr, port);
 
@@ -564,7 +565,7 @@ public class Client
         this.epoll = epoll;
         this.conn_notifier = conn_notifier;
 
-        this.neo = new Neo(config, this.conn_notifier);
+        this.neo = new Neo(config, Neo.Settings(this.conn_notifier));
         this.neo.enableSocketNoDelay();
 
         this.blocking = new Blocking;
