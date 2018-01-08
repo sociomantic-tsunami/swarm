@@ -13,7 +13,7 @@
 
 *******************************************************************************/
 
-module swarm.neo.util.StateMachine;
+deprecated module swarm.neo.util.StateMachine;
 
 /*******************************************************************************
 
@@ -59,6 +59,7 @@ version ( UnitTest )
 
 *******************************************************************************/
 
+deprecated("Requests should be adapted to use one of the new request core mixins in swarm.neo.client.mixin.")
 public istring genStateMachine ( istring[] states )
 {
     assert(states.length);
