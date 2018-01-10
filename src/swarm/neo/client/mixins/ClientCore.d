@@ -625,7 +625,7 @@ template ClientCore ( )
 
     ***************************************************************************/
 
-    private void logStatsFromAggregate ( Aggr, Getter )
+    public void logStatsFromAggregate ( Aggr, Getter )
         ( Getter getter, StatsLog logger )
     {
         static assert(is(Aggr == struct));
