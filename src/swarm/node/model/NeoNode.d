@@ -632,7 +632,8 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
     ***************************************************************************/
 
     public alias SelectListener!(ConnHandler, ConnectionSetupParams) Listener;
-    public alias SelectListener!(Neo.ConnectionHandler, Neo.ConnectionHandler.SharedParams) NeoListener;
+    public alias SelectListener!(Neo.ConnectionHandler,
+        Neo.ConnectionHandler.SharedParams) NeoListener;
 
     /***************************************************************************
 
@@ -777,8 +778,6 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
         this.shared_resources = options.shared_resources;
 
         InetAddress!(false) addr, neo_addr;
-        alias SelectListener!(Neo.ConnectionHandler,
-            Neo.ConnectionHandler.SharedParams) NeoListener;
 
         // Create listener sockets.
         this.socket = new AddressIPSocket!();
@@ -809,7 +808,7 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
         // Instantiate params object shared by all neo connection handlers.
         auto neo_conn_setup_params = new Neo.ConnectionHandler.SharedParams(
             options.epoll, options.shared_resources, options.requests,
-            options.no_delay, *credentials, this);
+            options.no_delay, *credentials, this, &this.getResourceAcquirer);
 
         // Set up unix listener socket, if specified.
         UnixListener unix_listener;
@@ -902,6 +901,27 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
         }
 
         return ret;
+    }
+
+    /***************************************************************************
+
+        Scope allocates a request resource acquirer backed by the protected
+        `shared_resources`. (Passed as a generic Object to avoid templatising
+        this class and others that depend on it.)
+
+        Params:
+            handle_request_dg = delegate that receives a resources acquirer and
+                initiates handling of a request
+
+    ***************************************************************************/
+
+    protected void getResourceAcquirer (
+        void delegate ( Object resource_acquirer ) handle_request_dg )
+    {
+        // Default implementation does nothing. The derived class should
+        // override and provide the expected logic.
+        // TODO: make this method abstract in the next major. (Obligatory
+        // keyword: deprecated.)
     }
 
     /***************************************************************************
