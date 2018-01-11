@@ -51,6 +51,7 @@ class ConnectionHandler : IConnectionHandler
 {
     import swarm.neo.node.Connection;
     import swarm.neo.node.RequestOnConn;
+    import swarm.neo.node.IRequestHandler;
     import swarm.neo.request.Command;
 
     import ocean.io.select.EpollSelectDispatcher;
@@ -91,8 +92,14 @@ class ConnectionHandler : IConnectionHandler
             /// The name of the request, used for stats tracking.
             istring name;
 
+            /// The ClassInfo of the request handler class that is newed when
+            /// handling a request of this type.
+            ClassInfo class_info;
+
             /// The request handler function, called when a request of this type
             /// is initiated.
+            /// Note: this field is only used when a request is set up with the
+            /// deprecated add() methods.
             Handler handler;
 
             /// Indicates whether timing stats should be gathered about the
@@ -128,7 +135,11 @@ class ConnectionHandler : IConnectionHandler
         public void add ( Command.Code code, cstring name, Handler handler,
             bool timing = true )
         {
-            this.map[code] = RequestInfo(idup(name), handler, timing);
+            RequestInfo ri;
+            ri.name = idup(name);
+            ri.handler = handler;
+            ri.timing = timing;
+            this.map[code] = ri;
             this.supported_requests[code] = true;
         }
 
@@ -139,13 +150,13 @@ class ConnectionHandler : IConnectionHandler
             Params:
                 command = command (request/version code) to initiate request
                 name = name of request
-                handler = function called to handle this request type
+                class_info = class that handles this request type
                 timing = if true, timing stats about request of this type are
                     tracked
 
         ***********************************************************************/
 
-        public void add ( Command command, cstring name, Handler handler,
+        public void add ( Command command, cstring name, ClassInfo class_info,
             bool timing = true )
         in
         {
@@ -153,11 +164,15 @@ class ConnectionHandler : IConnectionHandler
                 "Either add a single handler for all versions of a request or "
                 ~ "separate handlers for each version");
             assert(name.length > 0);
-            assert(handler !is null);
+            assert(class_info !is null);
         }
         body
         {
-            this.request_info[command] = RequestInfo(idup(name), handler, timing);
+            RequestInfo ri;
+            ri.name = idup(name);
+            ri.class_info = class_info;
+            ri.timing = timing;
+            this.request_info[command] = ri;
             this.supported_requests[command.code] = true;
         }
 
@@ -176,7 +191,10 @@ class ConnectionHandler : IConnectionHandler
         deprecated("Use the `add` method instead, specifying a name for the request.")
         public void opIndexAssign ( Handler handler, Command.Code code )
         {
-            this.map[code] = RequestInfo(null, handler, true);
+            RequestInfo ri;
+            ri.handler = handler;
+            ri.timing = true;
+            this.map[code] = ri;
         }
 
         /***********************************************************************
@@ -202,6 +220,21 @@ class ConnectionHandler : IConnectionHandler
     /// Alias to old name.
     deprecated("Use the `RequestMap` struct instead.")
     public alias RequestMap CmdHandlers;
+
+    /***************************************************************************
+
+        Type of a delegate that provides a scope-allocated request resource
+        acquirer, via the provided delegate, for use in a request handler.
+
+        Params:
+            handle_request_dg = delegate that receives a resources acquirer and
+                initiates handling of a request
+
+    ***************************************************************************/
+
+    public alias void delegate (
+        void delegate ( Object resource_acquirer ) handle_request_dg )
+        GetResourceAcquirerDg;
 
     /***************************************************************************
 
@@ -265,9 +298,22 @@ class ConnectionHandler : IConnectionHandler
 
             Opaque shared resources instance passed to the request handlers.
 
+            When the deprecated methods of RequestMap are removed, this instance
+            can also be removed. It should be no longer needed. (The
+            get_resource_acquirer delegate plays the same role.)
+
         ***********************************************************************/
 
         public Object shared_resources;
+
+        /***********************************************************************
+
+            Delegate that provides a scope-allocated request resource acquirer
+            for use in request handlers.
+
+        ***********************************************************************/
+
+        public GetResourceAcquirerDg get_resource_acquirer;
 
         /***********************************************************************
 
@@ -310,12 +356,15 @@ class ConnectionHandler : IConnectionHandler
                     is desired, but can be useful for low-bandwidth test setups.)
                 credentials = map of auth names -> keys
                 node_info = node informational interface
+                get_resource_acquirer = delegate that provides a scope-allocated
+                    request resource acquirer for use in request handlers
 
         ***********************************************************************/
 
         public this ( EpollSelectDispatcher epoll, Object shared_resources,
             RequestMap requests, bool no_delay,
-            ref Const!(Key[istring]) credentials, INodeInfo node_info )
+            ref Const!(Key[istring]) credentials, INodeInfo node_info,
+            GetResourceAcquirerDg get_resource_acquirer )
         {
             assert(requests.supported_requests.length > 0);
 
@@ -329,6 +378,7 @@ class ConnectionHandler : IConnectionHandler
             this.no_delay = no_delay;
             this.credentials = &credentials;
             this.node_info = node_info;
+            this.get_resource_acquirer = get_resource_acquirer;
         }
     }
 
@@ -462,7 +512,11 @@ class ConnectionHandler : IConnectionHandler
             // deprecated handlers without version handling
             if (auto rq = command.code in this.shared_params.requests.map)
             {
-                handleRequest(command, *rq, connection, init_payload);
+                this.handleRequest(*rq, connection,
+                    {
+                        (*rq.handler)(this.shared_params.shared_resources,
+                            connection, command.ver, init_payload);
+                    });
             }
             // Supported request codes.
             else if (command.code in
@@ -471,9 +525,31 @@ class ConnectionHandler : IConnectionHandler
                 // Supported version codes.
                 if (auto rq = command in this.shared_params.requests.request_info)
                 {
-                    this.sendSupportedStatus(connection,
-                        SupportedStatus.RequestSupported);
-                    handleRequest(command, *rq, connection, init_payload);
+                    // TODO: when the old deprecated handlers are removed, this
+                    // logic can be moved into handleRequest.
+                    this.handleRequest(*rq, connection,
+                        {
+                            bool acquired;
+                            this.shared_params.get_resource_acquirer(
+                                ( Object request_resources )
+                                {
+                                    acquired = true;
+                                    auto rq_handler =
+                                        this.emplace!(IRequestHandler)
+                                        (connection.emplace_buf, rq.class_info);
+                                    rq_handler.initialise(connection,
+                                        request_resources);
+                                    rq_handler.preSupportedCodeSent(
+                                        init_payload);
+                                    this.sendSupportedStatus(connection,
+                                        SupportedStatus.RequestSupported);
+                                    rq_handler.postSupportedCodeSent();
+                                }
+                            );
+                            // TODO: this check can be removed when the old
+                            // deprecated handlers are removed.
+                            assert(acquired);
+                        });
                 }
                 // Unsupported version codes.
                 else
@@ -521,15 +597,13 @@ class ConnectionHandler : IConnectionHandler
         fiber of `connection`.
 
         Params:
-            command = request/version code read from the client
             rq = request info struct (including handler function)
             connection = manages the connection socket I/O and the fiber
-            init_payload = the payload of the first message for the request
 
     ***************************************************************************/
 
-    private void handleRequest ( Command command, RequestMap.RequestInfo rq,
-        RequestOnConn connection, Const!(void)[] init_payload )
+    private void handleRequest ( RequestMap.RequestInfo rq,
+        RequestOnConn connection, void delegate ( ) handle_request )
     {
         StopWatch timer;
 
@@ -557,8 +631,7 @@ class ConnectionHandler : IConnectionHandler
 
         try
         {
-            (*rq.handler)(this.shared_params.shared_resources,
-                connection, command.ver, init_payload);
+            handle_request();
         }
         catch ( Exception e )
         {
@@ -589,5 +662,46 @@ class ConnectionHandler : IConnectionHandler
                 payload.add(code);
             }
         );
+    }
+
+    /***************************************************************************
+
+        Emplaces an instance of the specified class into the provided buffer.
+
+        Note that the class indicated by `ci` must fit the following criteria:
+            * Must have no constructors. `emplace()` does not call a ctor on the
+              created instance.
+            * Must not have a destructor. An emplaced instance is not registered
+              with the GC in the normal way, and will not be destructed like a
+              normal object.
+
+        Params:
+            T = type to return. The class described by the provided ClassInfo
+                must derive from T
+            buf = buffer in which to instantiate the object
+            ci = ClassInfo of class to instantiate
+
+        Returns:
+            an instance of the class specified by `ci`, emplaced in the provided
+            buffer and cast to `T`
+
+    ***************************************************************************/
+
+    private T emplace ( T ) ( ref void[] buf, ClassInfo ci )
+    {
+        assert(!(ci.flags & 8) && ci.defaultConstructor is null);
+        assert(ci.destructor is null);
+
+        // Allocate space
+        buf.length = ci.init.length;
+        enableStomping(buf);
+
+        // Initialize it
+        buf[] = ci.init[];
+
+        // Cast to T (and check that the cast succeeded)
+        auto t_instance = cast(T)cast(Object)buf.ptr;
+        assert(t_instance !is null);
+        return t_instance;
     }
 }
