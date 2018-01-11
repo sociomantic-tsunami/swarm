@@ -787,6 +787,19 @@ abstract class ConnectionBase: ISelectClient
 
     /***************************************************************************
 
+        Resets all cumulative stats counters for this connection.
+
+    ***************************************************************************/
+
+    public void resetStatsCounters ( )
+    {
+        this.send_loop.queue.stats = this.send_loop.queue.stats.init;
+        this.sender.io_stats = this.sender.io_stats.init;
+        this.receiver.io_stats = this.receiver.io_stats.init;
+    }
+
+    /***************************************************************************
+
         Obtains statistics of the time outgoing messages have spent in the
         queue. The timing statistics include only the messages that had to wait
         because the send fiber was busy when `registerForSending` was called.

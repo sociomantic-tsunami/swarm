@@ -323,6 +323,21 @@ template ClientCore ( )
 
         /***********************************************************************
 
+            Resets all cumulative stats counters.
+
+            When writing stats to a log file, it is recommended to call this
+            method once per stats logging cycle, after writing to the log.
+
+        ***********************************************************************/
+
+        public void reset ( )
+        {
+            foreach ( conn; this.outer.connections )
+                conn.resetStatsCounters();
+        }
+
+        /***********************************************************************
+
             Returns:
                 the number of active requests
 
@@ -657,7 +672,11 @@ template ClientCore ( )
 
             scope stats = client.new Stats;
 
+            // Write stats to the log file.
             client.logStatsFromAggregate!(StatsAggregate)(stats, logger);
+
+            // Reset cumulative stats counters.
+            stats.reset();
         }
     }
 
