@@ -49,6 +49,8 @@ import ocean.util.log.Stats;
 import ocean.util.app.Application;
 import ocean.util.app.ext.ReopenableFilesExt;
 
+import ocean.text.convert.Formatter;
+
 import swarm.Const : NodeItem;
 
 import swarm.client.model.IClient;
@@ -237,7 +239,7 @@ public class ClientStats : StatsLog
 
     private bool write ( )
     {
-        this.layout.length = 0;
+        this.buffer.clear();
 
         this.appendSection!("err")(( IClient client, cstring id, ref bool add_separator )
             {
@@ -273,13 +275,24 @@ public class ClientStats : StatsLog
                 this.appendDisabled(client, id, add_separator);
             });
 
-        this.logger.info(this.layout[]);
+        this.logger.info(this.buffer[]);
 
         this.resetClientCounters();
 
         return true;
     }
 
+    /***************************************************************************
+
+        Allows to call `sformat(&this.formatterSink, "{}", stuff)` to modify
+        protected buffer of `StatsLog` class.
+
+    ***************************************************************************/
+
+    private void formatterSink ( cstring s )
+    {
+        this.buffer.append(s);
+    }
 
     /***************************************************************************
 
@@ -309,12 +322,14 @@ public class ClientStats : StatsLog
     {
         bool add_separator;
 
-        this.layout(desc ~ ": [");
+        this.buffer.append(desc);
+        this.buffer.append(": [");
+
         foreach ( name, client; this.clients )
         {
             append_client(client, name, add_separator);
         }
-        this.layout("] ");
+        this.buffer.append("] ");
     }
 
 
@@ -449,8 +464,7 @@ public class ClientStats : StatsLog
         T value, ref bool add_separator )
     {
         this.logNode(node_info, id, add_separator);
-
-        this.layout(':', value);
+        sformat(&this.formatterSink, ":{}", value);
     }
 
 
@@ -472,10 +486,14 @@ public class ClientStats : StatsLog
     {
         if ( add_separator )
         {
-            this.layout(' ');
+            this.buffer.append(' ');
         }
 
-        this.layout(id, "_", node_info.address, "_", node_info.port);
+        sformat(
+            &this.formatterSink,
+            "{}_{}_{}",
+            id, node_info.address, node_info.port
+        );
 
         add_separator = true;
     }
