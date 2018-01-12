@@ -189,55 +189,11 @@ public template RequestCore ( RequestType request_type_, ubyte request_code,
 
     public static struct UserSpecifiedParams
     {
+        /// User-specified arguments.
         public Args args;
 
-        /***********************************************************************
-
-            Note: this struct is essentially deprecated. It is only needed in
-            order to maintain the public API of UserSpecifiedParams (specifically
-            the ability to call `params.notifier.set()`). In the next major
-            release, the `serialized_notifier` can be moved into
-            UserSpecifiedParams and this wrapper struct removed.
-
-        ***********************************************************************/
-
-        public struct SerializedNotifier
-        {
-            /// Serialized notifier delegate. (Must be serialized as the ocean
-            /// contiguous serializer rejects delegates.)
-            private ubyte[Notifier.sizeof] serialized_notifier;
-
-            /*******************************************************************
-
-                Serializes the passed notifier into this.serialized_notifier.
-
-                Params:
-                    notifier = notifier to serialize
-
-            *******************************************************************/
-
-            deprecated("Construct a const UserSpecifiedParams instance at once; do not set the notifier after construction.")
-            public void set ( Notifier notifier )
-            {
-                this.serialized_notifier[] =
-                    (cast(Const!(ubyte)*)&notifier)[0..notifier.sizeof];
-            }
-        }
-
-        /// ditto
-        public SerializedNotifier notifier;
-
-        /***********************************************************************
-
-            Returns:
-                the previously serialized notifier, deserialized
-
-        ***********************************************************************/
-
-        public Notifier getNotifier ( )
-        {
-            return *(cast(Notifier*)(this.notifier.serialized_notifier.ptr));
-        }
+        /// Notifier delegate.
+        public Notifier notifier;
     }
 
     /***************************************************************************
@@ -332,9 +288,9 @@ public template RequestCore ( RequestType request_type_, ubyte request_code,
     public static void notify ( ref UserSpecifiedParams params,
         NotificationUnion type )
     {
-        if ( auto notifier = params.getNotifier() )
+        if ( params.notifier !is null )
         {
-            notifier(type, params.args);
+            params.notifier(type, params.args);
         }
     }
 

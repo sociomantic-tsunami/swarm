@@ -83,11 +83,7 @@ public class Client
         public void put ( hash_t key, in void[] value, Put.Notifier notifier )
         {
             auto params = Const!(Internals.Put.UserSpecifiedParams)(
-                Const!(Put.Args)(key, value),
-                Const!(Internals.Put.UserSpecifiedParams.SerializedNotifier)(
-                    *(cast(Const!(ubyte[notifier.sizeof])*)&notifier)
-                )
-            );
+                Const!(Put.Args)(key, value), notifier);
 
             this.assign!(Internals.Put)(params);
         }
@@ -109,11 +105,7 @@ public class Client
             DoublePut.Notifier notifier )
         {
             auto params = Const!(Internals.DoublePut.UserSpecifiedParams)(
-                Const!(DoublePut.Args)(key, value),
-                Const!(Internals.DoublePut.UserSpecifiedParams.SerializedNotifier)(
-                    *(cast(Const!(ubyte[notifier.sizeof])*)&notifier)
-                )
-            );
+                Const!(DoublePut.Args)(key, value), notifier);
 
             this.assign!(Internals.DoublePut)(params);
         }
@@ -133,11 +125,7 @@ public class Client
         public void get ( hash_t key, Get.Notifier notifier )
         {
             auto params = Const!(Internals.Get.UserSpecifiedParams)(
-                Const!(Get.Args)(key),
-                Const!(Internals.Get.UserSpecifiedParams.SerializedNotifier)(
-                    *(cast(Const!(ubyte[notifier.sizeof])*)&notifier)
-                )
-            );
+                Const!(Get.Args)(key), notifier);
 
             this.assign!(Internals.Get)(params);
         }
@@ -162,11 +150,7 @@ public class Client
         public RequestId getAll ( GetAll.Notifier notifier )
         {
             auto params = Const!(Internals.GetAll.UserSpecifiedParams)(
-                Const!(GetAll.Args)(),
-                Const!(Internals.GetAll.UserSpecifiedParams.SerializedNotifier)(
-                    *(cast(Const!(ubyte[notifier.sizeof])*)&notifier)
-                )
-            );
+                Const!(GetAll.Args)(), notifier);
 
             return this.assign!(Internals.GetAll)(params);
         }
