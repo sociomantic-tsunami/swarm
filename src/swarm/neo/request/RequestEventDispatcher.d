@@ -401,8 +401,6 @@ public struct RequestEventDispatcher
             static assert(is(typeof(message) == Message));
 
         auto event = this.nextEvent(fiber, messages);
-        enforce(event.active == event.active.message,
-            "Unexpected event: waiting only for message receipt");
         return event.message;
     }
 
@@ -418,8 +416,6 @@ public struct RequestEventDispatcher
     public void yield ( MessageFiber fiber )
     {
         auto event = this.nextEvent(fiber, Yield());
-        enforce(event.active == event.active.yielded_resumed,
-            "Unexpected event: waiting only for resumption after yield");
     }
 
     /***************************************************************************
@@ -586,6 +582,8 @@ public struct RequestEventDispatcher
             flags = flags.Receive;
             if ( this.waitingYielders() )
                 flags |= flags.Yield;
+            if ( this.waitingForSignals() )
+                flags |= flags.Resume;
 
             auto event = conn.nextEvent(flags,
                 sending ? writer.event.send.get_payload : null);
@@ -772,6 +770,23 @@ public struct RequestEventDispatcher
         foreach ( waiting_fiber; this.waiting_fibers.array() )
             if ( waiting_fiber.enabled &&
                 waiting_fiber.event.active == waiting_fiber.event.active.yield )
+                return true;
+
+        return false;
+    }
+
+    /***************************************************************************
+
+        Returns:
+            true if any registered fiber is awating a signal.
+
+    ***************************************************************************/
+
+    private bool waitingForSignals ( )
+    {
+        foreach ( waiting_fiber; this.waiting_fibers.array() )
+            if ( waiting_fiber.enabled &&
+                waiting_fiber.event.active == waiting_fiber.event.active.signal )
                 return true;
 
         return false;
