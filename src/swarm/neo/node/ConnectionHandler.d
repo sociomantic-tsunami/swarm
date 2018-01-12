@@ -489,6 +489,19 @@ class ConnectionHandler : IConnectionHandler
 
     /***************************************************************************
 
+        Called by `finalize` to unregister the connection socket from epoll
+        before closing it.
+
+    ***************************************************************************/
+
+    override protected void unregisterSocket ( )
+    {
+        if (this.connection.is_registered())
+            this.shared_params.epoll.unregister(this.connection);
+    }
+
+    /***************************************************************************
+
         Sends the status code RequestNotSupported to the client.
 
         Params:
