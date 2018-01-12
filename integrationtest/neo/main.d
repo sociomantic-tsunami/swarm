@@ -120,12 +120,14 @@ class Test : Task
     private void testPutGet ( )
     {
         auto ok = this.client.blocking.put(23, "hello",
-            ( Client.Neo.Put.Notification info, Client.Neo.Put.Args args ) { });
+            ( Client.Neo.Put.Notification info,
+                Const!(Client.Neo.Put.Args) args ) { });
         enforce(ok, "Put request failed");
 
         void[] value;
         ok = this.client.blocking.get(23, value,
-            ( Client.Neo.Get.Notification info, Client.Neo.Get.Args args ) { });
+            ( Client.Neo.Get.Notification info,
+                Const!(Client.Neo.Get.Args) args ) { });
         enforce(ok, "Get request failed");
         enforce(value == cast(void[])"hello");
     }
@@ -147,7 +149,8 @@ class Test : Task
         for ( hash_t key = 0; key < records_written; key++ )
         {
             auto ok = this.client.blocking.put(key, value,
-                ( Client.Neo.Put.Notification info, Client.Neo.Put.Args args ) { });
+                ( Client.Neo.Put.Notification info,
+                    Const!(Client.Neo.Put.Args) args ) { });
             enforce(ok, "Put request failed");
         }
 
@@ -155,7 +158,8 @@ class Test : Task
         size_t received_count;
         bool request_finished;
         this.client.neo.getAll(
-            ( Client.Neo.GetAll.Notification info, Client.Neo.GetAll.Args args )
+            ( Client.Neo.GetAll.Notification info,
+                Const!(Client.Neo.GetAll.Args) args )
             {
                 with ( info.Active ) switch ( info.active )
                 {
@@ -202,7 +206,8 @@ class Test : Task
         for ( hash_t key = 0; key < records_written; key++ )
         {
             auto ok = this.client.blocking.put(key, value,
-                ( Client.Neo.Put.Notification info, Client.Neo.Put.Args args ) { });
+                ( Client.Neo.Put.Notification info,
+                    Const!(Client.Neo.Put.Args) args ) { });
             enforce(ok, "Put request failed");
         }
 
@@ -211,7 +216,8 @@ class Test : Task
         bool request_finished;
         Client.Neo.RequestId getall_id;
         getall_id = this.client.neo.getAll(
-            ( Client.Neo.GetAll.Notification info, Client.Neo.GetAll.Args args )
+            ( Client.Neo.GetAll.Notification info,
+                Const!(Client.Neo.GetAll.Args) args )
             {
                 with ( info.Active ) switch ( info.active )
                 {
@@ -266,7 +272,8 @@ class Test : Task
         for ( hash_t key = 0; key < records_written; key++ )
         {
             auto ok = this.client.blocking.put(key, value,
-                ( Client.Neo.Put.Notification info, Client.Neo.Put.Args args ) { });
+                ( Client.Neo.Put.Notification info,
+                    Const!(Client.Neo.Put.Args) args ) { });
             enforce(ok, "Put request failed");
         }
 
@@ -275,7 +282,8 @@ class Test : Task
         bool request_finished;
         Client.Neo.RequestId getall_id;
         getall_id = this.client.neo.getAll(
-            ( Client.Neo.GetAll.Notification info, Client.Neo.GetAll.Args args )
+            ( Client.Neo.GetAll.Notification info,
+                Const!(Client.Neo.GetAll.Args) args )
             {
                 with ( info.Active ) switch ( info.active )
                 {
@@ -341,14 +349,16 @@ class Test : Task
 
         void[] dst;
         auto ok = this.client.blocking.put(23, Serializer.serialize(str, dst),
-            ( Client.Neo.Put.Notification info, Client.Neo.Put.Args args ) { });
+            ( Client.Neo.Put.Notification info,
+                Const!(Client.Neo.Put.Args) args ) { });
         enforce(ok, "Put request failed");
 
         Contiguous!(Str) record;
         bool request_finished;
         bool err;
         this.client.neo.get(23,
-            ( Client.Neo.Get.Notification info, Client.Neo.Get.Args args )
+            ( Client.Neo.Get.Notification info,
+                Const!(Client.Neo.Get.Args) args )
             {
                 with ( info.Active ) switch (info.active )
                 {
@@ -398,14 +408,16 @@ class Test : Task
         auto version_decorator = new VersionDecorator;
         void[] dst;
         auto ok = this.client.blocking.put(23, version_decorator.store(str, dst),
-            ( Client.Neo.Put.Notification info, Client.Neo.Put.Args args ) { });
+            ( Client.Neo.Put.Notification info,
+                Const!(Client.Neo.Put.Args) args ) { });
         enforce(ok, "Put request failed");
 
         Contiguous!(Str) record;
         bool request_finished;
         bool err;
         this.client.neo.get(23,
-            ( Client.Neo.Get.Notification info, Client.Neo.Get.Args args )
+            ( Client.Neo.Get.Notification info,
+                Const!(Client.Neo.Get.Args) args )
             {
                 with ( info.Active ) switch (info.active )
                 {
@@ -469,7 +481,8 @@ class Test : Task
         enforce(this.conn_notifications == ConnNotifications(1, 0));
 
         auto ok = this.client.blocking.doublePut(23, "hello",
-            ( Client.Neo.DoublePut.Notification info, Client.Neo.DoublePut.Args args ) { });
+            ( Client.Neo.DoublePut.Notification info,
+                Const!(Client.Neo.DoublePut.Args) args ) { });
         enforce(ok, "DoublePut request failed");
     }
 }
