@@ -16,31 +16,7 @@ import ocean.transition;
 import integrationtest.neo.node.Storage;
 import swarm.neo.node.RequestOnConn;
 import swarm.neo.request.Command;
-
-/*******************************************************************************
-
-    The request handler for the table of handlers. When called, runs in a fiber
-    that can be controlled via `connection`.
-
-    Params:
-        shared_resources = an opaque object containing resources owned by the
-            node which are required by the request
-        connection  = performs connection socket I/O and manages the fiber
-        cmdver      = the version number of the Consume command as specified by
-                      the client
-        msg_payload = the payload of the first message of this request
-
-*******************************************************************************/
-
-public void handle_v0 ( Object shared_resources, RequestOnConn connection,
-    Command.Version cmdver, Const!(void)[] msg_payload )
-{
-    auto storage = cast(Storage)shared_resources;
-    assert(storage);
-
-    scope rq = new GetAllImpl_v0;
-    rq.handle(storage, connection, msg_payload);
-}
+import swarm.neo.node.IRequestHandler;
 
 /*******************************************************************************
 
@@ -48,11 +24,14 @@ public void handle_v0 ( Object shared_resources, RequestOnConn connection,
 
 *******************************************************************************/
 
-private scope class GetAllImpl_v0
+public class GetAllImpl_v0 : IRequestHandler
 {
     import integrationtest.neo.common.GetAll;
     import swarm.neo.util.MessageFiber;
     import swarm.neo.request.RequestEventDispatcher;
+    import integrationtest.neo.node.request.mixins.RequestCore;
+
+    mixin RequestCore!();
 
     /// Set by the Writer when the iteration over the records has finished. Used
     /// by the Controller to ignore incoming messages from that point.
@@ -74,7 +53,8 @@ private scope class GetAllImpl_v0
         {
             this.fiber = new MessageFiber(&this.fiberMethod, 64 * 1024);
             this.suspender = DelayedSuspender(
-                &this.outer.request_event_dispatcher, this.outer.conn,
+                &this.outer.request_event_dispatcher,
+                this.outer.connection.event_dispatcher,
                 this.fiber, ResumeSuspendedFiber);
         }
 
@@ -104,7 +84,7 @@ private scope class GetAllImpl_v0
                     payload.addCopy(MessageType.End);
                 }
             );
-            this.outer.conn.flush();
+            this.outer.connection.event_dispatcher.flush();
 
             this.outer.request_event_dispatcher.receive(this.fiber,
                 Message(MessageType.Ack));
@@ -149,7 +129,7 @@ private scope class GetAllImpl_v0
                         payload.addCopy(MessageType.Ack);
                     }
                 );
-                this.outer.conn.flush();
+                this.outer.connection.event_dispatcher.flush();
 
                 // Carry out the specified control message.
                 with ( MessageType ) switch ( message.type )
@@ -173,11 +153,8 @@ private scope class GetAllImpl_v0
         }
     }
 
-    /// Storage instance to iterate over.
-    private Storage storage;
-
-    /// Connection event dispatcher.
-    private RequestOnConn.EventDispatcher conn;
+    /// Start request in the suspended state?
+    private bool start_suspended;
 
     /// Writer fiber.
     private Writer writer;
@@ -190,45 +167,59 @@ private scope class GetAllImpl_v0
 
     /***************************************************************************
 
-        Request handler.
+        Called by the connection handler immediately after the request code and
+        version have been parsed from a message received over the connection.
+        Allows the request handler to process the remainder of the incoming
+        message, before the connection handler sends the supported code back to
+        the client.
+
+        Note: the initial payload is a slice of the connection's read buffer.
+        This means that when the request-on-conn fiber suspends, the contents of
+        the buffer (hence the slice) may change. It is thus *absolutely
+        essential* that this method does not suspend the fiber. (This precludes
+        all I/O operations on the connection.)
 
         Params:
-            storage = storage engine instance to operate on
-            connection = connection to client
-            msg_payload = initial message read from client to begin the request
-                (the request code and version are assumed to be extracted)
+            init_payload = initial message payload read from the connection
 
     ***************************************************************************/
 
-    final public void handle ( Storage storage, RequestOnConn connection,
-        Const!(void)[] msg_payload )
+    public void preSupportedCodeSent ( Const!(void)[] init_payload )
+    {
+        this.connection.event_dispatcher.message_parser.parseBody(
+            init_payload, this.start_suspended);
+    }
+
+    /***************************************************************************
+
+        Called by the connection handler after the supported code has been sent
+        back to the client.
+
+    ***************************************************************************/
+
+    public void postSupportedCodeSent ( )
     {
         try
         {
-            this.storage = storage;
-            this.conn = connection.event_dispatcher;
-
-            // Read request setup info from client.
-            bool start_suspended;
-            this.conn.message_parser.parseBody(msg_payload, start_suspended);
-
             // Now ready to start sending data from the storage and to handle
-            // control messages from the client. Each of these jobs is handled by a
-            // separate fiber.
+            // control messages from the client. Each of these jobs is handled
+            // by a separate fiber.
             this.writer = new Writer;
             this.controller = new Controller;
 
-            if ( start_suspended )
+            if ( this.start_suspended )
                 this.writer.suspender.requestSuspension();
 
             this.controller.fiber.start();
             this.writer.fiber.start();
-            this.request_event_dispatcher.eventLoop(this.conn);
+            this.request_event_dispatcher.eventLoop(
+                this.connection.event_dispatcher);
         }
         catch (Exception e)
         {
             // Inform client about the error
-            this.conn.send(( RequestOnConn.EventDispatcher.Payload payload )
+            this.connection.event_dispatcher.send(
+                ( RequestOnConn.EventDispatcher.Payload payload )
                 {
                     payload.addCopy(MessageType.Error);
                 }

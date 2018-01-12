@@ -34,10 +34,10 @@ public class Node : NodeBase!(ConnHandler)
     import integrationtest.neo.common.RequestCodes;
     import integrationtest.neo.node.Storage;
 
-    import Get = integrationtest.neo.node.request.Get;
-    import GetAll = integrationtest.neo.node.request.GetAll;
-    import Put = integrationtest.neo.node.request.Put;
-    import DoublePut = integrationtest.neo.node.request.DoublePut;
+    import integrationtest.neo.node.request.Get;
+    import integrationtest.neo.node.request.GetAll;
+    import integrationtest.neo.node.request.Put;
+    import integrationtest.neo.node.request.DoublePut;
 
     /***************************************************************************
 
@@ -65,13 +65,13 @@ public class Node : NodeBase!(ConnHandler)
         options.epoll = epoll;
 
         options.requests.add(Command(RequestCode.Get, 0),
-            "Get", &Get.handle_v0);
+            "Get", GetImpl_v0.classinfo);
         options.requests.add(Command(RequestCode.GetAll, 0),
-            "GetAll", &GetAll.handle_v0);
+            "GetAll", GetAllImpl_v0.classinfo);
         options.requests.add(Command(RequestCode.Put, 0),
-            "Put", &Put.handle_v0);
+            "Put", PutImpl_v0.classinfo);
         options.requests.add(Command(RequestCode.DoublePut, 0),
-            "DoublePut", &DoublePut.handle_v0);
+            "DoublePut", DoublePutImpl_v0.classinfo);
 
         options.credentials_map["dummy"] = Key.init;
         options.shared_resources = this.shared_resources;
@@ -95,6 +95,24 @@ public class Node : NodeBase!(ConnHandler)
     override protected cstring id ( )
     {
         return "example";
+    }
+
+    /***************************************************************************
+
+        Scope allocates a request resource acquirer backed by the protected
+        `shared_resources`. (Passed as a generic Object to avoid templatising
+        this class and others that depend on it.)
+
+        Params:
+            handle_request_dg = delegate that receives a resources acquirer and
+                initiates handling of a request
+
+    ***************************************************************************/
+
+    override protected void getResourceAcquirer (
+        void delegate ( Object resource_acquirer ) handle_request_dg )
+    {
+        handle_request_dg(this.shared_resources);
     }
 }
 
