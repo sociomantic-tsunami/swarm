@@ -258,7 +258,10 @@ abstract class RequestOnConnBase
             Receive     = 1 << 0,
 
             /// Wait for an epoll event-loop cycle to occur.
-            Yield       = 1 << 1
+            Yield       = 1 << 1,
+
+            /// Wait for explicit resume with a positive resume code
+            Resume = 1 << 2,
         }
 
         /// Type of a delegate to fill in a payload for sending.
@@ -640,6 +643,7 @@ abstract class RequestOnConnBase
             bool sending = fill_payload !is null;
             bool receiving = (flags & NextEventFlags.Receive) > 0;
             bool yielding = (flags & NextEventFlags.Yield) > 0;
+            bool explicit_resume = (flags & NextEventFlags.Resume) > 0;
 
             // Set up sending, if required.
             scope payload = this.new Payload;
@@ -768,8 +772,18 @@ abstract class RequestOnConnBase
                     assert(resume_code >= 0, "nextEvent: " ~
                            "Unsupported negative code used to resume " ~
                            "RequestOnConn fiber");
+
+                    if ( !explicit_resume )
+                    {
+                        auto e = this.protocol_error.set(
+                                "Unexpected explicit fiber resume.");
+                        this.shutdownConnection(e);
+                        throw e;
+                    }
+
                     fired_event.resumed =
                         EventNotificationUnion.ResumedWithCode(resume_code);
+
                     break;
             }
 
