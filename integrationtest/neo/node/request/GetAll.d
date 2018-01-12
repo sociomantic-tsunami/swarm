@@ -201,6 +201,13 @@ public class GetAllImpl_v0 : IRequestHandler
     {
         try
         {
+            // Initialise the RequestEventDispatcher with the delegate that
+            // returns (reusable) void[] arrays for the internal usage. The
+            // real implementation should pass the delegate that acquires the
+            // arrays from the pool, this implementation just returns pointers
+            // to the new slices, as we don't care about GC activity here.
+            this.request_event_dispatcher.initialise(
+                    () { auto slices = new void[][1]; return &slices[0]; });
             // Now ready to start sending data from the storage and to handle
             // control messages from the client. Each of these jobs is handled
             // by a separate fiber.
