@@ -39,9 +39,6 @@ public class Node : NodeBase!(ConnHandler)
     import Put = integrationtest.neo.node.request.Put;
     import DoublePut = integrationtest.neo.node.request.DoublePut;
 
-    /// Storage engine.
-    private Storage storage;
-
     /***************************************************************************
 
         Constructor.
@@ -60,7 +57,9 @@ public class Node : NodeBase!(ConnHandler)
     }
     body
     {
-        this.storage = new Storage;
+        // In this simple example node implementation, we don't need any shared
+        // resources except the reference to the storage.
+        this.shared_resources = new Storage;
 
         Options options;
         options.epoll = epoll;
@@ -75,7 +74,7 @@ public class Node : NodeBase!(ConnHandler)
             "DoublePut", &DoublePut.handle_v0);
 
         options.credentials_map["dummy"] = Key.init;
-        options.shared_resources = this.storage;
+        options.shared_resources = this.shared_resources;
 
         const backlog = 1_000;
         auto legacy_port = NodeItem(addr.dup, cast(ushort)(neo_port - 1));

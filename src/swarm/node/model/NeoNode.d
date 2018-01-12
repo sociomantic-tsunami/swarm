@@ -749,6 +749,14 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
 
     /***************************************************************************
 
+        The opaque shared resources instance.
+
+    ***************************************************************************/
+
+    protected Object shared_resources;
+
+    /***************************************************************************
+
         Constructor
 
         Params:
@@ -765,6 +773,8 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
                   int backlog )
     {
         assert(options.epoll !is null);
+
+        this.shared_resources = options.shared_resources;
 
         InetAddress!(false) addr, neo_addr;
         alias SelectListener!(Neo.ConnectionHandler,
