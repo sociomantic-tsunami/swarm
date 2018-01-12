@@ -33,8 +33,10 @@
 
 module swarm.neo.request.RequestEventDispatcher;
 
+import core.stdc.string;
 import ocean.transition;
 import ocean.core.SmartUnion;
+import swarm.neo.util.VoidBufferAsArrayOf;
 
 /*******************************************************************************
 
@@ -234,6 +236,9 @@ public struct YieldedThenResumed
            be notified of successive send readiness in the order in which they
            registered to receive this notification.)
 
+    Note that it's absolutely necessary to call initialise method on it before
+    doing any work.
+
 *******************************************************************************/
 
 public struct RequestEventDispatcher
@@ -264,11 +269,11 @@ public struct RequestEventDispatcher
     /// flag means that it's never necessary to actually remove an element from
     /// this array. This is an optimisation, as array remove operations were
     /// found (by profiling) to be taking a significant number of CPU cycles.
-    private WaitingFiber[] waiting_fibers;
+    private VoidBufferAsArrayOf!(WaitingFiber) waiting_fibers;
 
     /// Buffer into which waiting_fibers are copied when performing an iteration
     /// that can modify the contents of waiting_fibers.
-    private WaitingFiber[] waiting_fibers_to_iterate;
+    private VoidBufferAsArrayOf!(WaitingFiber) waiting_fibers_to_iterate;
 
     /// Event which has fired, to be returned by nextEvent(). (This value is set
     /// by notifyWaitingFiber(), just before resuming the waiting fiber.)
@@ -281,24 +286,29 @@ public struct RequestEventDispatcher
     /// List of signals which occurred while the request-on-conn fiber was
     /// running. (Signals which occur when the fiber is suspended are passed to
     /// the fiber resume method, waking it up.)
-    private ubyte[] queued_signals;
+    private VoidBufferAsArrayOf!(ubyte) queued_signals;
 
     /***************************************************************************
 
-        Resets this instance to its initial state. This method should be called
-        when retrieving an instance from a pool or free list.
+        Initialises the RequestEventDispatcher setting its initial state.
+
+        Params:
+            getVoidArray = void array acquirer. This instance will call this
+                           delegate multiple times, to acquire the buffers it
+                           needs internally. The request's acquired resources
+                           must not be relinquished during the lifetime of this
+                           instance.
 
     ***************************************************************************/
 
-    public void reset ( )
+    public void initialise ( void[]* delegate() getVoidArray)
     {
-        this.waiting_fibers.length = 0;
-        enableStomping(this.waiting_fibers);
+        assert(this.last_event == this.last_event.init);
 
-        this.queued_signals.length = 0;
-        enableStomping(this.queued_signals);
-
-        this.last_event = this.last_event.init;
+        this.waiting_fibers = VoidBufferAsArrayOf!(WaitingFiber)(getVoidArray());
+        this.waiting_fibers_to_iterate
+            = VoidBufferAsArrayOf!(WaitingFiber)(getVoidArray());
+        this.queued_signals = VoidBufferAsArrayOf!(ubyte)(getVoidArray());
     }
 
     /***************************************************************************
@@ -484,7 +494,7 @@ public struct RequestEventDispatcher
             // (Otherwise, a signal can be popped from the list, the waiting
             // fiber resumed, then the signal popped again -- now there's no
             // fiber waiting for it.)
-            if ( !Array.contains(this.queued_signals, code) )
+            if ( !Array.contains(this.queued_signals.array(), code) )
                 this.queued_signals ~= code;
         }
     }
@@ -533,9 +543,10 @@ public struct RequestEventDispatcher
             // Copy all WaitingFibers into a separate buffer. This is to avoid
             // the array being iterated over being modified by one of the fibers
             // which is resumed from inside the loop.
-            this.waiting_fibers_to_iterate.copy(this.waiting_fibers);
+            this.waiting_fibers_to_iterate.length = this.waiting_fibers.length;
+            this.waiting_fibers_to_iterate.array()[] = this.waiting_fibers.array()[];
 
-            foreach ( waiting_fiber; this.waiting_fibers_to_iterate )
+            foreach ( waiting_fiber; this.waiting_fibers_to_iterate.array() )
                 if ( waiting_fiber.fiber.waiting )
                     waiting_fiber.fiber.resume(this.token, null, msg);
 
@@ -544,8 +555,6 @@ public struct RequestEventDispatcher
                 writer.fiber.resume(this.token, null, msg);
 
             this.waiting_fibers.length = 0;
-            enableStomping(this.waiting_fibers);
-
             throw e;
         }
     }
@@ -636,7 +645,7 @@ public struct RequestEventDispatcher
     {
         // See if a matching element is already in this.waiting_fibers.
         WaitingFiber* in_list;
-        foreach ( ref waiting_fiber; this.waiting_fibers )
+        foreach ( ref waiting_fiber; this.waiting_fibers.array() )
         {
             if ( waiting_fiber.fiber == fiber && waiting_fiber.event == event )
             {
@@ -687,7 +696,7 @@ public struct RequestEventDispatcher
         if ( in_list is null )
         {
             this.waiting_fibers ~= WaitingFiber(fiber, event);
-            in_list = &this.waiting_fibers[$-1];
+            in_list = &this.waiting_fibers.array()[$-1];
         }
 
         // Set the list element to enabled.
@@ -706,7 +715,7 @@ public struct RequestEventDispatcher
 
     private void unregister ( MessageFiber fiber, EventRegistration event )
     {
-        foreach ( ref waiting_fiber; this.waiting_fibers )
+        foreach ( ref waiting_fiber; this.waiting_fibers.array() )
         {
             if ( waiting_fiber.fiber == fiber && waiting_fiber.event == event )
             {
@@ -727,7 +736,7 @@ public struct RequestEventDispatcher
 
     private void unregisterFiber ( MessageFiber fiber )
     {
-        foreach ( ref waiting_fiber; this.waiting_fibers )
+        foreach ( ref waiting_fiber; this.waiting_fibers.array() )
         {
             if ( waiting_fiber.fiber == fiber )
                 this.disable(waiting_fiber);
@@ -743,7 +752,7 @@ public struct RequestEventDispatcher
 
     private bool waitingWriters ( )
     {
-        foreach ( waiting_fiber; this.waiting_fibers )
+        foreach ( waiting_fiber; this.waiting_fibers.array() )
             if ( waiting_fiber.enabled &&
                 waiting_fiber.event.active == waiting_fiber.event.active.send )
                 return true;
@@ -760,7 +769,7 @@ public struct RequestEventDispatcher
 
     private bool waitingYielders ( )
     {
-        foreach ( waiting_fiber; this.waiting_fibers )
+        foreach ( waiting_fiber; this.waiting_fibers.array() )
             if ( waiting_fiber.enabled &&
                 waiting_fiber.event.active == waiting_fiber.event.active.yield )
                 return true;
@@ -791,7 +800,7 @@ public struct RequestEventDispatcher
     }
     body
     {
-        foreach ( ref waiting_fiber; this.waiting_fibers )
+        foreach ( ref waiting_fiber; this.waiting_fibers.array() )
             if ( waiting_fiber.enabled &&
                 waiting_fiber.event.active == waiting_fiber.event.active.send )
             {
@@ -821,8 +830,17 @@ public struct RequestEventDispatcher
     {
         while ( this.queued_signals.length > 0 )
         {
-            auto code = this.queued_signals[0];
-            Array.removeShift(this.queued_signals, 0);
+            auto code = this.queued_signals.array()[0];
+
+            // Shift all the elements to the left by one
+            void* src = this.queued_signals.array().ptr + 1;
+            void* dst = this.queued_signals.array().ptr;
+            size_t num = ubyte.sizeof * (this.queued_signals.length - 1);
+            memmove(dst, src, num);
+
+            // adjust buffer length
+            this.queued_signals.length = this.queued_signals.length - 1;
+
             this.dispatchSignal(conn, code);
         }
     }
@@ -851,7 +869,7 @@ public struct RequestEventDispatcher
         assert(signal <= 255);
         ubyte signal_ubyte = cast(ubyte)signal;
 
-        foreach ( waiting_fiber; this.waiting_fibers )
+        foreach ( waiting_fiber; this.waiting_fibers.array() )
         {
             if ( waiting_fiber.enabled &&
                 waiting_fiber.event.active == waiting_fiber.event.active.signal
@@ -890,7 +908,7 @@ public struct RequestEventDispatcher
     {
         auto message_type = *conn.message_parser.getValue!(ubyte)(payload);
 
-        foreach ( waiting_fiber; this.waiting_fibers )
+        foreach ( waiting_fiber; this.waiting_fibers.array() )
         {
             if ( waiting_fiber.enabled &&
                 waiting_fiber.event.active == waiting_fiber.event.active.message
@@ -929,9 +947,8 @@ public struct RequestEventDispatcher
         // over being modified by one of the fibers which is resumed from inside
         // the loop.
         this.waiting_fibers_to_iterate.length = 0;
-        enableStomping(this.waiting_fibers_to_iterate);
 
-        foreach ( waiting_fiber; this.waiting_fibers )
+        foreach ( waiting_fiber; this.waiting_fibers.array() )
         {
             if ( waiting_fiber.enabled &&
                 waiting_fiber.event.active == waiting_fiber.event.active.yield )
@@ -943,7 +960,7 @@ public struct RequestEventDispatcher
         if ( this.waiting_fibers_to_iterate.length == 0 )
             conn.shutdownWithProtocolError("Unhandled resume after yield");
 
-        foreach ( fiber_to_notify; this.waiting_fibers_to_iterate )
+        foreach ( fiber_to_notify; this.waiting_fibers_to_iterate.array() )
         {
             EventNotification fired_event;
             fired_event.yielded_resumed = YieldedThenResumed();

@@ -276,6 +276,14 @@ private scope class GetAllImpl
         Reader reader;
         Controller controller;
 
+        // Initialise the RequestEventDispatcher with the delegate that returns
+        // (reusable) void[] arrays for the internal usage. The real implementation
+        // should pass the delegate that acquires the arrays from the pool,
+        // this implementation just returns pointers to the new slices, as we
+        // don't care about GC activity here.
+        request_event_dispatcher.initialise(
+                () { auto slices = new void[][1]; return &slices[0]; });
+
         // Note: this request heap allocates two fibers each time it is handled.
         // In a real client implementation, you would want to get these fibers
         // from a pool, to avoid allocating each time.
