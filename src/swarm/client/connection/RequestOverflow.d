@@ -293,11 +293,11 @@ public class DiskOverflow : IRequestOverflow
             Deserializes and re-assigns an overflowed request.
 
             Params:
-                stored = ubyte[] containing a serialized request
+                stored = void[] containing a serialized request
 
         ***********************************************************************/
 
-        public void restore ( ubyte[] stored );
+        public void restore ( void[] stored );
     }
 
 
