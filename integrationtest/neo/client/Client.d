@@ -270,7 +270,8 @@ public class Client
             assert(task !is null);
 
             bool succeeded, finished;
-            void internalNotifier ( Neo.Put.Notification info, Neo.Put.Args args )
+            void internalNotifier ( Neo.Put.Notification info,
+                Const!(Neo.Put.Args) args )
             {
                 notifier(info, args);
 
@@ -315,7 +316,7 @@ public class Client
 
             bool succeeded, finished;
             void internalNotifier ( Neo.DoublePut.Notification info,
-                Neo.DoublePut.Args args )
+                Const!(Neo.DoublePut.Args) args )
             {
                 notifier(info, args);
 
@@ -370,7 +371,8 @@ public class Client
             assert(task !is null);
 
             bool succeeded, finished;
-            void internalNotifier ( Neo.Get.Notification info, Neo.Get.Args args )
+            void internalNotifier ( Neo.Get.Notification info,
+                Const!(Neo.Get.Args) args )
             {
                 notifier(info, args);
 
@@ -436,7 +438,8 @@ public class Client
                 assert(task !is null);
 
                 bool rq_finished;
-                void internalNotifier ( Neo.GetAll.Notification info, Neo.GetAll.Args args )
+                void internalNotifier ( Neo.GetAll.Notification info,
+                    Const!(Neo.GetAll.Args) args )
                 {
                     this.notifier(info, args);
 
