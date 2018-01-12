@@ -208,6 +208,14 @@ private scope class GetAllImpl_v0
             this.storage = storage;
             this.conn = connection.event_dispatcher;
 
+            // Initialise the RequestEventDispatcher with the delegate that
+            // returns (reusable) void[] arrays for the internal usage. The
+            // real implementation should pass the delegate that acquires the
+            // arrays from the pool, this implementation just returns pointers
+            // to the new slices, as we don't care about GC activity here.
+            this.request_event_dispatcher.initialise(
+                    () { auto slices = new void[][1]; return &slices[0]; });
+
             // Read request setup info from client.
             bool start_suspended;
             this.conn.message_parser.parseBody(msg_payload, start_suspended);
