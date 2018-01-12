@@ -29,7 +29,10 @@ class MessageSender
     import swarm.neo.protocol.socket.uio_const;
     import core.sys.posix.sys.socket: setsockopt;
     import core.sys.posix.netinet.in_: IPPROTO_TCP;
-    import core.sys.linux.sys.netinet.tcp: TCP_CORK;
+    static if (__VERSION__ >= 2078)
+        import core.sys.linux.netinet.tcp: TCP_CORK;
+    else
+        import core.sys.linux.sys.netinet.tcp: TCP_CORK;
     import core.stdc.errno: errno, EAGAIN, EWOULDBLOCK, EINTR;
 
     import ocean.transition;
