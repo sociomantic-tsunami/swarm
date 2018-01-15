@@ -138,13 +138,13 @@ public struct RequestNodeUnsupportedInfo
 
     private istring type_explanation ( )
     {
-        with ( Type ) switch ( this.type )
+        with ( Type ) final switch ( this.type )
         {
             case RequestNotSupported:
                 return "request";
             case RequestVersionNotSupported:
                 return "request version";
-            default:
+            version (D_Version2) {} else default:
                 assert(false);
         }
         assert(false);

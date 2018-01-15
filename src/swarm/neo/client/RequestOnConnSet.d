@@ -119,7 +119,7 @@ public struct RequestOnConnSet
     public RequestOnConn add ( RequestOnConn request_on_conn )
     in
     {
-        switch ( this.type_ )
+        final switch ( this.type_ )
         {
             case RequestType.SingleNode:
                 assert(this.list.length <= 1);
@@ -127,7 +127,9 @@ public struct RequestOnConnSet
                 break;
             case RequestType.MultiNode:
                 break;
-            default:
+            case RequestType.AllNodes, RequestType.None:
+                assert(false);
+            version (D_Version2) {} else default:
                 assert(false);
         }
     }
@@ -187,7 +189,7 @@ public struct RequestOnConnSet
 
     public int opApply ( int delegate ( ref RequestOnConn ) dg )
     {
-        with ( RequestType ) switch ( this.type_ )
+        with ( RequestType ) final switch ( this.type_ )
         {
             case None:
                 return 0;
@@ -205,7 +207,7 @@ public struct RequestOnConnSet
                         return ret;
                 return 0;
 
-            default: assert(false);
+            version (D_Version2) {} else default: assert(false);
         }
 
         assert(false);
@@ -227,7 +229,7 @@ public struct RequestOnConnSet
 
     public RequestOnConn get ( AddrPort node_address )
     {
-        with ( RequestType ) switch ( this.type_ )
+        with ( RequestType ) final switch ( this.type_ )
         {
             case None:
                 return null;
@@ -242,7 +244,7 @@ public struct RequestOnConnSet
             case AllNodes:
                 return node_address.cmp_id in this.map;
 
-            default: assert(false);
+            version (D_Version2) {} else default: assert(false);
         }
 
         assert(false);
@@ -285,7 +287,7 @@ public struct RequestOnConnSet
     }
     body
     {
-        with ( RequestType ) switch ( this.type_ )
+        with ( RequestType ) final switch ( this.type_ )
         {
             case None:
                 break;
@@ -306,7 +308,7 @@ public struct RequestOnConnSet
                 }
                 break;
 
-            default: assert(false);
+            version (D_Version2) {} else default: assert(false);
         }
 
         this.type_ = RequestType.None;
