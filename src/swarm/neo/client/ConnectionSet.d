@@ -23,6 +23,8 @@ module swarm.neo.client.ConnectionSet;
 
 import swarm.neo.client.RequestOnConn;
 
+import ocean.core.Verify;
+
 /// ditto
 public final class ConnectionSet : RequestOnConn.IConnectionGetter
 {
@@ -200,7 +202,7 @@ public final class ConnectionSet : RequestOnConn.IConnectionGetter
     public this ( Const!(Credentials) credentials, EpollSelectDispatcher epoll,
         ConnectionNotifier conn_notifier, bool auto_connect )
     {
-        assert(conn_notifier !is null);
+        verify(conn_notifier !is null);
 
         this.epoll = epoll;
         this.credentials = credentials;

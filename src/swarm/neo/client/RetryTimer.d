@@ -29,6 +29,8 @@ import stdio = core.stdc.stdio;
 import ocean.stdc.string;
 import ocean.transition;
 
+import ocean.core.Verify;
+
 /*******************************************************************************
 
     Repeatedly calls `success` until it returns true, using a timer: Whenever
@@ -42,12 +44,9 @@ import ocean.transition;
 *******************************************************************************/
 
 void retry ( lazy bool success, MessageFiber fiber, EpollSelectDispatcher epoll )
-in
 {
-    assert(fiber.running);
-}
-body
-{
+    verify(fiber.running);
+
     if (success) return; // first attempt
 
     timespec t_start;

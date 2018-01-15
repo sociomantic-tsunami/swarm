@@ -33,6 +33,8 @@ module swarm.neo.client.RequestSet;
 import swarm.neo.client.IRequestSet;
 import swarm.neo.client.ConnectionSet;
 
+import ocean.core.Verify;
+
 /// ditto
 public final class RequestSet: IRequestSet
 {
@@ -349,18 +351,16 @@ public final class RequestSet: IRequestSet
         ***********************************************************************/
 
         public void startOnNewConnection ( )
-        in
         {
+            verify(this.type == Type.multi_node);
+
+            // Sanity check for debugging, can be omitted in production.
             assert(this.id);
-            assert(this.type == Type.multi_node);
+            if (auto rq = this.id in this.outer.active_requests)
+                assert(*rq is this);
+            else
+                assert(false);
 
-            auto rq = this.id in this.outer.active_requests;
-
-            assert(rq !is null);
-            assert(*rq is this);
-        }
-        body
-        {
             auto request_on_conn = this.request_on_conns.add(
                 this.outer.newRequestOnConn());
             request_on_conn.start(this.id, this.context,
@@ -386,18 +386,16 @@ public final class RequestSet: IRequestSet
         ***********************************************************************/
 
         public void startOnNewConnection ( Connection connection )
-        in
         {
+            verify(this.type == Type.all_nodes);
+
+            // Sanity check for debugging, can be omitted in production.
             assert(this.id);
-            assert(this.type == Type.all_nodes);
+            if (auto rq = this.id in this.outer.active_requests)
+                assert(*rq is this);
+            else
+                assert(false);
 
-            auto rq = this.id in this.outer.active_requests;
-
-            assert(rq !is null);
-            assert(*rq is this);
-        }
-        body
-        {
             if ( this.getRequestOnConnForNode(connection.remote_address) !is null )
                 return;
 
@@ -479,7 +477,7 @@ public final class RequestSet: IRequestSet
         {
             foreach ( roc; this.request_on_conns )
             {
-                assert(!roc.is_running,
+                verify(!roc.is_running,
                     "abort() may not be called from within one of the request's fibers");
                 roc.abort(reason);
             }
@@ -499,14 +497,11 @@ public final class RequestSet: IRequestSet
         ***********************************************************************/
 
         private void packRequestContext ( T ) ( ref T request_context )
-        in
         {
-            assert(!this.context.length, typeof(this).stringof ~
+            verify(!this.context.length, typeof(this).stringof ~
                    "packRequestContext: this.context.length expected" ~
                    " to be 0 as it ought to be if it was properly reset");
-        }
-        body
-        {
+
             pack(request_context, this.context);
         }
 
@@ -564,17 +559,14 @@ public final class RequestSet: IRequestSet
 
         private void initRequest ( RequestContext )
             ( FinishedNotifier finished_notifier, RequestContext context )
-        in
         {
+            // Sanity check for debugging, can be omitted in production.
             assert(this.id);
+            if (auto rq = this.id in this.outer.active_requests)
+                assert(*rq is this);
+            else
+                assert(false);
 
-            auto rq = this.id in this.outer.active_requests;
-
-            assert(rq !is null);
-            assert(*rq is this);
-        }
-        body
-        {
             this.packRequestContext(context);
 
             // Now that we have the const user-provided info serialized, we can
@@ -730,8 +722,8 @@ public final class RequestSet: IRequestSet
         SingleNodeHandler handler, Request.FinishedNotifier finished_notifier,
         RequestContext context )
     {
-        assert(handler !is null);
-        assert(finished_notifier !is null);
+        verify(handler !is null);
+        verify(finished_notifier !is null);
 
         auto rq = this.newRequest();
         rq.startSingleNode(handler, finished_notifier, context);
@@ -758,8 +750,8 @@ public final class RequestSet: IRequestSet
         MultiNodeHandler handler, Request.FinishedNotifier finished_notifier,
         RequestContext context )
     {
-        assert(handler !is null);
-        assert(finished_notifier !is null);
+        verify(handler !is null);
+        verify(finished_notifier !is null);
 
         auto rq = this.newRequest();
         rq.startMultiNode(handler, finished_notifier, context);
@@ -789,8 +781,8 @@ public final class RequestSet: IRequestSet
         RoundRobinHandler handler, Request.FinishedNotifier finished_notifier,
         RequestContext context )
     {
-        assert(handler !is null);
-        assert(finished_notifier !is null);
+        verify(handler !is null);
+        verify(finished_notifier !is null);
 
         auto rq = this.newRequest();
         rq.startRoundRobin(handler, finished_notifier, context);
@@ -822,8 +814,8 @@ public final class RequestSet: IRequestSet
         AllNodesHandler handler, Request.FinishedNotifier finished_notifier,
         RequestContext context )
     {
-        assert(handler !is null);
-        assert(finished_notifier !is null);
+        verify(handler !is null);
+        verify(finished_notifier !is null);
 
         auto rq = this.newRequest();
         rq.startAllNodes(handler, finished_notifier, context);
@@ -958,7 +950,7 @@ public final class RequestSet: IRequestSet
     {
         if ( auto rq = id in this.active_requests )
         {
-            assert(rq.finished_notifier == expected_finished_notifier,
+            verify(rq.finished_notifier == expected_finished_notifier,
                 "Controller does not match specified request");
             return *rq;
         }
@@ -1024,7 +1016,7 @@ public final class RequestSet: IRequestSet
             }
             Request request = *rqp;
             assert(request); // also call the invariant
-            assert(!request.id, "new request expected to be inactive");
+            verify(!request.id, "new request expected to be inactive");
             request.id = this.global_request_id;
             return request;
         }
