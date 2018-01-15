@@ -178,7 +178,10 @@ public abstract class INodeBase : INode, INodeInfo
 
         Params:
             node = node addres & port
-            conn_setup_params = connection handler constructor arguments
+            conn_setup_params = connection handler constructor arguments.
+                Note that the `error_dg` field should not be set by the user; it
+                is set internally. To set a user-defined error callback, use the
+                `error_callback` method
             listener = select listener, is evaluated exactly once after
                        conn_setup_params have been populated
 
