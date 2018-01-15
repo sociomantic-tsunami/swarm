@@ -184,8 +184,7 @@ private scope class GetAllImpl
     public void run ( )
     {
         auto request = createSuspendableRequest!(GetAll)(this.conn, this.context,
-            &this.connect, &this.disconnected, &this.fillPayload,
-            &this.handleStatusCode, &this.handle);
+            &this.connect, &this.disconnected, &this.fillPayload, &this.handle);
         request.run();
     }
 
