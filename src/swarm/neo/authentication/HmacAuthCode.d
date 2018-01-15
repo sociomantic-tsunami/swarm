@@ -31,6 +31,7 @@ struct HmacAuthCode
 {
     import swarm.neo.authentication.HmacDef: Key, Code, Nonce;
 
+    import ocean.core.Verify;
     import ocean.util.cipher.gcrypt.HMAC;
     import ocean.util.cipher.gcrypt.c.gpgerror;
     import ocean.util.cipher.gcrypt.c.md;
@@ -70,15 +71,12 @@ struct HmacAuthCode
     ***************************************************************************/
 
     public Code createHmac ( in ubyte[] auth_key, ulong timestamp, in ubyte[] nonce )
-    in
     {
-        assert(auth_key.length == Key.length,
+        verify(auth_key.length == Key.length,
                "auth_key.length not " ~ Key.length.stringof);
-        assert(nonce.length == Nonce.length,
+        verify(nonce.length == Nonce.length,
                "nonce.length not " ~ Nonce.length.stringof);
-    }
-    body
-    {
+
         Code code;
         code.content[] = hmac.calculate(auth_key,
             (cast(ubyte*)(&timestamp))[0..timestamp.sizeof], nonce);
@@ -165,17 +163,14 @@ struct HmacAuthCode
 
     public bool confirm ( in ubyte[] auth_key, ulong timestamp,
                           in ubyte[] nonce, in ubyte[] client_code )
-    in
     {
-        assert(auth_key.length    == Key.length,
+        verify(auth_key.length    == Key.length,
                "auth_key.length not " ~ Key.length.stringof);
-        assert(nonce.length       == Nonce.length,
+        verify(nonce.length       == Nonce.length,
                "nonce.length not " ~ Nonce.length.stringof);
-        assert(client_code.length == Code.length,
+        verify(client_code.length == Code.length,
                "client_code.length not " ~ Code.length.stringof);
-    }
-    body
-    {
+
         auto reference = createHmac(auth_key, timestamp, nonce);
 
         debug ( SwarmConn ) Stdout.formatln("SwarmAuth: Confirm encoded={:X}",
@@ -245,13 +240,10 @@ struct HmacAuthCode
 
         typeof(this) setAuthParams ( ulong timestamp, Const!(ubyte)[] nonce,
                                      Const!(char)[] name, Const!(ubyte)[] code = null )
-        in
         {
-            assert(nonce.length == Nonce.length || !nonce.length);
-            assert(code.length  == Code.length  || !code.length);
-        }
-        body
-        {
+            verify(nonce.length == Nonce.length || !nonce.length);
+            verify(code.length  == Code.length  || !code.length);
+
             this.timestamp = timestamp;
 
             if (nonce.length)
