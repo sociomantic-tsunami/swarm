@@ -308,6 +308,11 @@ public scope class BatchReader ( Record ... )
                 buffer must remain unmodified and accessible for the lifetime of
                 this instance
 
+        Throws:
+            Exception if batch is too short (if it can't contain the batch
+            length), ocean.io.compress.CompressException.CompressException if
+            decompressing failed due to the decompress buffer overflow.
+
     ***************************************************************************/
 
     public this ( Lzo lzo, in void[] batch, ref void[] decompress_buf )
@@ -320,9 +325,9 @@ public scope class BatchReader ( Record ... )
         decompress_buf.length = uncompressed_len;
         enableStomping(decompress_buf);
 
-        // Decompress into this.batch.
+        // Decompress into decompress_buf.
         auto src = batch[size_t.sizeof .. $];
-        auto final_uncompressed_len = lzo.uncompress(src, decompress_buf);
+        auto final_uncompressed_len = lzo.decompressSafe(src, decompress_buf);
         assert(final_uncompressed_len == uncompressed_len);
 
         // Construct as normal, extracting from the decompressed data.
