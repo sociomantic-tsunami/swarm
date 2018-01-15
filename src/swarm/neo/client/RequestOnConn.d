@@ -561,7 +561,7 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
             this.reset();
         }
 
-        /*final*/ switch (this.handler.active)
+        final switch (this.handler.active)
         {
             case handler.active.single_node:
                 handler.single_node()(&this.useNode, this.request_context);
@@ -585,7 +585,10 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
                 handler.round_robin()(edrr, this.request_context);
                 break;
 
-            default: case handler.active.none:
+            case handler.active.none:
+                assert(false);
+
+            version (D_Version2) {} else default:
                 assert(false);
         }
     }
