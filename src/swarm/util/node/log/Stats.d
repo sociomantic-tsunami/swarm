@@ -415,7 +415,7 @@ unittest
 
         stats.log();
         test!("==")(log.output,
-            "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 "
+            "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 " ~
             "handling_neo_connections:0 handling_neo_connections_pcnt:0 ");
     }
 
@@ -429,12 +429,12 @@ unittest
 
         stats.log();
         test!("==")(log.output,
-            "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 "
-            "handling_neo_connections:0 handling_neo_connections_pcnt:0 "
-            "request/Put/max_active:0 request/Put/handled:0 "
-            "request/Put/mean_handled_time_micros:-nan request/Put/handled_10_micros:0 "
-            "request/Put/handled_100_micros:0 request/Put/handled_1_ms:0 "
-            "request/Put/handled_10_ms:0 request/Put/handled_100_ms:0 "
+            "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 " ~
+            "handling_neo_connections:0 handling_neo_connections_pcnt:0 " ~
+            "request/Put/max_active:0 request/Put/handled:0 " ~
+            "request/Put/mean_handled_time_micros:-nan request/Put/handled_10_micros:0 " ~
+            "request/Put/handled_100_micros:0 request/Put/handled_1_ms:0 " ~
+            "request/Put/handled_10_ms:0 request/Put/handled_100_ms:0 " ~
             "request/Put/handled_over_100_ms:0 ");
     }
 
@@ -448,8 +448,8 @@ unittest
 
         stats.log();
         test!("==")(log.output,
-            "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 "
-            "handling_neo_connections:0 handling_neo_connections_pcnt:0 "
+            "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 " ~
+            "handling_neo_connections:0 handling_neo_connections_pcnt:0 " ~
             "action/written/records:0 action/written/bytes:0 ");
     }
 
@@ -461,13 +461,13 @@ unittest
 
         stats.log();
         test!("==")(log.output,
-            "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 "
-            "handling_neo_connections:0 handling_neo_connections_pcnt:0 "
-            "request/Put/max_active:0 request/Put/handled:0 "
-            "request/Put/mean_handled_time_micros:-nan request/Put/handled_10_micros:0 "
-            "request/Put/handled_100_micros:0 request/Put/handled_1_ms:0 "
-            "request/Put/handled_10_ms:0 request/Put/handled_100_ms:0 "
-            "request/Put/handled_over_100_ms:0 "
+            "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 " ~
+            "handling_neo_connections:0 handling_neo_connections_pcnt:0 " ~
+            "request/Put/max_active:0 request/Put/handled:0 " ~
+            "request/Put/mean_handled_time_micros:-nan request/Put/handled_10_micros:0 " ~
+            "request/Put/handled_100_micros:0 request/Put/handled_1_ms:0 " ~
+            "request/Put/handled_10_ms:0 request/Put/handled_100_ms:0 " ~
+            "request/Put/handled_over_100_ms:0 " ~
             "action/written/records:0 action/written/bytes:0 ");
     }
 }
@@ -490,14 +490,14 @@ unittest
         node.sentBytes(23);
         stats.log();
         test!("==")(log.output,
-            "bytes_sent:23 bytes_received:23 handling_connections:0 handling_connections_pcnt:0 "
+            "bytes_sent:23 bytes_received:23 handling_connections:0 handling_connections_pcnt:0 " ~
             "handling_neo_connections:0 handling_neo_connections_pcnt:0 ");
 
         // Test that the counters have been reset
         log.output.length = 0;
         stats.log();
         test!("==")(log.output,
-            "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 "
+            "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 " ~
             "handling_neo_connections:0 handling_neo_connections_pcnt:0 ");
     }
 
@@ -510,16 +510,16 @@ unittest
         node.record_action_counters.increment("written", 23);
         stats.log();
         test!("==")(log.output,
-            "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 "
-            "handling_neo_connections:0 handling_neo_connections_pcnt:0 "
+            "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 " ~
+            "handling_neo_connections:0 handling_neo_connections_pcnt:0 " ~
             "action/written/records:1 action/written/bytes:23 ");
 
         // Test that the action stats have been reset
         log.output.length = 0;
         stats.log();
         test!("==")(log.output,
-            "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 "
-            "handling_neo_connections:0 handling_neo_connections_pcnt:0 "
+            "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 " ~
+            "handling_neo_connections:0 handling_neo_connections_pcnt:0 " ~
             "action/written/records:0 action/written/bytes:0 ");
     }
 
@@ -533,17 +533,17 @@ unittest
         node.request_stats.started("Put");
         stats.log();
         test!("==")(log.output,
-            "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 "
-            "handling_neo_connections:0 handling_neo_connections_pcnt:0 "
-            "request/Put/max_active:1 request/Put/handled:0 "
-            "request/Put/mean_handled_time_micros:-nan request/Put/handled_10_micros:0 "
-            "request/Put/handled_100_micros:0 request/Put/handled_1_ms:0 "
-            "request/Put/handled_10_ms:0 request/Put/handled_100_ms:0 "
-            "request/Put/handled_over_100_ms:0 "
-            "neo_request/Put/max_active:0 neo_request/Put/handled:0 "
-            "neo_request/Put/mean_handled_time_micros:-nan neo_request/Put/handled_10_micros:0 "
-            "neo_request/Put/handled_100_micros:0 neo_request/Put/handled_1_ms:0 "
-            "neo_request/Put/handled_10_ms:0 neo_request/Put/handled_100_ms:0 "
+            "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 " ~
+            "handling_neo_connections:0 handling_neo_connections_pcnt:0 " ~
+            "request/Put/max_active:1 request/Put/handled:0 " ~
+            "request/Put/mean_handled_time_micros:-nan request/Put/handled_10_micros:0 " ~
+            "request/Put/handled_100_micros:0 request/Put/handled_1_ms:0 " ~
+            "request/Put/handled_10_ms:0 request/Put/handled_100_ms:0 " ~
+            "request/Put/handled_over_100_ms:0 " ~
+            "neo_request/Put/max_active:0 neo_request/Put/handled:0 " ~
+            "neo_request/Put/mean_handled_time_micros:-nan neo_request/Put/handled_10_micros:0 " ~
+            "neo_request/Put/handled_100_micros:0 neo_request/Put/handled_1_ms:0 " ~
+            "neo_request/Put/handled_10_ms:0 neo_request/Put/handled_100_ms:0 " ~
             "neo_request/Put/handled_over_100_ms:0 ");
 
         // Finish a request
@@ -551,17 +551,17 @@ unittest
         log.output.length = 0;
         stats.log();
         test!("==")(log.output,
-            "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 "
-            "handling_neo_connections:0 handling_neo_connections_pcnt:0 "
-            "request/Put/max_active:1 request/Put/handled:1 "
-            "request/Put/mean_handled_time_micros:0.00 request/Put/handled_10_micros:0 "
-            "request/Put/handled_100_micros:0 request/Put/handled_1_ms:0 "
-            "request/Put/handled_10_ms:0 request/Put/handled_100_ms:0 "
-            "request/Put/handled_over_100_ms:0 "
-            "neo_request/Put/max_active:0 neo_request/Put/handled:0 "
-            "neo_request/Put/mean_handled_time_micros:-nan neo_request/Put/handled_10_micros:0 "
-            "neo_request/Put/handled_100_micros:0 neo_request/Put/handled_1_ms:0 "
-            "neo_request/Put/handled_10_ms:0 neo_request/Put/handled_100_ms:0 "
+            "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 " ~
+            "handling_neo_connections:0 handling_neo_connections_pcnt:0 " ~
+            "request/Put/max_active:1 request/Put/handled:1 " ~
+            "request/Put/mean_handled_time_micros:0.00 request/Put/handled_10_micros:0 " ~
+            "request/Put/handled_100_micros:0 request/Put/handled_1_ms:0 " ~
+            "request/Put/handled_10_ms:0 request/Put/handled_100_ms:0 " ~
+            "request/Put/handled_over_100_ms:0 " ~
+            "neo_request/Put/max_active:0 neo_request/Put/handled:0 " ~
+            "neo_request/Put/mean_handled_time_micros:-nan neo_request/Put/handled_10_micros:0 " ~
+            "neo_request/Put/handled_100_micros:0 neo_request/Put/handled_1_ms:0 " ~
+            "neo_request/Put/handled_10_ms:0 neo_request/Put/handled_100_ms:0 " ~
             "neo_request/Put/handled_over_100_ms:0 ");
 
         // Start a neo request
@@ -569,17 +569,17 @@ unittest
         log.output.length = 0;
         stats.log();
         test!("==")(log.output,
-            "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 "
-            "handling_neo_connections:0 handling_neo_connections_pcnt:0 "
-            "request/Put/max_active:0 request/Put/handled:0 "
-            "request/Put/mean_handled_time_micros:-nan request/Put/handled_10_micros:0 "
-            "request/Put/handled_100_micros:0 request/Put/handled_1_ms:0 "
-            "request/Put/handled_10_ms:0 request/Put/handled_100_ms:0 "
-            "request/Put/handled_over_100_ms:0 "
-            "neo_request/Put/max_active:1 neo_request/Put/handled:0 "
-            "neo_request/Put/mean_handled_time_micros:-nan neo_request/Put/handled_10_micros:0 "
-            "neo_request/Put/handled_100_micros:0 neo_request/Put/handled_1_ms:0 "
-            "neo_request/Put/handled_10_ms:0 neo_request/Put/handled_100_ms:0 "
+            "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 " ~
+            "handling_neo_connections:0 handling_neo_connections_pcnt:0 " ~
+            "request/Put/max_active:0 request/Put/handled:0 " ~
+            "request/Put/mean_handled_time_micros:-nan request/Put/handled_10_micros:0 " ~
+            "request/Put/handled_100_micros:0 request/Put/handled_1_ms:0 " ~
+            "request/Put/handled_10_ms:0 request/Put/handled_100_ms:0 " ~
+            "request/Put/handled_over_100_ms:0 " ~
+            "neo_request/Put/max_active:1 neo_request/Put/handled:0 " ~
+            "neo_request/Put/mean_handled_time_micros:-nan neo_request/Put/handled_10_micros:0 " ~
+            "neo_request/Put/handled_100_micros:0 neo_request/Put/handled_1_ms:0 " ~
+            "neo_request/Put/handled_10_ms:0 neo_request/Put/handled_100_ms:0 " ~
             "neo_request/Put/handled_over_100_ms:0 ");
 
         // Finish a neo request
@@ -587,34 +587,34 @@ unittest
         log.output.length = 0;
         stats.log();
         test!("==")(log.output,
-            "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 "
-            "handling_neo_connections:0 handling_neo_connections_pcnt:0 "
-            "request/Put/max_active:0 request/Put/handled:0 "
-            "request/Put/mean_handled_time_micros:-nan request/Put/handled_10_micros:0 "
-            "request/Put/handled_100_micros:0 request/Put/handled_1_ms:0 "
-            "request/Put/handled_10_ms:0 request/Put/handled_100_ms:0 "
-            "request/Put/handled_over_100_ms:0 "
-            "neo_request/Put/max_active:1 neo_request/Put/handled:1 "
-            "neo_request/Put/mean_handled_time_micros:0.00 neo_request/Put/handled_10_micros:0 "
-            "neo_request/Put/handled_100_micros:0 neo_request/Put/handled_1_ms:0 "
-            "neo_request/Put/handled_10_ms:0 neo_request/Put/handled_100_ms:0 "
+            "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 " ~
+            "handling_neo_connections:0 handling_neo_connections_pcnt:0 " ~
+            "request/Put/max_active:0 request/Put/handled:0 " ~
+            "request/Put/mean_handled_time_micros:-nan request/Put/handled_10_micros:0 " ~
+            "request/Put/handled_100_micros:0 request/Put/handled_1_ms:0 " ~
+            "request/Put/handled_10_ms:0 request/Put/handled_100_ms:0 " ~
+            "request/Put/handled_over_100_ms:0 " ~
+            "neo_request/Put/max_active:1 neo_request/Put/handled:1 " ~
+            "neo_request/Put/mean_handled_time_micros:0.00 neo_request/Put/handled_10_micros:0 " ~
+            "neo_request/Put/handled_100_micros:0 neo_request/Put/handled_1_ms:0 " ~
+            "neo_request/Put/handled_10_ms:0 neo_request/Put/handled_100_ms:0 " ~
             "neo_request/Put/handled_over_100_ms:0 ");
 
         // Logging again, all request stats should have been reset
         log.output.length = 0;
         stats.log();
         test!("==")(log.output,
-            "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 "
-            "handling_neo_connections:0 handling_neo_connections_pcnt:0 "
-            "request/Put/max_active:0 request/Put/handled:0 "
-            "request/Put/mean_handled_time_micros:-nan request/Put/handled_10_micros:0 "
-            "request/Put/handled_100_micros:0 request/Put/handled_1_ms:0 "
-            "request/Put/handled_10_ms:0 request/Put/handled_100_ms:0 "
-            "request/Put/handled_over_100_ms:0 "
-            "neo_request/Put/max_active:0 neo_request/Put/handled:0 "
-            "neo_request/Put/mean_handled_time_micros:-nan neo_request/Put/handled_10_micros:0 "
-            "neo_request/Put/handled_100_micros:0 neo_request/Put/handled_1_ms:0 "
-            "neo_request/Put/handled_10_ms:0 neo_request/Put/handled_100_ms:0 "
+            "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 " ~
+            "handling_neo_connections:0 handling_neo_connections_pcnt:0 " ~
+            "request/Put/max_active:0 request/Put/handled:0 " ~
+            "request/Put/mean_handled_time_micros:-nan request/Put/handled_10_micros:0 " ~
+            "request/Put/handled_100_micros:0 request/Put/handled_1_ms:0 " ~
+            "request/Put/handled_10_ms:0 request/Put/handled_100_ms:0 " ~
+            "request/Put/handled_over_100_ms:0 " ~
+            "neo_request/Put/max_active:0 neo_request/Put/handled:0 " ~
+            "neo_request/Put/mean_handled_time_micros:-nan neo_request/Put/handled_10_micros:0 " ~
+            "neo_request/Put/handled_100_micros:0 neo_request/Put/handled_1_ms:0 " ~
+            "neo_request/Put/handled_10_ms:0 neo_request/Put/handled_100_ms:0 " ~
             "neo_request/Put/handled_over_100_ms:0 ");
 
         // Start then finish a request with timing info
@@ -623,17 +623,17 @@ unittest
         log.output.length = 0;
         stats.log();
         test!("==")(log.output,
-            "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 "
-            "handling_neo_connections:0 handling_neo_connections_pcnt:0 "
-            "request/Put/max_active:1 request/Put/handled:1 "
-            "request/Put/mean_handled_time_micros:23.00 request/Put/handled_10_micros:0 "
-            "request/Put/handled_100_micros:1 request/Put/handled_1_ms:0 "
-            "request/Put/handled_10_ms:0 request/Put/handled_100_ms:0 "
-            "request/Put/handled_over_100_ms:0 "
-            "neo_request/Put/max_active:0 neo_request/Put/handled:0 "
-            "neo_request/Put/mean_handled_time_micros:-nan neo_request/Put/handled_10_micros:0 "
-            "neo_request/Put/handled_100_micros:0 neo_request/Put/handled_1_ms:0 "
-            "neo_request/Put/handled_10_ms:0 neo_request/Put/handled_100_ms:0 "
+            "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 " ~
+            "handling_neo_connections:0 handling_neo_connections_pcnt:0 " ~
+            "request/Put/max_active:1 request/Put/handled:1 " ~
+            "request/Put/mean_handled_time_micros:23.00 request/Put/handled_10_micros:0 " ~
+            "request/Put/handled_100_micros:1 request/Put/handled_1_ms:0 " ~
+            "request/Put/handled_10_ms:0 request/Put/handled_100_ms:0 " ~
+            "request/Put/handled_over_100_ms:0 " ~
+            "neo_request/Put/max_active:0 neo_request/Put/handled:0 " ~
+            "neo_request/Put/mean_handled_time_micros:-nan neo_request/Put/handled_10_micros:0 " ~
+            "neo_request/Put/handled_100_micros:0 neo_request/Put/handled_1_ms:0 " ~
+            "neo_request/Put/handled_10_ms:0 neo_request/Put/handled_100_ms:0 " ~
             "neo_request/Put/handled_over_100_ms:0 ");
 
         // Start then finish a neo request with timing info
@@ -642,17 +642,17 @@ unittest
         log.output.length = 0;
         stats.log();
         test!("==")(log.output,
-            "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 "
-            "handling_neo_connections:0 handling_neo_connections_pcnt:0 "
-            "request/Put/max_active:0 request/Put/handled:0 "
-            "request/Put/mean_handled_time_micros:-nan request/Put/handled_10_micros:0 "
-            "request/Put/handled_100_micros:0 request/Put/handled_1_ms:0 "
-            "request/Put/handled_10_ms:0 request/Put/handled_100_ms:0 "
-            "request/Put/handled_over_100_ms:0 "
-            "neo_request/Put/max_active:1 neo_request/Put/handled:1 "
-            "neo_request/Put/mean_handled_time_micros:23.00 neo_request/Put/handled_10_micros:0 "
-            "neo_request/Put/handled_100_micros:1 neo_request/Put/handled_1_ms:0 "
-            "neo_request/Put/handled_10_ms:0 neo_request/Put/handled_100_ms:0 "
+            "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 " ~
+            "handling_neo_connections:0 handling_neo_connections_pcnt:0 " ~
+            "request/Put/max_active:0 request/Put/handled:0 " ~
+            "request/Put/mean_handled_time_micros:-nan request/Put/handled_10_micros:0 " ~
+            "request/Put/handled_100_micros:0 request/Put/handled_1_ms:0 " ~
+            "request/Put/handled_10_ms:0 request/Put/handled_100_ms:0 " ~
+            "request/Put/handled_over_100_ms:0 " ~
+            "neo_request/Put/max_active:1 neo_request/Put/handled:1 " ~
+            "neo_request/Put/mean_handled_time_micros:23.00 neo_request/Put/handled_10_micros:0 " ~
+            "neo_request/Put/handled_100_micros:1 neo_request/Put/handled_1_ms:0 " ~
+            "neo_request/Put/handled_10_ms:0 neo_request/Put/handled_100_ms:0 " ~
             "neo_request/Put/handled_over_100_ms:0 ");
     }
 
@@ -667,8 +667,8 @@ unittest
         log.output.length = 0;
         stats.log();
         test!("==")(log.output,
-            "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 "
-            "handling_neo_connections:0 handling_neo_connections_pcnt:0 "
+            "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 " ~
+            "handling_neo_connections:0 handling_neo_connections_pcnt:0 " ~
             "neo_request/Put/max_active:1 neo_request/Put/handled:0 ");
 
         // Finish a neo request
@@ -676,8 +676,8 @@ unittest
         log.output.length = 0;
         stats.log();
         test!("==")(log.output,
-            "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 "
-            "handling_neo_connections:0 handling_neo_connections_pcnt:0 "
+            "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 " ~
+            "handling_neo_connections:0 handling_neo_connections_pcnt:0 " ~
             "neo_request/Put/max_active:1 neo_request/Put/handled:1 ");
     }
 }
@@ -698,8 +698,8 @@ unittest
 
         stats.log();
         test!("==")(log.output,
-            "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 "
-            "handling_neo_connections:0 handling_neo_connections_pcnt:0 "
+            "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 " ~
+            "handling_neo_connections:0 handling_neo_connections_pcnt:0 " ~
             "total_bytes:0 total_records:0 ");
     }
 
@@ -711,9 +711,9 @@ unittest
 
         stats.log();
         test!("==")(log.output,
-            "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 "
-            "handling_neo_connections:0 handling_neo_connections_pcnt:0 "
-            "total_bytes:0 total_records:0 "
+            "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 " ~
+            "handling_neo_connections:0 handling_neo_connections_pcnt:0 " ~
+            "total_bytes:0 total_records:0 " ~
             "channel/test/bytes:0 channel/test/records:0 ");
     }
 }

@@ -286,7 +286,7 @@ public abstract class ConnectionHandlerTemplate ( Commands : ICommandCodes )
 
                 if ( used2 > used1 )
                 {
-                    log.info("Memory usage increased while handling command {} "
+                    log.info("Memory usage increased while handling command {} " ~
                         "(+{} bytes)", request.description(this.cmd_description),
                         used2 - used1);
                 }
@@ -310,7 +310,7 @@ public abstract class ConnectionHandlerTemplate ( Commands : ICommandCodes )
                         ~ FieldName!(i, Resources) ~ ";");
                     if ( buffer.length > warn_limit )
                     {
-                        log.warn("Request resource '{}' grew to {} bytes while "
+                        log.warn("Request resource '{}' grew to {} bytes while " ~
                             "handling {}", FieldName!(i, Resources), buffer.length,
                             request.description(this.cmd_description));
                     }

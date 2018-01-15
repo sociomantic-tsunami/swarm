@@ -114,17 +114,13 @@ public static struct SerializableReferenceType ( Type )
             in progress. A single instance of this struct is stored for the
             whole request (as part of the request context, see below) and is
             shared by each connection which is active
-        RoCWorking = type containing data which a RequestOnConn needs while it
-            is in progress. An instance of this struct is stored per connection
-            on which the request runs and is passed to the request handler
         NotificationUnion = type of smart union defining the different
             notification info types for the request
 
 *******************************************************************************/
 
 public template RequestCore ( RequestType request_type_, ubyte request_code,
-    ubyte request_version, Args, SharedWorking, RoCWorking,
-    NotificationUnion )
+    ubyte request_version, Args, SharedWorking, NotificationUnion )
 {
     /***************************************************************************
 
@@ -147,7 +143,6 @@ public template RequestCore ( RequestType request_type_, ubyte request_code,
     ***************************************************************************/
 
     import swarm.neo.client.RequestOnConn;
-    import swarm.neo.client.IRequestSet : IRequestWorkingData;
     import swarm.neo.protocol.Message : RequestId;
 
     /***************************************************************************
@@ -221,8 +216,7 @@ public template RequestCore ( RequestType request_type_, ubyte request_code,
 
             *******************************************************************/
 
-            deprecated("Construct a const UserSpecifiedParams instance at once; "
-                "do not set the notifier after construction.")
+            deprecated("Construct a const UserSpecifiedParams instance at once; do not set the notifier after construction.")
             public void set ( Notifier notifier )
             {
                 this.serialized_notifier[] =
@@ -460,24 +454,6 @@ public template RequestCore ( RequestType request_type_, ubyte request_code,
     {
         return unpack!(Context)(context_blob);
     }
-
-    /***************************************************************************
-
-        Private helper function to convert the raw, serialized working data into
-        an RoCWorking instance.
-
-        Params:
-            working_blob = serialized working data
-
-        Returns:
-            a pointer to the deserialized working data struct
-
-    ***************************************************************************/
-
-    private static RoCWorking* getWorkingData ( void[] working_blob )
-    {
-        return Contiguous!(RoCWorking)(working_blob).ptr;
-    }
 }
 
 ///
@@ -525,11 +501,6 @@ unittest
             // Dummy
         }
 
-        private struct Working
-        {
-            // Dummy
-        }
-
         /***********************************************************************
 
             Request core. Mixes in the types `NotificationInfo`, `Notifier`,
@@ -539,6 +510,6 @@ unittest
         ***********************************************************************/
 
         mixin RequestCore!(RequestType.AllNodes, RequestCode, RequestVersion,
-            Args, SharedWorking, Working, Notification);
+            Args, SharedWorking, Notification);
     }
 }

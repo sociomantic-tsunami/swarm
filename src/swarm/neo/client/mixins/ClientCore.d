@@ -32,7 +32,8 @@ template ClientCore ( )
     import swarm.neo.client.ConnectionSet;
     import swarm.neo.client.RequestOnConn;
 
-    import swarm.neo.protocol.Message: RequestId;
+    static import swarm.neo.protocol.Message;
+    public alias swarm.neo.protocol.Message.RequestId RequestId;
 
     import swarm.neo.authentication.ClientCredentials;
     import swarm.neo.authentication.HmacDef : key_length;
@@ -913,7 +914,7 @@ template ClientCore ( )
                 "Cannot assign a single-node request when there are no nodes registered");
 
             return this.connections.request_set.startSingleNode(&R.handler,
-                &R.all_finished_notifier, context, R.Working.init);
+                &R.all_finished_notifier, context);
         }
         else static if ( R.request_type == R.request_type.MultiNode )
         {
@@ -929,12 +930,12 @@ template ClientCore ( )
                 "Cannot assign a round-robin request when there are no nodes registered");
 
             return this.connections.request_set.startRoundRobin(&R.handler,
-                &R.all_finished_notifier, context, R.Working.init);
+                &R.all_finished_notifier, context);
         }
         else static if ( R.request_type == R.request_type.AllNodes )
         {
             return this.connections.request_set.startAllNodes(&R.handler,
-                &R.all_finished_notifier, context, R.Working.init);
+                &R.all_finished_notifier, context);
         }
         else
         {
@@ -973,7 +974,6 @@ version ( UnitTest )
     class FakeClient
     {
         import ocean.io.select.EpollSelectDispatcher;
-        import swarm.neo.client.IRequestSet : IRequestWorkingData;
 
         // Required by ClientCore.
         private EpollSelectDispatcher epoll;
@@ -989,14 +989,14 @@ version ( UnitTest )
                 {
                     // Required by ClientCore.RequestStatsTemplate
                     static:
-                    void all_finished_notifier ( void[], IRequestWorkingData ) { }
+                    void all_finished_notifier ( void[] ) { }
                 }
 
                 struct Put
                 {
                     // Required by ClientCore.RequestStatsTemplate
                     static:
-                    void all_finished_notifier ( void[], IRequestWorkingData ) { }
+                    void all_finished_notifier ( void[] ) { }
                 }
             }
 

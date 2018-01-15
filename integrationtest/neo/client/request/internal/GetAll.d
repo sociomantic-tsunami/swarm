@@ -42,6 +42,7 @@ public struct GetAll
     import integrationtest.neo.client.request.GetAll;
     import integrationtest.neo.common.RequestCodes;
     import integrationtest.neo.client.NotifierTypes;
+    import swarm.neo.client.RequestOnConn;
     import swarm.neo.client.mixins.RequestCore;
     import swarm.neo.client.mixins.SuspendableRequestCore;
     import swarm.neo.client.mixins.AllNodesRequestCore;
@@ -56,26 +57,13 @@ public struct GetAll
 
     ***************************************************************************/
 
-    private static struct SharedWorking
+    public static struct SharedWorking
     {
         /// Shared working data required for core all-nodes request behaviour.
         AllNodesRequestSharedWorkingData all_nodes;
 
         /// Shared working data required for core suspendable behaviour.
         SuspendableRequestSharedWorkingData suspendable_control;
-    }
-
-    /***************************************************************************
-
-        Data which each request-on-conn needs while it is progress. An instance
-        of this struct is stored per connection on which the request runs and is
-        passed to the request handler.
-
-    ***************************************************************************/
-
-    private static struct Working
-    {
-        // Dummy (not required by this request)
     }
 
     /***************************************************************************
@@ -87,7 +75,7 @@ public struct GetAll
     ***************************************************************************/
 
     mixin RequestCore!(RequestType.AllNodes, RequestCode.GetAll, 0, Args,
-        SharedWorking, Working, Notification);
+        SharedWorking, Notification);
 
     /***************************************************************************
 
@@ -106,13 +94,11 @@ public struct GetAll
             conn = request-on-conn event dispatcher
             context_blob = untyped chunk of data containing the serialized
                 context of the request which is to be handled
-            working_blob = untyped chunk of data containing the serialized
-                working data for the request on this connection
 
     ***************************************************************************/
 
     public static void handler ( RequestOnConn.EventDispatcherAllNodes conn,
-        void[] context_blob, void[] working_blob )
+        void[] context_blob )
     {
         auto context = GetAll.getContext(context_blob);
 
@@ -127,13 +113,10 @@ public struct GetAll
         Params:
             context_blob = untyped chunk of data containing the serialized
                 context of the request which is finishing
-            working_data_iter = iterator over the stored working data associated
-                with each connection on which this request was run
 
     ***************************************************************************/
 
-    public static void all_finished_notifier ( void[] context_blob,
-        IRequestWorkingData working_data_iter )
+    public static void all_finished_notifier ( void[] context_blob )
     {
         auto context = GetAll.getContext(context_blob);
 

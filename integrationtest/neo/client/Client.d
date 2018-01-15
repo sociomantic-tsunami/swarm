@@ -31,10 +31,9 @@ public class Client
 
     ***************************************************************************/
 
-    private class Neo
+    public class Neo
     {
         import swarm.neo.client.mixins.ClientCore;
-        import swarm.neo.client.IRequestSet : IRequestWorkingData;
 
         /***********************************************************************
 
@@ -259,6 +258,7 @@ public class Client
     {
         import swarm.neo.client.mixins.TaskBlockingCore;
         import ocean.core.Array : copy;
+        import ocean.task.Task;
 
         /// Instantiation of TaskBlockingCore.
         mixin TaskBlockingCore!();
