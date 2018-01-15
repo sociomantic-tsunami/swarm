@@ -464,7 +464,7 @@ public final class Connection: ConnectionBase
 
         this.status_ = this.status_.Connecting;
         retry(this.tryConnect(), this.send_loop, this.epoll);
-        switch (this.status_)
+        final switch (this.status_)
         {
             case this.status_.Connecting:
                 this.status_ = this.status_.Connected;
@@ -480,9 +480,14 @@ public final class Connection: ConnectionBase
                  */
                 return false;
 
-            default:
+            case this.status_.Connected, this.status_.Shutdown:
+                assert(false);
+
+            version (D_Version2) {} else default:
                 assert(false);
         }
+
+        assert(false);
     }
 
     /***************************************************************************
