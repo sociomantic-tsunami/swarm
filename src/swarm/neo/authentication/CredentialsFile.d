@@ -43,6 +43,7 @@ import CredDef = swarm.neo.authentication.Credentials;
 import HmacDef = swarm.neo.authentication.HmacDef;
 
 import ocean.transition;
+import ocean.core.Verify;
 import ocean.io.device.File;
 import ocean.net.util.QueryParams;
 import ocean.text.convert.Formatter;
@@ -187,11 +188,11 @@ private HmacDef.Key[istring] parseContent ( istring content,
             b |= hexToByte(hex_key[i++]);
         }
 
-        assert(i == hex_key.length);
+        assert(i == hex_key.length); // enforced above
 
         /*
          * name is a cstring slice to the istring content so we don't need
-         * to idup it in order to use it as an associative array key. Assert
+         * to idup it in order to use it as an associative array key. Verify
          * the slice is correct, and cast it.
          * Note that determining that name is a slice to content via pointer
          * comparison relies on a flat memory model. In general comparing
@@ -201,7 +202,7 @@ private HmacDef.Key[istring] parseContent ( istring content,
          * has a flat memory model.
          */
         static assert(is(typeof(content) == istring));
-        assert(content.ptr <= name.ptr &&
+        verify(content.ptr <= name.ptr &&
                name.ptr + name.length <= content.ptr + content.length);
         keys[cast(istring)name] = key;
     }
@@ -289,12 +290,8 @@ version ( UnitTest )
     ***************************************************************************/
 
     HmacDef.Key makeKey ( ulong[] words ... )
-    in
     {
-        assert(words.length == HmacDef.Key.length / words[0].sizeof);
-    }
-    body
-    {
+        verify(words.length == HmacDef.Key.length / words[0].sizeof);
         HmacDef.Key key;
         (cast(ulong[])key.content)[] = words;
         ByteSwap.swap64(key.content);
