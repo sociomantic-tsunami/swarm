@@ -177,14 +177,10 @@ unittest
             AllNodesRequestSharedWorkingData called all_nodes
         FillPayload = type of policy instance to be called to add any required
             fields to the initial message payload sent to the node
-        HandleStatusCode = type of policy instance to be called to validate the
-            status code received from the node. Should return true to continue
-            handling the request or false to abort
 
 *******************************************************************************/
 
-public struct SuspendableRequestInitialiser ( Request, FillPayload,
-    HandleStatusCode )
+public struct SuspendableRequestInitialiser ( Request, FillPayload )
 {
     import swarm.neo.client.RequestOnConn;
     import swarm.neo.connection.RequestOnConnBase;
@@ -242,7 +238,7 @@ public struct SuspendableRequestInitialiser ( Request, FillPayload,
     }
 
     /// All-nodes initialiser used internally.
-    private AllNodesRequestInitialiser!(Request, FillPayload, HandleStatusCode)
+    private AllNodesRequestInitialiser!(Request, FillPayload)
         all_nodes_initialiser;
 
     /// State change readiness tracker instance.
@@ -309,12 +305,9 @@ public struct SuspendableRequestInitialiser ( Request, FillPayload,
         Request = type of the request being initialised
         FillPayload = type of policy instance to be called to add any required
             fields to the initial message payload sent to the node
-        HandleStatusCode = type of policy instance to be called to validate the
-            status code received from the node
         conn = request-on-conn event dispatcher to use for handling the request
         context = request context
         fill_payload = instance of FillPayload
-        handle_status_code = instance of HandleStatusCode
 
     Returns:
         instance of SuspendableRequestInitialiser constructed with the provided
@@ -323,16 +316,16 @@ public struct SuspendableRequestInitialiser ( Request, FillPayload,
 *******************************************************************************/
 
 public
-    SuspendableRequestInitialiser!(Request, FillPayload, HandleStatusCode)
+    SuspendableRequestInitialiser!(Request, FillPayload)
     createSuspendableRequestInitialiser
-        ( Request, FillPayload, HandleStatusCode )
+        ( Request, FillPayload )
         ( RequestOnConn.EventDispatcherAllNodes conn, Request.Context* context,
-          FillPayload fill_payload, HandleStatusCode handle_status_code )
+          FillPayload fill_payload )
 {
     return
-        SuspendableRequestInitialiser!(Request, FillPayload, HandleStatusCode)
-        (createAllNodesRequestInitialiser!(Request)(conn, context, fill_payload,
-        handle_status_code));
+        SuspendableRequestInitialiser!(Request, FillPayload)
+        (createAllNodesRequestInitialiser!(Request)(conn, context,
+            fill_payload));
 }
 
 ///
@@ -365,8 +358,7 @@ unittest
         public void run ( )
         {
             auto initialiser = createSuspendableRequestInitialiser!(ExampleRequest)(
-                this.conn, this.context, &this.fillPayload,
-                &this.handleStatusCode);
+                this.conn, this.context, &this.fillPayload);
 
             // Pass initialiser to an AllNodesRequest...
         }
@@ -374,11 +366,6 @@ unittest
         // Dummy policies...
         private void fillPayload (
             RequestOnConnBase.EventDispatcher.Payload payload ) { }
-
-        private bool handleStatusCode ( ubyte status )
-        {
-            return true;
-        }
     }
 }
 
@@ -397,8 +384,6 @@ unittest
             causes the connection to the node to break (see AllNodesRequest)
         FillPayload = type of policy instance to be called to add any required
             fields to the initial message payload sent to the node
-        HandleStatusCode = type of policy instance to be called to validate the
-            status code received from the node
         Handler = type of policy instance to be called to handle the main logic
             of the request (see AllNodesRequest)
         conn = request-on-conn event dispatcher to use for handling the request
@@ -406,7 +391,6 @@ unittest
         connector = instance of Connector policy
         disconnected = instance of Disconnected policy
         fill_payload = instance of FillPayload
-        handle_status_code = instance of HandleStatusCode
         handler = instance of Handler policy
 
     Returns:
@@ -416,18 +400,16 @@ unittest
 
 public
     AllNodesRequest!(Request, Connector, Disconnected,
-        SuspendableRequestInitialiser!(Request, FillPayload, HandleStatusCode),
+        SuspendableRequestInitialiser!(Request, FillPayload),
         Handler)
     createSuspendableRequest
-        ( Request, Connector, Disconnected, FillPayload,
-          HandleStatusCode, Handler )
+        ( Request, Connector, Disconnected, FillPayload, Handler )
         ( RequestOnConn.EventDispatcherAllNodes conn, Request.Context* context,
           Connector connector, Disconnected disconnected,
-          FillPayload fill_payload, HandleStatusCode handle_status_code,
-          Handler handler )
+          FillPayload fill_payload, Handler handler )
 {
     auto initialiser = createSuspendableRequestInitialiser!(Request)(
-        conn, context, fill_payload, handle_status_code);
+        conn, context, fill_payload);
     return
         AllNodesRequest!(Request, Connector, Disconnected, typeof(initialiser),
         Handler)
@@ -465,7 +447,7 @@ unittest
         {
             auto request = createSuspendableRequest!(ExampleRequest)(
                 this.conn, this.context, &this.connect, &this.disconnected,
-                &this.fillPayload, &this.handleStatusCode, &this.handle);
+                &this.fillPayload, &this.handle);
             request.run();
         }
 
@@ -479,11 +461,6 @@ unittest
 
         private void fillPayload (
             RequestOnConnBase.EventDispatcher.Payload payload ) { }
-
-        private bool handleStatusCode ( ubyte status )
-        {
-            return true;
-        }
 
         private void handle ( ) { }
     }
@@ -995,7 +972,7 @@ public struct SuspendableRequestSharedWorkingData
 
         The number of nodes which are currently ready to handle state change
         messages. A node is not ready for state changes if the connection is not
-        established or an error status code was returned.
+        established or an unsupported code was returned.
 
         If this counter is 0, then a user-requested state change takes immediate
         effect, as the desired state will be sent to the node as part of the

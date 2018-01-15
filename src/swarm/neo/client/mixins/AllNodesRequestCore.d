@@ -9,7 +9,7 @@
         * Connection: ensuring a connection to the node is established.
         * Initialisation: sending of a message containing all information
           required by the node to start handling the request; waiting for and
-          validating the status code sent back by the node.
+          validating the supported code sent back by the node.
         * Handling: the main logic of the request.
 
       The behaviours at each stage are defined by a set of policy instances (of
@@ -28,8 +28,8 @@
       steps:
         * Sending a message containing all information required by the node to
           start handling the request.
-        * Waiting for the status code (a single ubyte) sent back by the node.
-        * Validating the status code.
+        * Waiting for the supported code (a single ubyte) sent back by the node.
+        * Validating the supported code.
 
       The behaviours at each stage are defined by a set of policy instances (of
       types defined by template arguments of AllNodesRequestInitialiser).
@@ -64,7 +64,7 @@ import swarm.neo.client.NotifierTypes;
         * Connection: ensuring a connection to the node is established.
         * Initialisation: sending of a message containing all information
           required by the node to start handling the request; waiting for and
-          validating the status code sent back by the node.
+          validating the supported code sent back by the node.
         * Handling: the main logic of the request.
 
     The behaviours at each stage are defined by a set of policy instances, the
@@ -81,13 +81,13 @@ import swarm.neo.client.NotifierTypes;
             on-conn (e.g. any working data).
         Initialiser = type of policy instance to handle initialisation of the
             request on this connection (i.e. sending the initial payload and
-            handling the corresponding status code from the node). This policy
-            is expected to provide two functions:
+            handling the corresponding supported code from the node). This
+            policy is expected to provide two functions:
                 * initialise(): handles the actual initialisation process.
                 * reset(): should reset any state required for initialisation to
                   begin again. (Called after the handler exits, whether due to
                   an error or not.)
-        Handler = typoe of policy instance to be called to handle the main logic
+        Handler = type of policy instance to be called to handle the main logic
             of the request.
 
 *******************************************************************************/
@@ -326,11 +326,12 @@ unittest
     request-on-conn of an all-nodes request. Initialisation is defined as:
         * Sending a message containing all information required by the node to
           start handling the request.
-        * Waiting for the status code (a single ubyte) sent back by the node.
-        * Validating the status code.
+        * Waiting for the supported code (a single ubyte) sent back by the node.
+        * Validating the supported code.
 
-    The behaviours at each stage are defined by a set of policy instances, the
-    types of which are defined by template arguments.
+    The behaviour of the initial stage (sending the information to start the
+    request) is defined by a policy instance, the type of which is defined by
+    a template argument.
 
     This struct is suitable for passing to AllNodesRequest as the Initialiser
     policy.
@@ -346,18 +347,15 @@ unittest
             AllNodesRequestSharedWorkingData called all_nodes
         FillPayload = type of policy instance to be called to add any required
             fields to the initial message payload sent to the node
-        HandleStatusCode = type of policy instance to be called to validate the
-            status code received from the node. Should return true to continue
-            handling the request or false to abort
 
 *******************************************************************************/
 
-public struct AllNodesRequestInitialiser ( Request, FillPayload,
-    HandleStatusCode )
+public struct AllNodesRequestInitialiser ( Request, FillPayload )
 {
     import swarm.neo.client.RequestOnConn;
     import swarm.neo.connection.RequestOnConnBase;
     import swarm.neo.client.Connection;
+    import swarm.neo.request.Command : SupportedStatus;
 
     /// Connection event dispatcher.
     public RequestOnConn.EventDispatcherAllNodes conn;
@@ -367,9 +365,6 @@ public struct AllNodesRequestInitialiser ( Request, FillPayload,
 
     /// Policy object for adding fields to the initial message payload.
     public FillPayload fill_payload;
-
-    /// Policy object for handling the status code received from the node.
-    public HandleStatusCode handle_status_code;
 
     /***************************************************************************
 
@@ -408,8 +403,12 @@ public struct AllNodesRequestInitialiser ( Request, FillPayload,
 
         // Receive status from node and stop the request if not Ok
         auto status = conn.receiveValue!(ubyte)();
-        if ( !this.handle_status_code(status) )
+        auto request_status = cast(SupportedStatus)status;
+        if (!Request.handleSupportedCodes(request_status, this.context,
+            this.conn.remote_address) )
+        {
             return false;
+        }
 
         return true;
     }
@@ -443,12 +442,9 @@ public struct AllNodesRequestInitialiser ( Request, FillPayload,
         Request = type of the request being initialised
         FillPayload = type of policy instance to be called to add any required
             fields to the initial message payload sent to the node
-        HandleStatusCode = type of policy instance to be called to validate the
-            status code received from the node
         conn = request-on-conn event dispatcher to use for handling the request
         context = request context
         fill_payload = instance of FillPayload
-        handle_status_code = instance of HandleStatusCode
 
     Returns:
         instance of AllNodesRequestInitialiser constructed with the provided
@@ -456,16 +452,14 @@ public struct AllNodesRequestInitialiser ( Request, FillPayload,
 
 *******************************************************************************/
 
-public AllNodesRequestInitialiser!(Request, FillPayload, HandleStatusCode)
-    createAllNodesRequestInitialiser ( Request, FillPayload,
-    HandleStatusCode )
+public AllNodesRequestInitialiser!(Request, FillPayload)
+    createAllNodesRequestInitialiser ( Request, FillPayload )
     ( RequestOnConn.EventDispatcherAllNodes conn,
-    Request.Context* context, FillPayload fill_payload,
-    HandleStatusCode handle_status_code )
+    Request.Context* context, FillPayload fill_payload )
 {
     return
-        AllNodesRequestInitialiser!(Request, FillPayload, HandleStatusCode)
-        (conn, context, fill_payload, handle_status_code);
+        AllNodesRequestInitialiser!(Request, FillPayload)
+        (conn, context, fill_payload);
 }
 
 ///
@@ -498,8 +492,7 @@ unittest
         public void run ( )
         {
             auto initialiser = createAllNodesRequestInitialiser!(ExampleRequest)(
-                this.conn, this.context, &this.fillPayload,
-                &this.handleStatusCode);
+                this.conn, this.context, &this.fillPayload);
 
             // Pass initialiser to an AllNodesRequest...
         }
@@ -507,11 +500,6 @@ unittest
         // Dummy policies...
         private void fillPayload (
             RequestOnConnBase.EventDispatcher.Payload payload ) { }
-
-        private bool handleStatusCode ( ubyte status )
-        {
-            return true;
-        }
     }
 }
 
@@ -530,7 +518,7 @@ public struct AllNodesRequestSharedWorkingData
 
         The number of request-on-conns that are currently in the process of
         initialising the request -- sending the initial payload and waiting for
-        a status code back from the node.
+        a supported code back from the node.
 
         Used to decide when to send the started notification to the user.
 
