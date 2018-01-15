@@ -734,7 +734,6 @@ public final class RequestSet: IRequestSet
         assert(finished_notifier !is null);
 
         auto rq = this.newRequest();
-        assert(rq.id > 0);
         rq.startSingleNode(handler, finished_notifier, context);
         return rq.id;
     }
@@ -763,7 +762,6 @@ public final class RequestSet: IRequestSet
         assert(finished_notifier !is null);
 
         auto rq = this.newRequest();
-        assert(rq.id > 0);
         rq.startMultiNode(handler, finished_notifier, context);
         return rq.id;
     }
@@ -795,7 +793,6 @@ public final class RequestSet: IRequestSet
         assert(finished_notifier !is null);
 
         auto rq = this.newRequest();
-        assert(rq.id > 0);
         rq.startRoundRobin(handler, finished_notifier, context);
         return rq.id;
     }
@@ -829,7 +826,6 @@ public final class RequestSet: IRequestSet
         assert(finished_notifier !is null);
 
         auto rq = this.newRequest();
-        assert(rq.id > 0);
         rq.startAllNodes(handler, finished_notifier, context);
         return rq.id;
     }
@@ -1012,6 +1008,11 @@ public final class RequestSet: IRequestSet
     ***************************************************************************/
 
     private Request newRequest ( )
+    out (request)
+    {
+        assert(request.id);
+    }
+    body
     {
         if ( this.active_requests.length < typeof(this).max_requests )
         {
