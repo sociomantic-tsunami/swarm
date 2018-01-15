@@ -13,6 +13,7 @@
 module swarm.neo.client.RequestOnConnSet;
 
 import ocean.transition;
+import ocean.core.Verify;
 
 /*******************************************************************************
 
@@ -78,13 +79,10 @@ public struct RequestOnConnSet
     ***************************************************************************/
 
     public void initialise ( RequestType type )
-    in
     {
-        assert(type != RequestType.None);
-        assert(this.num_active == 0);
-    }
-    body
-    {
+        verify(type != RequestType.None);
+        verify(this.num_active == 0);
+
         this.type_ = type;
         if ( type == RequestType.AllNodes )
             this.map.reinit();
@@ -117,24 +115,21 @@ public struct RequestOnConnSet
     ***************************************************************************/
 
     public RequestOnConn add ( RequestOnConn request_on_conn )
-    in
     {
         final switch ( this.type_ )
         {
             case RequestType.SingleNode:
-                assert(this.list.length <= 1);
-                assert(this.num_active <= 1);
+                verify(this.list.length <= 1);
+                verify(this.num_active <= 1);
                 break;
             case RequestType.MultiNode:
                 break;
             case RequestType.AllNodes, RequestType.None:
-                assert(false);
+                verify(false);
             version (D_Version2) {} else default:
                 assert(false);
         }
-    }
-    body
-    {
+
         this.list ~= request_on_conn;
         this.num_active++;
 
@@ -157,12 +152,9 @@ public struct RequestOnConnSet
 
     public RequestOnConn add ( AddrPort remote_address,
         RequestOnConn request_on_conn )
-    in
     {
-        assert(this.type_ == RequestType.AllNodes);
-    }
-    body
-    {
+        verify(this.type_ == RequestType.AllNodes);
+
         bool added;
         this.map.put(remote_address.cmp_id, added, request_on_conn);
         assert(added, typeof(this).stringof ~ ".add: a " ~
@@ -260,12 +252,9 @@ public struct RequestOnConnSet
     ***************************************************************************/
 
     public bool finished ( )
-    in
     {
-        assert(this.num_active);
-    }
-    body
-    {
+        verify(this.num_active != 0);
+
         return --this.num_active == 0;
     }
 
@@ -281,12 +270,9 @@ public struct RequestOnConnSet
     ***************************************************************************/
 
     public void reset ( void delegate ( RequestOnConn ) recycle )
-    in
     {
-        assert(this.num_active == 0);
-    }
-    body
-    {
+        verify(this.num_active == 0);
+
         with ( RequestType ) final switch ( this.type_ )
         {
             case None:
