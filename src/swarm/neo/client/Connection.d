@@ -20,6 +20,8 @@ module swarm.neo.client.Connection;
 
 import swarm.neo.connection.ConnectionBase;
 
+import ocean.core.Verify;
+
 /// ditto
 public final class Connection: ConnectionBase
 {
@@ -493,7 +495,7 @@ public final class Connection: ConnectionBase
                 return false;
 
             case this.status_.Connected, this.status_.Shutdown:
-                assert(false);
+                verify(false);
 
             version (D_Version2) {} else default:
                 assert(false);
@@ -519,12 +521,9 @@ public final class Connection: ConnectionBase
     ***************************************************************************/
 
     private bool tryConnect ( )
-    in
     {
-        assert(this.send_loop.running);
-    }
-    body
-    {
+        verify(this.send_loop.running);
+
         debug ( SwarmConn )
         {
             Stdout.formatln("{}:{}: Connection.tryConnect()",
@@ -570,12 +569,9 @@ public final class Connection: ConnectionBase
     ***************************************************************************/
 
     private void notifyConnectedSubscribers ( )
-    in
     {
-        assert(this.status_ == this.status_.Connected);
-    }
-    body
-    {
+        verify(this.status_ == this.status_.Connected);
+
         foreach (ref ebnode; this.connected_subscribers)
         {
             auto id = ebnode.key;
