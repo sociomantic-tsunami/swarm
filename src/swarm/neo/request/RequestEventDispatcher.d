@@ -579,11 +579,7 @@ public struct RequestEventDispatcher
             this.dispatchQueuedSignals(conn);
 
             RequestOnConnBase.EventDispatcher.NextEventFlags flags;
-            flags = flags.Receive;
-            if ( this.waitingYielders() )
-                flags |= flags.Yield;
-            if ( this.waitingForSignals() )
-                flags |= flags.Resume;
+            flags = flags.Receive | this.nextEventYieldResumeFlags();
 
             auto event = conn.nextEvent(flags,
                 sending ? writer.event.send.get_payload : null);
@@ -761,35 +757,42 @@ public struct RequestEventDispatcher
     /***************************************************************************
 
         Returns:
-            true if any registered fibers wish to yield
+            flags to pass to EventDispatcher.nextEvent(), with Resume and/or
+            Yield bits set, based on the events that registered fibers are
+            waiting for.
 
     ***************************************************************************/
 
-    private bool waitingYielders ( )
+    RequestOnConnBase.EventDispatcher.NextEventFlags nextEventYieldResumeFlags ()
     {
+        RequestOnConnBase.EventDispatcher.NextEventFlags flags;
+
+        // All the flags that this method sets, used for short-circuit the
+        // array iteration if we set all relevant flags.
+        const all_set_flags = flags.Yield | flags.Resume;
+
         foreach ( waiting_fiber; this.waiting_fibers.array() )
-            if ( waiting_fiber.enabled &&
-                waiting_fiber.event.active == waiting_fiber.event.active.yield )
-                return true;
+        {
+            if ( waiting_fiber.enabled )
+            {
+                switch (waiting_fiber.event.active)
+                {
+                    case waiting_fiber.event.active.signal:
+                        flags |= flags.Resume;
+                        break;
+                    case waiting_fiber.event.active.yield:
+                        flags |= flags.Yield;
+                        break;
+                    default:
+                        break;
+                }
 
-        return false;
-    }
+                if (flags == all_set_flags)
+                    return flags;
+            }
+        }
 
-    /***************************************************************************
-
-        Returns:
-            true if any registered fiber is awating a signal.
-
-    ***************************************************************************/
-
-    private bool waitingForSignals ( )
-    {
-        foreach ( waiting_fiber; this.waiting_fibers.array() )
-            if ( waiting_fiber.enabled &&
-                waiting_fiber.event.active == waiting_fiber.event.active.signal )
-                return true;
-
-        return false;
+        return flags;
     }
 
     /***************************************************************************
