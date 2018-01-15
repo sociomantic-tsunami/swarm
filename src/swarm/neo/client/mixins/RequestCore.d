@@ -388,7 +388,7 @@ public template RequestCore ( RequestType request_type_, ubyte request_code,
 
     /***************************************************************************
 
-        Private helper function to handle notification of the global supported
+        Helper function to handle notification of the global supported
         codes, including the RequestSupported code.
 
         Params:
@@ -403,7 +403,7 @@ public template RequestCore ( RequestType request_type_, ubyte request_code,
 
     ***************************************************************************/
 
-    private static bool handleSupportedCodes ( SupportedStatus status,
+    public static bool handleSupportedCodes ( SupportedStatus status,
         Context* context, AddrPort remote_address )
     {
         switch ( status )
