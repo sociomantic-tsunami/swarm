@@ -125,11 +125,11 @@ class ConnectionHandler : IConnectionHandler
 
         deprecated("Use the other version of `add` that provides info for "
             "specific request versions")
-        public void add ( Command.Code code, cstring name, Handler handler,
+        public void add ( Command.Code code, cstring name, scope Handler handler,
             bool timing = true )
         {
-            this.map[code] = RequestInfo(idup(name), handler, timing);
-            this.supported_requests[code] = true;
+            (&this).map[code] = RequestInfo(idup(name), handler, timing);
+            (&this).supported_requests[code] = true;
         }
 
         /***********************************************************************
@@ -145,11 +145,11 @@ class ConnectionHandler : IConnectionHandler
 
         ***********************************************************************/
 
-        public void add ( Command command, cstring name, Handler handler,
+        public void add ( Command command, cstring name, scope Handler handler,
             bool timing = true )
         in
         {
-            assert((command.code in this.map) is null,
+            assert((command.code in (&this).map) is null,
                 "Either add a single handler for all versions of a request or "
                 ~ "separate handlers for each version");
             assert(name.length > 0);
@@ -157,8 +157,8 @@ class ConnectionHandler : IConnectionHandler
         }
         body
         {
-            this.request_info[command] = RequestInfo(idup(name), handler, timing);
-            this.supported_requests[command.code] = true;
+            (&this).request_info[command] = RequestInfo(idup(name), handler, timing);
+            (&this).supported_requests[command.code] = true;
         }
 
         /***********************************************************************
@@ -174,9 +174,9 @@ class ConnectionHandler : IConnectionHandler
         ***********************************************************************/
 
         deprecated("Use the `add` method instead, specifying a name for the request.")
-        public void opIndexAssign ( Handler handler, Command.Code code )
+        public void opIndexAssign ( scope Handler handler, Command.Code code )
         {
-            this.map[code] = RequestInfo(null, handler, true);
+            (&this).map[code] = RequestInfo(null, handler, true);
         }
 
         /***********************************************************************
@@ -190,11 +190,11 @@ class ConnectionHandler : IConnectionHandler
 
         public void initStats ( RequestStats request_stats )
         {
-            foreach ( code, rq; this.map )
+            foreach ( code, rq; (&this).map )
                 if ( rq.name.length > 0 )
                     request_stats.init(rq.name, rq.timing);
 
-            foreach ( command, rq; this.request_info )
+            foreach ( command, rq; (&this).request_info )
                 request_stats.init(rq.name, rq.timing);
         }
     }
@@ -368,7 +368,7 @@ class ConnectionHandler : IConnectionHandler
 
     ***************************************************************************/
 
-    public this ( FinalizeDg return_to_pool, SharedParams shared_params )
+    public this ( scope FinalizeDg return_to_pool, SharedParams shared_params )
     {
         auto socket = new AddressIPSocket!();
         super(socket, null, null);

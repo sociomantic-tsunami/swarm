@@ -322,30 +322,30 @@ private struct Reader
     void fiberMethod ( )
     {
         auto suspendable_control =
-            &this.context.shared_working.suspendable_control;
+            &(&this).context.shared_working.suspendable_control;
 
         bool finished, error;
         do
         {
-            auto message = this.request_event_dispatcher.receive(this.fiber,
+            auto message = (&this).request_event_dispatcher.receive((&this).fiber,
                 Message(MessageType.Record), Message(MessageType.End),
                 Message(MessageType.Error));
             with ( MessageType ) switch ( message.type )
             {
                 case Record:
-                    auto key = *this.conn.message_parser.
+                    auto key = *(&this).conn.message_parser.
                         getValue!(hash_t)(message.payload);
-                    auto value = this.conn.message_parser.
+                    auto value = (&this).conn.message_parser.
                         getArray!(char)(message.payload);
 
                     GetAll.Notification n;
-                    n.record = RequestKeyDataInfo(this.context.request_id,
+                    n.record = RequestKeyDataInfo((&this).context.request_id,
                         key, value);
                     if ( suspendable_control.notifyAndCheckStateChange!(GetAll)(
-                        this.context, n) )
+                        (&this).context, n) )
                     {
                         // The user used the controller in the notifier callback
-                        this.request_event_dispatcher.signal(this.conn,
+                        (&this).request_event_dispatcher.signal((&this).conn,
                             suspendable_control.Signal.StateChangeRequested);
                     }
                     break;
@@ -357,13 +357,13 @@ private struct Reader
                     {
                         // Acknowledge the End signal. The protocol guarantees that the node
                         // will not send any further messages.
-                        this.request_event_dispatcher.send(this.fiber,
+                        (&this).request_event_dispatcher.send((&this).fiber,
                             ( RequestOnConn.EventDispatcher.Payload payload )
                             {
                                 payload.addCopy(MessageType.Ack);
                             }
                         );
-                        this.conn.flush();
+                        (&this).conn.flush();
                     }
                     break;
 
@@ -372,9 +372,9 @@ private struct Reader
                     error = true;
 
                     GetAll.Notification n;
-                    n.node_error = RequestNodeInfo(this.context.request_id,
-                            this.conn.remote_address);
-                    GetAll.notify(this.context.user_params, n);
+                    n.node_error = RequestNodeInfo((&this).context.request_id,
+                            (&this).conn.remote_address);
+                    GetAll.notify((&this).context.user_params, n);
                     break;
 
                 default:
@@ -384,7 +384,7 @@ private struct Reader
         while ( !finished );
 
         // Kill the controller fiber.
-        this.request_event_dispatcher.abort(this.controller.fiber);
+        (&this).request_event_dispatcher.abort((&this).controller.fiber);
     }
 }
 
@@ -406,10 +406,10 @@ private struct Controller
     void fiberMethod ( )
     {
         SuspendableRequestControllerFiber!(GetAll, MessageType) controller;
-        controller.handle(this.conn, this.context,
-            this.request_event_dispatcher, this.fiber);
+        controller.handle((&this).conn, (&this).context,
+            (&this).request_event_dispatcher, (&this).fiber);
 
         // Kill the reader fiber; the request is finished.
-        this.request_event_dispatcher.abort(this.reader.fiber);
+        (&this).request_event_dispatcher.abort((&this).reader.fiber);
     }
 }

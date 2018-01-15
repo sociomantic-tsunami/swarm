@@ -267,8 +267,8 @@ private template ExampleRequestCore ( )
     import ocean.core.SmartUnion;
 
     // Required by RequestCore
-    const ubyte RequestCode = 0;
-    const ubyte RequestVersion = 0;
+    static immutable ubyte RequestCode = 0;
+    static immutable ubyte RequestVersion = 0;
 
     // Required by RequestCore
     struct Args

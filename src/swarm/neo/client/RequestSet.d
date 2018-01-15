@@ -204,7 +204,7 @@ public final class RequestSet: IRequestSet
         ***********************************************************************/
 
         public void startSingleNode ( RequestContext )
-            ( SingleNodeHandler handler, FinishedNotifier finished_notifier,
+            ( scope SingleNodeHandler handler, scope FinishedNotifier finished_notifier,
             RequestContext context )
         {
             this.handler.single_node = handler;
@@ -243,7 +243,7 @@ public final class RequestSet: IRequestSet
         ***********************************************************************/
 
         public void startMultiNode ( RequestContext )
-            ( MultiNodeHandler handler, FinishedNotifier finished_notifier,
+            ( scope MultiNodeHandler handler, scope FinishedNotifier finished_notifier,
             RequestContext context )
         {
             this.handler.multi_node = handler;
@@ -275,7 +275,7 @@ public final class RequestSet: IRequestSet
         ***********************************************************************/
 
         public void startRoundRobin ( RequestContext ) (
-            RoundRobinHandler handler, FinishedNotifier finished_notifier,
+            scope RoundRobinHandler handler, scope FinishedNotifier finished_notifier,
             RequestContext context )
         {
             this.handler.round_robin = handler;
@@ -318,7 +318,7 @@ public final class RequestSet: IRequestSet
         ***********************************************************************/
 
         public void startAllNodes ( RequestContext )
-            ( AllNodesHandler handler, FinishedNotifier finished_notifier,
+            ( scope AllNodesHandler handler, scope FinishedNotifier finished_notifier,
             RequestContext context )
         {
             this.handler.all_nodes = handler;
@@ -563,7 +563,7 @@ public final class RequestSet: IRequestSet
         ***********************************************************************/
 
         private void initRequest ( RequestContext )
-            ( FinishedNotifier finished_notifier, RequestContext context )
+            ( scope FinishedNotifier finished_notifier, RequestContext context )
         in
         {
             assert(this.id);
@@ -727,7 +727,7 @@ public final class RequestSet: IRequestSet
     ***************************************************************************/
 
     public RequestId startSingleNode ( RequestContext ) (
-        SingleNodeHandler handler, Request.FinishedNotifier finished_notifier,
+        scope SingleNodeHandler handler, scope Request.FinishedNotifier finished_notifier,
         RequestContext context )
     {
         assert(handler !is null);
@@ -756,7 +756,7 @@ public final class RequestSet: IRequestSet
     ***************************************************************************/
 
     public RequestId startMultiNode ( RequestContext ) (
-        MultiNodeHandler handler, Request.FinishedNotifier finished_notifier,
+        scope MultiNodeHandler handler, scope Request.FinishedNotifier finished_notifier,
         RequestContext context )
     {
         assert(handler !is null);
@@ -788,7 +788,7 @@ public final class RequestSet: IRequestSet
     ***************************************************************************/
 
     public RequestId startRoundRobin ( RequestContext ) (
-        RoundRobinHandler handler, Request.FinishedNotifier finished_notifier,
+        scope RoundRobinHandler handler, scope Request.FinishedNotifier finished_notifier,
         RequestContext context )
     {
         assert(handler !is null);
@@ -822,7 +822,7 @@ public final class RequestSet: IRequestSet
     ***************************************************************************/
 
     public RequestId startAllNodes ( RequestContext ) (
-        AllNodesHandler handler, Request.FinishedNotifier finished_notifier,
+        scope AllNodesHandler handler, scope Request.FinishedNotifier finished_notifier,
         RequestContext context )
     {
         assert(handler !is null);
@@ -958,7 +958,7 @@ public final class RequestSet: IRequestSet
     ***************************************************************************/
 
     public IRequestController getRequestController ( RequestId id,
-        Request.FinishedNotifier expected_finished_notifier )
+        scope Request.FinishedNotifier expected_finished_notifier )
     {
         if ( auto rq = id in this.active_requests )
         {
