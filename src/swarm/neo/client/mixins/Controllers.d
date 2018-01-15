@@ -288,7 +288,7 @@ template Controllers ( )
 
         public void handlePending ( )
         {
-            switch ( this.pending )
+            final switch ( this.pending )
             {
                 case Pending.None:
                     break;
@@ -300,7 +300,7 @@ template Controllers ( )
                     this.pending = Pending.None;
                     this.resume();
                     break;
-                default: assert(false);
+                version (D_Version2) {} else default: assert(false);
             }
             assert(this.pending == Pending.None,
                 "handlePending() called when request is not ready");

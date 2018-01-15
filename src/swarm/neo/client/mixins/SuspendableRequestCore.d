@@ -768,7 +768,7 @@ public struct SuspendableRequestControllerFiber ( Request, MessageType )
         // Determine message type.
         MessageType msg;
         with ( suspendable_control.DesiredState )
-        switch ( suspendable_control.desired_state )
+        final switch ( suspendable_control.desired_state )
         {
             case Running:
                 msg = MessageType.Resume;
@@ -779,7 +779,9 @@ public struct SuspendableRequestControllerFiber ( Request, MessageType )
             case Stopped:
                 msg = MessageType.Stop;
                 break;
-            default:
+            case None:
+                assert(false);
+            version (D_Version2) {} else default:
                 assert(false);
         }
 
@@ -825,7 +827,7 @@ public struct SuspendableRequestControllerFiber ( Request, MessageType )
             // Set up notification.
             Request.Notification notification;
             with ( suspendable_control.DesiredState )
-            switch ( suspendable_control.desired_state )
+            final switch ( suspendable_control.desired_state )
             {
                 case Running:
                     notification.resumed = RequestInfo(this.context.request_id);
@@ -839,7 +841,9 @@ public struct SuspendableRequestControllerFiber ( Request, MessageType )
                     this.context.shared_working.suspendable_control.
                         stopped_notification_done = true;
                     break;
-                default:
+                case None:
+                    assert(false);
+                version (D_Version2) {} else default:
                     assert(false);
             }
 
