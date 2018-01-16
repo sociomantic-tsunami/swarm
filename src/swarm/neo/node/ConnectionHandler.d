@@ -29,6 +29,7 @@ module swarm.neo.node.ConnectionHandler;
 *******************************************************************************/
 
 import ocean.transition;
+import ocean.core.Verify;
 import ocean.net.server.connection.IConnectionHandler;
 import ocean.sys.socket.AddressIPSocket;
 import ocean.util.log.Logger;
@@ -158,16 +159,13 @@ class ConnectionHandler : IConnectionHandler
 
         public void add ( Command command, cstring name, ClassInfo class_info,
             bool timing = true )
-        in
         {
-            assert((command.code in this.map) is null,
+            verify((command.code in this.map) is null,
                 "Either add a single handler for all versions of a request or "
                 ~ "separate handlers for each version");
-            assert(name.length > 0);
-            assert(class_info !is null);
-        }
-        body
-        {
+            verify(name.length > 0);
+            verify(class_info !is null);
+
             RequestInfo ri;
             ri.name = idup(name);
             ri.class_info = class_info;
@@ -368,7 +366,7 @@ class ConnectionHandler : IConnectionHandler
             ref Const!(Key[istring]) credentials, INodeInfo node_info,
             GetResourceAcquirerDg get_resource_acquirer )
         {
-            assert(requests.supported_requests.length > 0);
+            verify(requests.supported_requests.length > 0);
 
             this.epoll = epoll;
             this.shared_resources = shared_resources;
