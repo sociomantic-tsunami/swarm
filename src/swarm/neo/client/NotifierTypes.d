@@ -18,7 +18,7 @@ module swarm.neo.client.NotifierTypes;
 *******************************************************************************/
 
 import ocean.transition;
-import swarm.neo.util.Formatter;
+import ocean.text.convert.Formatter;
 
 /*******************************************************************************
 
