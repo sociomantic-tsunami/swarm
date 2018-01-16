@@ -21,6 +21,7 @@ module swarm.neo.util.StructPacker;
 
 import ocean.transition;
 import ocean.core.Traits;
+import ocean.core.Verify;
 
 /*******************************************************************************
 
@@ -74,7 +75,8 @@ public void pack ( S ) ( S s, ref void[] buf )
 
 public S* unpack ( S ) ( void[] packed )
 {
-    assert(packed.length >= S.sizeof);
+    verify(packed.length >= S.sizeof);
+
     return cast(S*)packed.ptr;
 }
 

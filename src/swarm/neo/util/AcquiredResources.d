@@ -13,6 +13,7 @@
 module swarm.neo.util.AcquiredResources;
 
 import ocean.transition;
+import ocean.core.Verify;
 import ocean.util.container.pool.FreeList;
 
 /*******************************************************************************
@@ -128,12 +129,9 @@ public struct AcquiredArraysOf ( T )
     ***************************************************************************/
 
     public void relinquishAll ( )
-    in
     {
-        assert(this.buffer_pool !is null);
-    }
-    body
-    {
+        verify(this.buffer_pool !is null);
+
         if ( this.buffer !is null )
         {
             // Relinquish acquired buffers.
@@ -156,12 +154,9 @@ public struct AcquiredArraysOf ( T )
     ***************************************************************************/
 
     private void[]* acquireNewBuffer ( )
-    in
     {
-        assert(this.buffer_pool !is null);
-    }
-    body
-    {
+        verify(this.buffer_pool !is null);
+
         const initial_array_capacity = 4;
 
         // Acquire container buffer, if not already done.
@@ -326,12 +321,9 @@ public struct Acquired ( T )
     ***************************************************************************/
 
     public Elem acquire ( lazy Elem new_t )
-    in
     {
-        assert(this.buffer_pool !is null);
-    }
-    body
-    {
+        verify(this.buffer_pool !is null);
+
         // Acquire container buffer, if not already done.
         if ( this.buffer is null )
         {
@@ -352,12 +344,9 @@ public struct Acquired ( T )
     ***************************************************************************/
 
     public void relinquishAll ( )
-    in
     {
-        assert(this.buffer_pool !is null);
-    }
-    body
-    {
+        verify(this.buffer_pool !is null);
+
         if ( this.buffer !is null )
         {
             // Relinquish acquired Ts.
@@ -504,16 +493,13 @@ public struct AcquiredSingleton ( T )
     ***************************************************************************/
 
     public Elem acquire ( lazy Elem new_t )
-    in
     {
-        assert(this.t_pool !is null);
-    }
-    body
-    {
+        verify(this.t_pool !is null);
+
         if ( this.acquired is null )
             this.acquired = this.t_pool.get(new_t);
 
-        assert(this.acquired !is null);
+        verify(this.acquired !is null);
 
         return this.acquired;
     }
@@ -534,19 +520,16 @@ public struct AcquiredSingleton ( T )
     ***************************************************************************/
 
     public Elem acquire ( lazy Elem new_t, void delegate ( Elem ) reset )
-    in
     {
-        assert(this.t_pool !is null);
-    }
-    body
-    {
+        verify(this.t_pool !is null);
+
         if ( this.acquired is null )
         {
             this.acquired = this.t_pool.get(new_t);
             reset(this.acquired);
         }
 
-        assert(this.acquired !is null);
+        verify(this.acquired !is null);
 
         return this.acquired;
     }
@@ -558,12 +541,9 @@ public struct AcquiredSingleton ( T )
     ***************************************************************************/
 
     public void relinquish ( )
-    in
     {
-        assert(this.t_pool !is null);
-    }
-    body
-    {
+        verify(this.t_pool !is null);
+
         if ( this.acquired !is null )
             this.t_pool.recycle(this.acquired);
     }
