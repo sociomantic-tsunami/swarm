@@ -651,10 +651,6 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
 
         public Neo.ConnectionHandler.RequestMap requests;
 
-        /// Alias to old name.
-        deprecated("Use the `requests` member instead.")
-        public alias requests cmd_handlers;
-
         /***********************************************************************
 
             Epoll instance used by the node.
