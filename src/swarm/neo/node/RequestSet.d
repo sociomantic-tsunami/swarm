@@ -22,6 +22,7 @@ module swarm.neo.node.RequestSet;
 import ocean.util.container.pool.ObjectPool;
 
 import ocean.transition;
+import ocean.core.Verify;
 
 /******************************************************************************/
 
@@ -148,7 +149,7 @@ class RequestSet
         body
         {
             auto node_conn = downcast!(Connection)(this.connection);
-            assert(node_conn !is null);
+            verify(node_conn !is null);
 
             return node_conn.connected_client;
         }
@@ -222,7 +223,7 @@ class RequestSet
             /* final */ switch (this.fiber.state)
             {
                 case fiber.state.HOLD:
-                    assert(!this.fiber_was_started,
+                    verify(!this.fiber_was_started,
                            "Request unexpectedly running (fiber suspended)");
                     goto case;
 
@@ -234,9 +235,9 @@ class RequestSet
                     assert(false, "Request unexpectedly running (fiber executing)");
             }
 
-            assert(!this.request_id, "previous request id wasn't reset");
-            assert(!this.request_set, "previous request set wasn't reset");
-            assert(!this.connection, "previous connection wasn't reset");
+            verify(!this.request_id, "previous request id wasn't reset");
+            verify(!this.request_set, "previous request set wasn't reset");
+            verify(!this.connection, "previous connection wasn't reset");
         }
         body
         {
