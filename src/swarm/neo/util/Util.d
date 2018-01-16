@@ -83,10 +83,10 @@ unittest
     void[][] slices;
     char[] str = "Hello World!".dup;
     appendSlices(slices, str);
-    assert(slices.length == 2);
-    assert(slices[0].length == size_t.sizeof);
-    assert(*cast(size_t*)(slices[0].ptr) == str.length);
-    assert(slices[1] is str);
+    test!("==")(slices.length, 2);
+    test!("==")(slices[0].length, size_t.sizeof);
+    test!("==")(*cast(size_t*)(slices[0].ptr), str.length);
+    test!("is")(slices[1], str);
 }
 
 
@@ -121,7 +121,11 @@ char[] TupleToSlices ( Types ... ) ( istring name )
     return code;
 }
 
-version (UnitTest) import ocean.core.Tuple;
+version (UnitTest)
+{
+    import ocean.core.Test;
+    import ocean.core.Tuple;
+}
 
 unittest
 {
@@ -130,10 +134,10 @@ unittest
 
     void f ( void[][] slices ... )
     {
-        assert(slices.length == 2);
-        assert(slices[0].length == items[0].length.sizeof);
-        assert(*cast(size_t*)slices[0].ptr == items[0].length);
-        assert(slices[1] is items[0]);
+        test!("==")(slices.length, 2);
+        test!("==")(slices[0].length, items[0].length.sizeof);
+        test!("==")(*cast(size_t*)slices[0].ptr, items[0].length);
+        test!("is")(slices[1], items[0]);
     }
 
     mixin("f(" ~ TupleToSlices!(typeof(items))("items") ~ ");");
