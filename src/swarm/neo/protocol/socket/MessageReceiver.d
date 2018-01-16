@@ -17,6 +17,8 @@
 
 module swarm.neo.protocol.socket.MessageReceiver;
 
+import ocean.core.Verify;
+
 /*******************************************************************************
 
     This base class contains everything -- data buffering and message parsing --
@@ -143,16 +145,14 @@ private class MessageReceiverBase
     ***************************************************************************/
 
     public ubyte receiveProtocolVersion ( lazy Event wait )
-    in
-    {
-        assert(!this.buffer_content_end);
-    }
     out
     {
         assert(!this.buffer_content_end);
     }
     body
     {
+        verify(!this.buffer_content_end);
+
         this.ensureMinimumAmountOfBytesInBuffer(ubyte.sizeof, wait);
 
         scope (exit) this.buffer_content_end = 0;
@@ -342,12 +342,9 @@ private class MessageReceiverBase
     ***************************************************************************/
 
     private void cutBufferHead ( size_t n )
-    in
     {
-        assert(n <= this.buffer_content_end);
-    }
-    body
-    {
+        verify(n <= this.buffer_content_end);
+
         this.buffer_content_end -= n;
 
         // Don't memmove if there are no data to move. This also protects from
@@ -521,9 +518,6 @@ class MessageReceiver: MessageReceiverBase
     in
     {
         assert(this);
-        assert(events & events.EPOLLIN,
-               typeof(this).stringof ~ ".write: called without EPOLLIN event");
-        assert(this.buffer_content_end < this.buffer.length, "requested to receive nothing");
     }
     out
     {
@@ -531,6 +525,10 @@ class MessageReceiver: MessageReceiverBase
     }
     body
     {
+        verify((events & events.EPOLLIN) != 0,
+               typeof(this).stringof ~ ".write: called without EPOLLIN event");
+        verify(this.buffer_content_end < this.buffer.length, "requested to receive nothing");
+
         void[] dst = this.buffer[this.buffer_content_end .. $];
 
         errno = 0;
@@ -645,8 +643,8 @@ unittest
             {
                 auto n = msg_len_min + cast(uint)
                     (erand48(xsubi) * (msg_len_max - msg_len_min + 1));
-                assert(n >= msg_len_min);
-                assert(n <= msg_len_max);
+                verify(n >= msg_len_min);
+                verify(n <= msg_len_max);
                 n += MessageHeader.sizeof;
                 auto start = this.messages.length;
                 this.messages.length = start + n;
@@ -660,16 +658,14 @@ unittest
 
         // Populates `dst` with one message, `id` is the serial message id.
         static void makeMsg ( void[] dst, uint id )
-        in
-        {
-            assert(dst.length >= MessageHeader.sizeof + Info.sizeof);
-        }
         out
         {
             checkMsgBody(dst[MessageHeader.sizeof .. $], id);
         }
         body
         {
+            verify(dst.length >= MessageHeader.sizeof + Info.sizeof);
+
             // Write the message header
             auto msg_body = dst[MessageHeader.sizeof .. $];
             auto header = MessageHeader(MessageType.Request, msg_body.length);
@@ -715,7 +711,7 @@ unittest
         // are available then only the available data are read.
         override protected size_t read ( Event events = Event.EPOLLIN )
         {
-            assert(this.read_chunk_size); // protect from an endless loop
+            verify(this.read_chunk_size != 0); // protect from an endless loop
             auto n = this.read_chunk_size;
 
             if (this.messages.length < (n + this.data_read))
@@ -733,13 +729,10 @@ unittest
         // Tests `receive()` with `read()` reading `read_chunk_size` bytes per
         // call. Reads all generated messages and validates them.
         void runTest ( size_t read_chunk_size )
-        in
         {
-            assert(read_chunk_size);
-            assert(read_chunk_size <= this.buffer.length);
-        }
-        body
-        {
+            verify(read_chunk_size != 0);
+            verify(read_chunk_size <= this.buffer.length);
+
             this.read_chunk_size = read_chunk_size;
             this.data_read = 0;
 
