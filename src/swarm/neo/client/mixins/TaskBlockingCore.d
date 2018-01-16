@@ -27,7 +27,6 @@ template TaskBlockingCore ( )
     import ocean.task.Task;
 
     import swarm.neo.client.ConnectionSet;
-    import swarm.neo.IPAddress;
 
     /***************************************************************************
 

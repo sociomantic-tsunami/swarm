@@ -24,15 +24,6 @@ public struct Credentials
 
     /***************************************************************************
 
-        Limits for the length of credentials strings and files.
-
-    ***************************************************************************/
-
-    deprecated("Refer to LengthLimit in swarm.neo.authentication.Credentials")
-    public alias CredDef.LengthLimit LengthLimit;
-
-    /***************************************************************************
-
         The client name.
 
         Only ASCII graph characters are allowed. ASCII graph characters are
@@ -92,22 +83,6 @@ public struct Credentials
             this.key = key;
         }
     }
-
-    /***************************************************************************
-
-        Scans name for non-graph characters.
-
-        Params:
-            name = input client name
-
-        Returns:
-            name.length minus the index of the first non-graph character found
-            or 0 if all characters in name are graph characters.
-
-    ***************************************************************************/
-
-    deprecated("Call validateNameCharacters in swarm.neo.authentication.Credentials")
-    public alias CredDef.validateNameCharacters validateNameCharacters;
 }
 
 /*******************************************************************************

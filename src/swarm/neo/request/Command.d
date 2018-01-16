@@ -47,23 +47,6 @@ public alias byte StatusCode;
 
 /*******************************************************************************
 
-    Enum defining global status codes transmitted from the node -> client, in
-    response to a request.
-
-    Note: there are two types of status code:
-        * Global: the codes defined in this module, which may be received by the
-          client in response to any request. Global codes have negative values.
-        * Request-specific: each request may define whatever status codes it
-          needs to inform the client of success/failure/etc. These must have
-          positive values.
-
-*******************************************************************************/
-
-deprecated ("Use the SupportedStatus instead of GlobalStatusCode")
-public alias SupportedStatus GlobalStatusCode;
-
-/*******************************************************************************
-
     Enum defining request supported status codes transmitted from the node ->
     client, in response to a request.
 
