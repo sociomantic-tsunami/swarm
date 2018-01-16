@@ -35,6 +35,7 @@ abstract class ConnectionBase: ISelectClient
     import swarm.neo.util.FiberTokenHashGenerator;
     import swarm.neo.util.MessageFiber;
 
+    import ocean.core.Verify;
     import ocean.core.SmartUnion;
 
     import ocean.io.select.EpollSelectDispatcher;
@@ -189,7 +190,7 @@ abstract class ConnectionBase: ISelectClient
                     // note on error handling, above.)
                     if ( !this.loop_started )
                     {
-                        assert(this.send_loop_exited_ex !is null);
+                        verify(this.send_loop_exited_ex !is null);
                         scope ( exit )
                         {
                             this.send_loop_exited_ex = null;
@@ -580,12 +581,9 @@ abstract class ConnectionBase: ISelectClient
         ***********************************************************************/
 
         private void fiberMethod ( )
-        in
         {
-            assert(!this.outer.current_exception);
-        }
-        body
-        {
+            verify(!this.outer.current_exception);
+
             debug ( SwarmConn )
             {
                 Stdout.formatln("ReceiveLoop.fiberMethod()");
@@ -1016,12 +1014,9 @@ abstract class ConnectionBase: ISelectClient
     ***************************************************************************/
 
     public void shutdown ( Exception e, RequestId request_id = 0 ) // nothrow
-    in
     {
-        assert(!this.send_loop.running);
-    }
-    body
-    {
+        verify(!this.send_loop.running);
+
         if (request_id)
         {
             this.send_loop.unregisterForSending(request_id);
@@ -1062,12 +1057,9 @@ abstract class ConnectionBase: ISelectClient
     ***************************************************************************/
 
     protected static void enableKeepAlive ( AddressIPSocket!() socket )
-    in
     {
-        assert(socket !is null);
-    }
-    body
-    {
+        verify(socket !is null);
+
         // Activates TCP's keepalive feature for this socket.
         if (socket.setsockoptVal(SOL_SOCKET, SO_KEEPALIVE, true) == -1)
         {
@@ -1111,13 +1103,10 @@ abstract class ConnectionBase: ISelectClient
     ***************************************************************************/
 
     protected void shutdownImpl ( Exception e ) // nothrow
-    in
     {
-        assert(this.send_loop.running);
-        assert(!this.send_loop.loop_started);
-    }
-    body
-    {
+        verify(this.send_loop.running);
+        verify(!this.send_loop.loop_started);
+
         this.current_exception = e;
 
         scope (exit) this.current_exception = null;
