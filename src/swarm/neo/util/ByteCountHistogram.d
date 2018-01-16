@@ -19,6 +19,7 @@
 module swarm.neo.util.ByteCountHistogram;
 
 import ocean.transition;
+import ocean.core.Verify;
 
 /// ditto
 struct ByteCountHistogram
@@ -215,12 +216,9 @@ struct ByteCountHistogram
     ***************************************************************************/
 
     public double mean_bytes ( )
-    in
     {
-        assert(this.count || !this.total);
-    }
-    body
-    {
+        verify(this.count || !this.total);
+
         return this.total / cast(double)this.count;
     }
 

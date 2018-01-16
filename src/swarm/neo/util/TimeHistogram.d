@@ -20,6 +20,7 @@
 module swarm.neo.util.TimeHistogram;
 
 import ocean.transition;
+import ocean.core.Verify;
 
 /// ditto
 struct TimeHistogram
@@ -133,12 +134,10 @@ struct TimeHistogram
         ***********************************************************************/
 
         private static istring divisionBinVariables ( istring[] suffixes )
-        in
         {
+            // CTFE functions cannot use ocean.core.Verify
             assert(suffixes.length > 0);
-        }
-        body
-        {
+
             const type = typeof(TimeHistogram.bins[0]).stringof;
 
             istring res;
@@ -211,12 +210,9 @@ struct TimeHistogram
     ***************************************************************************/
 
     public double mean_time_micros ( )
-    in
     {
-        assert(this.count || !this.total_time_micros);
-    }
-    body
-    {
+        verify(this.count || !this.total_time_micros);
+
         return cast(double)this.total_time_micros / this.count;
     }
 

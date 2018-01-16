@@ -37,6 +37,7 @@ module swarm.neo.util.TreeMap;
 
 /******************************************************************************/
 
+import ocean.core.Verify;
 import ocean.util.container.ebtree.c.eb64tree;
 import ocean.util.container.ebtree.c.ebtree;
 
@@ -171,8 +172,8 @@ struct TreeMap ( Node = eb64_node )
             if (added)
             {
                 auto user_element = new_element;
-                assert(user_element !is null);
-                assert(user_element.treemap_backlink is null);
+                verify(user_element !is null);
+                verify(user_element.treemap_backlink is null);
                 user_element.treemap_backlink = node;
                 node.user_element_with_treemap_backlink = user_element;
                 return user_element;
@@ -180,7 +181,7 @@ struct TreeMap ( Node = eb64_node )
             else
             {
                 auto user_element = node.user_element_with_treemap_backlink;
-                assert(user_element.treemap_backlink is node);
+                verify(user_element.treemap_backlink is node);
                 return user_element;
             }
         }
@@ -274,12 +275,9 @@ struct TreeMap ( Node = eb64_node )
         public static UserElement iterate
             ( bool ascend = true )
             ( UserElement user_element )
-        in
         {
-            assert(user_element.treemap_backlink !is null);
-        }
-        body
-        {
+            verify(user_element.treemap_backlink !is null);
+
             static if (ascend)
                 return nodeToUserElement(cast(Node*)user_element.treemap_backlink.tupleof[0].next);
             else
@@ -321,16 +319,13 @@ struct TreeMap ( Node = eb64_node )
         ***********************************************************************/
 
         public static void remove ( UserElement user_element )
-        in
         {
-            assert(user_element.treemap_backlink !is null);
-            assert(
+            verify(user_element.treemap_backlink !is null);
+            verify(
                 user_element.treemap_backlink.user_element_with_treemap_backlink
                 is user_element
             );
-        }
-        body
-        {
+
             auto node = user_element.treemap_backlink;
             user_element.treemap_backlink = null;
             eb64_delete(&node.tupleof[0]);
@@ -355,8 +350,8 @@ struct TreeMap ( Node = eb64_node )
             if (node !is null)
             {
                 auto user_element = node.user_element_with_treemap_backlink;
-                assert(user_element !is null);
-                assert(user_element.treemap_backlink is node);
+                verify(user_element !is null);
+                verify(user_element.treemap_backlink is node);
                 return user_element;
             }
             else

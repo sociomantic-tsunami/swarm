@@ -19,6 +19,7 @@ module swarm.neo.util.FixedSizeMap;
 
 *******************************************************************************/
 
+import ocean.core.Verify;
 import ocean.util.container.map.Map;
 
 /******************************************************************************/
@@ -52,7 +53,7 @@ class FixedSizeMap ( V, K ) : StandardKeyHashingMap!(V, K)
 
     /***************************************************************************
 
-        Adds a new element to the map, asserting that
+        Adds a new element to the map, verifying that
           - a mapping for key does not already exist and
           - the map does not already contain n elements where n is the  maximum
             number of elements passed to the constructor.
@@ -70,7 +71,7 @@ class FixedSizeMap ( V, K ) : StandardKeyHashingMap!(V, K)
     {
         bool was_added;
         auto val_ptr = this.put(key, was_added);
-        assert(was_added, typeof(this).stringof ~
+        verify(was_added, typeof(this).stringof ~
                              ".add: element already in map");
         return val_ptr;
     }
@@ -139,7 +140,7 @@ class FixedSizeMap ( V, K ) : StandardKeyHashingMap!(V, K)
 
         protected override Bucket.Element* newElement ( )
         {
-            assert(this.n < this.items.length, typeof(this).stringof ~
+            verify(this.n < this.items.length, typeof(this).stringof ~
                    "maximum number of elements exceeded");
             return &this.items[this.n++];
         }

@@ -17,6 +17,8 @@
 
 module swarm.neo.util.TreeQueue;
 
+import ocean.core.Verify;
+
 /*******************************************************************************
 
     Tree queue template; `T` is the type of the values to store.
@@ -393,12 +395,12 @@ private struct TreeQueueCore
         {
             if (this.head)
             {
-                assert(!this.head.prev);
+                verify(!this.head.prev);
                 this.head.prev = item;
             }
             else // null head: queue is empty
             {
-                assert(this.tail is null);
+                verify(this.tail is null);
                 this.tail = item;
             }
 
@@ -429,7 +431,7 @@ private struct TreeQueueCore
 
         while (!stop && this.tail)
         {
-            assert(this);
+            assert(this); // call invariant
 
             auto request_id = this.tail.ebnode.key;
 
@@ -439,13 +441,13 @@ private struct TreeQueueCore
 
             if (auto new_tail = this.tail.prev)
             {
-                assert(new_tail.next is this.tail);
+                verify(new_tail.next is this.tail);
                 new_tail.next = null;
                 this.tail = new_tail;
             }
             else
             {
-                assert(this.head is this.tail);
+                verify(this.head is this.tail);
                 this.head = this.tail = null;
             }
 
