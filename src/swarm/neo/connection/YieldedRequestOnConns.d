@@ -147,6 +147,8 @@ class YieldedRequestOnConns: ISelectEvent
 
     private static struct YieldedQueue
     {
+        import ocean.core.Verify;
+
         /***********************************************************************
 
             The two queues of yielded `RequestOnConn`s.
@@ -209,12 +211,6 @@ class YieldedRequestOnConns: ISelectEvent
         ***********************************************************************/
 
         public void swapAndPop ( void delegate ( IYieldedRequestOnConn popped_roc ) dg )
-        in
-        {
-            assert(this.queue[!this.active].is_empty, typeof(this).stringof ~
-                   ".swapAndPop: " ~
-                   "Expected the inactive queue to be empty when called");
-        }
         out
         {
             assert(this.queue[!this.active].is_empty, typeof(this).stringof ~
@@ -223,6 +219,10 @@ class YieldedRequestOnConns: ISelectEvent
         }
         body
         {
+            verify(this.queue[!this.active].is_empty, typeof(this).stringof ~
+                   ".swapAndPop: " ~
+                   "Expected the inactive queue to be empty when called");
+
             this.active = !this.active;
 
             foreach (roc; this.queue[!this.active])
