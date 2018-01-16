@@ -226,37 +226,6 @@ public template RequestCore ( RequestType request_type_, ubyte request_code,
 
         /***********************************************************************
 
-            Note: this struct is essentially deprecated. It is only needed in
-            order to maintain the public API of Context. In the next major
-            release, this wrapper struct can be removed.
-
-        ***********************************************************************/
-
-        private struct RequestResources
-        {
-            private Object* request_resources;
-
-            public Object get ( )
-            {
-                return *this.request_resources;
-            }
-        }
-
-        /***********************************************************************
-
-            Returns:
-                instance to shared resources wrapper struct
-
-        ***********************************************************************/
-
-        deprecated("Access `shared_resources` object directly instead.")
-        public RequestResources request_resources ( )
-        {
-            return RequestResources(&this.shared_resources);
-        }
-
-        /***********************************************************************
-
             Global working data required by the request.
 
         ***********************************************************************/
