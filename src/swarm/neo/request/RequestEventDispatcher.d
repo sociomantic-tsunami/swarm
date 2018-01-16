@@ -36,6 +36,7 @@ module swarm.neo.request.RequestEventDispatcher;
 import core.stdc.string;
 import ocean.transition;
 import ocean.core.SmartUnion;
+import ocean.core.Verify;
 import swarm.neo.util.VoidBufferAsArrayOf;
 
 /*******************************************************************************
@@ -303,7 +304,7 @@ public struct RequestEventDispatcher
 
     public void initialise ( void[]* delegate() getVoidArray)
     {
-        assert(this.last_event == this.last_event.init);
+        verify(this.last_event == this.last_event.init);
 
         this.waiting_fibers = VoidBufferAsArrayOf!(WaitingFiber)(getVoidArray());
         this.waiting_fibers_to_iterate
@@ -353,13 +354,13 @@ public struct RequestEventDispatcher
             this.unregisterFiber(fiber);
 
             this.last_event = this.last_event.init;
-            assert(this.last_event.active == this.last_event.active.none);
+            verify(this.last_event.active == this.last_event.active.none);
         }
 
         fiber.suspend(this.token);
         // The code which resumes the fiber is expected to set the value of
         // this.last_event immediately before calling resume().
-        assert(this.last_event.active != this.last_event.active.none);
+        verify(this.last_event.active != this.last_event.active.none);
         return this.last_event;
     }
 
@@ -453,18 +454,15 @@ public struct RequestEventDispatcher
     ***************************************************************************/
 
     public void abort ( MessageFiber fiber )
-    in
     {
-        assert(!fiber.running, "Cannot abort self");
-    }
-    body
-    {
+        verify(!fiber.running, "Cannot abort self");
+
         this.unregisterFiber(fiber);
 
         if ( fiber.finished )
             return;
 
-        assert(fiber.waiting);
+        verify(fiber.waiting);
         fiber.kill();
     }
 
@@ -643,8 +641,8 @@ public struct RequestEventDispatcher
         {
             if ( waiting_fiber.fiber == fiber && waiting_fiber.event == event )
             {
-                assert(in_list is null);
-                assert(!waiting_fiber.enabled);
+                verify(in_list is null);
+                verify(!waiting_fiber.enabled);
                 in_list = &waiting_fiber;
             }
 
@@ -655,29 +653,21 @@ public struct RequestEventDispatcher
                 with ( event.Active ) switch ( event.active )
                 {
                     case message:
-                        // TODO: this `enforce` could be switched to `verify`
-                        // when we adapt assert statements.
-                        enforce(waiting_fiber.event.message.type
+                        verify(waiting_fiber.event.message.type
                             != event.message.type,
                             "Only one fiber may handle each message type");
                         break;
                     case signal:
-                        // TODO: this `enforce` could be switched to `verify`
-                        // when we adapt assert statements.
-                        enforce(waiting_fiber.event.signal.code
+                        verify(waiting_fiber.event.signal.code
                             != event.signal.code,
                             "Only one fiber may handle each signal");
                         break;
                     case send:
-                        // TODO: this `enforce` could be switched to `verify`
-                        // when we adapt assert statements.
-                        enforce(waiting_fiber.fiber != fiber,
+                        verify(waiting_fiber.fiber != fiber,
                             "Each fiber may only send one thing at a time");
                         break;
                     case yield:
-                        // TODO: this `enforce` could be switched to `verify`
-                        // when we adapt assert statements.
-                        enforce(waiting_fiber.fiber != fiber,
+                        verify(waiting_fiber.fiber != fiber,
                             "Each fiber may only yield once at a time");
                         break;
                     default:
@@ -806,11 +796,6 @@ public struct RequestEventDispatcher
     ***************************************************************************/
 
     private WaitingFiber popWaitingWriter ( )
-    in
-    {
-        assert(this.waiting_fibers.length > 0);
-        assert(this.enabled_events > 0);
-    }
     out ( const_waiting_fiber )
     {
         auto waiting_fiber = cast(WaitingFiber)const_waiting_fiber;
@@ -818,6 +803,9 @@ public struct RequestEventDispatcher
     }
     body
     {
+        verify(this.waiting_fibers.length > 0);
+        verify(this.enabled_events > 0);
+
         foreach ( ref waiting_fiber; this.waiting_fibers.array() )
             if ( waiting_fiber.enabled &&
                 waiting_fiber.event.active == waiting_fiber.event.active.send )
@@ -884,7 +872,7 @@ public struct RequestEventDispatcher
         if ( signal < 0 ) // Standard send/receive codes
             return;
 
-        assert(signal <= 255);
+        verify(signal <= 255);
         ubyte signal_ubyte = cast(ubyte)signal;
 
         foreach ( waiting_fiber; this.waiting_fibers.array() )
@@ -1039,9 +1027,9 @@ public struct RequestEventDispatcher
 
     private void notifyWaitingFiber ( MessageFiber fiber, EventNotification event )
     {
-        assert(this.last_event.active == this.last_event.active.none);
+        verify(this.last_event.active == this.last_event.active.none);
         this.last_event = event;
-        assert(this.last_event.active != this.last_event.active.none);
+        verify(this.last_event.active != this.last_event.active.none);
         fiber.resume(this.token);
     }
 }
