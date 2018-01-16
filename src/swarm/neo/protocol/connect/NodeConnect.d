@@ -31,6 +31,7 @@ class NodeConnect
     import core.stdc.time: time_t, time;
     import core.stdc.ctype: isalnum;
     import ocean.core.Enforce;
+    import ocean.core.Verify;
     import ocean.core.array.Mutation : copy;
     import ocean.transition;
 
@@ -233,7 +234,7 @@ class NodeConnect
 
         // Make sure we return normally only if the authentication was accepted.
         // We should have thrown otherwise.
-        assert(success, typeof(this).stringof ~
+        verify(success, typeof(this).stringof ~
                ".authenticate should have thrown on rejected authentication");
     }
 
