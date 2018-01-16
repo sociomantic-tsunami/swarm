@@ -15,6 +15,7 @@ module swarm.neo.AddrPort;
 import core.sys.posix.netinet.in_; // in_addr, in_addr_t, in_port_t, sockaddr_in, AF_INET
 
 import ocean.transition;
+version ( UnitTest ) import ocean.core.Test;
 
 extern (C) int inet_aton(Const!(char)* src, in_addr* dst);
 
@@ -125,12 +126,12 @@ public struct AddrPort
     {
         typeof(*this) x;
         bool success = x.setAddress("192.168.222.111");
-        assert(success);
-        assert(x.address_bytes == [cast(ubyte)192, 168, 222, 111]);
+        test(success);
+        test!("==")(x.address_bytes, [cast(ubyte)192, 168, 222, 111]);
         success = x.setAddress("192.168.333.111");
-        assert(!success);
+        test(!success);
         success = x.setAddress("Die Katze tritt die Treppe krumm."); // too long
-        assert(!success);
+        test(!success);
     }
 
     /***************************************************************************
