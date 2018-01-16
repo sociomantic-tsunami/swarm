@@ -118,35 +118,6 @@ template ClientCore ( )
         Params:
             auth_name = name of the client, for authorisation
             auth_key = key of the client, for authorisation
-            conn_notifier = delegate which is called when a connection
-                attempt succeeds or fails (including when a connection is
-                re-established). Of type:
-                void delegate ( AddrPort node_address, Exception e )
-            request_resources = object to acquire resources from
-
-    ***************************************************************************/
-
-    deprecated("Use the ctor that accepts a Settings instance instead")
-    private this ( cstring auth_name, in ubyte[] auth_key,
-        ConnectionNotifier conn_notifier, Object request_resources = null )
-    {
-        Settings settings;
-        settings.conn_notifier = conn_notifier;
-        settings.request_resources = request_resources;
-        this(auth_name, auth_key, settings);
-    }
-
-    /***************************************************************************
-
-        Constructor (private, so that only the client class where this template
-        is mixed-in can construct an instance).
-
-        This constructor that accepts all arguments manually (i.e. not read from
-        config files) is mostly of use in tests.
-
-        Params:
-            auth_name = name of the client, for authorisation
-            auth_key = key of the client, for authorisation
             settings = Settings instance specifying construction settings
 
     ***************************************************************************/
@@ -162,59 +133,6 @@ template ClientCore ( )
         this.connections = new ConnectionSet(cred, this.outer.epoll,
             settings.conn_notifier, settings.auto_connect);
         this.request_resources = settings.request_resources;
-    }
-
-    /***************************************************************************
-
-        Constructor (private, so that only the client class where this template
-        is mixed-in can construct an instance).
-
-        Params:
-            auth_file = path of file from which to read the name/key of the
-                client, for authorisation
-            conn_notifier = delegate which is called when a connection
-                attempt succeeds or fails (including when a connection is
-                re-established). Of type:
-                void delegate ( AddrPort node_address, Exception e )
-            request_resources = object to acquire resources from
-
-    ***************************************************************************/
-
-    deprecated("Use the ctor that accepts a Config instance instead")
-    private this ( cstring auth_file, ConnectionNotifier conn_notifier,
-        Object request_resources = null )
-    {
-        auto cred = fromFile(auth_file);
-        this(cred, conn_notifier, request_resources);
-    }
-
-    /***************************************************************************
-
-        Constructor (private, so that only the client class where this template
-        is mixed-in can construct an instance).
-
-        Adds nodes from the file specified in the config argument.
-
-        Params:
-            config = Config object specifying the paths of the credentials and
-                nodes files to use
-            conn_notifier = delegate which is called when a connection
-                attempt succeeds or fails (including when a connection is
-                re-established). Of type:
-                void delegate ( AddrPort node_address, Exception e )
-            request_resources = object to acquire resources from
-
-    ***************************************************************************/
-
-    deprecated("Use the ctor that accepts a Settings instance instead")
-    private this ( Config config, ConnectionNotifier conn_notifier,
-        Object request_resources = null )
-    {
-        Settings settings;
-        settings.conn_notifier = conn_notifier;
-        settings.request_resources = request_resources;
-
-        this(config, settings);
     }
 
     /***************************************************************************
@@ -241,30 +159,6 @@ template ClientCore ( )
         this.request_resources = settings.request_resources;
 
         this.addNodes(config.nodes_file());
-    }
-
-    /***************************************************************************
-
-        Constructor (private, so that only the client class where this template
-        is mixed-in can construct an instance).
-
-        Params:
-            cred = name/key of the client, for authorisation
-            conn_notifier = delegate which is called when a connection
-                attempt succeeds or fails (including when a connection is
-                re-established). Of type:
-                void delegate ( AddrPort node_address, Exception e )
-            request_resources = object to acquire resources from
-
-    ***************************************************************************/
-
-    deprecated("Use the ctor that accepts a Config instance instead")
-    private this ( Credentials cred, ConnectionNotifier conn_notifier,
-        Object request_resources = null )
-    {
-        this.connections = new ConnectionSet(cred, this.outer.epoll,
-            conn_notifier, true);
-        this.request_resources = request_resources;
     }
 
     /***************************************************************************

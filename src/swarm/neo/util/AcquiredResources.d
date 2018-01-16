@@ -106,54 +106,6 @@ public struct AcquiredArraysOf ( T )
     {
         /***********************************************************************
 
-            Gets a pointer to a new array, acquired from the shared resources
-            pool.
-
-            Important note about array casting: care must be taken when casting
-            an array to a type of a different element size. Sizing the array
-            first, then casting is fine, e.g.:
-
-            ---
-                AcquiredArraysOf!(void) arrays;
-                arrays.initialise(buffer_pool); // buffer_pool assumed to exist
-                auto void_array = arrays.acquire();
-
-                struct S { int i; hash_t h; }
-                (*void_array).length = 23 * S.sizeof;
-                auto s_array = cast(S[])*void_array;
-            ---
-
-            But casting the array then sizing it has been observed to cause
-            segfaults, e.g.:
-
-            ---
-                AcquiredArraysOf!(void) arrays;
-                arrays.initialise(buffer_pool); // buffer_pool assumed to exist
-                auto void_array = arrays.acquire();
-
-                struct S { int i; hash_t h; }
-                auto s_array = cast(S[]*)void_array;
-                s_array.length = 23;
-            ---
-
-            The exact reason for the segfaults is not known, but it appears to
-            lead to corruption of internal GC data (possibly type metadata
-            associated with the array's pointer).
-
-            Returns:
-                pointer to a new void[] cast to a pointer to a T[]
-
-        ***********************************************************************/
-
-        deprecated("Use the safely typed wrapper returned by acquireWrapped instead")
-        public T[]* acquire ( )
-        {
-            auto new_buf = this.acquireNewBuffer();
-            return cast(T[]*)new_buf;
-        }
-
-        /***********************************************************************
-
             Gets a new void[] wrapped with an API allowing it to be used as a
             T[], acquired from the shared resources pool.
 

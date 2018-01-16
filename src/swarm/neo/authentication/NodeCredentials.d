@@ -99,14 +99,4 @@ public class Credentials
     {
         this.credentials_ = CredFile.parse(this.filepath);
     }
-
-    /***************************************************************************
-
-        Specialised exception class containing the file and line where a parsing
-        error occurred.
-
-    ***************************************************************************/
-
-    deprecated("Refer to CredentialsParseException in swarm.neo.authentication.CredentialsFile directly")
-    public alias CredFile.CredentialsParseException ParseException;
 }
