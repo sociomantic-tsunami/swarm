@@ -78,10 +78,6 @@ void appendSlices ( Types ... ) ( ref void[][] slices, ref Types x )
     }
 }
 
-//pragma(msg, TupleToSlices_old!("x", int, char[]));
-//pragma(msg, TupleToSlices!(int, char[])("x"));
-import ocean.io.Stdout;
-
 unittest
 {
     void[][] slices;
