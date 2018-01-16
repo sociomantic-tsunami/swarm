@@ -59,9 +59,9 @@
 
     Whenever `suspendFiber()` returns `FiberResumeCode.Received` -- whether you
     are expecting it or not --, acknowledge the reception of the message by
-    setting `recv_payload` to `null`, or an assertion wil fail. (The reason for
-    this is to avoid turning `recv_payload` into a dangling slice when the fiber
-    is suspended the next time.)
+    setting `recv_payload` to `null`, or a verification wil fail. (The reason
+    for this is to avoid turning `recv_payload` into a dangling slice when the
+    fiber is suspended the next time.)
 
     Copyright: Copyright (c) 2016-2017 sociomantic labs GmbH. All rights reserved
 
@@ -82,6 +82,7 @@ abstract class RequestOnConnBase
     import Util = swarm.neo.util.Util;
 
     import ocean.transition;
+    import ocean.core.Verify;
 
     /// Convenience alias for derived classes
     protected alias Message.RequestId RequestId;
@@ -93,7 +94,7 @@ abstract class RequestOnConnBase
 
         When `suspendFiber()` returns `FiberResumeCode.Received`, the caller
         must call `discardRecvPayload()` before suspending the fiber again or
-        an assertion will fail when this request receives the next message.
+        a verifitcation will fail when this request receives the next message.
 
     ***************************************************************************/
 
@@ -178,13 +179,9 @@ abstract class RequestOnConnBase
     ***************************************************************************/
 
     public void resumeFiber ( uint code = 0 )
-    in
     {
-        assert(code <= int.max,
+        verify(code <= int.max,
                "fiber resume code expected to be at most int.max");
-    }
-    body
-    {
         this.resumeFiber_(this.fiber.Message(code));
     }
 
@@ -389,7 +386,7 @@ abstract class RequestOnConnBase
 
             private this ( )
             {
-                assert(this.outer.outer.send_payload.length == 0);
+                verify(this.outer.outer.send_payload.length == 0);
             }
 
             /*******************************************************************
@@ -444,9 +441,9 @@ abstract class RequestOnConnBase
             {
                 static assert(is(T : long));
 
-                assert(this.copied_values_used + T.sizeof
+                verify(this.copied_values_used + T.sizeof
                     <= this.copied_values.length,
-                    "Payload constants buffer insufficient to store requested value");
+                    "Payload copied values buffer insufficient to store requested value");
 
                 auto start = this.copied_values_used;
                 this.copied_values_used += T.sizeof;
@@ -654,7 +651,7 @@ abstract class RequestOnConnBase
                 if (!this.outer.connection.registerForSending(
                     this.outer.request_id))
                 {
-                    assert(false, "nextEvent: already sending");
+                    verify(false, "nextEvent: already sending");
                 }
 
                 // Sending may succeed immediately. send_payload_ is null, in
@@ -684,7 +681,7 @@ abstract class RequestOnConnBase
                 if (!this.outer.connection.registerForErrorNotification(
                     this.outer.request_id))
                 {
-                    assert(false, "nextEvent: already receiving");
+                    verify(false, "nextEvent: already receiving");
                 }
             }
 
@@ -701,7 +698,7 @@ abstract class RequestOnConnBase
             if ( yielding )
             {
                 if (!this.outer.yielded_rqonconns.add(yielded_rqonconn))
-                    assert(false, "nextEvent: already added to the resumer");
+                    verify(false, "nextEvent: already added to the resumer");
             }
 
             scope ( exit )
@@ -762,7 +759,7 @@ abstract class RequestOnConnBase
                     break;
 
                 default:
-                    assert(resume_code >= 0, "nextEvent: " ~
+                    verify(resume_code >= 0, "nextEvent: " ~
                            "Unsupported negative code used to resume " ~
                            "RequestOnConn fiber");
 
@@ -816,7 +813,7 @@ abstract class RequestOnConnBase
         public void send ( void delegate ( Payload ) fill_payload )
         {
             auto event = this.nextEvent(NextEventFlags.None, fill_payload);
-            assert(event.active == event.active.sent);
+            verify(event.active == event.active.sent);
         }
 
         /***********************************************************************
