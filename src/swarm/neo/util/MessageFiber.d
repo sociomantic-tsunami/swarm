@@ -21,6 +21,7 @@ module swarm.neo.util.MessageFiber;
 import ocean.transition;
 
 import ocean.core.Array: copy;
+import ocean.core.Verify;
 
 import ocean.core.SmartUnion;
 
@@ -354,7 +355,7 @@ public class OceanMessageFiber
         {
             auto l = cast(MessageFiber) GC.weakPointerGet(MessageFiber.last_fiber);
 
-            assert ( l !is null );
+            verify ( l !is null );
 
             l.next_fiber = me;
             prev_fiber = last_fiber;
@@ -383,10 +384,6 @@ public class OceanMessageFiber
      **************************************************************************/
 
     public Message start ( Message msg = Message.init )
-    in
-    {
-        assert (this.fiber.state != this.fiber.State.EXEC, "attempt to start an active fiber");
-    }
     out (_msg_out)
     {
         auto msg_out = cast(Unqual!(typeof(_msg_out))) _msg_out;
@@ -397,6 +394,8 @@ public class OceanMessageFiber
     }
     body
     {
+        verify (this.fiber.state != this.fiber.State.EXEC, "attempt to start an active fiber");
+
         debug (MessageFiber)
         {
             Stdout.formatln(
@@ -446,11 +445,6 @@ public class OceanMessageFiber
      **************************************************************************/
 
     public Message suspend ( Token token, Object identifier = null, Message msg = Message.init )
-    in
-    {
-        assert (this.fiber.state == this.fiber.State.EXEC, "attempt to suspend an inactive fiber");
-        with (msg) if (active == active.exc) assert (exc !is null);
-    }
     out (_msg_out)
     {
         auto msg_out = cast(Unqual!(typeof(_msg_out))) _msg_out;
@@ -458,6 +452,9 @@ public class OceanMessageFiber
     }
     body
     {
+        verify (this.fiber.state == this.fiber.State.EXEC, "attempt to suspend an inactive fiber");
+        with (msg) if (active == active.exc) verify (exc !is null);
+
         if (!msg.active)
         {
             msg.num = 0;
@@ -489,7 +486,7 @@ public class OceanMessageFiber
             throw this.e_resume.set(__FILE__, __LINE__);
         }
 
-        assert(this.suspend_ret_msg.active);
+        verify(this.suspend_ret_msg.active != this.resume_ret_msg.active.none);
         return this.suspend_ret_msg;
     }
 
@@ -518,12 +515,9 @@ public class OceanMessageFiber
      **************************************************************************/
 
     public Message suspend ( Token token, Exception e )
-    in
     {
-        assert (e !is null);
-    }
-    body
-    {
+        verify (e !is null);
+
         return this.suspend(token, null, Message(e));
     }
 
@@ -554,10 +548,6 @@ public class OceanMessageFiber
      **************************************************************************/
 
     public Message resume ( Token token, Object identifier = null, Message msg = Message.init )
-    in
-    {
-        assert (this.fiber.state == this.fiber.State.HOLD, "attempt to resume a non-held fiber");
-    }
     out (_msg_out)
     {
         auto msg_out = cast(Unqual!(typeof(_msg_out))) _msg_out;
@@ -568,6 +558,8 @@ public class OceanMessageFiber
     }
     body
     {
+        verify (this.fiber.state == this.fiber.State.HOLD, "attempt to resume a non-held fiber");
+
         if (!msg.active)
         {
             msg.num = 0;
@@ -606,7 +598,7 @@ public class OceanMessageFiber
         // we set a default message (the number 0).
         if ( this.fiber.state == this.fiber.State.TERM )
             this.resume_ret_msg.num = 0;
-        assert(this.resume_ret_msg.active);
+        verify(this.resume_ret_msg.active != this.resume_ret_msg.active.none);
 
         if (this.resume_ret_msg.active == this.resume_ret_msg.active.exc)
         {
@@ -636,13 +628,10 @@ public class OceanMessageFiber
      **************************************************************************/
 
     public void kill ( istring file = __FILE__, long line = __LINE__ )
-    in
     {
-        assert (this.fiber.state == this.fiber.State.HOLD, "attempt to kill a non-held fiber");
-        assert (!this.killed);
-    }
-    body
-    {
+        verify (this.fiber.state == this.fiber.State.HOLD, "attempt to kill a non-held fiber");
+        verify (!this.killed);
+
         debug (MessageFiber)
         {
             Stdout.formatln(
@@ -769,13 +758,10 @@ public class OceanMessageFiber
      **************************************************************************/
 
     private void suspend_ ( )
-    in
     {
-        assert (this.fiber.state == this.fiber.State.EXEC, "attempt to suspend a non-active fiber");
-        assert (this.fiber is Fiber.getThis, "attempt to suspend fiber externally");
-    }
-    body
-    {
+        verify (this.fiber.state == this.fiber.State.EXEC, "attempt to suspend a non-active fiber");
+        verify (this.fiber is Fiber.getThis, "attempt to suspend fiber externally");
+
         this.fiber.yield();
 
         if (this.killed)

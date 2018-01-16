@@ -28,6 +28,7 @@ module swarm.neo.util.Batch;
 
 import ocean.transition;
 import ocean.core.Traits;
+import ocean.core.Verify;
 import ocean.io.compress.Lzo;
 
 /*******************************************************************************
@@ -328,7 +329,7 @@ public scope class BatchReader ( Record ... )
         // Decompress into decompress_buf.
         auto src = batch[size_t.sizeof .. $];
         auto final_uncompressed_len = lzo.decompressSafe(src, decompress_buf);
-        assert(final_uncompressed_len == uncompressed_len);
+        verify(final_uncompressed_len == uncompressed_len);
 
         // Construct as normal, extracting from the decompressed data.
         this(decompress_buf);
