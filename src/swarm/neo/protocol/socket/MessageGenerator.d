@@ -11,6 +11,8 @@
 
 module swarm.neo.protocol.socket.MessageGenerator;
 
+import ocean.core.Verify;
+
 struct IoVecMessage // MessageGenerator
 {
     import swarm.neo.protocol.Message: MessageType, MessageHeader;
@@ -53,12 +55,9 @@ struct IoVecMessage // MessageGenerator
     ***************************************************************************/
 
     IoVecTracker* setup ( MessageType type, in void[][] dynamic_fields, in void[][] static_fields ... )
-    in
     {
-        assert(type <= type.max);
-    }
-    body
-    {
+        verify(type <= type.max);
+
         this.tracker.fields.length = 1 + static_fields.length + dynamic_fields.length;
         enableStomping(this.tracker.fields);
 
@@ -183,12 +182,9 @@ struct IoVecTracker
     ***************************************************************************/
 
     size_t advance ( size_t n )
-    in
     {
-        assert(n <= this.length);
-    }
-    body
-    {
+        verify(n <= this.length);
+
         if (n)
         {
             if (n == this.length)
@@ -264,7 +260,7 @@ struct IoVecTracker
                 start = end;
             }
 
-            assert(start == this.length);
+            verify(start == this.length);
 
             this.fields = this.fields[0 .. 1];
             enableStomping(this.fields);

@@ -36,6 +36,7 @@ class MessageSender
     import core.stdc.errno: errno, EAGAIN, EWOULDBLOCK, EINTR;
 
     import ocean.transition;
+    import ocean.core.Verify;
 
     debug (Raw) import ocean.io.Stdout: Stderr;
 
@@ -191,17 +192,15 @@ class MessageSender
      **************************************************************************/
 
     public void finishSending ( lazy Event wait )
-    in
-    {
-        assert(this.pending_data.length, typeof(this).stringof ~
-               ".finishSending: no message to send");
-    }
     out
     {
         assert(!this.pending_data.length);
     }
     body
     {
+        verify(this.pending_data.length > 0, typeof(this).stringof ~
+               ".finishSending: no message to send");
+
         auto iov = iovec_const(this.pending_data.ptr, this.pending_data.length);
         auto src = IoVecTracker((&iov)[0 .. 1], iov.iov_len);
 
@@ -307,18 +306,16 @@ class MessageSender
     ***************************************************************************/
 
     private bool assign_ ( ref IoVecTracker src )
-    in
-    {
-        assert(src.length, typeof(this).stringof ~ ".assign_: empty message");
-        assert(!this.pending_data.length, typeof(this).stringof ~
-               ".assign_: the previous message hasn't been sent yet");
-    }
     out (need_finish)
     {
         assert(need_finish || !this.pending_data.length);
     }
     body
     {
+        verify(src.length > 0, typeof(this).stringof ~ ".assign_: empty message");
+        verify(!this.pending_data.length, typeof(this).stringof ~
+               ".assign_: the previous message hasn't been sent yet");
+
         // Try to write it all in one go, this is likely to succeed.
         if (!this.write(src))
         {
@@ -353,14 +350,11 @@ class MessageSender
      **************************************************************************/
 
     private bool write ( ref IoVecTracker src, Event events = Event.EPOLLOUT )
-    in
     {
-        assert(events & events.EPOLLOUT,
+        verify((events & events.EPOLLOUT) != 0,
                typeof(this).stringof ~ ".write: called without EPOLLOUT event");
-        assert(src.length, "requested to send nothing");
-    }
-    body
-    {
+        verify(src.length > 0, "requested to send nothing");
+
         debug (Raw)
         {
             Stderr.format("[{}] Write ", this.socket.fileHandle);
