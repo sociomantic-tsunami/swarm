@@ -19,6 +19,8 @@ import ocean.text.convert.Formatter;
 
 import swarm.neo.client.NotifierTypes;
 
+import ocean.core.Verify;
+
 /// Alias for a formatting sink delegate.
 private alias void delegate ( cstring chunk ) Sink;
 
@@ -148,12 +150,9 @@ private Sink format_sink;
 *******************************************************************************/
 
 public void format ( T ) ( T notification )
-in
 {
-    assert(.format_sink !is null);
-}
-body
-{
+    verify(.format_sink !is null);
+
     static if ( hasMethod!(T, "toString", void delegate ( Sink )) )
     {
         .format_sink(": ");
