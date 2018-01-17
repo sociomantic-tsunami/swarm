@@ -121,11 +121,13 @@ public struct Record
 
     ***************************************************************************/
 
-    public void serialize ( OutputStream stream, ref mstring buf )
+    public void serialize ( OutputStream stream, ref mstring buf ) /* d1to2fix_inject: const */
     {
         if ( this.key.length )
         {
-            SimpleStreamSerializer.writeData(stream, this.key);
+            // Cast necessary because the porting of this function
+            // was fixed in v3.6.0
+            SimpleStreamSerializer.writeData(stream, cast(void[]) this.key);
         }
         SimpleStreamSerializer.write(stream, Separator);
 
@@ -275,10 +277,10 @@ public struct Record
 
     ***************************************************************************/
 
-    private static void splitRecord ( ubyte[] input, ref ubyte[] key,
+    private static void splitRecord ( in ubyte[] input, ref ubyte[] key,
         ref ubyte[] value )
     {
-        bool split ( ubyte[] line )
+        bool split ( in ubyte[] line )
         {
             // Find the separator
             auto sep = line.find(cast(ubyte)Separator);
@@ -287,7 +289,7 @@ public struct Record
 
             // If another separator is found, the line is invalid
             auto head = line[0..sep];
-            ubyte[] tail;
+            Const!(ubyte)[] tail;
             if ( sep < line.length - 1 )
             {
                 tail = line[sep + 1..$];
@@ -298,7 +300,7 @@ public struct Record
 
             // The head (before the separator) is expected to be the record key
             // and must either be empty or be a 16-character hex-string.
-            if ( head.length && !isHash(castFrom!(ubyte[]).to!(mstring)(head)) )
+            if ( head.length && !isHash(castFrom!(Const!(ubyte)[]).to!(cstring)(head)) )
                 return false;
 
             // The tail (after the separator) is expected to be the record value
