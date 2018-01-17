@@ -10,7 +10,8 @@ endif
 # Remove deprecated modules from testing:
 TEST_FILTER_OUT += \
 	$C/src/swarm/neo/node/helper/SuspendableRequest.d \
-	$C/src/swarm/neo/client/helper/SuspendableRequest.d
+	$C/src/swarm/neo/client/helper/SuspendableRequest.d \
+	$C/src/swarm/neo/util/StateMachine.d
 
 .PHONY: d2conv
 d2conv: $O/d2conv.stamp
