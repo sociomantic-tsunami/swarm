@@ -25,6 +25,7 @@ template TaskBlockingCore ( )
 {
     import ocean.transition;
     import ocean.task.Task;
+    import ocean.core.Verify;
 
     import swarm.neo.client.ConnectionSet;
 
@@ -96,6 +97,8 @@ template TaskBlockingCore ( )
 
     public class NodesConnected : Task
     {
+        import ocean.core.Verify;
+
         /// When the task exits, holds the number of nodes which are connected.
         public size_t result;
 
@@ -153,7 +156,7 @@ template TaskBlockingCore ( )
     private void waitConnect ( bool delegate ( ) finished )
     {
         auto task = Task.getThis();
-        assert(task !is null, "This method may only be called from inside a Task");
+        verify(task !is null, "This method may only be called from inside a Task");
 
         ConnectionSet.ConnectionNotifier user_conn_notifier;
 
