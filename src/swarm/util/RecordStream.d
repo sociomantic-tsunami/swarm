@@ -21,7 +21,7 @@ import ocean.transition;
 
 import ocean.io.model.ISuspendable;
 import ocean.io.serialize.SimpleStreamSerializer;
-import ocean.io.Console : Cin, Cout;
+import ocean.io.Console : Cin, Cout, Console;
 
 version ( UnitTest )
 {
@@ -159,6 +159,32 @@ public struct Record
 
         // Extract the key and value from the line
         splitRecord(cast(ubyte[])buf, this.key, this.value);
+    }
+
+    /***************************************************************************
+
+        Serializes this record from the specified stream.
+
+        This overload uses `Console.Input` as stream, which means it's likely
+        to be only used with stdin, which is the common use case.
+        Using `Console.Input` means we can use `readln`, which handles buffering
+        for us, something that the other overload implements very inefficiently.
+
+        Params:
+            stream = input stream to read from
+
+        Throws:
+            EofException upon encountering the end of the input stream
+
+    ***************************************************************************/
+
+    private void deserialize ( Console.Input stream )
+    {
+        cstring data;
+        stream.readln(data);
+
+        // Extract the key and value from the line
+        splitRecord(cast(Const!(ubyte)[])data, this.key, this.value);
     }
 
 
@@ -430,14 +456,6 @@ public class StdinRecordStream : ISuspendable
 
     /***************************************************************************
 
-        Buffer used for deserializing records.
-
-    ***************************************************************************/
-
-    private char[] deserialize_buf;
-
-    /***************************************************************************
-
         Record read from stream.
 
     ***************************************************************************/
@@ -523,7 +541,7 @@ public class StdinRecordStream : ISuspendable
         {
             try
             {
-                this.record.deserialize(Cin.stream, this.deserialize_buf);
+                this.record.deserialize(Cin);
             }
             catch ( EofException e )
             {
@@ -538,4 +556,3 @@ public class StdinRecordStream : ISuspendable
         }
     }
 }
-
