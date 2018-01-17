@@ -8,6 +8,8 @@
 
 module swarm.neo.client.requests.Timeouts;
 
+import ocean.core.Verify;
+
 /// ditto
 public class Timeouts
 {
@@ -113,7 +115,7 @@ public class Timeouts
     private void timeoutCallback ( ref RequestId id )
     {
         this.timeout_requests.removeExisting(id);
-        assert(!(id in this.timeout_requests));
+        verify(!(id in this.timeout_requests));
 
         this.abort_request(id);
     }
