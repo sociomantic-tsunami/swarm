@@ -36,6 +36,7 @@ template Controllers ( )
     {
         import swarm.neo.protocol.Message: RequestId;
         import ocean.core.Enforce;
+        import ocean.core.Verify;
 
         /***********************************************************************
 
@@ -89,12 +90,8 @@ template Controllers ( )
         ***********************************************************************/
 
         public RequestId id ( )
-        in
         {
-            assert(this.initialised);
-        }
-        body
-        {
+            verify(this.initialised);
             return this.id_;
         }
 
@@ -132,12 +129,8 @@ template Controllers ( )
         ***********************************************************************/
 
         public void control ( void delegate ( ControllerInterface ) dg )
-        in
         {
-            assert(this.initialised);
-        }
-        body
-        {
+            verify(this.initialised);
             enforce(this.outer.control(this.id_, dg),
                 "Request no longer exists");
         }
@@ -302,7 +295,7 @@ template Controllers ( )
                     break;
                 version (D_Version2) {} else default: assert(false);
             }
-            assert(this.pending == Pending.None,
+            verify(this.pending == Pending.None,
                 "handlePending() called when request is not ready");
         }
 
