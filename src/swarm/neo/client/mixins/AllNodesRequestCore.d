@@ -56,6 +56,8 @@ module swarm.neo.client.mixins.AllNodesRequestCore;
 import swarm.neo.client.RequestOnConn;
 import swarm.neo.client.NotifierTypes;
 
+import ocean.core.Verify;
+
 /*******************************************************************************
 
     Struct template encapsulating the core logic for handling a single request-
@@ -285,7 +287,7 @@ public bool allNodesRequestConnector (
             break;
 
         default:
-            assert(false);
+            verify(false);
     }
 
     return true;
@@ -380,7 +382,7 @@ public struct AllNodesRequestInitialiser ( Request, FillPayload )
     public bool initialise ( )
     {
         // establishConnection() should guarantee we're already connected
-        assert(this.conn.connection_status() == Connection.Status.Connected);
+        verify(this.conn.connection_status() == Connection.Status.Connected);
 
         auto all_nodes = &this.context.shared_working.all_nodes;
 
@@ -570,12 +572,9 @@ public struct AllNodesRequestSharedWorkingData
     ***************************************************************************/
 
     public bool allInitialised ( Request ) ( Request.Context* context )
-    in
     {
-        assert(this.initialising == 0);
-    }
-    body
-    {
+        verify(this.initialising == 0);
+
         if ( this.called_started_notifier )
             return false;
 

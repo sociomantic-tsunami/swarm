@@ -40,6 +40,8 @@ template ClientCore ( )
 
     import swarm.client.helper.NodesConfigReader;
 
+    import ocean.core.Verify;
+
     /***************************************************************************
 
         Convenience alias for the connection notification union.
@@ -124,7 +126,7 @@ template ClientCore ( )
 
     private this ( cstring auth_name, in ubyte[] auth_key, Settings settings )
     {
-        assert(auth_key.length == key_length);
+        verify(auth_key.length == key_length);
 
         Credentials cred;
         cred.name = auth_name.dup;
