@@ -58,6 +58,8 @@ module swarm.neo.client.mixins.SuspendableRequestCore;
 import swarm.neo.client.RequestOnConn;
 import swarm.neo.client.mixins.AllNodesRequestCore;
 
+import ocean.core.Verify;
+
 /*******************************************************************************
 
     Helper function providing the standard logic for connecting a request-on-
@@ -104,7 +106,7 @@ public bool suspendableRequestConnector (
                     break;
 
             default:
-                assert(false);
+                verify(false);
         }
     }
     while ( !connected );
@@ -229,7 +231,7 @@ public struct SuspendableRequestInitialiser ( Request, FillPayload )
             {
                 if ( this.ready_for_state_change )
                 {
-                    assert(this.suspendable_control.ready_for_state_change > 0);
+                    verify(this.suspendable_control.ready_for_state_change > 0);
                     this.ready_for_state_change = false;
                     this.suspendable_control.ready_for_state_change--;
                 }
@@ -499,6 +501,7 @@ public template SuspendableController ( Request, IController, MessageType )
     public scope class Controller : IController
     {
         import ocean.core.Enforce;
+        import ocean.core.Verify;
         import swarm.neo.client.mixins.RequestCore : ControllerBase;
         import swarm.neo.client.NotifierTypes;
 
@@ -609,7 +612,7 @@ public template SuspendableController ( Request, IController, MessageType )
                     notification.stopped = info;
                     break;
 
-                default: assert(false,
+                default: verify(false,
                     Request.stringof ~ ".Controller: Unexpected message type");
             }
 
@@ -732,8 +735,8 @@ public struct SuspendableRequestControllerFiber ( Request, MessageType )
                 // Wait for user action.
                 auto event = this.request_event_dispatcher.nextEvent(this.fiber,
                     Signal(suspendable_control.Signal.StateChangeRequested));
-                assert(event.active == event.active.signal);
-                assert(event.signal.code == suspendable_control.Signal.StateChangeRequested);
+                verify(event.active == event.active.signal);
+                verify(event.signal.code == suspendable_control.Signal.StateChangeRequested);
             }
 
             // Send state change message to node and wait for ACK.
@@ -908,7 +911,7 @@ unittest
             // writing from/to the node.
 
             this.request_event_dispatcher.eventLoop(this.conn);
-            assert(this.controller_fiber.finished());
+            verify(this.controller_fiber.finished());
         }
 
         private void controllerFiberMethod ( )

@@ -32,6 +32,8 @@ module swarm.neo.client.mixins.BatchRequestCore;
 import swarm.neo.client.RequestOnConn;
 import swarm.neo.client.mixins.AllNodesRequestCore;
 
+import ocean.core.Verify;
+
 /*******************************************************************************
 
     Helper function providing the standard logic for connecting a request-on-
@@ -70,7 +72,7 @@ public bool batchRequestConnector ( RequestOnConn.EventDispatcherAllNodes conn )
                 return false;
 
             default:
-                assert(false);
+                verify(false);
         }
     }
 }
