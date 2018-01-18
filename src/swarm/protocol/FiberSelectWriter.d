@@ -34,10 +34,11 @@ import ocean.io.select.EpollSelectDispatcher;
 
 import ocean.core.Traits;
 
+import ocean.core.Verify;
+
 import ocean.math.Math : min;
 
 import ocean.core.Array : copy;
-
 
 
 public class FiberSelectWriter : Ocean.BufferedFiberSelectWriter
@@ -67,12 +68,8 @@ public class FiberSelectWriter : Ocean.BufferedFiberSelectWriter
     public this ( IOutputDevice output, SelectFiber fiber,
         IOWarning warning_e, IOError error_e,
         size_t size = default_buffer_size )
-    in
     {
-        assert (size, "zero input buffer size specified");
-    }
-    body
-    {
+        verify (size > 0, "zero input buffer size specified");
         super(output, fiber, warning_e, error_e, size);
     }
 

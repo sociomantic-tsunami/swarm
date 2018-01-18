@@ -39,6 +39,8 @@ import swarm.client.request.model.ISuspendableRequest;
 import ocean.core.array.Search : contains;
 import ocean.transition;
 
+import ocean.core.Verify;
+
 
 /*******************************************************************************
 
@@ -139,11 +141,11 @@ public class RequestQueueSuspendableThrottler : Swarm.ISuspendableThrottler
     public this ( IClient client,
         float suspend_point = 0.75, float resume_point = 0.1 )
     {
-        assert(suspend_point >= 0.0);
-        assert(suspend_point <= 1.0);
-        assert(resume_point >= 0.0);
-        assert(resume_point <= 1.0);
-        assert(suspend_point > resume_point);
+        verify(suspend_point >= 0.0);
+        verify(suspend_point <= 1.0);
+        verify(resume_point >= 0.0);
+        verify(resume_point <= 1.0);
+        verify(suspend_point > resume_point);
 
         this.client = client;
         this.suspend_point = suspend_point;

@@ -41,6 +41,8 @@ import swarm.client.ClientCommandParams;
 
 import ocean.core.Enforce;
 
+import ocean.core.Verify;
+
 import ocean.io.select.EpollSelectDispatcher;
 
 import ocean.transition;
@@ -165,7 +167,7 @@ public abstract class NodeRegistry : INodeRegistry
         INodeConnectionPoolErrorReporter error_reporter )
     {
         assert(&settings); // call ClientSettings invariant
-        assert(epoll !is null, "epoll must be non-null");
+        verify(epoll !is null, "epoll must be non-null");
 
         this.epoll = epoll;
         this.settings = settings;
@@ -232,7 +234,7 @@ public abstract class NodeRegistry : INodeRegistry
         {
             auto handled =
                 this.assignClientCommand(this.getClientCommandParams(params));
-            assert(handled, "unhandled client command code");
+            verify(handled, "unhandled client command code");
         }
         else
         {

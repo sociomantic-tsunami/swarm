@@ -33,6 +33,8 @@ import swarm.client.ClientCommandParams;
 
 import ocean.core.Traits;
 
+import ocean.core.Verify;
+
 import ocean.io.select.EpollSelectDispatcher;
 
 import ocean.io.serialize.SimpleStreamSerializer;
@@ -312,15 +314,12 @@ public abstract class IRequestParams
     ***************************************************************************/
 
     final public void serialize ( void[] data )
-    in
     {
-        assert(data.length >= this.serialized_length,
+        verify(data.length >= this.serialized_length,
                this.classinfo.name ~ ".serialize(): Output buffer too short");
-    }
-    body
-    {
+
         auto left = this.serializeData(data).length;
-        assert(left == data.length - this.serialized_length);
+        verify(left == data.length - this.serialized_length);
     }
 
     /***************************************************************************
@@ -337,15 +336,12 @@ public abstract class IRequestParams
     ***************************************************************************/
 
     final public void deserialize ( void[] data )
-    in
     {
-        assert(data.length >= this.serialized_length,
+        verify(data.length >= this.serialized_length,
                this.classinfo.name ~ ".serialize(): Input buffer too short");
-    }
-    body
-    {
+
         auto left = this.deserializeData(data).length;
-        assert(left == data.length - this.serialized_length);
+        verify(left == data.length - this.serialized_length);
     }
 
     /***************************************************************************
@@ -562,10 +558,10 @@ public abstract class IRequestParams
                           T.stringof ~ " data are " ~ This.sizeof.stringof ~
                           " bytes");
 
-            assert(data.length >= This.sizeof, "input data too short, must " ~
+            verify(data.length >= This.sizeof, "input data too short, must " ~
                    "be at least " ~ This.sizeof.stringof ~ " bytes");
 
-            assert(!(cast(size_t)data.ptr & (This.alignof - 1)),
+            verify(!(cast(size_t)data.ptr & (This.alignof - 1)),
                    "data.ptr expected to be an integer  multiple of " ~
                    This.alignof.stringof ~ " as required for the " ~
                    "alignment of serialised " ~ T.stringof);

@@ -27,6 +27,8 @@ import swarm.client.ClientExceptions;
 
 import swarm.client.request.params.IRequestParams;
 
+import ocean.core.Verify;
+
 import ocean.io.select.EpollSelectDispatcher;
 
 import ocean.io.select.client.TimerSet;
@@ -231,12 +233,8 @@ public class RequestScheduler
     ***************************************************************************/
 
     private void scheduledRequestFired ( ref void[] scheduled_data )
-    in
     {
-        assert (this.assign_scheduled_request !is null);
-    }
-    body
-    {
+        verify (this.assign_scheduled_request !is null);
         this.assign_scheduled_request(cast(ubyte[])scheduled_data);
     }
 

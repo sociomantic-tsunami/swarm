@@ -39,6 +39,8 @@ import swarm.protocol.FiberSelectWriter;
 
 import ocean.core.Enum;
 
+import ocean.core.Verify;
+
 import ocean.io.select.client.FiberSelectEvent;
 
 import ocean.io.select.fiber.SelectFiber;
@@ -379,8 +381,8 @@ public abstract class IRequestConnection :
     public this ( EpollSelectDispatcher epoll, INodeConnectionPool conn_pool,
         IRequestParams params, size_t fiber_stack_size )
     {
-        assert(conn_pool !is null, typeof(this).stringof ~ ".ctor: connection pool interface must be non-null");
-        assert(params !is null, typeof(this).stringof ~ ".ctor: request params instance must be non-null");
+        verify(conn_pool !is null, typeof(this).stringof ~ ".ctor: connection pool interface must be non-null");
+        verify(params !is null, typeof(this).stringof ~ ".ctor: request params instance must be non-null");
 
         this.id = This.instance_count++;
 
@@ -1078,7 +1080,7 @@ public abstract class RequestConnectionTemplate ( Commands : IEnum )
             mixin(CommandCases!(Commands));
 
             default:
-                assert(false, "Invalid command code");
+                verify(false, "Invalid command code");
         }
     }
 
