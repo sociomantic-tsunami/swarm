@@ -63,6 +63,7 @@ import core.stdc.string: memmove;
 
 import Integer = ocean.text.convert.Integer_tango;
 
+version (UnitTest) import ocean.core.Test;
 
 
 /*******************************************************************************
@@ -344,19 +345,19 @@ unittest
 
     // Maximum
     hash = 0b0000100000000000000000000000000000000000000000000000000000000000;
-    assert(isWithinNodeResponsibility(hash, min, max));
+    test!("==")(isWithinNodeResponsibility(hash, min, max), true);
 
     // Minimum
     hash = 0b0100000000000000000000000000000000000000000000000000000000000000;
-    assert(isWithinNodeResponsibility(hash, min, max));
+    test!("==")(isWithinNodeResponsibility(hash, min, max), true);
 
     // Too low
     hash = 0b1000000000000000000000000000000000000000000000000000000000000000;
-    assert(!isWithinNodeResponsibility(hash, min, max));
+    test!("==")(isWithinNodeResponsibility(hash, min, max), false);
 
     // Too high
     hash = 0b0000010000000000000000000000000000000000000000000000000000000000;
-    assert(!isWithinNodeResponsibility(hash, min, max));
+    test!("==")(isWithinNodeResponsibility(hash, min, max), false);
 }
 
 
@@ -599,7 +600,7 @@ unittest
     for ( uint i = 0; i < Iterations; i++ )
     {
         HashGenerator.hexStr(str);
-        assert(isHex(str), "swarm.Hash unittest - error in isHex, " ~ str ~ " is invalid");
+        test(isHex(str), "swarm.Hash unittest - error in isHex, " ~ str ~ " is invalid");
     }
 
     str.length = 16;
@@ -608,21 +609,21 @@ unittest
     {
         cstr = Integer.format(str, i, "x16");
 
-        assert(straightToHash(cstr) == i, "swarm.Hash unittest - error in straightToHash, " ~ str ~ " is invalid");
+        test(straightToHash(cstr) == i, "swarm.Hash unittest - error in straightToHash, " ~ str ~ " is invalid");
     }
 
     // Test validation of some random non-hex values
     for ( uint i = 0; i < Iterations; i++ )
     {
         HashGenerator.nonHexStr(str);
-        assert(str.length == 0 || !isHex(str), "swarm.Hash unittest - error in isHex, " ~ str ~ " should be invalid");
+        test(str.length == 0 || !isHex(str), "swarm.Hash unittest - error in isHex, " ~ str ~ " should be invalid");
     }
 
     // Test validation of some random hashes
     for ( uint i = 0; i < Iterations; i++ )
     {
         HashGenerator.hashStr(str);
-        assert(isHash(str), "swarm.Hash unittest - error in isHash, " ~ str ~ " is invalid");
+        test(isHash(str), "swarm.Hash unittest - error in isHash, " ~ str ~ " is invalid");
     }
 
     // Test validation of some random invalid length hashes
@@ -632,13 +633,13 @@ unittest
         {
             HashGenerator.hexStr(str);
         } while ( str.length == HashDigits );
-        assert(!isHash(str), "swarm.Hash unittest - error in isHash, " ~ str ~ " should be invalid");
+        test(!isHash(str), "swarm.Hash unittest - error in isHash, " ~ str ~ " should be invalid");
     }
 
     // Test validation of some random non-hashes
     for ( uint i = 0; i < Iterations; i++ )
     {
         HashGenerator.nonHexStr(str);
-        assert(!isHash(str), "swarm.Hash unittest - error in isHash, " ~ str ~ " should be invalid");
+        test(!isHash(str), "swarm.Hash unittest - error in isHash, " ~ str ~ " should be invalid");
     }
 }

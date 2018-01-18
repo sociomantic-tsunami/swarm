@@ -382,15 +382,12 @@ unittest
     // order; that is, unique elements sorted ascendingly by object pointer.
     // `name` is the name of the test.
     void testListenerSet ( istring name, Listener[] listeners ... )
-    in
     {
-        assert(listeners.length);
+        test!(">")(listeners.length, 0);
         foreach (i, listener; listeners[1 .. $])
-            assert(cast(void*)listeners[i] < cast(void*)listener,
+            test!("<")(cast(void*)listeners[i], cast(void*)listener,
             "wrong order of listeners");
-    }
-    body
-    {
+
         auto test = new NamedTest(name);
 
         test.test(!liset.is_empty);
