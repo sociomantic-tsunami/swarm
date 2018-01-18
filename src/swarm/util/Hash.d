@@ -51,6 +51,8 @@ import ocean.transition;
 
 import ocean.core.Array;
 
+import ocean.core.Enforce;
+
 import ocean.io.digest.Fnv1;
 
 import ocean.math.Range;
@@ -64,6 +66,14 @@ import core.stdc.string: memmove;
 import Integer = ocean.text.convert.Integer_tango;
 
 version (UnitTest) import ocean.core.Test;
+
+class InvalidHashException: Exception
+{
+    import ocean.core.Exception: ReusableExceptionImplementation;
+    mixin ReusableExceptionImplementation!();
+}
+
+private InvalidHashException hash_exception;
 
 
 /*******************************************************************************
@@ -208,17 +218,22 @@ public hash_t straightToHash ( hash_t hash )
         hash value of the string
 
     Throws:
-        asserts that the string is a valid hex hash
+        InvalidHashException if the string is not a valid hex hash
 
  **************************************************************************/
 
 public hash_t straightToHash ( cstring hash )
-in
 {
-    assert(isHash(hash), "straightToHash(cstring)  - string is not a valid hash " ~ hash);
-}
-body
-{
+    if (!isHash(hash))
+    {
+        if (.hash_exception is null)
+            .hash_exception = new InvalidHashException();
+
+        throw.hash_exception
+             .set("straightToHash(cstring)  - string is not a valid hash ")
+             .append(hash);
+    }
+
     return cast(hash_t) Integer.toLong(hash, 16);
 }
 
@@ -262,16 +277,11 @@ public hash_t[] straightToHash ( cstring[] hash_strings, ref hash_t[] hashes )
         string containing the hex hash for the specified value
 
     Throws:
-        asserts that the resulting string is a valid hex hash
+        InvalidHashException that the input string is longer than HexDigest.length
 
  **************************************************************************/
 
 public mstring toHexString ( hash_t val, mstring hash )
-in
-{
-    assert(hash.length >= HexDigest.length,
-           "'hash' must have a length >= HexDigest.length");
-}
 out ( result )
 {
     assert(isHash(result),
@@ -279,6 +289,14 @@ out ( result )
 }
 body
 {
+    if (hash.length < HexDigest.length)
+    {
+        if (.hash_exception is null)
+            .hash_exception = new InvalidHashException();
+
+        throw.hash_exception.set("'hash' must have a length >= HexDigest.length");
+    }
+
     return intToHex(val, hash);
 }
 

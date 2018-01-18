@@ -35,6 +35,7 @@ import core.stdc.time : time_t;
 
 import ocean.math.IEEE : isNaN;
 
+import ocean.core.Enforce;
 
 
 public class NodeErrorTracker : INodeConnectionPoolErrorReporter
@@ -196,7 +197,7 @@ public class NodeErrorTracker : INodeConnectionPoolErrorReporter
 
             public bool inc ( time_t now, Weights weights )
             {
-                assert(now >= this.last_time);
+                enforce(now >= this.last_time);
                 bool updated;
 
                 if ( now > this.last_time && this.last_time > this.last_time.init )
