@@ -195,6 +195,7 @@ class ConnectionHandler : IConnectionHandler
             ri.handler = handler;
             ri.timing = true;
             this.map[code] = ri;
+            this.supported_requests[code] = true;
         }
 
         /***********************************************************************
