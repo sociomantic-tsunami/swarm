@@ -26,6 +26,7 @@ import ocean.io.compress.Lzo;
 
 import ocean.transition;
 
+import ocean.core.Enforce;
 
 /*******************************************************************************
 
@@ -503,7 +504,7 @@ public class RecordBatch : RecordBatchBase
     {
         // Read uncompressed length from first size_t.sizeof bytes.
         auto uncompressed_len = *(cast(size_t*)(compressed.ptr));
-        assert(uncompressed_len <= this.batch.dimension);
+        enforce(uncompressed_len <= this.batch.dimension);
         this.batch.length = uncompressed_len;
 
         // Decompress into this.batch.
