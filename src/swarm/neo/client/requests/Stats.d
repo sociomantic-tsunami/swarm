@@ -10,6 +10,8 @@ module swarm.neo.client.requests.Stats;
 
 import swarm.neo.client.IRequestSet : IRequest;
 
+import ocean.core.Enforce;
+
 /*******************************************************************************
 
     Request stats methods which are publicly exposed by the RequestSet (i.e. can
@@ -107,7 +109,7 @@ public class Stats : IRequestStats
         ulong start_time )
     {
         auto end_time = MicrosecondsClock.now_us();
-        assert(start_time <= end_time);
+        enforce(start_time <= end_time);
         auto duration = end_time - start_time;
 
         auto rq_stats = request_type in this.stats;
