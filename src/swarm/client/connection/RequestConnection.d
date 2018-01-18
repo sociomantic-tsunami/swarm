@@ -252,7 +252,7 @@ public abstract class IRequestConnection :
             // context of this class only `false` value is expected. It violates
             // substitution principle but renaming methods over such minor
             // issue is not worth the trouble
-            assert (!force);
+            assert (!force); // should this become verify?
             this.had_timeout = false;
             return super.connect(address, port);
         }
