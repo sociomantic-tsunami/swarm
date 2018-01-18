@@ -26,6 +26,8 @@ module swarm.common.request.helper.DisconnectDetector;
 
 import ocean.io.select.client.model.ISelectClient;
 
+import ocean.core.Verify;
+
 
 
 /*******************************************************************************
@@ -87,8 +89,8 @@ public class DisconnectDetector : ISelectClient
 
     public this ( Handle fd, DisconnectionHandler handler )
     {
-        assert (fd != -1, "You have to provide a valid open file descriptor");
-        assert (handler !is null, "You need to provide a non-null handler");
+        verify (fd != -1, "You have to provide a valid open file descriptor");
+        verify (handler !is null, "You need to provide a non-null handler");
 
         this.fd = fd;
         this.disconnection_handler = handler;

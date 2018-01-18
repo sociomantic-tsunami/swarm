@@ -32,6 +32,7 @@
 module swarm.node.request.RequestStats;
 
 import ocean.transition;
+import ocean.core.Verify;
 
 version ( UnitTest )
 {
@@ -215,7 +216,7 @@ public class RequestStats
             // No duplicates allowed
             for ( size_t i = 1; i < this.bucket_limits.length; i++ )
             {
-                assert(this.bucket_limits[i] > this.bucket_limits[i-1]);
+                verify(this.bucket_limits[i] > this.bucket_limits[i-1]);
             }
 
             this.bucket_count.length = this.bucket_limits.length;
@@ -421,12 +422,8 @@ public class RequestStats
         ***********************************************************************/
 
         public void requestFinished ( )
-        in
         {
-            assert(this.counters.active > 0);
-        }
-        body
-        {
+            verify(this.counters.active > 0);
             this.counters.active--;
             this.counters.finished++;
         }
@@ -654,7 +651,7 @@ public class RequestStats
 
     public void init ( istring rq, bool timing = true )
     {
-        assert(!(rq in this.request_stats), "command stats " ~ rq ~ " initialised twice");
+        verify(!(rq in this.request_stats), "command stats " ~ rq ~ " initialised twice");
 
         if ( timing )
             this.request_stats[rq] = new SingleRequestStatsWithTiming;
@@ -676,10 +673,10 @@ public class RequestStats
     public void started ( cstring rq )
     {
         auto stats_i = rq in this.request_stats;
-        assert(stats_i, "command stats " ~ rq ~" not initialised");
+        verify(stats_i !is null, idup("command stats " ~ rq ~" not initialised"));
 
         auto stats = cast(SingleRequestStats)*stats_i;
-        assert(stats !is null);
+        verify(stats !is null);
 
         stats.requestStarted();
     }
@@ -699,10 +696,10 @@ public class RequestStats
     public void finished ( cstring rq )
     {
         auto stats_i = rq in this.request_stats;
-        assert(stats_i, "command stats " ~ rq ~" not initialised");
+        verify(stats_i !is null, idup("command stats " ~ rq ~" not initialised"));
 
         auto stats = cast(SingleRequestStats)*stats_i;
-        assert(stats !is null);
+        verify(stats !is null);
 
         stats.requestFinished();
     }
@@ -723,10 +720,10 @@ public class RequestStats
     public void finished ( cstring rq, ulong microseconds )
     {
         auto stats_i = rq in this.request_stats;
-        assert(stats_i, "command stats " ~ rq ~" not initialised");
+        verify(stats_i !is null, idup("command stats " ~ rq ~" not initialised"));
 
         auto timed_stats = cast(SingleRequestStatsWithTiming)*stats_i;
-        assert(timed_stats !is null);
+        verify(timed_stats !is null);
 
         timed_stats.requestFinished(microseconds);
     }
@@ -743,7 +740,7 @@ public class RequestStats
         foreach ( stats_i; this.request_stats )
         {
             auto stats = cast(SingleRequestStats)stats_i;
-            assert(stats !is null);
+            verify(stats !is null);
 
             stats.resetCounters();
         }

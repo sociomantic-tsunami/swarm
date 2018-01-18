@@ -28,6 +28,8 @@ module swarm.node.model.RecordActionCounters;
 
 import ocean.transition;
 
+import ocean.core.Verify;
+
 /******************************************************************************/
 
 public class RecordActionCounters
@@ -90,7 +92,7 @@ public class RecordActionCounters
     {
         Counter* counter = id in this.counters;
 
-        assert(counter, "unknown counter id '" ~ id ~ "'");
+        verify(counter !is null, idup("unknown counter id '" ~ id ~ "'"));
 
         counter.records += records;
         counter.bytes += bytes;

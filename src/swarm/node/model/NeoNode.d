@@ -57,6 +57,8 @@ import ocean.util.log.Logger;
 
 import ocean.core.Enforce;
 
+import ocean.core.Verify;
+
 /*******************************************************************************
 
     Static module logger
@@ -760,7 +762,7 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
                   ConnectionSetupParams conn_setup_params, Options options,
                   int backlog )
     {
-        assert(options.epoll !is null);
+        verify(options.epoll !is null);
 
         InetAddress!(false) addr, neo_addr;
         alias SelectListener!(Neo.ConnectionHandler,
@@ -774,7 +776,7 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
         Const!(Key[istring])* credentials;
         if ( options.credentials_filename )
         {
-            assert(options.credentials_map is null);
+            verify(options.credentials_map is null);
             this.credentials_file =
                 new Credentials(options.credentials_filename);
             credentials = this.credentials_file.credentials;
@@ -782,7 +784,7 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
         // ...or copy the pre-configured credentials.
         else
         {
-            assert(options.credentials_map !is null);
+            verify(options.credentials_map !is null);
 
             // Make sure the reference to the credentials map does not go out
             // of scope. (Store a copy in heap-allocated memory.)
@@ -855,7 +857,7 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
         foreach ( conn_info; this.neo_listener.poolInfo() )
         {
             auto conn = cast(Neo.ConnectionHandler)conn_info;
-            assert(conn !is null);
+            verify(conn !is null);
 
             ret += conn.bytes_received;
         }
@@ -882,7 +884,7 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
         foreach ( conn_info; this.neo_listener.poolInfo() )
         {
             auto conn = cast(Neo.ConnectionHandler)conn_info;
-            assert(conn !is null);
+            verify(conn !is null);
 
             ret += conn.bytes_sent;
         }
@@ -902,12 +904,9 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
 
     private void handleUpdateCredentials ( cstring args,
         void delegate ( cstring response ) send_response )
-    in
     {
-        assert(this.credentials_file);
-    }
-    body
-    {
+        verify(this.credentials_file !is null);
+
         if (args.length)
         {
             send_response("Error: No command arguments expected\n");
@@ -971,7 +970,7 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
         foreach ( i, conn; conns )
         {
             auto swarm_conn = cast(ISwarmConnectionHandlerInfo)conn;
-            assert(swarm_conn, "Node connection handler does not implement ISwarmConnectionHandlerInfo");
+            verify(swarm_conn !is null, "Node connection handler does not implement ISwarmConnectionHandlerInfo");
 
             auto client = swarm_conn.registered_client;
             auto events = client ? client.events : 0;

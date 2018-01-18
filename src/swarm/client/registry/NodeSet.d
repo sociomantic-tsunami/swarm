@@ -33,6 +33,8 @@ import ocean.core.Exception;
 
 import ocean.core.Enforce;
 
+import ocean.core.Verify;
+
 import ocean.util.container.map.Map : StandardKeyHashingMap;
 
 import ocean.transition;
@@ -288,7 +290,7 @@ public class NodeSet
                 break;
             }
         }
-        assert(index < this.list.length, "connection pool list/map mismatch");
+        verify(index < this.list.length, "connection pool list/map mismatch");
 
         // Remove from list
         this.list[index] = this.list[$-1];

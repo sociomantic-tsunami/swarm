@@ -15,6 +15,8 @@ module swarm.client.plugins.ScopeRequests;
 
 import ocean.transition;
 
+import ocean.core.Verify;
+
 /*******************************************************************************
 
     Fiber-suspending request performing plugin for swarm client. (To be used
@@ -24,6 +26,8 @@ import ocean.transition;
 
 public class ScopeRequestsPlugin
 {
+    import ocean.core.Verify;
+
     /***************************************************************************
 
         Code to be mixed into the client.
@@ -176,7 +180,7 @@ public class ScopeRequestsPlugin
                 }
                 else
                 {
-                    assert(this.notifier == request.notification_dg,
+                    verify(this.notifier == request.notification_dg,
                         "Requests assigned via perform() must all have the same notification delegate");
                 }
 
@@ -241,12 +245,9 @@ public class ScopeRequestsPlugin
             *******************************************************************/
 
             private void notify ( IRequestNotification info )
-            in
             {
-                assert (this.pending, "no requests pending when notified");
-            }
-            body
-            {
+                verify (this.pending, "no requests pending when notified");
+
                 try
                 {
                     if ( info.type == info.type.Finished )

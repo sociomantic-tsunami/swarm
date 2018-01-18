@@ -39,6 +39,7 @@ import swarm.client.request.context.RequestContext;
 
 import swarm.Const;
 
+import ocean.core.Verify;
 
 
 /*******************************************************************************
@@ -166,7 +167,7 @@ public abstract class IGroupRequest
     public void setup ( IRequestParams params )
     {
         auto notifier = this.setup_(params);
-        assert(notifier != &this.notifier, typeof(this).stringof ~
+        verify(notifier != &this.notifier, typeof(this).stringof ~
             ".setup: setting notifier to this.notifier will lead to infinite recursion!");
 
         this.user_notifier = notifier;
@@ -209,13 +210,10 @@ public abstract class IGroupRequest
     ***************************************************************************/
 
     public void setClient ( IClient client )
-    in
     {
-        assert(client !is null,
+        verify(client !is null,
                 typeof(this).stringof ~ ".setClient: client instance is null");
-    }
-    body
-    {
+
         this.client = client;
     }
 
@@ -275,13 +273,10 @@ public abstract class IGroupRequest
     ***************************************************************************/
 
     private void notifier ( IRequestNotification info )
-    in
     {
-        assert(this.client !is null,
+        verify(this.client !is null,
                 typeof(this).stringof ~ ".notifier: client instance is null");
-    }
-    body
-    {
+
         if ( this.user_notifier !is null )
         {
             this.user_notifier(info);

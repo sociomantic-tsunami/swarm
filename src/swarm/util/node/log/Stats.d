@@ -22,6 +22,8 @@ import ocean.util.log.Stats;
 
 import ocean.transition;
 
+import ocean.core.Verify;
+
 /*******************************************************************************
 
     Convenience alias for basic node stats logger (hides the template from the
@@ -109,8 +111,8 @@ private class NodeStatsTemplate ( Logger = StatsLog )
 
     public this ( INodeInfo node, Logger stats_log )
     {
-        assert(node);
-        assert(stats_log);
+        verify(node !is null);
+        verify(stats_log !is null);
 
         this.node = node;
         this.stats_log = stats_log;
