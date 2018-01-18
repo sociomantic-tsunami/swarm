@@ -34,6 +34,8 @@ import swarm.Const : NodeItem;
 
 import ocean.transition;
 
+import ocean.core.Verify;
+
 /*******************************************************************************
 
     Node deactivation plugin for swarm client. (To be used with the
@@ -154,7 +156,7 @@ public class NodeDeactivator
 
     public this ( NodeErrorTracker.Clock clock, Config config )
     {
-        assert(config);
+        verify(config !is null);
 
         this.error_tracker = new NodeErrorTracker(clock,
             config.counters_window_size_s);
@@ -330,7 +332,7 @@ public class NodeDeactivator
         {
             auto node_counter =
                 node in mixin(instance).error_tracker.node_counters;
-            assert(node_counter);
+            verify(node_counter !is null);
 
             node_counter.reset(error_rate_reset);
 

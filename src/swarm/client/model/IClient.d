@@ -32,6 +32,8 @@ module swarm.client.model.IClient;
 
 import swarm.Const;
 
+import ocean.core.Verify;
+
 import swarm.client.ClientExceptions;
 import swarm.client.RequestSetup;
 import swarm.client.ClientCommandParams;
@@ -211,8 +213,8 @@ public abstract class IClient
 
     protected this ( EpollSelectDispatcher epoll, INodeRegistry registry )
     {
-        assert(epoll !is null, typeof(this).stringof ~ ".this: reference to epoll select dispatcher is null");
-        assert(registry !is null, typeof(this).stringof ~ ".this: reference to registry is null");
+        verify(epoll !is null, typeof(this).stringof ~ ".this: reference to epoll select dispatcher is null");
+        verify(registry !is null, typeof(this).stringof ~ ".this: reference to registry is null");
 
         this.epoll = epoll;
         this.nodes_ = this.registry = registry;

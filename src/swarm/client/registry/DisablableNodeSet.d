@@ -34,6 +34,7 @@ import swarm.client.registry.NodeSet;
 
 import ocean.core.Enforce;
 
+import ocean.core.Verify;
 
 
 public class DisablableNodeSet : NodeSet
@@ -89,7 +90,7 @@ public class DisablableNodeSet : NodeSet
     }
     body
     {
-        assert(!(node in this.disabled_nodes), "node already disabled");
+        verify(!(node in this.disabled_nodes), "node already disabled");
 
         this.disabled_nodes[node] = this.remove(node); // calls this.modified()
     }

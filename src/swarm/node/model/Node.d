@@ -55,6 +55,8 @@ import ocean.util.log.Logger;
 
 import ocean.core.Enforce;
 
+import ocean.core.Verify;
+
 /*******************************************************************************
 
     Static module logger
@@ -660,7 +662,8 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler,
         foreach ( i, conn; conns )
         {
             auto swarm_conn = cast(ISwarmConnectionHandlerInfo)conn;
-            assert(swarm_conn, "Node connection handler does not implement ISwarmConnectionHandlerInfo");
+            verify(swarm_conn !is null,
+                    "Node connection handler does not implement ISwarmConnectionHandlerInfo");
 
             auto client = swarm_conn.registered_client;
             auto events = client ? client.events : 0;

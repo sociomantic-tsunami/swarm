@@ -33,6 +33,8 @@ import ocean.core.array.Mutation : moveToEnd;
 
 import ocean.transition;
 
+import ocean.core.Verify;
+
 /*******************************************************************************
 
     Listener root interface, defines the Code enumerator.
@@ -330,12 +332,9 @@ public class IListeners ( Data ... )
     ***************************************************************************/
 
     protected void trigger_ ( Listener.Code code, Data data )
-    in
     {
-        assert(!this.listeners.is_empty, "trigger_() called with no listeners registered");
-    }
-    body
-    {
+        verify(!this.listeners.is_empty, "trigger_() called with no listeners registered");
+
         foreach ( listener; this.listeners )
         {
             listener.trigger(code, data);

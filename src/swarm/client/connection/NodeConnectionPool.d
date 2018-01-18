@@ -20,6 +20,9 @@ module swarm.client.connection.NodeConnectionPool;
 *******************************************************************************/
 
 import ocean.transition;
+
+import ocean.core.Verify;
+
 import swarm.Const;
 
 import swarm.client.connection.RequestConnection;
@@ -227,7 +230,8 @@ public abstract class NodeConnectionPool
         mstring address, ushort port, IRequestOverflow request_overflow,
         INodeConnectionPoolErrorReporter error_reporter )
     {
-        assert(request_overflow, typeof(this).stringof ~ ".ctor: request overflow instance is null");
+        verify(request_overflow !is null,
+                typeof(this).stringof ~ ".ctor: request overflow instance is null");
 
         this.epoll = epoll;
         this.fiber_stack_size = settings.fiber_stack_size;
@@ -308,7 +312,7 @@ public abstract class NodeConnectionPool
     public mixin(genOpCmp(`
     {
         auto other = cast(typeof(this)) rhs;
-        assert(other);
+        verify(other !is null);
         return this.node_item.opCmp(other.node_item);
     }
     `));
@@ -811,12 +815,12 @@ public abstract class NodeConnectionPool
 
     private void startRequest ( IRequestParams params )
     {
-        assert(this.num_idle > 0);
+        verify(this.num_idle > 0);
 
         // newConnection() will never be called, as all connections have been
         // newed in the constructor by calling super.fill.
         auto conn = super.get(this.newConnection());
-        assert(conn !is null, typeof(this).stringof ~
+        verify(conn !is null, typeof(this).stringof ~
             ".startRequest: error getting idle connection from pool");
 
         conn.startRequest(params);

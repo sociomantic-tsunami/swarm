@@ -36,6 +36,8 @@ import ocean.util.container.pool.ObjectPool;
 
 import ocean.core.ExceptionDefinitions;
 
+import ocean.core.Verify;
+
 import ocean.util.log.Logger;
 
 import ocean.transition;
@@ -320,12 +322,11 @@ abstract public class IStorageChannelsTemplate ( Storage : IStorageEngine )
     ***************************************************************************/
 
     protected Storage create ( cstring channel_id )
-    in
     {
-        assert(!(channel_id in this.channels), typeof(this).stringof ~ ".create: channel '" ~ channel_id ~ "' already exists!");
-    }
-    body
-    {
+        verify(!(channel_id in this.channels),
+            idup(typeof(this).stringof ~ ".create: channel '" ~
+                          channel_id ~ "' already exists!"));
+
         if ( !this.no_more_channels )
         {
             try
@@ -334,12 +335,14 @@ abstract public class IStorageChannelsTemplate ( Storage : IStorageEngine )
                 channel.initialise(channel_id);
                 this.channels[channel.id] = channel;
 
-                assert(channel.id == channel_id, typeof(this).stringof ~
+                verify(channel.id == channel_id, idup(typeof(this).stringof ~
                     ".create: channel name mismatch - '" ~ channel_id ~
-                    " vs '" ~ channel.id ~ "'");
+                    " vs '" ~ channel.id ~ "'"));
 
-                assert(channel_id in this.channels, typeof(this).stringof ~
-                    ".create: channel '" ~ channel_id ~ "' not in map after creation!");
+                verify((channel_id in this.channels) !is null,
+                    idup(typeof(this).stringof ~
+                        ".create: channel '" ~ channel_id ~
+                        "' not in map after creation!"));
 
                 return channel;
             }

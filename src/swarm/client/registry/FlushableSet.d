@@ -20,6 +20,8 @@ module swarm.client.registry.FlushableSet;
 
 *******************************************************************************/
 
+import ocean.core.Verify;
+
 import ocean.util.container.map.Set;
 
 import swarm.client.request.model.IFlushable;
@@ -63,7 +65,7 @@ public class FlushableSet : Set!(IFlushable), IFlushables
 
     public void register ( IFlushable flushable )
     {
-        assert(!(flushable in this), "IFlushable interface already in set");
+        verify(!(flushable in this), "IFlushable interface already in set");
         this.put(flushable);
     }
 
@@ -81,7 +83,7 @@ public class FlushableSet : Set!(IFlushable), IFlushables
 
     public void unregister ( IFlushable flushable )
     {
-        assert(flushable in this, "IFlushable interface not in set");
+        verify(flushable in this, "IFlushable interface not in set");
         this.remove(flushable);
     }
 

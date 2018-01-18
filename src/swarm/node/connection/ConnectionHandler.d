@@ -69,6 +69,8 @@ import ocean.core.Traits : FieldName;
 
 import ocean.core.Traits : ctfe_i2a;
 
+import ocean.core.Verify;
+
 import ocean.io.model.IConduit: ISelectable;
 
 import ocean.sys.socket.AddressIPSocket;
@@ -320,13 +322,13 @@ public abstract class ConnectionHandlerTemplate ( Commands : ICommandCodes )
 
         static if ( stats == RequestStatsTracking.Count )
         {
-            assert(rq_name);
+            verify(rq_name.length > 0);
             this.setup.node_info.request_stats.started(rq_name);
             scope ( exit ) this.setup.node_info.request_stats.finished(rq_name);
         }
         else static if ( stats == RequestStatsTracking.TimeAndCount )
         {
-            assert(rq_name);
+            verify(rq_name.length > 0);
 
             StopWatch timer;
             timer.start();
@@ -638,7 +640,7 @@ abstract public class ISwarmConnectionHandler : IFiberConnectionHandlerBase,
     public cstring address ( )
     {
         auto socket_ip = cast(AddressIPSocket!()) this.socket;
-        assert( socket_ip !is null );
+        verify( socket_ip !is null );
         return socket_ip.address;
     }
 
@@ -655,7 +657,7 @@ abstract public class ISwarmConnectionHandler : IFiberConnectionHandlerBase,
     public ushort port ( )
     {
         auto socket_ip = cast(AddressIPSocket!()) this.socket;
-        assert( socket_ip !is null );
+        verify( socket_ip !is null );
         return socket_ip.port;
     }
 
