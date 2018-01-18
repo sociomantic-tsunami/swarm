@@ -551,7 +551,7 @@ public abstract class IRequestConnection :
                     restart_fiber = false;
                 }
 
-                with ( FiberMode ) switch ( this.mode )
+                with ( FiberMode ) final switch ( this.mode )
                 {
                     case HandleRequest:
                         this.requestFinished(!this.socket.had_timeout);
@@ -578,8 +578,12 @@ public abstract class IRequestConnection :
                         restart_fiber = true;
                     break;
 
-                    default:
-                        assert(false);
+                    version (D_Version2) {}
+                    else
+                    {
+                        default:
+                            assert(false);
+                    }
                 }
 
                 if ( restart_fiber )
@@ -661,7 +665,7 @@ public abstract class IRequestConnection :
                 this.id);
         }
 
-        with ( FiberMode ) switch ( this.mode )
+        with ( FiberMode ) final switch ( this.mode )
         {
             case HandleRequest:
                 this.handleRequest();
@@ -671,8 +675,12 @@ public abstract class IRequestConnection :
                 this.establishConnection();
             break;
 
-            default:
-                assert(false);
+            version (D_Version2) {}
+            else
+            {
+                default:
+                    assert(false);
+            }
         }
 
         debug ( SwarmClient ) Stderr.formatln("[{}:{}.{}]: No requests pending -- recycling connection",

@@ -142,7 +142,7 @@ public abstract scope class IRequest: IFiberRequest
 
         this.receiveStatus();
 
-        with ( StatusAction ) switch ( this.statusAction() )
+        with ( StatusAction ) final switch ( this.statusAction() )
         {
             case Handle:
                 this.handle__();
@@ -156,8 +156,12 @@ public abstract scope class IRequest: IFiberRequest
                 this.statusActionFatal();
                 throw this.fatal_error_exception(__FILE__, __LINE__);
 
-            default:
-                assert(false);
+            version (D_Version2) {}
+            else
+            {
+                default:
+                    assert(false);
+            }
         }
     }
 
