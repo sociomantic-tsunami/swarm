@@ -191,13 +191,13 @@ static:
         # 127.0.0.3:6000";
 
         auto res = read(content);
-        assert(res.length == 2);
+        test!("==")(res.length, 2);
 
-        assert(res[0].Address == "127.0.0.1");
-        assert(res[0].Port == 4000);
+        test!("==")(res[0].Address, "127.0.0.1");
+        test!("==")(res[0].Port, 4000);
 
-        assert(res[1].Address == "127.0.0.2");
-        assert(res[1].Port == 5000);
+        test!("==")(res[1].Address, "127.0.0.2");
+        test!("==")(res[1].Port, 5000);
 
         content = "127.0.0.1";
 
