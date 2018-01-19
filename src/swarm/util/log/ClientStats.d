@@ -40,10 +40,14 @@ module swarm.util.log.ClientStats;
 import ocean.io.select.EpollSelectDispatcher;
 
 import ocean.io.select.client.TimerEvent;
+import ocean.io.device.File;
 
 import ocean.util.log.Appender;
 
 import ocean.util.log.Stats;
+
+import ocean.util.app.Application;
+import ocean.util.app.ext.ReopenableFilesExt;
 
 import swarm.Const : NodeItem;
 
@@ -56,6 +60,7 @@ import swarm.client.registry.model.IFluidNodeRegistryInfo;
 import core.stdc.time : time_t;
 
 import ocean.transition;
+
 
 /*******************************************************************************
 
@@ -143,6 +148,37 @@ public class ClientStats : StatsLog
         time_t period = default_period )
     {
         this(epoll, file_name, null, period);
+    }
+
+
+    /***************************************************************************
+
+        Constructs the class to use the default StatsLog appender, registers it
+        with the application's reopenable files extension (if present), and
+        starts the update timer.
+
+        Params:
+            app = application class
+            epoll = epoll select dispatcher to register timer with
+            file_name = log file to write to
+            period = seconds delay between log writes
+
+    ***************************************************************************/
+
+    public this ( Application app, EpollSelectDispatcher epoll,
+        istring file_name, time_t period = default_period )
+    {
+        Appender newAppender ( istring file, Appender.Layout layout )
+        {
+            auto stream = new File(file, File.WriteAppending);
+
+            if ( auto rof_ext = app.getExtension!(ReopenableFilesExt) )
+                rof_ext.register(stream);
+
+            return new AppendStream(stream, true, layout);
+        }
+
+        this(epoll, file_name, &newAppender, period);
     }
 
 
