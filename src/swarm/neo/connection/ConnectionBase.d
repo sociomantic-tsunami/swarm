@@ -46,6 +46,8 @@ abstract class ConnectionBase: ISelectClient
     import swarm.neo.util.TreeMap;
     import swarm.neo.protocol.socket.IOStats;
 
+    import ocean.util.log.Logger;
+
     import ocean.transition;
 
     import core.sys.posix.netinet.in_: SOL_SOCKET, IPPROTO_TCP, SO_KEEPALIVE;
@@ -328,7 +330,7 @@ abstract class ConnectionBase: ISelectClient
                     debug ( SwarmConn )
                         Stdout.formatln("SendLoop.fiberMethod(): ResumeException! @{}:{}", e.file, e.line);
 
-                    // should never happen: TODO log
+                    log.error("SendLoop: {} @{}:{}", getMsg(e), e.file, e.line);
                     throw e;
                 }
                 catch (Exception e)
@@ -612,7 +614,7 @@ abstract class ConnectionBase: ISelectClient
             }
             catch (ResumeException e)
             {
-                // Should never happen: TODO log, then return.
+                log.error("ReceiveLoop: {} @{}:{}", getMsg(e), e.file, e.line);
             }
             catch (Exception e)
             {
@@ -651,9 +653,24 @@ abstract class ConnectionBase: ISelectClient
                     this.outer.setReceivedPayload(request_id, msg_body);
                     break;
 
-                default: // TODO: throw
+                default:
+                    throw this.outer.protocol_error_.setFmt(
+                        "Received message is not of type Request");
             }
         }
+    }
+
+    /***************************************************************************
+
+        Logger.
+
+    ***************************************************************************/
+
+    protected static Logger log;
+
+    static this ( )
+    {
+        log = Log.lookup("swarm.neo.connection.ConnectionBase");
     }
 
     /***************************************************************************
