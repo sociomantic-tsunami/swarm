@@ -35,8 +35,11 @@ class ConnectProtocol: ISelectClient
     import ocean.core.Traits: hasIndirections;
 
     import ocean.stdc.posix.sys.socket;
+    import ocean.stdc.string: strerror_r, strlen;
 
     import core.stdc.errno: ENOENT;
+
+    import ocean.util.log.Logger;
 
     import ocean.transition;
 
@@ -423,17 +426,23 @@ class ConnectProtocol: ISelectClient
     {
         try
         {
-            switch (this.epoll.unregister(this))
+            auto errnum = this.epoll.unregister(this);
+            switch (errnum)
             {
                 case 0, ENOENT:
                     break;
                 default: // includes EBADF
-                    // TODO: log error
+                    char[0x100] buf;
+                    auto errmsg = strerror_r(errnum, buf.ptr, buf.length);
+                    Log.lookup(this.classinfo.name)
+                        .error("epoll.unregister: {}",
+                            errmsg[0 .. strlen(errmsg)]);
             }
         }
         catch (Exception e)
         {
-            // TODO: log error
+            Log.lookup(this.classinfo.name).error("unregisterEpoll: {} @{}:{}",
+                getMsg(e), e.file, e.line);
         }
     }
 
@@ -495,13 +504,15 @@ class ConnectProtocol: ISelectClient
 
     override public bool handle ( Event events )
     {
-        // TODO: as long as this returns true (it does) and never throws, we can
+        // An old comment, potentially relevant if we encounter bugs:
+        // As long as this returns true (it does) and never throws, we can
         // be sure that only informational methods of the client will be called
         // by SelectedKeys handler after this method exits.
         // I'm not sure we can guarantee that, though, as resume() may throw an
         // exception which was passed to the subsequent suspend().
 
-        // TODO: Pass exception on error event
+        // Technically `event` could indicate an error, but in practice this
+        // has never been observed.
         this.fiber.resume(this.fiber_token_hash.get(), this,
             this.fiber.Message(events));
         return true;

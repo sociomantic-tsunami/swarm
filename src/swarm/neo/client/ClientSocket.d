@@ -24,6 +24,8 @@ public class ClientSocket
     import core.sys.posix.netinet.in_: sockaddr_in;
     import core.stdc.errno: errno;
 
+    import ocean.util.log.Logger;
+
     import ocean.core.Enforce;
 
     debug ( ISelectClient ) import ocean.io.Stdout : Stderr;
@@ -94,11 +96,12 @@ public class ClientSocket
         if (this.socket_.fd >= 0)
         {
             /*
-             * TODO: Log a warning if this happens.
              * The socket should not exist or there is a bug. However, this
              * situation is too critical to assert or ignore it and leak file
              * descriptors.
              */
+            Log.lookup(this.classinfo.name).warn("connect: The socket " ~
+                "already exists.");
             this.socket.close();
         }
 
