@@ -427,26 +427,7 @@ class ConnectionHandler : IConnectionHandler
                 // Supported version codes.
                 if (auto rq = command in this.shared_params.requests.request_info)
                 {
-                    // TODO: when the old deprecated handlers are removed, this
-                    // logic can be moved into handleRequest.
-                    this.handleRequest(*rq, connection,
-                        {
-                            this.shared_params.get_resource_acquirer(
-                                ( Object request_resources )
-                                {
-                                    auto rq_handler =
-                                        this.emplace!(IRequestHandler)
-                                        (connection.emplace_buf, rq.class_info);
-                                    rq_handler.initialise(connection,
-                                        request_resources);
-                                    rq_handler.preSupportedCodeSent(
-                                        init_payload);
-                                    this.sendSupportedStatus(connection,
-                                        SupportedStatus.RequestSupported);
-                                    rq_handler.postSupportedCodeSent();
-                                }
-                            );
-                        });
+                    this.handleRequest(*rq, connection, init_payload);
                 }
                 // Unsupported version codes.
                 else
@@ -496,11 +477,12 @@ class ConnectionHandler : IConnectionHandler
         Params:
             rq = request info struct (including handler function)
             connection = manages the connection socket I/O and the fiber
+            init_payload = the payload of the first message for the request
 
     ***************************************************************************/
 
     private void handleRequest ( RequestMap.RequestInfo rq,
-        RequestOnConn connection, void delegate ( ) handle_request )
+        RequestOnConn connection, Const!(void)[] init_payload )
     {
         StopWatch timer;
 
@@ -528,7 +510,18 @@ class ConnectionHandler : IConnectionHandler
 
         try
         {
-            handle_request();
+            this.shared_params.get_resource_acquirer(
+                ( Object request_resources )
+                {
+                    auto rq_handler = this.emplace!(IRequestHandler)
+                        (connection.emplace_buf, rq.class_info);
+                    rq_handler.initialise(connection, request_resources);
+                    rq_handler.preSupportedCodeSent(init_payload);
+                    this.sendSupportedStatus(connection,
+                        SupportedStatus.RequestSupported);
+                    rq_handler.postSupportedCodeSent();
+                }
+            );
         }
         catch ( Exception e )
         {
