@@ -214,7 +214,8 @@ class ConnectionHandler : IConnectionHandler
                     request_stats.init(rq.name, rq.timing);
 
             foreach ( command, rq; this.request_info )
-                request_stats.init(rq.name, rq.timing);
+                if ( !(rq.name in request_stats.request_stats ) )
+                    request_stats.init(rq.name, rq.timing);
         }
     }
 
@@ -714,4 +715,27 @@ class ConnectionHandler : IConnectionHandler
         assert(t_instance !is null);
         return t_instance;
     }
+}
+
+version ( UnitTest )
+{
+    import swarm.node.request.RequestStats;
+    import swarm.neo.request.Command;
+}
+
+// Check that initialising stats for two versions of a request works. (Stats for
+// both versions will be tracked under the same request name.)
+unittest
+{
+    class Rq1_v0 { }
+    class Rq1_v1 { }
+
+    ConnectionHandler.RequestMap map;
+    auto rq1_v0 = Command(1, 0);
+    auto rq1_v1 = Command(1, 1);
+
+    map.add(rq1_v0, "Request1", Rq1_v0.classinfo);
+    map.add(rq1_v1, "Request1", Rq1_v1.classinfo);
+
+    map.initStats(new RequestStats);
 }
