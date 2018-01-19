@@ -17,7 +17,7 @@ public const code_length = 512 / 8;
 public const nonce_length = 32 / 8;
 
 
-/* TODO: in D2, we could simply use fixed-length arrays, as follows:
+/* Note: in D2, we could simply use fixed-length arrays, as follows:
 version (D_Version2)
 {
     alias ubyte[key_length]    Key;

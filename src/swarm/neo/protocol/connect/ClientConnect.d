@@ -125,7 +125,7 @@ class ClientConnect
             switch (errno)
             {
                 case EINPROGRESS,
-                     EINTR: // TODO: Might never be reported, see note above.
+                     EINTR: // Might never be reported, see note above.
                     /*
                      * EINPROGRESS: Establishing the connection would make
                      * connect() block so we need to wait for EPOLLOUT to be
