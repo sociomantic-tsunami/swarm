@@ -44,9 +44,9 @@ import ocean.core.Tuple;
     the handler delegates or multiple variadic arguments have the same type then
     a compile-time error is raised.
 
-    The purpose of `T1 arg` is merely to work around a bug in DMD v1.077s17,
-    which fails compiling if `n_args == 0`. DMD v1.076 and v2.072.1 don't fail.
-    TODO: Remove `T1 arg` when the DMD bug is fixed.
+    The purpose of `T1 arg` is merely to work around a bug in DMD v1.077s17 and
+    still in v1.081.2, which fails compiling if `n_args == 0`. DMD v1.076 and
+    v2.072.1 don't fail. TODO: Remove `T1 arg` when the DMD bug is fixed.
 
     Params:
         n_args       = the number of arguments to handle
