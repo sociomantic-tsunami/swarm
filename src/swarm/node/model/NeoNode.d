@@ -805,7 +805,7 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
 
         // Instantiate params object shared by all neo connection handlers.
         auto neo_conn_setup_params = new Neo.ConnectionHandler.SharedParams(
-            options.epoll, options.shared_resources, options.requests,
+            options.epoll, options.requests,
             options.no_delay, *credentials, this, &this.getResourceAcquirer);
 
         // Set up unix listener socket, if specified.

@@ -97,52 +97,16 @@ class ConnectionHandler : IConnectionHandler
             /// handling a request of this type.
             ClassInfo class_info;
 
-            /// The request handler function, called when a request of this type
-            /// is initiated.
-            /// Note: this field is only used when a request is set up with the
-            /// deprecated add() methods.
-            Handler handler;
-
             /// Indicates whether timing stats should be gathered about the
             /// request.
             bool timing;
         }
-
-        /// Map of request info by command code.
-        // (When the deprecated add method is removed, this field can be too.)
-        private RequestInfo[Command.Code] map;
 
         /// Map of request info by request/version code.
         private RequestInfo[Command] request_info;
 
         /// Set of supported request codes.
         private bool[Command.Code] supported_requests;
-
-        /***********************************************************************
-
-            Adds a request to the map.
-
-            Params:
-                code = command code to initiate request
-                name = name of request
-                handler = function called to handle this request type
-                timing = if true, timing stats about request of this type are
-                    tracked
-
-        ***********************************************************************/
-
-        deprecated("Use the other version of `add` that provides info for "
-            "specific request versions")
-        public void add ( Command.Code code, cstring name, Handler handler,
-            bool timing = true )
-        {
-            RequestInfo ri;
-            ri.name = idup(name);
-            ri.handler = handler;
-            ri.timing = timing;
-            this.map[code] = ri;
-            this.supported_requests[code] = true;
-        }
 
         /***********************************************************************
 
@@ -160,9 +124,6 @@ class ConnectionHandler : IConnectionHandler
         public void add ( Command command, cstring name, ClassInfo class_info,
             bool timing = true )
         {
-            verify((command.code in this.map) is null,
-                "Either add a single handler for all versions of a request or "
-                ~ "separate handlers for each version");
             verify(name.length > 0);
             verify(class_info !is null);
 
@@ -176,28 +137,6 @@ class ConnectionHandler : IConnectionHandler
 
         /***********************************************************************
 
-            Adds an unnamed request to the map. (This method exists in order to
-            mimic the API of an associative array, for compatibility with old
-            code.)
-
-            Params:
-                handler = function called to handle this request type
-                code = command code to initiate request
-
-        ***********************************************************************/
-
-        deprecated("Use the `add` method instead, specifying a name for the request.")
-        public void opIndexAssign ( Handler handler, Command.Code code )
-        {
-            RequestInfo ri;
-            ri.handler = handler;
-            ri.timing = true;
-            this.map[code] = ri;
-            this.supported_requests[code] = true;
-        }
-
-        /***********************************************************************
-
             Sets up stats tracking for all requests in the map.
 
             Params:
@@ -207,19 +146,11 @@ class ConnectionHandler : IConnectionHandler
 
         public void initStats ( RequestStats request_stats )
         {
-            foreach ( code, rq; this.map )
-                if ( rq.name.length > 0 )
-                    request_stats.init(rq.name, rq.timing);
-
             foreach ( command, rq; this.request_info )
                 if ( !(rq.name in request_stats.request_stats ) )
                     request_stats.init(rq.name, rq.timing);
         }
     }
-
-    /// Alias to old name.
-    deprecated("Use the `RequestMap` struct instead.")
-    public alias RequestMap CmdHandlers;
 
     /***************************************************************************
 
@@ -258,10 +189,6 @@ class ConnectionHandler : IConnectionHandler
 
         public RequestMap requests;
 
-        /// Alias to old name.
-        deprecated("Use the `requests` member instead.")
-        public alias requests cmd_handlers;
-
         /***********************************************************************
 
             Epoll instance used by the node.
@@ -293,18 +220,6 @@ class ConnectionHandler : IConnectionHandler
         ***********************************************************************/
 
         public Connection.YieldedRequestOnConns yielded_rqonconns;
-
-        /***********************************************************************
-
-            Opaque shared resources instance passed to the request handlers.
-
-            When the deprecated methods of RequestMap are removed, this instance
-            can also be removed. It should be no longer needed. (The
-            get_resource_acquirer delegate plays the same role.)
-
-        ***********************************************************************/
-
-        public Object shared_resources;
 
         /***********************************************************************
 
@@ -346,8 +261,6 @@ class ConnectionHandler : IConnectionHandler
 
             Params:
                 epoll = epoll dispatcher used by the node
-                shared_resources = global resources shared by all request
-                    handlers
                 requests = map of command code -> request handling info
                 no_delay = if false, data written to the socket will be buffered
                     and sent according to Nagle's algorithm. If true, no
@@ -361,7 +274,7 @@ class ConnectionHandler : IConnectionHandler
 
         ***********************************************************************/
 
-        public this ( EpollSelectDispatcher epoll, Object shared_resources,
+        public this ( EpollSelectDispatcher epoll,
             RequestMap requests, bool no_delay,
             ref Const!(Key[istring]) credentials, INodeInfo node_info,
             GetResourceAcquirerDg get_resource_acquirer )
@@ -369,12 +282,10 @@ class ConnectionHandler : IConnectionHandler
             verify(requests.supported_requests.length > 0);
 
             this.epoll = epoll;
-            this.shared_resources = shared_resources;
             this.request_pool = new Connection.RequestPool;
             this.yielded_rqonconns = new Connection.YieldedRequestOnConns;
             epoll.register(this.yielded_rqonconns);
             this.requests = requests;
-            this.requests.map.rehash;
             this.no_delay = no_delay;
             this.credentials = &credentials;
             this.node_info = node_info;
@@ -509,17 +420,8 @@ class ConnectionHandler : IConnectionHandler
         {
             auto command = *this.connection.message_parser.getValue!(Command)(init_payload);
 
-            // deprecated handlers without version handling
-            if (auto rq = command.code in this.shared_params.requests.map)
-            {
-                this.handleRequest(*rq, connection,
-                    {
-                        (*rq.handler)(this.shared_params.shared_resources,
-                            connection, command.ver, init_payload);
-                    });
-            }
             // Supported request codes.
-            else if (command.code in
+            if (command.code in
                 this.shared_params.requests.supported_requests)
             {
                 // Supported version codes.
@@ -529,11 +431,9 @@ class ConnectionHandler : IConnectionHandler
                     // logic can be moved into handleRequest.
                     this.handleRequest(*rq, connection,
                         {
-                            bool acquired;
                             this.shared_params.get_resource_acquirer(
                                 ( Object request_resources )
                                 {
-                                    acquired = true;
                                     auto rq_handler =
                                         this.emplace!(IRequestHandler)
                                         (connection.emplace_buf, rq.class_info);
@@ -546,9 +446,6 @@ class ConnectionHandler : IConnectionHandler
                                     rq_handler.postSupportedCodeSent();
                                 }
                             );
-                            // TODO: this check can be removed when the old
-                            // deprecated handlers are removed.
-                            assert(acquired);
                         });
                 }
                 // Unsupported version codes.
