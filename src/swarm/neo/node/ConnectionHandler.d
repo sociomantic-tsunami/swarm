@@ -693,12 +693,21 @@ class ConnectionHandler : IConnectionHandler
         assert(!(ci.flags & 8) && ci.defaultConstructor is null);
         assert(ci.destructor is null);
 
+        version (D_Version2)
+        {
+            auto initializer = ci.initializer();
+        }
+        else
+        {
+            auto initializer = ci.init;
+        }
+
         // Allocate space
-        buf.length = ci.init.length;
+        buf.length = initializer.length;
         enableStomping(buf);
 
         // Initialize it
-        buf[] = ci.init[];
+        buf[] = initializer[];
 
         // Cast to T (and check that the cast succeeded)
         auto t_instance = cast(T)cast(Object)buf.ptr;
