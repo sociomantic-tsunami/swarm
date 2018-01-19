@@ -39,6 +39,10 @@ import ocean.transition;
     to expire after ~10 ms. When this timer expires it is set again, doubling
     the time delay up to 2.5 s, then keeping it constant.
 
+    Throws:
+        `TimerFD.TimerException` if the timer failed. This can happen only due
+        to OS resource exhaustion.
+
 *******************************************************************************/
 
 void retry ( lazy bool success, MessageFiber fiber, EpollSelectDispatcher epoll )
@@ -61,144 +65,136 @@ body
     // This exception is caught inside the scope of this function.
     scope e = new TimerFD.TimerException;
 
-    try
+    scope timer = new TimerFD(e);
+
+    FiberTokenHashGenerator fiber_token;
+
+    bool waiting_for_timer = true;
+
+    // Custom timer event using the stack allocated `TimerFD` instance
+    final scope class TimerEvent: ISelectClient
     {
-        scope timer = new TimerFD(e);
+        // Events and file handle
+        override Event events ( ) {return Event.EPOLLIN;}
+        override Handle fileHandle ( ) {return timer.fileHandle;}
 
-        FiberTokenHashGenerator fiber_token;
+        // Table of timer expiration delays
+        const delay =
+        [
+            timespec(0,   9_765_625),
+            timespec(0,  19_531_250),
+            timespec(0,  39_062_500),
+            timespec(0,  78_125_000),
+            timespec(0, 156_250_000),
+            timespec(0, 312_500_000),
+            timespec(0, 625_000_000),
+            timespec(1, 250_000_000),
+            timespec(2, 500_000_000)
+        ];
 
-        bool waiting_for_timer = true;
+        // A counter for the delay to use on the next expiration.
+        uint n = 0;
 
-        // Custom timer event using the stack allocated `TimerFD` instance
-        final scope class TimerEvent: ISelectClient
+        // Constructor; sets the timer to the next delay that is greater
+        // than the duration of the first retry, `t_end - t_start`, and
+        // registers this instance with epoll.
+        this ( )
         {
-            // Events and file handle
-            override Event events ( ) {return Event.EPOLLIN;}
-            override Handle fileHandle ( ) {return timer.fileHandle;}
+            auto dt = diff(t_end, t_start);
 
-            // Table of timer expiration delays
-            const delay =
-            [
-                timespec(0,   9_765_625),
-                timespec(0,  19_531_250),
-                timespec(0,  39_062_500),
-                timespec(0,  78_125_000),
-                timespec(0, 156_250_000),
-                timespec(0, 312_500_000),
-                timespec(0, 625_000_000),
-                timespec(1, 250_000_000),
-                timespec(2, 500_000_000)
-            ];
-
-            // A counter for the delay to use on the next expiration.
-            uint n = 0;
-
-            // Constructor; sets the timer to the next delay that is greater
-            // than the duration of the first retry, `t_end - t_start`, and
-            // registers this instance with epoll.
-            this ( )
+            do
             {
-                auto dt = diff(t_end, t_start);
+                this.n++;
+            }
+            while (greater(dt, delay[this.n]) && this.n < delay.length - 1);
 
-                do
+            switch (this.n)
+            {
+                default:
+                    // Set the timer to expire once.
+                    timer.set(delay[this.n]);
+                    this.n++;
+                    break;
+                case delay.length  - 2:
+                    // Set the timer to expire after 1.25s, then every 2.5s.
+                    timer.set(delay[this.n], delay[this.n + 1]);
+                    this.n++;
+                    break;
+                case delay.length  - 1:
+                    // Set the timer to expire every 2.5s.
+                    timer.set(delay[this.n], delay[this.n]);
+            }
+
+            epoll.register(this);
+        }
+
+        // Timer expiration event handler. Resumes the fiber if waiting for
+        // the timer, and sets the timer to the next expiration if needed.
+        // Returns true to stay registered in epoll; ignores event.
+        override bool handle ( Event event )
+        {
+            timer.handle();
+
+            if (this.n <= delay.length - 2)
+            {
+                if (this.n < delay.length - 2)
                 {
+                    // Set the timer to expire once.
+                    timer.set(delay[this.n++]);
+                }
+                else
+                {
+                    // Set the timer to expire after 1.25s, then every 2.5s.
+                    timer.set(delay[this.n], delay[this.n + 1]);
                     this.n++;
                 }
-                while (greater(dt, delay[this.n]) && this.n < delay.length - 1);
-
-                switch (this.n)
-                {
-                    default:
-                        // Set the timer to expire once.
-                        timer.set(delay[this.n]);
-                        this.n++;
-                        break;
-                    case delay.length  - 2:
-                        // Set the timer to expire after 1.25s, then every 2.5s.
-                        timer.set(delay[this.n], delay[this.n + 1]);
-                        this.n++;
-                        break;
-                    case delay.length  - 1:
-                        // Set the timer to expire every 2.5s.
-                        timer.set(delay[this.n], delay[this.n]);
-                }
-
-                epoll.register(this);
             }
 
-            // Timer expiration event handler. Resumes the fiber if waiting for
-            // the timer, and sets the timer to the next expiration if needed.
-            // Returns true to stay registered in epoll; ignores event.
-            override bool handle ( Event event )
-            {
-                timer.handle();
+            if (waiting_for_timer)
+                fiber.resume(fiber_token.get(), this);
 
-                if (this.n <= delay.length - 2)
-                {
-                    if (this.n < delay.length - 2)
-                    {
-                        // Set the timer to expire once.
-                        timer.set(delay[this.n++]);
-                    }
-                    else
-                    {
-                        // Set the timer to expire after 1.25s, then every 2.5s.
-                        timer.set(delay[this.n], delay[this.n + 1]);
-                        this.n++;
-                    }
-                }
-
-                if (waiting_for_timer)
-                    fiber.resume(fiber_token.get(), this);
-
-                return true;
-            }
-
-            // Unregister this instance when it goes out of scope.
-            ~this ( )
-            {
-                try
-                {
-                    // Catch and log exceptions, so that this destructor won't
-                    // throw.
-                    if (int error_code = epoll.unregister(this))
-                    {
-                        if (error_code != ENOENT)
-                        {
-                            stdio.fprintf(stdio.stderr, ("Error unregistering " ~
-                                    typeof(this).stringof ~
-                                    " from epoll: %s\n\0").ptr,
-                                    strerror(error_code));
-                        }
-                    }
-                }
-                catch (Exception e)
-                {
-                    auto msg = getMsg(e);
-                    stdio.fprintf(stdio.stderr, ("Error unregistering " ~
-                            typeof(this).stringof ~
-                            " from epoll: %.*s @%s:%u\n\0").ptr,
-                            msg.length, msg.ptr, e.file.ptr, e.line);
-                }
-            }
-
-        } // TimerEvent ends here
-
-        scope event = new TimerEvent;
-
-        do
-        {
-            waiting_for_timer = true;
-            fiber.suspend(fiber_token.create(), event);
-            waiting_for_timer = false;
+            return true;
         }
-        while (!success);
-    }
-    catch (TimerFD.TimerException e)
+
+        // Unregister this instance when it goes out of scope.
+        ~this ( )
+        {
+            try
+            {
+                // Catch and log exceptions, so that this destructor won't
+                // throw.
+                if (int error_code = epoll.unregister(this))
+                {
+                    if (error_code != ENOENT)
+                    {
+                        stdio.fprintf(stdio.stderr, ("Error unregistering " ~
+                                typeof(this).stringof ~
+                                " from epoll: %s\n\0").ptr,
+                                strerror(error_code));
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                auto msg = getMsg(e);
+                stdio.fprintf(stdio.stderr, ("Error unregistering " ~
+                        typeof(this).stringof ~
+                        " from epoll: %.*s @%s:%u\n\0").ptr,
+                        msg.length, msg.ptr, e.file.ptr, e.line);
+            }
+        }
+
+    } // TimerEvent ends here
+
+    scope event = new TimerEvent;
+
+    do
     {
-        // Fatal error: The timer failed. This can happen only due to OS
-        // resource exhaustion. TODO: log error
+        waiting_for_timer = true;
+        fiber.suspend(fiber_token.create(), event);
+        waiting_for_timer = false;
     }
+    while (!success);
 }
 
 /*******************************************************************************
