@@ -462,8 +462,20 @@ public final class Connection: ConnectionBase
         if (!this.restart_after_shutdown)
             return false;
 
-        this.status_ = this.status_.Connecting;
-        retry(this.tryConnect(), this.send_loop, this.epoll);
+        try
+        {
+            this.status_ = this.status_.Connecting;
+            retry(this.tryConnect(), this.send_loop, this.epoll);
+        }
+        catch (Exception e)
+        {
+            // This may happen if the timer failed due to OS resource
+            // exhaustion.
+            log.error("connect: retry failed - {} @{}:{}",
+                getMsg(e), e.file, e.line);
+            this.status_ = this.status_.Disconnected;
+        }
+
         switch (this.status_)
         {
             case this.status_.Connecting:
