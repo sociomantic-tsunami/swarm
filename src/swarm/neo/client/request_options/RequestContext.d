@@ -10,7 +10,7 @@
            union (e.g. ocean.core.ContextUnion) in a request's user-specified
            arguments.
 
-    TODO: in D2, `alias this` would greatly simplify this wrapper struct.
+    Note: in D2, `alias this` would greatly simplify this wrapper struct.
 
     copyright: Copyright (c) 2016-2017 sociomantic labs GmbH. All rights reserved
 

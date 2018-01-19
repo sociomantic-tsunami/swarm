@@ -5,7 +5,7 @@
     Note: The terms "hash function" and "message digest" are used
     interchangeably in the context of HMAC and this class.
 
-    TODO: It would be nice to have a constant length for authentication keys so
+    Note: It would be nice to have a constant length for authentication keys so
     that a key can be held in a static array, avoiding buffer allocation and
     referencing. HMAC internally pads or shortens the key to the block size of
     the hash function anyway so forcing the key length to match that block size
