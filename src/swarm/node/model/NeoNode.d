@@ -913,14 +913,8 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
 
     ***************************************************************************/
 
-    protected void getResourceAcquirer (
-        void delegate ( Object resource_acquirer ) handle_request_dg )
-    {
-        // Default implementation does nothing. The derived class should
-        // override and provide the expected logic.
-        // TODO: make this method abstract in the next major. (Obligatory
-        // keyword: deprecated.)
-    }
+    abstract protected void getResourceAcquirer (
+        void delegate ( Object resource_acquirer ) handle_request_dg );
 
     /***************************************************************************
 
