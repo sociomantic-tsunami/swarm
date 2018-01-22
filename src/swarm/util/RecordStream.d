@@ -78,7 +78,7 @@ public struct Record
 
     ***************************************************************************/
 
-    private static const Separator = ':';
+    private static enum Separator = ':';
 
 
     /***************************************************************************
@@ -121,18 +121,18 @@ public struct Record
 
     ***************************************************************************/
 
-    public void serialize ( OutputStream stream, ref mstring buf ) /* d1to2fix_inject: const */
+    public void serialize ( OutputStream stream, ref mstring buf ) const
     {
-        if ( this.key.length )
+        if ( (&this).key.length )
         {
             // Cast necessary because the porting of this function
             // was fixed in v3.6.0
-            SimpleStreamSerializer.writeData(stream, cast(void[]) this.key);
+            SimpleStreamSerializer.writeData(stream, cast(void[]) (&this).key);
         }
         SimpleStreamSerializer.write(stream, Separator);
 
-        buf.length = Base64.allocateEncodeSize(this.value);
-        SimpleStreamSerializer.writeData(stream, Base64.encode(this.value, buf));
+        buf.length = Base64.allocateEncodeSize((&this).value);
+        SimpleStreamSerializer.writeData(stream, Base64.encode((&this).value, buf));
         SimpleStreamSerializer.write(stream, '\n');
     }
 
@@ -158,7 +158,7 @@ public struct Record
         readUntil(stream, '\n', buf);
 
         // Extract the key and value from the line
-        splitRecord(cast(ubyte[])buf, this.key, this.value);
+        splitRecord(cast(ubyte[])buf, (&this).key, (&this).value);
     }
 
     /***************************************************************************
@@ -184,7 +184,7 @@ public struct Record
         stream.readln(data);
 
         // Extract the key and value from the line
-        splitRecord(cast(Const!(ubyte)[])data, this.key, this.value);
+        splitRecord(cast(Const!(ubyte)[])data, (&this).key, (&this).value);
     }
 
 
@@ -197,13 +197,13 @@ public struct Record
 
     public Type type ( )
     {
-        if ( this.key.length )
+        if ( (&this).key.length )
         {
-            return this.value.length ? Type.KeyValue : Type.ValueOnly;
+            return (&this).value.length ? Type.KeyValue : Type.ValueOnly;
         }
         else
         {
-            return this.value.length ? Type.ValueOnly : Type.Empty;
+            return (&this).value.length ? Type.ValueOnly : Type.Empty;
         }
     }
 
@@ -221,9 +221,9 @@ public struct Record
 
     public hash_t hash ( )
     {
-        enforce(isHash(castFrom!(ubyte[]).to!(mstring)(this.key)));
+        enforce(isHash(castFrom!(ubyte[]).to!(mstring)((&this).key)));
 
-        return straightToHash(castFrom!(ubyte[]).to!(mstring)(this.key));
+        return straightToHash(castFrom!(ubyte[]).to!(mstring)((&this).key));
     }
 
 
@@ -238,8 +238,8 @@ public struct Record
 
     public void hash ( hash_t h )
     {
-        this.key.length = HashDigits;
-        intToHex(h, cast(char[])this.key);
+        (&this).key.length = HashDigits;
+        intToHex(h, cast(char[])(&this).key);
     }
 
 
@@ -471,9 +471,9 @@ public class StdinRecordStream : ISuspendable
 
     ***************************************************************************/
 
-    public this ( OutputDg output_dg )
+    public this ( scope OutputDg output_dg )
     {
-        const fiber_stack_size = 256 * 1024;
+        static immutable fiber_stack_size = 256 * 1024;
         this.fiber = new MessageFiber(&this.fiberMethod, fiber_stack_size);
         this.output_dg = output_dg;
     }

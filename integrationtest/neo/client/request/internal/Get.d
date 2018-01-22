@@ -109,7 +109,7 @@ public struct Get
 
     ***************************************************************************/
 
-    public static void handler ( UseNodeDg use_node, void[] context_blob,
+    public static void handler ( scope UseNodeDg use_node, void[] context_blob,
         void[] working_blob )
     {
         auto context = Get.getContext(context_blob);
