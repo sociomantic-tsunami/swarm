@@ -96,7 +96,7 @@ public class NodeDeactivator
 
     ***************************************************************************/
 
-    public const real default_threshold = 1.0;
+    public static immutable real default_threshold = 1.0;
 
     public real threshold = default_threshold;
 
@@ -109,7 +109,7 @@ public class NodeDeactivator
 
     ***************************************************************************/
 
-    public const uint default_retry_time_ms = 60_000;
+    public static immutable uint default_retry_time_ms = 60_000;
 
     public uint retry_time_ms = default_retry_time_ms;
 
@@ -124,7 +124,7 @@ public class NodeDeactivator
 
     ***************************************************************************/
 
-    public const float default_max_disabled_fraction = 0.25;
+    public static immutable float default_max_disabled_fraction = 0.25;
 
     public float max_disabled_fraction = default_max_disabled_fraction;
 

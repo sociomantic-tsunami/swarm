@@ -56,9 +56,9 @@ struct DelayedSuspender
 
     invariant ( )
     {
-        assert(this.fiber !is null);
-        assert(this.request_event_dispatcher !is null);
-        assert(this.conn !is null);
+        assert((&this).fiber !is null);
+        assert((&this).request_event_dispatcher !is null);
+        assert((&this).conn !is null);
     }
 
     /***************************************************************************
@@ -70,10 +70,10 @@ struct DelayedSuspender
 
     public void requestSuspension ( )
     {
-        with ( SuspendState ) switch ( this.state )
+        with ( SuspendState ) switch ( (&this).state )
         {
             case None:
-                this.state = Pending;
+                (&this).state = Pending;
                 break;
             case Pending:
                 // Suspend already requested; do nothing.
@@ -95,19 +95,19 @@ struct DelayedSuspender
 
     public void resumeIfSuspended ( )
     {
-        with ( SuspendState ) switch ( this.state )
+        with ( SuspendState ) switch ( (&this).state )
         {
             case None:
                 // Already running; do nothing.
                 break;
             case Pending:
                 // Already running; cancel suspend request.
-                this.state = None;
+                (&this).state = None;
                 break;
             case Suspended:
-                this.state = None;
-                this.request_event_dispatcher.signal(this.conn,
-                    this.signal_code);
+                (&this).state = None;
+                (&this).request_event_dispatcher.signal((&this).conn,
+                    (&this).signal_code);
                 break;
             default: assert(false);
         }
@@ -121,16 +121,16 @@ struct DelayedSuspender
 
     public void suspendIfRequested ( )
     {
-        with ( SuspendState ) switch ( this.state )
+        with ( SuspendState ) switch ( (&this).state )
         {
             case None:
             case Suspended:
                 // No state change requested; do nothing.
                 break;
             case Pending:
-                this.state = Suspended;
-                this.request_event_dispatcher.nextEvent(this.fiber,
-                    Signal(this.signal_code));
+                (&this).state = Suspended;
+                (&this).request_event_dispatcher.nextEvent((&this).fiber,
+                    Signal((&this).signal_code));
                 break;
             default: assert(false);
         }
@@ -160,7 +160,7 @@ unittest
         private RequestOnConnBase.EventDispatcher conn;
 
         /// Signal code that suspended fiber waits for.
-        const ResumeSuspendedFiber = 23;
+        static immutable ResumeSuspendedFiber = 23;
 
         class Worker
         {
