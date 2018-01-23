@@ -189,6 +189,7 @@ public class NodeDeactivator
         import swarm.Const : NodeItem;
 
         import ocean.core.Enforce;
+        import ocean.core.Verify;
 
         debug ( NodeDeactivator ) import ocean.io.Stdout;
 
