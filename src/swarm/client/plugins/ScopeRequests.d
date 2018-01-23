@@ -26,8 +26,6 @@ import ocean.core.Verify;
 
 public class ScopeRequestsPlugin
 {
-    import ocean.core.Verify;
-
     /***************************************************************************
 
         Code to be mixed into the client.
@@ -47,6 +45,7 @@ public class ScopeRequestsPlugin
         import swarm.client.request.notifier.IRequestNotification;
 
         import ocean.core.MessageFiber;
+        import ocean.core.Verify;
 
         debug ( SwarmClient ) import ocean.io.Stdout;
 
@@ -246,7 +245,7 @@ public class ScopeRequestsPlugin
 
             private void notify ( IRequestNotification info )
             {
-                verify (this.pending, "no requests pending when notified");
+                verify (this.pending > 0, "no requests pending when notified");
 
                 try
                 {
