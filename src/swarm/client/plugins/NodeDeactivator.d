@@ -186,6 +186,8 @@ public class NodeDeactivator
 
         import swarm.client.registry.FluidNodeRegistry;
 
+        import swarm.Const : NodeItem;
+
         import ocean.core.Enforce;
 
         debug ( NodeDeactivator ) import ocean.io.Stdout;
