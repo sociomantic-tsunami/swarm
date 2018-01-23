@@ -94,6 +94,8 @@ public class RequestQueueDiskOverflow
 
     template Extension ( istring instance )
     {
+        import swarm.client.connection.RequestOverflow;
+
         /***********************************************************************
 
             Overrides the default requestOverflow() method, which provides a
