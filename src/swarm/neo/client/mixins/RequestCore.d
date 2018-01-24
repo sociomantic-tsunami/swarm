@@ -74,12 +74,12 @@ public static struct SerializableReferenceType ( Type )
 
     void set ( Type val )
     {
-        this.serialized[] = (cast(ubyte*)&val)[0..val.sizeof];
+        (&this).serialized[] = (cast(ubyte*)&val)[0..val.sizeof];
     }
 
     Type get ( )
     {
-        return *(cast(Type*)this.serialized.ptr);
+        return *(cast(Type*)(&this).serialized.ptr);
     }
 }
 
@@ -169,7 +169,7 @@ public template RequestCore ( RequestType request_type_, ubyte request_code,
 
     ***************************************************************************/
 
-    const RequestType request_type = request_type_;
+    static immutable RequestType request_type = request_type_;
 
     /***************************************************************************
 
@@ -396,8 +396,8 @@ unittest
 
         ***********************************************************************/
 
-        const ubyte RequestCode = 0;
-        const ubyte RequestVersion = 0;
+        enum ubyte RequestCode = 0;
+        enum ubyte RequestVersion = 0;
 
         struct Args
         {

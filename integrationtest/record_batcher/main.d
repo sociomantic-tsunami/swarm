@@ -80,7 +80,7 @@ public void runListener ()
 }
 
 
-private const Input = [
+private static immutable Input = [
     // Two records without keys (values only)
     Record(null,     [ 0x52, 0x45, 0x50, 0x4F, 0x52, 0x54, 0x49, 0x4E, 0x47 ]),
     Record(null,     [ 0x20, 0x57, 0x41, 0x53 ]),

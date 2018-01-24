@@ -145,7 +145,7 @@ class Test : Task
         // sent and parsed in a single write buffer.
         mstring value;
         value.length = 1024 * 64;
-        const records_written = 100;
+        static immutable records_written = 100;
         for ( hash_t key = 0; key < records_written; key++ )
         {
             auto ok = this.client.blocking.put(key, value,
@@ -202,7 +202,7 @@ class Test : Task
         // sent and parsed in a single write buffer.
         mstring value;
         value.length = 1024 * 64;
-        const records_written = 100;
+        static immutable records_written = 100;
         for ( hash_t key = 0; key < records_written; key++ )
         {
             auto ok = this.client.blocking.put(key, value,
@@ -268,7 +268,7 @@ class Test : Task
         // sent and parsed in a single write buffer.
         mstring value;
         value.length = 1024 * 64;
-        const records_written = 100;
+        static immutable records_written = 100;
         for ( hash_t key = 0; key < records_written; key++ )
         {
             auto ok = this.client.blocking.put(key, value,
@@ -396,7 +396,7 @@ class Test : Task
     {
         struct Str
         {
-            const ubyte StructVersion = 23;
+            enum ubyte StructVersion = 23;
             mstring name;
             uint age;
         }
