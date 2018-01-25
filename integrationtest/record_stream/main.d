@@ -13,7 +13,7 @@
 
 *******************************************************************************/
 
-module integrationtest.record_batcher.main;
+module integrationtest.record_stream.main;
 
 import core.sys.posix.unistd;
 
