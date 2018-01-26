@@ -38,6 +38,7 @@ public class Node : NodeBase!(ConnHandler)
     import integrationtest.neo.node.request.GetAll;
     import integrationtest.neo.node.request.Put;
     import integrationtest.neo.node.request.DoublePut;
+    import integrationtest.neo.node.request.RoundRobinPut;
 
     /***************************************************************************
 
@@ -72,6 +73,8 @@ public class Node : NodeBase!(ConnHandler)
             "Put", PutImpl_v0.classinfo);
         options.requests.add(Command(RequestCode.DoublePut, 0),
             "DoublePut", DoublePutImpl_v0.classinfo);
+        options.requests.add(Command(RequestCode.RoundRobinPut, 0),
+            "RoundRobinPut", RoundRobinPutImpl_v0.classinfo);
 
         options.credentials_map["dummy"] = Key.init;
         options.shared_resources = this.shared_resources;
