@@ -46,6 +46,7 @@ public class Client
         public import GetAll = integrationtest.neo.client.request.GetAll;
         public import Put = integrationtest.neo.client.request.Put;
         public import DoublePut = integrationtest.neo.client.request.DoublePut;
+        public import RoundRobinPut = integrationtest.neo.client.request.RoundRobinPut;
 
         /***********************************************************************
 
@@ -58,15 +59,17 @@ public class Client
             import integrationtest.neo.client.request.internal.GetAll;
             import integrationtest.neo.client.request.internal.Get;
             import integrationtest.neo.client.request.internal.Put;
+            import integrationtest.neo.client.request.internal.Put;
             import integrationtest.neo.client.request.internal.DoublePut;
+            import integrationtest.neo.client.request.internal.RoundRobinPut;
         }
 
         /// Instantiation of ClientCore.
         mixin ClientCore!();
 
         /// Instantiation of RequestStatsTemplate.
-        alias RequestStatsTemplate!("Put", "DoublePut", "Get", "GetAll")
-            RequestStats;
+        alias RequestStatsTemplate!("Put", "DoublePut", "RoundRobinPut", "Get",
+            "GetAll") RequestStats;
 
         /***********************************************************************
 
@@ -117,6 +120,33 @@ public class Client
             );
 
             this.assign!(Internals.DoublePut)(params);
+        }
+
+        /***********************************************************************
+
+            Assigns a RoundRobinPut request, instructing one node (chosen
+            according to a round-robin sequence) to associate the specified
+            value and key.
+
+            Params:
+                key = key of record to add to node
+                value = value of record to add to node
+                notifier = notifier, called when interesting events occur for
+                    this request
+
+        ***********************************************************************/
+
+        public void roundRobinPut ( hash_t key, in void[] value,
+            RoundRobinPut.Notifier notifier )
+        {
+            auto params = Const!(Internals.RoundRobinPut.UserSpecifiedParams)(
+                Const!(RoundRobinPut.Args)(key, value),
+                Const!(Internals.RoundRobinPut.UserSpecifiedParams.SerializedNotifier)(
+                    *(cast(Const!(ubyte[notifier.sizeof])*)&notifier)
+                )
+            );
+
+            this.assign!(Internals.RoundRobinPut)(params);
         }
 
         /***********************************************************************
@@ -358,6 +388,61 @@ public class Client
             }
 
             this.outer.neo.doublePut(key, value, &internalNotifier);
+            if ( !finished )
+                task.suspend();
+
+            return succeeded;
+        }
+
+        /***********************************************************************
+
+            Assigns a RoundRobinPut request, instructing one node (chosen
+            according to a round-robin sequence) to associate the specified
+            value and key. The calling Task is blocked until the request
+            finishes.
+
+            Params:
+                key = key of record to add to nodes
+                value = value of record to add to nodes
+                notifier = notifier, called when interesting events occur for
+                    this request
+
+            Returns:
+                true if the RoundRobinPut request succeeded on a node, false if
+                it failed on all nodes
+
+        ***********************************************************************/
+
+        public bool roundRobinPut ( hash_t key, in void[] value,
+            Neo.RoundRobinPut.Notifier notifier )
+        {
+            auto task = Task.getThis();
+            assert(task !is null);
+
+            bool succeeded, finished;
+            void internalNotifier ( Neo.RoundRobinPut.Notification info,
+                Neo.RoundRobinPut.Args args )
+            {
+                notifier(info, args);
+
+                switch ( info.active )
+                {
+                    case info.active.succeeded:
+                        succeeded = true;
+                        finished = true;
+                        break;
+                    case info.active.failure:
+                        finished = true;
+                        break;
+                    default:
+                        // Do nothing; other notifications are non-final.
+                }
+
+                if ( finished && task.suspended )
+                    task.resume();
+            }
+
+            this.outer.neo.roundRobinPut(key, value, &internalNotifier);
             if ( !finished )
                 task.suspend();
 
