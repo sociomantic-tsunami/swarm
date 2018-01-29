@@ -72,6 +72,7 @@ class Test : Task
         enforce(this.conn_notifications == ConnNotifications(1, 0));
 
         this.testPutGet();
+        this.testUnsupported();
         this.testPutGetAll();
         this.testPutGetAllStop();
         this.testPutGetAllSuspend();
@@ -128,6 +129,33 @@ class Test : Task
             ( Client.Neo.Get.Notification info, Client.Neo.Get.Args args ) { });
         enforce(ok, "Get request failed");
         enforce(value == cast(void[])"hello");
+    }
+
+    /***************************************************************************
+
+        Runs a simple test where an unsupported version of the Get request is
+        sent to the node, as a test of the unsupported request handling.
+
+    ***************************************************************************/
+
+    private void testUnsupported ( )
+    {
+        bool unsupported;
+        void notifier ( Client.Neo.Get.Notification info,
+            Client.Neo.Get.Args args )
+        {
+            if ( info.active == info.active.unsupported && info.unsupported.type
+                == info.unsupported.type.RequestVersionNotSupported )
+            {
+                unsupported = true;
+            }
+        }
+
+        void[] value;
+        auto ok = this.client.blocking.get!(23)(23, value, &notifier);
+        enforce(!ok, "Unsupported Get request succeeded");
+        enforce(value is null);
+        enforce(unsupported);
     }
 
     /***************************************************************************
