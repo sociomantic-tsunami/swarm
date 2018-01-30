@@ -128,7 +128,7 @@ template Controllers ( )
 
         ***********************************************************************/
 
-        public void control ( void delegate ( ControllerInterface ) dg )
+        public void control ( scope void delegate ( ControllerInterface ) dg )
         {
             verify(this.initialised);
             enforce(this.outer.control(this.id_, dg),

@@ -65,9 +65,9 @@ public struct BatchWriter ( Record ... )
 
     public void initialise ( void[]* buffer, size_t max_size )
     {
-        this.buffer = buffer;
-        this.max_size = max_size;
-        this.clear();
+        (&this).buffer = buffer;
+        (&this).max_size = max_size;
+        (&this).clear();
     }
 
     /***************************************************************************
@@ -88,7 +88,7 @@ public struct BatchWriter ( Record ... )
     {
         size_t sum;
         foreach ( field; record )
-            sum += this.sizeOfField(field);
+            sum += (&this).sizeOfField(field);
 
         return sum;
     }
@@ -108,7 +108,7 @@ public struct BatchWriter ( Record ... )
 
     public bool fits ( Record record )
     {
-        return this.sizeOf(record) <= this.max_size;
+        return (&this).sizeOf(record) <= (&this).max_size;
     }
 
     /***************************************************************************
@@ -128,18 +128,18 @@ public struct BatchWriter ( Record ... )
 
     ***************************************************************************/
 
-    public bool add ( Record record, void delegate ( ) batch_finished )
+    public bool add ( Record record, scope void delegate ( ) batch_finished )
     {
-        if ( !this.fits(record) )
+        if ( !(&this).fits(record) )
             return false;
 
         foreach ( field; record )
-            this.addField(field);
+            (&this).addField(field);
 
-        if ( this.buffer.length >= this.max_size )
+        if ( (&this).buffer.length >= (&this).max_size )
         {
             batch_finished();
-            this.clear();
+            (&this).clear();
         }
 
         return true;
@@ -154,7 +154,7 @@ public struct BatchWriter ( Record ... )
 
     public Const!(void)[] get ( )
     {
-        return *this.buffer;
+        return *(&this).buffer;
     }
 
     /***************************************************************************
@@ -175,15 +175,15 @@ public struct BatchWriter ( Record ... )
     {
         // Set destination to max possible length.
         compress_buf.length =
-            lzo.maxCompressedLength(this.buffer.length) + size_t.sizeof;
+            lzo.maxCompressedLength((&this).buffer.length) + size_t.sizeof;
         enableStomping(compress_buf);
 
         // Write uncompressed length into first size_t.sizeof bytes of dest.
-        *(cast(size_t*)(compress_buf.ptr)) = this.buffer.length;
+        *(cast(size_t*)(compress_buf.ptr)) = (&this).buffer.length;
 
         // Compress into destination.
         auto dst = compress_buf[size_t.sizeof .. $];
-        auto compressed_len = lzo.compress(*this.buffer, dst);
+        auto compressed_len = lzo.compress(*(&this).buffer, dst);
 
         // Minimize dest length and return.
         compress_buf.length = compressed_len + size_t.sizeof;
@@ -199,8 +199,8 @@ public struct BatchWriter ( Record ... )
 
     public void clear ( )
     {
-        this.buffer.length = 0;
-        enableStomping(*this.buffer);
+        (&this).buffer.length = 0;
+        enableStomping(*(&this).buffer);
     }
 
     /***************************************************************************
@@ -240,11 +240,11 @@ public struct BatchWriter ( Record ... )
         static if ( isDynamicArrayType!(Field) )
         {
             auto len = field.length;
-            this.addBytes((cast(void*)&len)[0 .. size_t.sizeof]);
-            this.addBytes(field[]);
+            (&this).addBytes((cast(void*)&len)[0 .. size_t.sizeof]);
+            (&this).addBytes(field[]);
         }
         else
-            this.addBytes((cast(void*)&field)[0 .. Field.sizeof]);
+            (&this).addBytes((cast(void*)&field)[0 .. Field.sizeof]);
     }
 
     /***************************************************************************
@@ -258,7 +258,7 @@ public struct BatchWriter ( Record ... )
 
     private void addBytes ( in void[] data )
     {
-        (*this.buffer) ~= data;
+        (*(&this).buffer) ~= data;
     }
 }
 
@@ -348,7 +348,7 @@ public scope class BatchReader ( Record ... )
 
     ***************************************************************************/
 
-    public int opApply ( int delegate ( ref Record ) dg )
+    public int opApply ( scope int delegate ( ref Record ) dg )
     {
         Record record;
         while ( this.remaining.length )
@@ -498,7 +498,7 @@ version ( UnitTest )
 unittest
 {
     void[] buffer;
-    const max_len = 256;
+    static immutable max_len = 256;
 
     {
         BatchWriter!(uint) batch;
@@ -549,7 +549,7 @@ unittest
 
     auto values = ["best", "thing", "ever"];
 
-    const max_len = 256;
+    static immutable max_len = 256;
     BatchWriter!(cstring) batcher;
     batcher.initialise(&buffer, max_len);
 
@@ -573,7 +573,7 @@ unittest
 
     auto values = ["best", "thing", "ever"];
 
-    const max_len = 256;
+    static immutable max_len = 256;
     BatchWriter!(cstring) batcher;
     batcher.initialise(&buffer, max_len);
 
@@ -605,7 +605,7 @@ unittest
         KeyValue(34, "whatever")];
 
     {
-        const max_len = 256;
+        static immutable max_len = 256;
         BatchWriter!(typeof(KeyValue.tupleof)) batch;
         batch.initialise(&buffer, max_len);
 
