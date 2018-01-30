@@ -61,8 +61,9 @@ Dependencies
 ========== =======
 Dependency Version
 ========== =======
-ocean      v3.1.4
-makd       v1.5.x
+ocean      v4.0.x
+makd       v2.1.x
+turtle     v9.0.x
 ========== =======
 
 The following libraries are required (for an absolutely up to date list you can
