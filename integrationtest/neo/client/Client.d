@@ -116,18 +116,20 @@ public class Client
             with the specified key (if one exists).
 
             Params:
+                Version = request version (for testing the handling of
+                    unsupported versions)
                 key = key of record to retrieve from node
                 notifier = notifier, called when interesting events occur for
                     this request
 
         ***********************************************************************/
 
-        public void get ( hash_t key, Get.Notifier notifier )
+        public void get ( ubyte Version = 0 ) ( hash_t key, Get.Notifier notifier )
         {
-            auto params = Const!(Internals.Get.UserSpecifiedParams)(
+            auto params = Const!(Internals.VersionedGet!(Version).UserSpecifiedParams)(
                 Const!(Get.Args)(key), notifier);
 
-            this.assign!(Internals.Get)(params);
+            this.assign!(Internals.VersionedGet!(Version))(params);
         }
 
         /***********************************************************************
@@ -354,6 +356,8 @@ public class Client
             until the request finishes.
 
             Params:
+                Version = request version (for testing the handling of
+                    unsupported versions)
                 key = key of record to retrive from node
                 value = output value, receives the value of the record (null, if
                     no value exists for the specified key)
@@ -365,7 +369,8 @@ public class Client
 
         ***********************************************************************/
 
-        public bool get ( hash_t key, ref void[] value, Neo.Get.Notifier notifier )
+        public bool get ( ubyte Version = 0 ) ( hash_t key, ref void[] value,
+            Neo.Get.Notifier notifier )
         {
             auto task = Task.getThis();
             assert(task !is null);
@@ -396,7 +401,7 @@ public class Client
                     task.resume();
             }
 
-            this.outer.neo.get(key, &internalNotifier);
+            this.outer.neo.get!(Version)(key, &internalNotifier);
             if ( !finished )
                 task.suspend();
 
