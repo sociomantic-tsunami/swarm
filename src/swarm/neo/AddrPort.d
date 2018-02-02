@@ -12,7 +12,7 @@
 
 module swarm.neo.AddrPort;
 
-import core.sys.posix.netinet.in_; // in_addr, in_addr_t, in_port_t, sockaddr_in, AF_INET
+import core.sys.posix.netinet.in_; // in_addr, in_addr_t, in_port_t, socklen_t, sockaddr_in, AF_INET
 
 import ocean.transition;
 
@@ -21,7 +21,8 @@ extern (C) int inet_aton(Const!(char)* src, in_addr* dst);
 /// ditto
 public struct AddrPort
 {
-    import core.sys.posix.arpa.inet: ntohl, ntohs, htonl, htons;
+    import core.sys.posix.arpa.inet: ntohl, ntohs, htonl, htons, inet_ntop;
+    import core.stdc.string: strlen;
 
     import ocean.util.container.map.model.StandardHash;
 
@@ -121,12 +122,51 @@ public struct AddrPort
         return false;
     }
 
+    /***************************************************************************
+
+        Converts the address of this instance to a string in the the well-known
+        IPv4 dotted-decimal notation such as "192.168.2.111". The result is
+        written to `dst` as a NUL-terminated string.
+        `dst.length` needs to be at least `INET_ADDRSTRLEN` (from
+        `core.sys.posix.netinet.in_`).
+
+        To allocate a new buffer for the address, use
+        ---
+            AddrPort ap;
+            mstring str = ap.getAddress(new char[INET_ADDRSTRLEN]);
+        ---
+
+        Params:
+            dst = destination string; the minimum required length is
+                `INET_ADDRSTRLEN`
+
+        Returns:
+            a slice referencing the result in `dst` (excluding the terminating
+            NUL byte).
+
+    ***************************************************************************/
+
+    public mstring getAddress ( mstring dst )
+    {
+        assert(dst.length >= INET_ADDRSTRLEN,
+            "dst.length expected to be at least INET_ADDRSTRLEN");
+        auto src = in_addr(this.naddress);
+        inet_ntop(AF_INET, &src, dst.ptr, cast(socklen_t)dst.length);
+        // The only possible errors for inet_ntop  are a wrong address family
+        // and `dst.length < INET_ADDRSTRLEN`. Neither can be the case here.
+        return dst[0 .. strlen(dst.ptr)];
+    }
+
     unittest
     {
         typeof(*this) x;
         bool success = x.setAddress("192.168.222.111");
         assert(success);
         assert(x.address_bytes == [cast(ubyte)192, 168, 222, 111]);
+
+        char[INET_ADDRSTRLEN] buf;
+        assert(x.getAddress(buf), "192.168.222.111");
+
         success = x.setAddress("192.168.333.111");
         assert(!success);
         success = x.setAddress("Die Katze tritt die Treppe krumm."); // too long
