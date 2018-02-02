@@ -144,7 +144,7 @@ class Test : Task
     {
         bool unsupported;
         void notifier ( Client.Neo.Get.Notification info,
-            Client.Neo.Get.Args args )
+            Const!(Client.Neo.Get.Args) args )
         {
             if ( info.active == info.active.unsupported && info.unsupported.type
                 == info.unsupported.type.RequestVersionNotSupported )
