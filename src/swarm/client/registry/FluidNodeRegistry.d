@@ -207,7 +207,7 @@ public class FluidNodeRegistry : NodeRegistry, IFluidNodeRegistry
 
         ***********************************************************************/
 
-        public override int opApply ( int delegate ( ref NodeItem,
+        public override int opApply ( scope int delegate ( ref NodeItem,
             ref INodeConnectionPoolInfo ) dg )
         {
             auto disablable_nodes = cast(DisablableNodeSet)this.outer.nodes;
@@ -234,7 +234,7 @@ public class FluidNodeRegistry : NodeRegistry, IFluidNodeRegistry
 
     ***************************************************************************/
 
-    override public void disabled_nodes ( void delegate ( IDisabledIterator ) dg )
+    override public void disabled_nodes ( scope void delegate ( IDisabledIterator ) dg )
     {
         scope it = new DisabledIterator;
         dg(it);

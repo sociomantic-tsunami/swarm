@@ -19,10 +19,10 @@ template FieldSizeSum ( S, size_t i = 0 )
 {
     static if (i < S.tupleof.length)
     {
-        const FieldSizeSum = S.tupleof[i].sizeof + FieldSizeSum!(S, i + 1);
+        static immutable FieldSizeSum = S.tupleof[i].sizeof + FieldSizeSum!(S, i + 1);
     }
     else
     {
-        const size_t FieldSizeSum = 0;
+        static immutable size_t FieldSizeSum = 0;
     }
 }
