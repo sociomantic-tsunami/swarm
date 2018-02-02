@@ -367,22 +367,24 @@ public template RequestCore ( RequestType request_type_, ubyte request_code,
         switch ( status )
         {
             case SupportedStatus.RequestNotSupported:
-                NotificationUnion n;
-                n.unsupported = RequestNodeUnsupportedInfo();
-                n.unsupported.request_id = context.request_id;
-                n.unsupported.node_addr = remote_address;
-                n.unsupported.type = n.unsupported.type.RequestNotSupported;
+                RequestNodeUnsupportedInfo info;
+                info.request_id = context.request_id;
+                info.node_addr = remote_address;
+                info.type = info.type.RequestNotSupported;
 
+                NotificationUnion n;
+                n.unsupported = info;
                 notify(context.user_params, n);
                 return true;
 
             case SupportedStatus.RequestVersionNotSupported:
-                NotificationUnion n;
-                n.unsupported = RequestNodeUnsupportedInfo();
-                n.unsupported.request_id = context.request_id;
-                n.unsupported.node_addr = remote_address;
-                n.unsupported.type = n.unsupported.type.RequestVersionNotSupported;
+                RequestNodeUnsupportedInfo info;
+                info.request_id = context.request_id;
+                info.node_addr = remote_address;
+                info.type = info.type.RequestVersionNotSupported;
 
+                NotificationUnion n;
+                n.unsupported = info;
                 notify(context.user_params, n);
                 return true;
 
@@ -415,22 +417,24 @@ public template RequestCore ( RequestType request_type_, ubyte request_code,
         switch ( status )
         {
             case SupportedStatus.RequestNotSupported:
-                NotificationUnion n;
-                n.unsupported = RequestNodeUnsupportedInfo();
-                n.unsupported.request_id = context.request_id;
-                n.unsupported.node_addr = remote_address;
-                n.unsupported.type = n.unsupported.type.RequestNotSupported;
+                RequestNodeUnsupportedInfo info;
+                info.request_id = context.request_id;
+                info.node_addr = remote_address;
+                info.type = info.type.RequestNotSupported;
 
+                NotificationUnion n;
+                n.unsupported = info;
                 notify(context.user_params, n);
                 return false;
 
             case SupportedStatus.RequestVersionNotSupported:
-                NotificationUnion n;
-                n.unsupported = RequestNodeUnsupportedInfo();
-                n.unsupported.request_id = context.request_id;
-                n.unsupported.node_addr = remote_address;
-                n.unsupported.type = n.unsupported.type.RequestVersionNotSupported;
+                RequestNodeUnsupportedInfo info;
+                info.request_id = context.request_id;
+                info.node_addr = remote_address;
+                info.type = info.type.RequestVersionNotSupported;
 
+                NotificationUnion n;
+                n.unsupported = info;
                 notify(context.user_params, n);
                 return false;
 

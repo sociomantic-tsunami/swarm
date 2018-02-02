@@ -173,18 +173,23 @@ public struct Record
         Params:
             stream = input stream to read from
 
+        Returns:
+            `true` if there was data in the stream, `false` otherwise.
+
         Throws:
             EofException upon encountering the end of the input stream
 
     ***************************************************************************/
 
-    private void deserialize ( Console.Input stream )
+    private bool deserialize ( Console.Input stream )
     {
         cstring data;
-        stream.readln(data);
+        if (!stream.readln(data))
+            return false;
 
         // Extract the key and value from the line
         splitRecord(cast(Const!(ubyte)[])data, this.key, this.value);
+        return true;
     }
 
 
@@ -539,13 +544,8 @@ public class StdinRecordStream : ISuspendable
     {
         while (true)
         {
-            try
+            if (!this.record.deserialize(Cin))
             {
-                this.record.deserialize(Cin);
-            }
-            catch ( EofException e )
-            {
-                // An I/O exception (EOF) is expected when reading a key
                 this.end_of_stream = true;
                 break;
             }

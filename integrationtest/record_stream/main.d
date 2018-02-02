@@ -13,7 +13,7 @@
 
 *******************************************************************************/
 
-module integrationtest.record_batcher.main;
+module integrationtest.record_stream.main;
 
 import core.sys.posix.unistd;
 
@@ -37,10 +37,12 @@ public int main ()
 
     if (auto pid = fork())
     {
+        close(pipes[0]);
         return runSender(pid, pipes[1]);
     }
     else
     {
+        close(pipes[1]);
         dup2(pipes[0], STDIN_FILENO);
         runListener();
         return 0;
@@ -55,6 +57,8 @@ public int runSender (pid_t pid, int write_fd)
         scope conduit = new FDConduit(write_fd);
         foreach (record; Input)
             record.serialize(conduit, buffer);
+        foreach (str; Verbatim)
+            conduit.write(str);
     }
 
     int status;
@@ -68,19 +72,23 @@ public void runListener ()
     size_t index;
     scope comparer = (Record r)
         {
-            test!("==")(r.key, Input[index].key);
-            test!("==")(r.value, Input[index].value);
+            test!("==")(r.key, Output[index].key);
+            test!("==")(r.value, Output[index].value);
             index++;
-            return index < Input.length;
+            return true;
 
         };
     scope stream = new StdinRecordStream(comparer);
     auto eos = stream.process();
-    assert(!eos, "End Of Stream reached!");
+    assert(eos, "End Of Stream not received!");
 }
 
+private const istring[] Verbatim = [
+    "\n\n\n",
+    "bbbbbbbbbbbbbbbb:AAAAAAAAAAAAAAAA\n",
+];
 
-private const Input = [
+private const Record[] Input = [
     // Two records without keys (values only)
     Record(null,     [ 0x52, 0x45, 0x50, 0x4F, 0x52, 0x54, 0x49, 0x4E, 0x47 ]),
     Record(null,     [ 0x20, 0x57, 0x41, 0x53 ]),
@@ -88,6 +96,18 @@ private const Input = [
     Record([ 0x42, 0x42, 0x42, 0x42, 0x42, 0x42, 0x42, 0x42, 0x42, 0x42, 0x42,
              0x42, 0x42, 0x42, 0x42, 0x42 ],
            [ 0x48, 0x65, 0x6C, 0x6C, 0x6F, 0x20, 0x57, 0x6F, 0x72, 0x6C, 0x64 ]),
+];
+
+private const Record[] Output = [
+    // Input
+    Input[0], Input[1], Input[2],
+    // Verbatim: 3 newlines = 3 empty records
+    Record.init, Record.init, Record.init,
+    // Ensure records after newline are processed
+    Record([ 0x62, 0x62, 0x62, 0x62, 0x62, 0x62, 0x62, 0x62, 0x62, 0x62, 0x62,
+             0x62, 0x62, 0x62, 0x62, 0x62 ],
+           [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]),
+
 ];
 
 private final class FDConduit : Device

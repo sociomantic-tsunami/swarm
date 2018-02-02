@@ -14,6 +14,9 @@ module integrationtest.neo.client.request.internal.Get;
 
 import ocean.transition;
 
+/// Default (v0) Get implementation.
+public alias VersionedGet!(0) Get;
+
 /*******************************************************************************
 
     Get request implementation.
@@ -34,9 +37,13 @@ import ocean.transition;
 
     The RequestCore mixin provides items 1 and 2.
 
+    Params:
+        Version = request version (used for testing the version handling
+            support of the client and node by sending an unsupported request)
+
 *******************************************************************************/
 
-public struct Get
+public struct VersionedGet ( ubyte Version )
 {
     import integrationtest.neo.common.Get;
     import integrationtest.neo.client.request.Get;
@@ -45,6 +52,8 @@ public struct Get
     import swarm.neo.client.RequestHandlers : UseNodeDg;
 
     import ocean.io.select.protocol.generic.ErrnoIOException: IOError;
+
+    mixin TypeofThis;
 
     /***************************************************************************
 
@@ -91,7 +100,7 @@ public struct Get
 
     ***************************************************************************/
 
-    mixin RequestCore!(RequestType.SingleNode, RequestCode.Get, 0, Args,
+    mixin RequestCore!(RequestType.SingleNode, RequestCode.Get, Version, Args,
         SharedWorking, Working, Notification);
 
     /***************************************************************************
@@ -112,7 +121,7 @@ public struct Get
     public static void handler ( UseNodeDg use_node, void[] context_blob,
         void[] working_blob )
     {
-        auto context = Get.getContext(context_blob);
+        auto context = This.getContext(context_blob);
         context.shared_working.result = SharedWorking.Result.Failure;
 
         // In a real client, you'd have to have some way for a request to decide
@@ -131,8 +140,8 @@ public struct Get
                     conn.send(
                         ( conn.Payload payload )
                         {
-                            payload.add(Get.cmd.code);
-                            payload.add(Get.cmd.ver);
+                            payload.add(This.cmd.code);
+                            payload.add(This.cmd.ver);
                             payload.add(context.user_params.args.key);
                         }
                     );
@@ -140,7 +149,7 @@ public struct Get
 
                     // Receive supported status from node
                     auto supported = conn.receiveValue!(SupportedStatus)();
-                    if ( !Get.handleSupportedCodes(supported, context,
+                    if ( !This.handleSupportedCodes(supported, context,
                         conn.remote_address) )
                     {
                         // Global codes (not supported / version not supported)
@@ -168,7 +177,7 @@ public struct Get
                                         Notification n;
                                         n.received = RequestDataInfo(
                                             context.request_id, value);
-                                        Get.notify(context.user_params, n);
+                                        This.notify(context.user_params, n);
                                     }
                                 );
                                 break;
@@ -186,7 +195,7 @@ public struct Get
                                 Notification n;
                                 n.node_error = RequestNodeInfo(
                                     context.request_id, conn.remote_address);
-                                Get.notify(context.user_params, n);
+                                This.notify(context.user_params, n);
                                 break;
 
                             default:
@@ -204,7 +213,7 @@ public struct Get
                     Notification n;
                     n.node_disconnected = RequestNodeExceptionInfo(
                         context.request_id, conn.remote_address, e);
-                    Get.notify(context.user_params, n);
+                    This.notify(context.user_params, n);
                 }
             });
     }
@@ -224,7 +233,7 @@ public struct Get
     public static void all_finished_notifier ( void[] context_blob,
         IRequestWorkingData working_data_iter )
     {
-        auto context = Get.getContext(context_blob);
+        auto context = This.getContext(context_blob);
 
         Notification n;
 
@@ -248,6 +257,6 @@ public struct Get
                 assert(false);
         }
 
-        Get.notify(context.user_params, n);
+        This.notify(context.user_params, n);
     }
 }
