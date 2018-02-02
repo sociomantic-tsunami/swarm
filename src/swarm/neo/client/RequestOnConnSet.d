@@ -29,10 +29,10 @@ public struct RequestOnConnSet
 
     invariant ( )
     {
-        if ( this.type_ == RequestType.None )
+        if ( (&this).type_ == RequestType.None )
         {
-            assert(this.num_active == 0);
-            assert(this.list.length == 0);
+            assert((&this).num_active == 0);
+            assert((&this).list.length == 0);
         }
     }
 
@@ -81,13 +81,13 @@ public struct RequestOnConnSet
     in
     {
         assert(type != RequestType.None);
-        assert(this.num_active == 0);
+        assert((&this).num_active == 0);
     }
     body
     {
-        this.type_ = type;
+        (&this).type_ = type;
         if ( type == RequestType.AllNodes )
-            this.map.reinit();
+            (&this).map.reinit();
     }
 
     /***************************************************************************
@@ -98,9 +98,9 @@ public struct RequestOnConnSet
 
     ***************************************************************************/
 
-    public RequestType type ( ) /* d1to2fix_inject: const */
+    public RequestType type ( ) const
     {
-        return this.type_;
+        return (&this).type_;
     }
 
     /***************************************************************************
@@ -119,11 +119,11 @@ public struct RequestOnConnSet
     public RequestOnConn add ( RequestOnConn request_on_conn )
     in
     {
-        switch ( this.type_ )
+        switch ( (&this).type_ )
         {
             case RequestType.SingleNode:
-                assert(this.list.length <= 1);
-                assert(this.num_active <= 1);
+                assert((&this).list.length <= 1);
+                assert((&this).num_active <= 1);
                 break;
             case RequestType.MultiNode:
                 break;
@@ -133,8 +133,8 @@ public struct RequestOnConnSet
     }
     body
     {
-        this.list ~= request_on_conn;
-        this.num_active++;
+        (&this).list ~= request_on_conn;
+        (&this).num_active++;
 
         return request_on_conn;
     }
@@ -157,16 +157,16 @@ public struct RequestOnConnSet
         RequestOnConn request_on_conn )
     in
     {
-        assert(this.type_ == RequestType.AllNodes);
+        assert((&this).type_ == RequestType.AllNodes);
     }
     body
     {
         bool added;
-        this.map.put(remote_address.cmp_id, added, request_on_conn);
-        assert(added, typeof(this).stringof ~ ".add: a " ~
+        (&this).map.put(remote_address.cmp_id, added, request_on_conn);
+        assert(added, typeof((&this)).stringof ~ ".add: a " ~
             "request-on-connection already exists for the specified node");
 
-        this.num_active++;
+        (&this).num_active++;
 
         return request_on_conn;
     }
@@ -185,22 +185,22 @@ public struct RequestOnConnSet
 
     ***************************************************************************/
 
-    public int opApply ( int delegate ( ref RequestOnConn ) dg )
+    public int opApply ( scope int delegate ( ref RequestOnConn ) dg )
     {
-        with ( RequestType ) switch ( this.type_ )
+        with ( RequestType ) switch ( (&this).type_ )
         {
             case None:
                 return 0;
 
             case SingleNode:
             case MultiNode:
-                foreach ( roc; this.list )
+                foreach ( roc; (&this).list )
                     if ( auto ret = dg(roc) )
                         return ret;
                 return 0;
 
             case AllNodes:
-                foreach ( roc; this.map )
+                foreach ( roc; (&this).map )
                     if ( auto ret = dg(roc) )
                         return ret;
                 return 0;
@@ -227,20 +227,20 @@ public struct RequestOnConnSet
 
     public RequestOnConn get ( AddrPort node_address )
     {
-        with ( RequestType ) switch ( this.type_ )
+        with ( RequestType ) switch ( (&this).type_ )
         {
             case None:
                 return null;
 
             case SingleNode:
             case MultiNode:
-                foreach ( roc; this.list )
+                foreach ( roc; (&this).list )
                     if ( roc.connectedTo(node_address) )
                         return roc;
                 return null;
 
             case AllNodes:
-                return node_address.cmp_id in this.map;
+                return node_address.cmp_id in (&this).map;
 
             default: assert(false);
         }
@@ -260,11 +260,11 @@ public struct RequestOnConnSet
     public bool finished ( )
     in
     {
-        assert(this.num_active);
+        assert((&this).num_active);
     }
     body
     {
-        return --this.num_active == 0;
+        return --(&this).num_active == 0;
     }
 
     /***************************************************************************
@@ -278,30 +278,30 @@ public struct RequestOnConnSet
 
     ***************************************************************************/
 
-    public void reset ( void delegate ( RequestOnConn ) recycle )
+    public void reset ( scope void delegate ( RequestOnConn ) recycle )
     in
     {
-        assert(this.num_active == 0);
+        assert((&this).num_active == 0);
     }
     body
     {
-        with ( RequestType ) switch ( this.type_ )
+        with ( RequestType ) switch ( (&this).type_ )
         {
             case None:
                 break;
 
             case SingleNode:
             case MultiNode:
-                foreach ( roc; this.list )
+                foreach ( roc; (&this).list )
                     recycle(roc);
-                this.list.length = 0;
-                enableStomping(this.list);
+                (&this).list.length = 0;
+                enableStomping((&this).list);
                 break;
 
             case AllNodes:
-                foreach ( roc; this.map )
+                foreach ( roc; (&this).map )
                 {
-                    this.map.remove(roc);
+                    (&this).map.remove(roc);
                     recycle(roc);
                 }
                 break;
@@ -309,6 +309,6 @@ public struct RequestOnConnSet
             default: assert(false);
         }
 
-        this.type_ = RequestType.None;
+        (&this).type_ = RequestType.None;
     }
 }

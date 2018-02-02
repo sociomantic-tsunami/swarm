@@ -116,7 +116,7 @@ abstract public class IStorageChannelsTemplate ( Storage : IStorageEngine )
 
         this.channel_pool = new ObjectPool!(Storage);
 
-        const channels_estimate = 100; // TODO: configurable?
+        static immutable channels_estimate = 100; // TODO: configurable?
         this.channels = new Channels(channels_estimate);
     }
 
@@ -155,7 +155,7 @@ abstract public class IStorageChannelsTemplate ( Storage : IStorageEngine )
 
     ***************************************************************************/
 
-    public int opApply ( int delegate ( ref Storage channel ) dg )
+    public int opApply ( scope int delegate ( ref Storage channel ) dg )
     {
         int result = 0;
 
