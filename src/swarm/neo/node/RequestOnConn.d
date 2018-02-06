@@ -39,7 +39,7 @@ abstract class RequestOnConn: RequestOnConnBase
 
     /***************************************************************************
 
-        Re-usable buffer used by COnnectionHandler to emplace request handler
+        Re-usable buffer used by ConnectionHandler to emplace request handler
         objects into. (Instead of heap allocating an instance every time a
         request is handled.) We use a heap buffer, rather than a fixed-size
         array on the stack, in order to not have to guess the maximum size of a
