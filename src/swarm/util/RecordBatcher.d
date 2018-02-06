@@ -590,3 +590,63 @@ public class RecordBatch : RecordBatchBase
         return value;
     }
 }
+
+version ( UnitTest )
+{
+    import ocean.core.Test;
+}
+
+// Basic tests.
+unittest
+{
+    auto lzo = new Lzo;
+    auto writer = new RecordBatcher(lzo, 200);
+    auto reader = new RecordBatch(lzo, 200);
+
+    mstring key, value_S, value_M, value_L;
+    key.length = 16;
+    value_S.length = 50;
+    value_M.length = 150;
+    value_L.length = 200;
+
+    // Test RecordBatcher.batchedSize()
+    test!("==")(writer.batchedSize(key, value_S),
+        key.length + key.length.sizeof + value_S.length + value_S.length.sizeof);
+    test!("==")(writer.batchedSize(key, value_M),
+        key.length + key.length.sizeof + value_M.length + value_M.length.sizeof);
+    test!("==")(writer.batchedSize(key, value_L),
+        key.length + key.length.sizeof + value_L.length + value_L.length.sizeof);
+
+    // Test RecordBatcher.fits()
+    bool will_never_fit;
+    test(writer.fits(key, value_S, will_never_fit));
+    test(!will_never_fit);
+
+    test(writer.fits(key, value_M, will_never_fit));
+    test(!will_never_fit);
+
+    test(!writer.fits(key, value_L, will_never_fit));
+    test(will_never_fit);
+
+    // Test batch compression
+    ubyte[] compressed;
+    auto res = writer.add(key, value_S);
+    test!("==")(res, res.Added);
+    res = writer.add(key, value_S);
+    test!("==")(res, res.Added);
+    res = writer.add(key, value_S);
+    test!("==")(res, res.BatchFull);
+    writer.compress(compressed);
+
+    // Test batch extraction
+    reader.decompress(compressed);
+    uint i;
+    foreach ( k, v; reader )
+    {
+        i++;
+        test!("==")(k, key);
+        test!("==")(v, value_S);
+    }
+    test!("==")(i, 2);
+}
+
