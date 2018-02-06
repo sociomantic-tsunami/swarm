@@ -55,6 +55,7 @@ class ConnectionHandler : IConnectionHandler
     import swarm.neo.node.IRequestHandler;
     import swarm.neo.request.Command;
 
+    import ocean.core.array.Mutation : copy;
     import ocean.io.select.EpollSelectDispatcher;
     import ocean.time.StopWatch;
 
@@ -91,6 +92,12 @@ class ConnectionHandler : IConnectionHandler
         /// Details stored in map about a single request.
         public struct RequestInfo
         {
+            /// Indicates whether the specified class info is for an
+            /// IRequestHandler (true) or an IRequest (false). (When the
+            /// deprecated `add()` method is removed, this field can be removed
+            /// as well.)
+            bool old_handler;
+
             /// The name of the request, used for stats tracking.
             istring name;
 
@@ -122,6 +129,7 @@ class ConnectionHandler : IConnectionHandler
 
         ***********************************************************************/
 
+        deprecated("Use addHandler instead")
         public void add ( Command command, cstring name, ClassInfo class_info,
             bool timing = true )
         {
@@ -129,11 +137,38 @@ class ConnectionHandler : IConnectionHandler
             verify(class_info !is null);
 
             RequestInfo ri;
+            ri.old_handler = true;
             ri.name = idup(name);
             ri.class_info = class_info;
             ri.timing = timing;
             this.request_info[command] = ri;
             this.supported_requests[command.code] = true;
+        }
+
+        /***********************************************************************
+
+            Adds a request/version to the map.
+
+            Params:
+                Request = type of request handler class. Must implement IRequest
+                    and is expected to have a public, static member called
+                    `command`, of type `Command`
+                timing = if true, timing stats about request of this type are
+                    tracked
+
+        ***********************************************************************/
+
+        public void addHandler ( Request : IRequest ) ( bool timing = true )
+        {
+            assert(Request.name.length > 0);
+
+            RequestInfo ri;
+            ri.old_handler = false;
+            ri.name = Request.name;
+            ri.class_info = Request.classinfo;
+            ri.timing = timing;
+            this.request_info[Request.command] = ri;
+            this.supported_requests[Request.command.code] = true;
         }
 
         /***********************************************************************
@@ -514,13 +549,26 @@ class ConnectionHandler : IConnectionHandler
             this.shared_params.get_resource_acquirer(
                 ( Object request_resources )
                 {
-                    auto rq_handler = this.emplace!(IRequestHandler)
-                        (connection.emplace_buf, rq.class_info);
-                    rq_handler.initialise(connection, request_resources);
-                    rq_handler.preSupportedCodeSent(init_payload);
-                    this.sendSupportedStatus(connection,
-                        SupportedStatus.RequestSupported);
-                    rq_handler.postSupportedCodeSent();
+                    if ( rq.old_handler )
+                    {
+                        auto rq_handler = this.emplace!(IRequestHandler)
+                            (connection.emplace_buf, rq.class_info);
+                        rq_handler.initialise(connection, request_resources);
+                        rq_handler.preSupportedCodeSent(init_payload);
+                        this.sendSupportedStatus(connection,
+                            SupportedStatus.RequestSupported);
+                        rq_handler.postSupportedCodeSent();
+                    }
+                    else
+                    {
+                        connection.init_payload_buf.copy(init_payload);
+                        this.sendSupportedStatus(connection,
+                            SupportedStatus.RequestSupported);
+                        auto rq_handler = this.emplace!(IRequest)
+                            (connection.emplace_buf, rq.class_info);
+                        rq_handler.handle(connection, request_resources,
+                            connection.init_payload_buf);
+                    }
                 }
             );
         }

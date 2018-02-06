@@ -51,6 +51,19 @@ abstract class RequestOnConn: RequestOnConnBase
 
     /***************************************************************************
 
+        Re-usable buffer used by ConnectionHandler to receive a copy of the
+        initial request payload sent by the client. A copy of the initial
+        payload is made in order to simplify request handling logic. (If this is
+        not done, request handling code has to be written to very carefully take
+        into account that the initial payload is a slice of a volatile buffer
+        owned by the connection.)
+
+    ***************************************************************************/
+
+    public void[] init_payload_buf;
+
+    /***************************************************************************
+
         The event dispatcher to communicate to the client.
 
     ***************************************************************************/
