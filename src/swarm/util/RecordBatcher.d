@@ -473,10 +473,26 @@ public class RecordBatch
 
     ***************************************************************************/
 
-    public this ( Lzo lzo, size_t batch_size = RecordBatcher.DefaultMaxBatchSize )
+    deprecated("Specifying a batch size no longer has any effect. Please use the other ctor.")
+    public this ( Lzo lzo, size_t batch_size )
+    {
+        this(lzo);
+    }
+
+
+    /***************************************************************************
+
+        Constructor.
+
+        Params:
+            lzo = lzo de/compressor to use
+
+    ***************************************************************************/
+
+    public this ( Lzo lzo )
     {
         this.lzo = lzo;
-        this.batch = new AppendBuffer!(ubyte)(batch_size);
+        this.batch = new AppendBuffer!(ubyte)(RecordBatcher.DefaultMaxBatchSize);
     }
 
 
