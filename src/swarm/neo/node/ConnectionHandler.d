@@ -671,21 +671,33 @@ version ( UnitTest )
 {
     import swarm.node.request.RequestStats;
     import swarm.neo.request.Command;
+    import swarm.neo.node.IRequestHandler;
+    import swarm.neo.node.RequestOnConn;
 }
 
 // Check that initialising stats for two versions of a request works. (Stats for
 // both versions will be tracked under the same request name.)
 unittest
 {
-    class Rq1_v0 { }
-    class Rq1_v1 { }
+    class Rq1_v0 : IRequest
+    {
+        const Command command = Command(1, 0);
+        const istring name = "Request1";
+        void handle ( RequestOnConn connection, Object resources,
+            Const!(void)[] init_payload ) { }
+    }
+
+    class Rq1_v1 : IRequest
+    {
+        const Command command = Command(1, 1);
+        const istring name = "Request1";
+        void handle ( RequestOnConn connection, Object resources,
+            Const!(void)[] init_payload ) { }
+    }
 
     ConnectionHandler.RequestMap map;
-    auto rq1_v0 = Command(1, 0);
-    auto rq1_v1 = Command(1, 1);
-
-    map.add(rq1_v0, "Request1", Rq1_v0.classinfo);
-    map.add(rq1_v1, "Request1", Rq1_v1.classinfo);
+    map.addHandler!(Rq1_v0)();
+    map.addHandler!(Rq1_v1)();
 
     map.initStats(new RequestStats);
 }

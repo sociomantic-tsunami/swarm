@@ -32,10 +32,10 @@ should be changed to this:
 class GetImpl_v0 : IRequest // Implement new interface
 {
     // Add this.
-    static const Command command = Command(RequestCode.Get, 0);
+    const Command command = Command(RequestCode.Get, 0);
 
     // Add this.
-    static istring name = "Get";
+    const istring name = "Get";
 
     void handle ( RequestOnConn connection, Object resources,
         Const!(void)[] init_payload )
