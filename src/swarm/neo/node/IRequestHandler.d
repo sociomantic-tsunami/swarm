@@ -16,6 +16,8 @@
 module swarm.neo.node.IRequestHandler;
 
 /// ditto
+// This interface is deprecated. When the `RequestMap.add` method that uses it
+// is removed, it can also be removed.
 public interface IRequestHandler
 {
     import ocean.transition;
@@ -63,4 +65,32 @@ public interface IRequestHandler
     ***************************************************************************/
 
     void postSupportedCodeSent ( );
+}
+
+/// ditto
+public interface IRequest
+{
+    import ocean.transition;
+
+    import swarm.neo.node.RequestOnConn;
+
+    /***************************************************************************
+
+        Called by the connection handler after the request code and version have
+        been parsed from a message received over the connection, and the
+        request-supported code sent in response.
+
+        Note: the initial payload passed to this method is a slice of a buffer
+        owned by the RequestOnConn. It is thus safe to assume that the contents
+        of the buffer will not change over the lifetime of the request.
+
+        Params:
+            connection = request-on-conn in which the request handler is called
+            resources = request resources acquirer
+            init_payload = initial message payload read from the connection
+
+    ***************************************************************************/
+
+    void handle ( RequestOnConn connection, Object resources,
+        Const!(void)[] init_payload );
 }
