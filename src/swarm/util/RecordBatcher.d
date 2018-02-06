@@ -29,11 +29,17 @@ import ocean.transition;
 
 /*******************************************************************************
 
-    Base class for record batch creator/extractor.
+    Class to create and compress batches. A batch always has a fixed maximum
+    size, after which no more records may be added to it.
+
+    The add() method should be called repeatedly until either there is no more
+    data to add or the value BatchFull is returned. At this point the compress()
+    method can be called, which compresses the batch into a provided buffer, and
+    clears the batch for re-use.
 
 *******************************************************************************/
 
-private abstract class RecordBatchBase
+public class RecordBatcher
 {
     /***************************************************************************
 
@@ -70,67 +76,7 @@ private abstract class RecordBatchBase
 
     protected Const!(size_t) batch_size;
 
-    /***************************************************************************
 
-        Constructor.
-
-        Params:
-            lzo = lzo de/compressor to use
-            batch_size = batch size to use
-
-    ***************************************************************************/
-
-    protected this ( Lzo lzo, size_t batch_size = DefaultMaxBatchSize )
-    {
-        this.lzo = lzo;
-        this.batch_size = batch_size;
-        this.batch = new AppendBuffer!(ubyte)(this.batch_size);
-    }
-
-
-    /***************************************************************************
-
-        Empties the batch.
-
-    ***************************************************************************/
-
-    public void clear ( )
-    {
-        this.batch.length = 0;
-    }
-
-
-    /***************************************************************************
-
-        Returns the current batch size.
-
-        Returns:
-            current batch size
-
-    ***************************************************************************/
-
-    public size_t length ( )
-    {
-        return this.batch.length;
-    }
-}
-
-
-
-/*******************************************************************************
-
-    Class to create and compress batches. A batch always has a fixed maximum
-    size, after which no more records may be added to it.
-
-    The add() method should be called repeatedly until either there is no more
-    data to add or the value BatchFull is returned. At this point the compress()
-    method can be called, which compresses the batch into a provided buffer, and
-    clears the batch for re-use.
-
-*******************************************************************************/
-
-public class RecordBatcher : RecordBatchBase
-{
     /***************************************************************************
 
         Result codes for add() methods.
@@ -158,7 +104,9 @@ public class RecordBatcher : RecordBatchBase
 
     public this ( Lzo lzo, size_t batch_size = DefaultMaxBatchSize )
     {
-        super(lzo, batch_size);
+        this.lzo = lzo;
+        this.batch_size = batch_size;
+        this.batch = new AppendBuffer!(ubyte)(this.batch_size);
     }
 
 
@@ -379,6 +327,33 @@ public class RecordBatcher : RecordBatchBase
 
     /***************************************************************************
 
+        Empties the batch.
+
+    ***************************************************************************/
+
+    public void clear ( )
+    {
+        this.batch.length = 0;
+    }
+
+
+    /***************************************************************************
+
+        Returns the current batch size.
+
+        Returns:
+            current batch size
+
+    ***************************************************************************/
+
+    public size_t length ( )
+    {
+        return this.batch.length;
+    }
+
+
+    /***************************************************************************
+
         Calculates the size which a value will take up in a batch buffer.
 
         Params:
@@ -468,8 +443,26 @@ public class RecordBatcher : RecordBatchBase
 
 *******************************************************************************/
 
-public class RecordBatch : RecordBatchBase
+public class RecordBatch
 {
+    /***************************************************************************
+
+        Buffer used to store/extract batch of records.
+
+    ***************************************************************************/
+
+    protected AppendBuffer!(ubyte) batch;
+
+
+    /***************************************************************************
+
+        Lzo instance (passed in constructor).
+
+    ***************************************************************************/
+
+    protected Lzo lzo;
+
+
     /***************************************************************************
 
         Constructor.
@@ -480,9 +473,10 @@ public class RecordBatch : RecordBatchBase
 
     ***************************************************************************/
 
-    public this ( Lzo lzo, size_t batch_size = DefaultMaxBatchSize )
+    public this ( Lzo lzo, size_t batch_size = RecordBatcher.DefaultMaxBatchSize )
     {
-        super(lzo, batch_size);
+        this.lzo = lzo;
+        this.batch = new AppendBuffer!(ubyte)(batch_size);
     }
 
 
@@ -562,6 +556,33 @@ public class RecordBatch : RecordBatchBase
         }
 
         return r;
+    }
+
+
+    /***************************************************************************
+
+        Empties the batch.
+
+    ***************************************************************************/
+
+    public void clear ( )
+    {
+        this.batch.length = 0;
+    }
+
+
+    /***************************************************************************
+
+        Returns the current batch size.
+
+        Returns:
+            current batch size
+
+    ***************************************************************************/
+
+    public size_t length ( )
+    {
+        return this.batch.length;
     }
 
 
