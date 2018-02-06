@@ -83,6 +83,7 @@ class ConnectionHandler : IConnectionHandler
 
         ***********************************************************************/
 
+        deprecated("Use new request handling framework. (This symbol should have been removed in v5.0.0.)")
         public alias void function ( Object shared_resources,
             RequestOnConn connection, Command.Version cmdver,
             Const!(void)[] msg_payload ) Handler;
