@@ -503,7 +503,6 @@ public class RecordBatch : RecordBatchBase
     {
         // Read uncompressed length from first size_t.sizeof bytes.
         auto uncompressed_len = *(cast(size_t*)(compressed.ptr));
-        assert(uncompressed_len <= this.batch.dimension);
         this.batch.length = uncompressed_len;
 
         // Decompress into this.batch.
@@ -594,6 +593,7 @@ public class RecordBatch : RecordBatchBase
 version ( UnitTest )
 {
     import ocean.core.Test;
+    import ocean.text.convert.Formatter;
 }
 
 // Basic tests.
@@ -650,3 +650,31 @@ unittest
     test!("==")(i, 2);
 }
 
+// Test extracting a larger batch than the reader was initialised for. (This is
+// silently allowed.)
+unittest
+{
+    auto lzo = new Lzo;
+    auto writer = new RecordBatcher(lzo, RecordBatcher.DefaultMaxBatchSize * 10);
+    auto reader = new RecordBatch(lzo, RecordBatcher.DefaultMaxBatchSize);
+
+    ubyte[] compressed;
+    uint added;
+    while ( true )
+    {
+        auto res = writer.add(format("0x{:16}", added),
+            format("{}{}{}", added, added, added));
+        if ( res == res.BatchFull )
+            break;
+        added++;
+    }
+
+    writer.compress(compressed);
+    assert(compressed.length > RecordBatcher.DefaultMaxBatchSize);
+
+    reader.decompress(compressed);
+    uint extracted;
+    foreach ( k, v; reader )
+        extracted++;
+    test!("==")(extracted, added);
+}
