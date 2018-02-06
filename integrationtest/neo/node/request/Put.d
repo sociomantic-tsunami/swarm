@@ -24,53 +24,46 @@ import swarm.neo.node.IRequestHandler;
 
 *******************************************************************************/
 
-public class PutImpl_v0 : IRequestHandler
+public class PutImpl_v0 : IRequest
 {
+    import integrationtest.neo.common.RequestCodes;
     import integrationtest.neo.common.Put;
     import integrationtest.neo.node.request.mixins.RequestCore;
 
     mixin RequestCore!();
 
+    /// Request code / version. Required by ConnectionHandler.
+    const Command command = Command(RequestCode.Put, 0);
+
+    /// Request name for stats tracking. Required by ConnectionHandler.
+    const istring name = "Put";
+
     /***************************************************************************
 
-        Called by the connection handler immediately after the request code and
-        version have been parsed from a message received over the connection.
-        Allows the request handler to process the remainder of the incoming
-        message, before the connection handler sends the supported code back to
-        the client.
-
-        Note: the initial payload is a slice of the connection's read buffer.
-        This means that when the request-on-conn fiber suspends, the contents of
-        the buffer (hence the slice) may change. It is thus *absolutely
-        essential* that this method does not suspend the fiber. (This precludes
-        all I/O operations on the connection.)
+        Called by the connection handler after the request code and version have
+        been parsed from a message received over the connection, and the
+        request-supported code sent in response.
 
         Params:
+            connection = request-on-conn in which the request handler is called
+            resources = request resources acquirer
             init_payload = initial message payload read from the connection
 
     ***************************************************************************/
 
-    public void preSupportedCodeSent ( Const!(void)[] init_payload )
+    public void handle ( RequestOnConn connection, Object resources,
+        Const!(void)[] init_payload )
     {
-        auto parser = this.connection.event_dispatcher.message_parser;
+        this.initialise(connection, resources);
+
+        auto ed = this.connection.event_dispatcher;
 
         hash_t key;
         cstring value;
-        parser.parseBody(init_payload, key, value);
+        ed.message_parser.parseBody(init_payload, key, value);
 
         this.storage.map[key] = value.dup;
-    }
 
-    /***************************************************************************
-
-        Called by the connection handler after the supported code has been sent
-        back to the client.
-
-    ***************************************************************************/
-
-    public void postSupportedCodeSent ( )
-    {
-        auto ed = this.connection.event_dispatcher;
         ed.send(
             ( ed.Payload payload )
             {
