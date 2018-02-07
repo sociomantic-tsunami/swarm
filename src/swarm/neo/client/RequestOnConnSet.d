@@ -38,7 +38,7 @@ public struct RequestOnConnSet
     }
 
     /// Type of request currently using this instance.
-    private enum RequestType
+    public enum RequestType
     {
         None,
         SingleNode, // Includes round-robin requests.
