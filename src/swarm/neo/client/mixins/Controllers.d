@@ -168,6 +168,8 @@ template Controllers ( )
     public class Suspendable ( ControllerInterface ) :
         Controller!(ControllerInterface), ISuspendable
     {
+        import ocean.core.Verify;
+
         /***********************************************************************
 
             Enum of possible pending state-changes.
@@ -322,4 +324,22 @@ template Controllers ( )
                 ~ "by " ~ typeof(this).stringof);
         }
     }
+}
+
+/// Unit test instantiating the templates to detect semantic errors
+version (UnitTest) private class ControllersTemplateTest
+{
+    import swarm.neo.protocol.Message: RequestId;
+
+    interface DummyControllerInterface
+    {
+        bool suspend();
+        bool resume();
+    }
+
+    abstract bool control(RequestId, void delegate(DummyControllerInterface));
+
+    mixin Controllers!();
+    class C: Controller!(DummyControllerInterface) {}
+    class S: Suspendable!(DummyControllerInterface) {}
 }
