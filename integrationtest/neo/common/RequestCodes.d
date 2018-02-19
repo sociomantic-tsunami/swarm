@@ -18,5 +18,6 @@ public enum RequestCode : ubyte
     Put,
     Get,
     GetAll,
-    DoublePut
+    DoublePut,
+    RoundRobinPut
 }

@@ -78,6 +78,7 @@ class Test : Task
         this.testPutGetAllSuspend();
         this.testSerialize();
         this.testSerializeVersioned();
+        this.testRoundRobinPut();
         this.testDisconnect();
         this.testDoublePut();
 
@@ -470,6 +471,21 @@ class Test : Task
         enforce!("!is")(record.ptr, null);
         enforce!("==")(record.ptr.name, "Bob");
         enforce!("==")(record.ptr.age, 23);
+    }
+
+    /***************************************************************************
+
+        Runs a simple test where a second node is added to the client's registry
+        and a single record is written to a node with RoundRobinPut.
+
+    ***************************************************************************/
+
+    private void testRoundRobinPut ( )
+    {
+        auto ok = this.client.blocking.roundRobinPut(23, "hello",
+            ( Client.Neo.RoundRobinPut.Notification info,
+                Client.Neo.RoundRobinPut.Args args ) { });
+        enforce(ok, "RoundRobinPut request failed");
     }
 
     /***************************************************************************

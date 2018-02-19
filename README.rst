@@ -113,16 +113,8 @@ for bug fixes that don't cause breaking changes.
 Support Guarantees
 ------------------
 
-* Major branch development period:
-
-  - Bug fixes: 6 months
-
-  - New features: Only the newset major branch is developed with new features.
-    This is because swarm is a purely internal library (i.e. an application's
-    usage of swarm is always via an intermediary library where a client is
-    implemented).
-
-* Maintained minor versions: 1 most recent
+* Major branch development period: 6 months
+* Maintained minor versions: 2 most recent
 
 Maintained Major Branches
 -------------------------

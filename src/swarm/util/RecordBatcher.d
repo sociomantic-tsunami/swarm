@@ -30,11 +30,17 @@ import ocean.core.Enforce;
 
 /*******************************************************************************
 
-    Base class for record batch creator/extractor.
+    Class to create and compress batches. A batch always has a fixed maximum
+    size, after which no more records may be added to it.
+
+    The add() method should be called repeatedly until either there is no more
+    data to add or the value BatchFull is returned. At this point the compress()
+    method can be called, which compresses the batch into a provided buffer, and
+    clears the batch for re-use.
 
 *******************************************************************************/
 
-private abstract class RecordBatchBase
+public class RecordBatcher
 {
     /***************************************************************************
 
@@ -71,67 +77,7 @@ private abstract class RecordBatchBase
 
     protected Const!(size_t) batch_size;
 
-    /***************************************************************************
 
-        Constructor.
-
-        Params:
-            lzo = lzo de/compressor to use
-            batch_size = batch size to use
-
-    ***************************************************************************/
-
-    protected this ( Lzo lzo, size_t batch_size = DefaultMaxBatchSize )
-    {
-        this.lzo = lzo;
-        this.batch_size = batch_size;
-        this.batch = new AppendBuffer!(ubyte)(this.batch_size);
-    }
-
-
-    /***************************************************************************
-
-        Empties the batch.
-
-    ***************************************************************************/
-
-    public void clear ( )
-    {
-        this.batch.length = 0;
-    }
-
-
-    /***************************************************************************
-
-        Returns the current batch size.
-
-        Returns:
-            current batch size
-
-    ***************************************************************************/
-
-    public size_t length ( )
-    {
-        return this.batch.length;
-    }
-}
-
-
-
-/*******************************************************************************
-
-    Class to create and compress batches. A batch always has a fixed maximum
-    size, after which no more records may be added to it.
-
-    The add() method should be called repeatedly until either there is no more
-    data to add or the value BatchFull is returned. At this point the compress()
-    method can be called, which compresses the batch into a provided buffer, and
-    clears the batch for re-use.
-
-*******************************************************************************/
-
-public class RecordBatcher : RecordBatchBase
-{
     /***************************************************************************
 
         Result codes for add() methods.
@@ -159,7 +105,9 @@ public class RecordBatcher : RecordBatchBase
 
     public this ( Lzo lzo, size_t batch_size = DefaultMaxBatchSize )
     {
-        super(lzo, batch_size);
+        this.lzo = lzo;
+        this.batch_size = batch_size;
+        this.batch = new AppendBuffer!(ubyte)(this.batch_size);
     }
 
 
@@ -380,6 +328,33 @@ public class RecordBatcher : RecordBatchBase
 
     /***************************************************************************
 
+        Empties the batch.
+
+    ***************************************************************************/
+
+    public void clear ( )
+    {
+        this.batch.length = 0;
+    }
+
+
+    /***************************************************************************
+
+        Returns the current batch size.
+
+        Returns:
+            current batch size
+
+    ***************************************************************************/
+
+    public size_t length ( )
+    {
+        return this.batch.length;
+    }
+
+
+    /***************************************************************************
+
         Calculates the size which a value will take up in a batch buffer.
 
         Params:
@@ -469,8 +444,26 @@ public class RecordBatcher : RecordBatchBase
 
 *******************************************************************************/
 
-public class RecordBatch : RecordBatchBase
+public class RecordBatch
 {
+    /***************************************************************************
+
+        Buffer used to store/extract batch of records.
+
+    ***************************************************************************/
+
+    protected AppendBuffer!(ubyte) batch;
+
+
+    /***************************************************************************
+
+        Lzo instance (passed in constructor).
+
+    ***************************************************************************/
+
+    protected Lzo lzo;
+
+
     /***************************************************************************
 
         Constructor.
@@ -481,9 +474,26 @@ public class RecordBatch : RecordBatchBase
 
     ***************************************************************************/
 
-    public this ( Lzo lzo, size_t batch_size = DefaultMaxBatchSize )
+    deprecated("Specifying a batch size no longer has any effect. Please use the other ctor.")
+    public this ( Lzo lzo, size_t batch_size )
     {
-        super(lzo, batch_size);
+        this(lzo);
+    }
+
+
+    /***************************************************************************
+
+        Constructor.
+
+        Params:
+            lzo = lzo de/compressor to use
+
+    ***************************************************************************/
+
+    public this ( Lzo lzo )
+    {
+        this.lzo = lzo;
+        this.batch = new AppendBuffer!(ubyte)(RecordBatcher.DefaultMaxBatchSize);
     }
 
 
@@ -504,7 +514,6 @@ public class RecordBatch : RecordBatchBase
     {
         // Read uncompressed length from first size_t.sizeof bytes.
         auto uncompressed_len = *(cast(size_t*)(compressed.ptr));
-        enforce(uncompressed_len <= this.batch.dimension);
         this.batch.length = uncompressed_len;
 
         // Decompress into this.batch.
@@ -569,6 +578,33 @@ public class RecordBatch : RecordBatchBase
 
     /***************************************************************************
 
+        Empties the batch.
+
+    ***************************************************************************/
+
+    public void clear ( )
+    {
+        this.batch.length = 0;
+    }
+
+
+    /***************************************************************************
+
+        Returns the current batch size.
+
+        Returns:
+            current batch size
+
+    ***************************************************************************/
+
+    public size_t length ( )
+    {
+        return this.batch.length;
+    }
+
+
+    /***************************************************************************
+
         Extracts a single value from the batch.
 
         Params:
@@ -590,4 +626,93 @@ public class RecordBatch : RecordBatchBase
 
         return value;
     }
+}
+
+version ( UnitTest )
+{
+    import ocean.core.Test;
+    import ocean.text.convert.Formatter;
+}
+
+// Basic tests.
+unittest
+{
+    auto lzo = new Lzo;
+    auto writer = new RecordBatcher(lzo, 200);
+    auto reader = new RecordBatch(lzo, 200);
+
+    mstring key, value_S, value_M, value_L;
+    key.length = 16;
+    value_S.length = 50;
+    value_M.length = 150;
+    value_L.length = 200;
+
+    // Test RecordBatcher.batchedSize()
+    test!("==")(writer.batchedSize(key, value_S),
+        key.length + key.length.sizeof + value_S.length + value_S.length.sizeof);
+    test!("==")(writer.batchedSize(key, value_M),
+        key.length + key.length.sizeof + value_M.length + value_M.length.sizeof);
+    test!("==")(writer.batchedSize(key, value_L),
+        key.length + key.length.sizeof + value_L.length + value_L.length.sizeof);
+
+    // Test RecordBatcher.fits()
+    bool will_never_fit;
+    test(writer.fits(key, value_S, will_never_fit));
+    test(!will_never_fit);
+
+    test(writer.fits(key, value_M, will_never_fit));
+    test(!will_never_fit);
+
+    test(!writer.fits(key, value_L, will_never_fit));
+    test(will_never_fit);
+
+    // Test batch compression
+    ubyte[] compressed;
+    auto res = writer.add(key, value_S);
+    test!("==")(res, res.Added);
+    res = writer.add(key, value_S);
+    test!("==")(res, res.Added);
+    res = writer.add(key, value_S);
+    test!("==")(res, res.BatchFull);
+    writer.compress(compressed);
+
+    // Test batch extraction
+    reader.decompress(compressed);
+    uint i;
+    foreach ( k, v; reader )
+    {
+        i++;
+        test!("==")(k, key);
+        test!("==")(v, value_S);
+    }
+    test!("==")(i, 2);
+}
+
+// Test extracting a larger batch than the reader was initialised for. (This is
+// silently allowed.)
+unittest
+{
+    auto lzo = new Lzo;
+    auto writer = new RecordBatcher(lzo, RecordBatcher.DefaultMaxBatchSize * 10);
+    auto reader = new RecordBatch(lzo, RecordBatcher.DefaultMaxBatchSize);
+
+    ubyte[] compressed;
+    uint added;
+    while ( true )
+    {
+        auto res = writer.add(format("0x{:16}", added),
+            format("{}{}{}", added, added, added));
+        if ( res == res.BatchFull )
+            break;
+        added++;
+    }
+
+    writer.compress(compressed);
+    assert(compressed.length > RecordBatcher.DefaultMaxBatchSize);
+
+    reader.decompress(compressed);
+    uint extracted;
+    foreach ( k, v; reader )
+        extracted++;
+    test!("==")(extracted, added);
 }
