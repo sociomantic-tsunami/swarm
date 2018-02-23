@@ -125,6 +125,7 @@ abstract class ConnectionBase: ISelectClient
 
         ***********************************************************************/
 
+        deprecated("Use TCP_NODELAY and explicit buffering instead.")
         public bool flush_requested;
 
         /***********************************************************************
@@ -433,8 +434,6 @@ abstract class ConnectionBase: ISelectClient
                 // Register the socket for both input and output
                 this.outer.registerEpoll(true);
                 this.outer.sender.finishSending(this.suspend());
-                if (this.flush_requested)
-                    this.outer.sender.flush();
             }
         }
     }
@@ -1208,6 +1207,7 @@ abstract class ConnectionBase: ISelectClient
 
     ***************************************************************************/
 
+    deprecated("Use TCP_NODELAY and explicit buffering instead.")
     public void flush ( )
     {
         // Flush the OS-maintained (TCP_CORK) socket output buffer. This will
