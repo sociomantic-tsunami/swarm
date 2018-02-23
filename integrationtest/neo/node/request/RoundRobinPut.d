@@ -77,6 +77,5 @@ public class RoundRobinPutImpl_v0 : IRequestHandler
                 payload.addCopy(MessageType.Succeeded);
             }
         );
-        ed.flush();
     }
 }

@@ -404,7 +404,6 @@ public struct AllNodesRequestInitialiser ( Request, FillPayload,
                 this.fill_payload(payload);
             }
         );
-        this.conn.flush();
 
         // Receive status from node and stop the request if not Ok
         auto status = conn.receiveValue!(ubyte)();

@@ -64,6 +64,7 @@ public class Node : NodeBase!(ConnHandler)
 
         Options options;
         options.epoll = epoll;
+        options.no_delay = true;
 
         options.requests.add(Command(RequestCode.Get, 0),
             "Get", GetImpl_v0.classinfo);

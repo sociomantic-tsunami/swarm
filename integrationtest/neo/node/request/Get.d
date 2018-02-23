@@ -96,6 +96,5 @@ public class GetImpl_v0 : IRequestHandler
                 }
             );
         }
-        ed.flush();
     }
 }
