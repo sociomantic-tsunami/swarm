@@ -284,8 +284,6 @@ class ConnectProtocol: ISelectClient
             this.registerEpoll(Event.EPOLLOUT);
             this.sender.finishSending(this.wait());
         }
-
-        this.sender.flush();
     }
 
     /***************************************************************************

@@ -77,6 +77,5 @@ public class DoublePutImpl_v0 : IRequestHandler
                 payload.addCopy(RequestStatusCode.Succeeded);
             }
         );
-        ed.flush();
     }
 }

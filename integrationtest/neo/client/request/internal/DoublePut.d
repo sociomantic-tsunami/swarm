@@ -165,7 +165,6 @@ public struct DoublePut
                             payload.addArray(context.user_params.args.value);
                         }
                     );
-                    conn.flush();
 
                     // Receive supported status from node
                     auto supported = conn.receiveValue!(SupportedStatus)();
