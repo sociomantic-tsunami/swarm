@@ -5,6 +5,18 @@
     This class is suitable for both half and full duplex because it does not
     handle epoll notifications directly (it is not a select client).
 
+    Once upon a time there was an explicit flush method. It relied on the
+    TCP_CORK being set and it would then pull out and put the cork back in.
+    However this wouldn't work, because putting the cork back in had to be done
+    after all the packets are actually sent, otherwise the last incomplete packet
+    would be delayed for the 200ms. Since we moved to the explicit application
+    buffering for the large data and to the explicit flushing for the control
+    messages this flush was deprecated. If there's a need to bring it in again,
+    instead of TCP_CORK on/off, what it should do is to set the TCP_NODELAY
+    on (which is overridden by TCP_CORK, but still forces explicit flush of all
+    pending data). See https://github.com/sociomantic-tsunami/dmqproto/issues/48
+    for more info.
+
     Copyright: Copyright (c) 2010-2017 sociomantic labs GmbH. All rights reserved
 
     License:
@@ -225,6 +237,7 @@ class MessageSender
 
     ***************************************************************************/
 
+    deprecated("Use TCP_NODELAY and explicit buffering instead.")
     public void flush ( )
     {
         if (this.cork_)

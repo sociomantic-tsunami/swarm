@@ -784,6 +784,7 @@ abstract class RequestOnConnBase
 
         ***********************************************************************/
 
+        deprecated("Use TCP_NODELAY and explicit buffering instead.")
         public void flush ( )
         {
             this.outer.connection.flush();
