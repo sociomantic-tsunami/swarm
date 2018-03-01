@@ -511,26 +511,25 @@ abstract class RequestOnConnBase
             Initiates a connection shutdown from inside the fiber, throwing an
             exception of type ProtocolError in all other requests that are
             currently using this connection or attempt to use it, until the
-            shutdown is complete. The exception instance is then returned -- the
-            caller is expected to throw it in the context of the request handler
-            that called this method.
+            shutdown is complete. The exception instance is then thrown, killing
+            the request handler that called this method.
 
             Params:
                 msg = message to set in exception
                 file = source filename to set in exception
                 line = source line to set in exception
 
-            Returns:
+            Throws:
                 The ProtocolError that was used to shut down the connection
 
         ***********************************************************************/
 
-        public ProtocolError shutdownWithProtocolError ( cstring msg,
+        public void shutdownWithProtocolError ( cstring msg,
             istring file = __FILE__, int line = __LINE__ )
         {
             auto e = this.outer.connection.protocol_error.set(msg, file, line);
             this.shutdownConnection(e);
-            return e;
+            throw e;
         }
 
         /***********************************************************************
