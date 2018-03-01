@@ -569,7 +569,7 @@ class ConnectionHandler : IConnectionHandler
         }
         else
         {
-            connection.event_dispatcher.shutdownWithProtocolError(
+            throw connection.event_dispatcher.shutdownWithProtocolError(
                 "First request message contains no command"
             );
         }
