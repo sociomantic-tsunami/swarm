@@ -865,7 +865,7 @@ public struct RequestEventDispatcher
             }
         }
 
-        conn.shutdownWithProtocolError("Unhandled signal code");
+        throw conn.shutdownWithProtocolError("Unhandled signal code");
     }
 
     /***************************************************************************
@@ -904,7 +904,7 @@ public struct RequestEventDispatcher
             }
         }
 
-        conn.shutdownWithProtocolError("Unhandled message");
+        throw conn.shutdownWithProtocolError("Unhandled message");
     }
 
     /***************************************************************************
@@ -941,7 +941,7 @@ public struct RequestEventDispatcher
         }
 
         if ( this.waiting_fibers_to_iterate.length == 0 )
-            conn.shutdownWithProtocolError("Unhandled resume after yield");
+            throw conn.shutdownWithProtocolError("Unhandled resume after yield");
 
         foreach ( fiber_to_notify; this.waiting_fibers_to_iterate )
         {
