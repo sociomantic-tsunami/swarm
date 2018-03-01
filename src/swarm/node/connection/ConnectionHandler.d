@@ -279,12 +279,12 @@ public abstract class ConnectionHandlerTemplate ( Commands : ICommandCodes )
         {
             const float Mb = 1024 * 1024;
             size_t used1, free1;
-            GC.usage(used1, free1);
+            gc_usage(used1, free1);
 
             scope ( exit )
             {
                 size_t used2, free2;
-                GC.usage(used2, free2);
+                gc_usage(used2, free2);
 
                 if ( used2 > used1 )
                 {
