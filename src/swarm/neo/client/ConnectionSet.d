@@ -47,13 +47,14 @@ public final class ConnectionSet : RequestOnConn.IConnectionGetter
 
         Set this flag to `true` before calling `start` to prevent TCP socket
         output data buffering through Nagle's algorithm and TCP Cork.
-        Warning: This is meant to be used only in tests which perform sequential
-        requests. For a high data throughput rate it may impact performance so
-        do not use it in a production environment.
+        Warning: Since no buffering is done, in case of many write calls for
+        small amount of data, this may impact performance, since lots of small
+        packets will be generated. It is hence important to coalesce writes that
+        logically belong together into smaller number of writes.
 
     ***************************************************************************/
 
-    public bool socket_no_delay = false;
+    public bool socket_no_delay = true;
 
     /***************************************************************************
 

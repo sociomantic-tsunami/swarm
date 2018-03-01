@@ -972,6 +972,7 @@ template ClientCore ( )
 
     ***************************************************************************/
 
+    deprecated("This is now on by default, simply remove this call")
     public void enableSocketNoDelay ( )
     {
         this.connections.socket_no_delay = true;
