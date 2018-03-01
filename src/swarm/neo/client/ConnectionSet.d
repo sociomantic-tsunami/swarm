@@ -200,7 +200,7 @@ public final class ConnectionSet : RequestOnConn.IConnectionGetter
     ***************************************************************************/
 
     public this ( Const!(Credentials) credentials, EpollSelectDispatcher epoll,
-        ConnectionNotifier conn_notifier, bool auto_connect )
+        scope ConnectionNotifier conn_notifier, bool auto_connect )
     {
         verify(conn_notifier !is null);
 
@@ -229,7 +229,7 @@ public final class ConnectionSet : RequestOnConn.IConnectionGetter
     ***************************************************************************/
 
     public ConnectionNotifier setConnectionNotifier (
-        ConnectionNotifier conn_notifier )
+        scope ConnectionNotifier conn_notifier )
     {
         auto old_conn_notifier = this.conn_notifier;
         this.conn_notifier = conn_notifier;
@@ -448,7 +448,7 @@ public final class ConnectionSet : RequestOnConn.IConnectionGetter
 
     ***************************************************************************/
 
-    public int iterateRoundRobin ( int delegate ( Connection conn ) dg )
+    public int iterateRoundRobin ( scope int delegate ( Connection conn ) dg )
     {
         auto connections_buf = this.connection_list_pool.get(
             new Connection[this.connection_pool.num_busy]);
@@ -486,7 +486,7 @@ public final class ConnectionSet : RequestOnConn.IConnectionGetter
 
     ***************************************************************************/
 
-    public int opApply ( int delegate ( ref Connection conn ) dg )
+    public int opApply ( scope int delegate ( ref Connection conn ) dg )
     {
         return this.connections.opApply(dg);
     }
@@ -506,7 +506,7 @@ public final class ConnectionSet : RequestOnConn.IConnectionGetter
 
     ***************************************************************************/
 
-    public int opApplyReverse ( int delegate ( ref Connection conn ) dg )
+    public int opApplyReverse ( scope int delegate ( ref Connection conn ) dg )
     {
         return this.connections.opApplyReverse(dg);
     }
@@ -654,7 +654,7 @@ private struct ConnectionRegistry ( C )
     public Elem put ( AddrPort node_address, out bool added,
         lazy Elem new_conn )
     {
-        return this.connection_map.put(node_address.cmp_id, added, new_conn);
+        return (&this).connection_map.put(node_address.cmp_id, added, new_conn);
     }
 
     /***************************************************************************
@@ -671,7 +671,7 @@ private struct ConnectionRegistry ( C )
 
     public Elem get ( AddrPort node_address )
     {
-        return node_address.cmp_id in this.connection_map;
+        return node_address.cmp_id in (&this).connection_map;
     }
 
     // ditto
@@ -688,7 +688,7 @@ private struct ConnectionRegistry ( C )
 
     public void remove ( Elem conn )
     {
-        this.connection_map.remove(conn);
+        (&this).connection_map.remove(conn);
     }
 
     /***************************************************************************
@@ -706,7 +706,7 @@ private struct ConnectionRegistry ( C )
 
     public Elem getBoundary ( bool first = true ) ( )
     {
-        return this.connection_map.getBoundary!(first)();
+        return (&this).connection_map.getBoundary!(first)();
     }
 
     /***************************************************************************
@@ -740,7 +740,7 @@ private struct ConnectionRegistry ( C )
                 ulong address_id = connection.remote_address.cmp_id;
 
                 if (auto conn_found =
-                    this.connection_map.getThisOrNext!(ascend)(address_id)
+                    (&this).connection_map.getThisOrNext!(ascend)(address_id)
                 )
                 {
                     // conn_found has the same or the next address as
@@ -758,7 +758,7 @@ private struct ConnectionRegistry ( C )
                             return conn_found;
                     }
 
-                    return this.connection_map.iterate!(ascend)(conn_found);
+                    return (&this).connection_map.iterate!(ascend)(conn_found);
                 }
                 else
                 {
@@ -767,7 +767,7 @@ private struct ConnectionRegistry ( C )
             }
             else
             {
-                return this.connection_map.iterate!(ascend)(connection);
+                return (&this).connection_map.iterate!(ascend)(connection);
             }
         }
 
@@ -789,12 +789,12 @@ private struct ConnectionRegistry ( C )
 
     ***************************************************************************/
 
-    public int opApply ( int delegate ( ref Elem conn ) dg )
+    public int opApply ( scope int delegate ( ref Elem conn ) dg )
     {
         for (
-            auto conn = this.connection_map.getBoundary!(true)();
+            auto conn = (&this).connection_map.getBoundary!(true)();
             conn !is null;
-            conn = this.getNext!(true)(conn)
+            conn = (&this).getNext!(true)(conn)
         )
         {
             if (int x = dg(conn))
@@ -819,12 +819,12 @@ private struct ConnectionRegistry ( C )
 
     ***************************************************************************/
 
-    public int opApplyReverse ( int delegate ( ref Elem conn ) dg )
+    public int opApplyReverse ( scope int delegate ( ref Elem conn ) dg )
     {
         for (
-            auto conn = this.connection_map.getBoundary!(false)();
+            auto conn = (&this).connection_map.getBoundary!(false)();
             conn !is null;
-            conn = this.getNext!(false)(conn)
+            conn = (&this).getNext!(false)(conn)
         )
         {
             if (int x = dg(conn))
@@ -862,12 +862,12 @@ private struct ConnectionRegistry ( C )
     ***************************************************************************/
 
     public int iterateRoundRobin ( ref Elem[] connections_buf,
-        int delegate ( Elem conn ) dg )
+        scope int delegate ( Elem conn ) dg )
     {
         connections_buf.length = 0;
         enableStomping(connections_buf);
 
-        this.opApply(
+        (&this).opApply(
             ( ref Elem conn )
             {
                 connections_buf ~= conn;

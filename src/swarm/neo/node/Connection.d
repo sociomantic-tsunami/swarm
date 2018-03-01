@@ -100,8 +100,8 @@ class Connection: ConnectionBase
 
     public this ( ref Const!(Key[istring]) credentials,
                   AddressIPSocket!() socket, EpollSelectDispatcher epoll,
-                  RequestSet.Handler request_handler,
-                  void delegate ( ) when_closed, RequestPool request_pool,
+                  scope RequestSet.Handler request_handler,
+                  scope void delegate ( ) when_closed, RequestPool request_pool,
                   YieldedRequestOnConns task_resumer, bool no_delay = false )
     {
         super(socket, epoll, no_delay);
@@ -224,7 +224,7 @@ class Connection: ConnectionBase
     ***************************************************************************/
 
     override protected void getPayloadForSending (
-        RequestId id, void delegate ( in void[][] payload ) send
+        RequestId id, scope void delegate ( in void[][] payload ) send
     )
     {
         if (auto request = this.request_set.getRequest(id))

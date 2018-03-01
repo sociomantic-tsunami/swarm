@@ -27,7 +27,7 @@ import ocean.transition;
 interface IRequestSet
 {
     /// The global limit of active requests at a time.
-    public const max_requests = 5_000;
+    public static immutable max_requests = 5_000;
 
     import swarm.neo.protocol.Message: RequestId;
     IRequest getRequest ( RequestId id );
@@ -57,7 +57,7 @@ interface IRequest
 
 interface IRequestOnConn
 {
-    void getPayloadForSending ( void delegate ( in void[][] payload ) send );
+    void getPayloadForSending ( scope void delegate ( in void[][] payload ) send );
     void setReceivedPayload ( Const!(void)[] payload );
     void error ( Exception e );
     void reconnected ( );

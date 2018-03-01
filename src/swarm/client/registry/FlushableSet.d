@@ -117,7 +117,7 @@ public class FlushableSet : Set!(IFlushable), IFlushables
 
     ***************************************************************************/
 
-    override public hash_t toHash ( in IFlushable flushable ) /* d1to2fix_inject: const */
+    override public hash_t toHash ( in IFlushable flushable ) const
     {
         return cast(hash_t)cast(void*)flushable;
     }

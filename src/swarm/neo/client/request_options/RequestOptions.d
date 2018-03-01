@@ -61,7 +61,7 @@ public void setupOptionalArgs ( size_t n_args, T1, T ... )
 {
     static if (n_args)
     {
-        const n_args1 = n_args - 1;
+        static immutable n_args1 = n_args - 1;
 
         foreach (i, Handler; T[n_args1 .. $])
         {
