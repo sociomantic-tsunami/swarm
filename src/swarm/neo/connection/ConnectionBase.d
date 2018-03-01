@@ -416,8 +416,6 @@ abstract class ConnectionBase: ISelectClient
         {
             bool finish_sending = false;
 
-            scope (exit) this.flush_requested = false;
-
             this.outer.getPayloadForSending(
                 id,
                 ( in void[][] payload )
