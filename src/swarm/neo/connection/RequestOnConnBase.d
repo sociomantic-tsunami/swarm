@@ -515,12 +515,18 @@ abstract class RequestOnConnBase
 
         /***********************************************************************
 
-            Initiates a connection shutdown from inside the fiber, throwing `e `
-            in all other requests that are currently using this connection or
-            attempt to use it until the shutdown is complete.
+            Initiates a connection shutdown from inside the fiber, throwing an
+            exception of type ProtocolError in all other requests that are
+            currently using this connection or attempt to use it, until the
+            shutdown is complete. The exception instance is then returned -- the
+            caller is expected to throw it in the context of the request handler
+            that called this method.
 
             Params:
                 e = the exception reflecting the reason for the shutdown
+
+            Returns:
+                The ProtocolError that was used to shut down the connection
 
         ***********************************************************************/
 
