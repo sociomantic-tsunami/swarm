@@ -90,11 +90,6 @@ class Connection: ConnectionBase
             request_pool = global pool of `Request` objects shared across
                            multiple instances of this class
             task_resumer = global resumer to resume yielded `RequestOnConn`s
-            no_delay = if false, data written to the socket will be buffered and
-                sent according to Nagle's algorithm and TCP Cork. If true, no
-                buffering will occur. (The no-delay option is not generally
-                suited to live servers, where efficient packing of packets is
-                desired, but can be useful for low-bandwidth test setups.)
 
     ***************************************************************************/
 
@@ -102,9 +97,9 @@ class Connection: ConnectionBase
                   AddressIPSocket!() socket, EpollSelectDispatcher epoll,
                   RequestSet.Handler request_handler,
                   void delegate ( ) when_closed, RequestPool request_pool,
-                  YieldedRequestOnConns task_resumer, bool no_delay = false )
+                  YieldedRequestOnConns task_resumer )
     {
-        super(socket, epoll, no_delay);
+        super(socket, epoll);
         this.request_set = new RequestSet(this, request_pool, task_resumer, request_handler);
         this.conn_init = new NodeConnect(credentials);
         this.when_closed = when_closed;

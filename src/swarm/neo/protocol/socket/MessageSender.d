@@ -70,14 +70,6 @@ class MessageSender
 
     /***************************************************************************
 
-        true if the TCP Cork feature is currently enabled or false otherwise.
-
-    ***************************************************************************/
-
-    private bool cork_ = false;
-
-    /***************************************************************************
-
         The socket to write to.
 
     ***************************************************************************/
@@ -223,72 +215,6 @@ class MessageSender
         do
             this.io_stats.num_iowait_calls++;
         while (!this.write(src, wait));
-    }
-
-    /***************************************************************************
-
-        Flushes the TCP Cork buffer.
-
-        Note that apart from TCP Cork no output data buffering is done in this
-        class: All sending methods return only after write() accepted all output
-        data. If TCP Cork is enabled then write() may do internal buffering of
-        the payload of one TCP frame; that buffer is flushed after 200 ms.
-        See man 7 tcp.
-
-    ***************************************************************************/
-
-    deprecated("Use TCP_NODELAY and explicit buffering instead.")
-    public void flush ( )
-    {
-        if (this.cork_)
-        {
-            this.cork = false;
-            this.cork = true;
-        }
-    }
-
-    /***************************************************************************
-
-        Enables or disables the TCP Cork feature.
-
-        TCP Cork is a Linux feature to buffer output data for a TCP/IP
-        connection until a full TCP frame (network packet) can be sent. It uses
-        a timeout of 200ms. See man 7 tcp.
-
-        No further output data buffering is done in this class: All sending
-        methods return only after write() accepted all output data.
-
-        Params:
-            enabled = true: enable the TCP Cork option; false: disable it.
-                      Disabling sends all pending data immediately.
-
-        Returns:
-            enable
-
-        Throws:
-            IOException on error setting the TCP Cork option.
-
-    ***************************************************************************/
-
-    public bool cork ( bool enable )
-    {
-        this.error_e.enforce(!this.socket.setsockoptVal(IPPROTO_TCP, TCP_CORK, enable), "unable to set TCP_CORK");
-        this.cork_ = enable;
-        return this.cork_;
-    }
-
-    /**************************************************************************
-
-        Tells whether TCP Cork feature is currently enabled.
-
-        Returns:
-            true if TCP Cork is currently enabled or false otherwise.
-
-     **************************************************************************/
-
-    public bool cork ( )
-    {
-        return this.cork_;
     }
 
     /***************************************************************************
