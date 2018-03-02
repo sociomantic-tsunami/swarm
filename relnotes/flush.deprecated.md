@@ -10,11 +10,10 @@ otherwise the last incomplete packet will be delayed for the 200ms. Since we
 moved to the explicit application buffering for the large data and to the
 explicit flushing for the control messages this flush was deprecated.
 
-The steps to do instead of explicit flush differ on the client and the node side.
-On the client side, the method ClientCore.enableNoDelay() should be called in
-the client's constructor, and on the node side, passing `Options.no_delay` set to
-true in the `NeoNode`'s constructor will suffice to turn on the `TCP_NODELAY`.
-Then, all the implicit batching in the requests should be mitigated to the explicit
+Since now the TCP_NODELAY is always on, `ClientCore.enableNoDelay` and
+`NeoNode.Options.no_delay` are now also deprecated and do nothing.
+
+All the implicit batching in the requests should be mitigated to the explicit
 batching (like preparing batches and sending them) and the explicit flushing after
 sending small quick control messages should be removed, as TCP_NODELAY will send
 the message as soon as it's written.
