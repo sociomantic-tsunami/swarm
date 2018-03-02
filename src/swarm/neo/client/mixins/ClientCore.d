@@ -972,10 +972,9 @@ template ClientCore ( )
 
     ***************************************************************************/
 
-    deprecated("This is now on by default, simply remove this call")
+    deprecated("TCP_NODELAY is now on, this method does nothing.")
     public void enableSocketNoDelay ( )
     {
-        this.connections.socket_no_delay = true;
     }
 }
 

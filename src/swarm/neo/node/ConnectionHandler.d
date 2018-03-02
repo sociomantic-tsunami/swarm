@@ -428,8 +428,7 @@ class ConnectionHandler : IConnectionHandler
         this.connection = new Connection(
             *shared_params.credentials, socket, shared_params.epoll,
             &this.handleRequest, &this.whenConnectionClosed,
-            shared_params.request_pool, shared_params.yielded_rqonconns,
-            shared_params.no_delay
+            shared_params.request_pool, shared_params.yielded_rqonconns
         );
         this.return_to_pool = return_to_pool;
         this.shared_params = shared_params;

@@ -119,17 +119,6 @@ abstract class ConnectionBase: ISelectClient
 
         /***********************************************************************
 
-            If this flag is true and `sendRequestPayload` is waiting for
-            `EPOLLOUT` then it will call `sender.flush` after it has sent the
-            remaining data.
-
-        ***********************************************************************/
-
-        deprecated("Use TCP_NODELAY and explicit buffering instead.")
-        public bool flush_requested;
-
-        /***********************************************************************
-
             The queue of ids of requests waiting to send a message.
 
         ***********************************************************************/
@@ -307,11 +296,8 @@ abstract class ConnectionBase: ISelectClient
 
                 try
                 {
-                    if (this.outer.no_delay)
-                        this.outer.socket.setsockoptVal(IPPROTO_TCP,
-                            socket.TcpOptions.TCP_NODELAY, true);
-                    else
-                        this.outer.sender.cork = true;
+                    this.outer.socket.setsockoptVal(IPPROTO_TCP,
+                        socket.TcpOptions.TCP_NODELAY, true);
 
                     // Start the receive fiber, it will suspend itself immediately.
                     this.outer.recv_loop.start();
@@ -766,13 +752,10 @@ abstract class ConnectionBase: ISelectClient
         Params:
             socket       = node/client connection socket
             epoll        = epoll select dispatcher for registering the socket
-            no_delay     = disables TCP socket output buffering (see comments on
-                           the no_delay field, above)
 
     ***************************************************************************/
 
-    protected this ( AddressIPSocket!() socket, EpollSelectDispatcher epoll,
-        bool no_delay = false )
+    protected this ( AddressIPSocket!() socket, EpollSelectDispatcher epoll )
     {
         this.socket               = socket;
         this.epoll                = epoll;
@@ -1205,19 +1188,9 @@ abstract class ConnectionBase: ISelectClient
 
     ***************************************************************************/
 
-    deprecated("Use TCP_NODELAY and explicit buffering instead.")
+    deprecated("TCP_NODELAY is now on by default and this method does nothing")
     public void flush ( )
     {
-        // Flush the OS-maintained (TCP_CORK) socket output buffer. This will
-        // immediately send all data that have been accepted by `sendmsg(2)`.
-        this.sender.flush();
-        // `this.sender` may in addition buffer data that have not been accepted
-        // by `sendmsg` - that is, `send(2)` returned a value less than the
-        // buffer length argument - and wait for `EPOLLOUT` on the socket to
-        // call `sendmsg` again  with the remaining data. Set a flag to flush
-        // the OS-maintained (TCP_CORK) socket output buffer when `sendmsg`
-        // eventually accepted all outstanding data.
-        this.send_loop.flush_requested = true;
     }
 
     /***************************************************************************
