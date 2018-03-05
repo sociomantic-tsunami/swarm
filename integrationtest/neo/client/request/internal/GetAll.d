@@ -370,7 +370,6 @@ private struct Reader
                                 payload.addCopy(MessageType.Ack);
                             }
                         );
-                        this.conn.flush();
                     }
                     break;
 

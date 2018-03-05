@@ -869,9 +869,9 @@ template ClientCore ( )
 
     ***************************************************************************/
 
+    deprecated("TCP_NODELAY is now on, this method does nothing.")
     public void enableSocketNoDelay ( )
     {
-        this.connections.socket_no_delay = true;
     }
 }
 

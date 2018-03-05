@@ -133,7 +133,6 @@ public struct VersionedGet ( ubyte Version )
                             payload.add(context.user_params.args.key);
                         }
                     );
-                    conn.flush();
 
                     // Receive supported status from node
                     auto supported = conn.receiveValue!(SupportedStatus)();

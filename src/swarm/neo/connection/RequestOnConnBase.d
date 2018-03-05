@@ -516,7 +516,9 @@ abstract class RequestOnConnBase
             that called this method.
 
             Params:
-                e = the exception reflecting the reason for the shutdown
+                msg = message to set in exception
+                file = source filename to set in exception
+                line = source line to set in exception
 
             Returns:
                 The ProtocolError that was used to shut down the connection
@@ -794,6 +796,7 @@ abstract class RequestOnConnBase
 
         ***********************************************************************/
 
+        deprecated("Use TCP_NODELAY and explicit buffering instead.")
         public void flush ( )
         {
             this.outer.connection.flush();

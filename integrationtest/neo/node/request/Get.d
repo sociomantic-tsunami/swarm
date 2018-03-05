@@ -87,6 +87,5 @@ public class GetImpl_v0 : IRequest
                 }
             );
         }
-        ed.flush();
     }
 }

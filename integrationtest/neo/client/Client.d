@@ -615,7 +615,6 @@ public class Client
         ubyte[] auth_key = Key.init.content;
         this.neo = new Neo(auth_name, auth_key,
             Neo.Settings(this.conn_notifier));
-        this.neo.enableSocketNoDelay();
         this.neo.addNode(addr, port);
 
         this.blocking = new Blocking;
@@ -639,7 +638,6 @@ public class Client
         this.conn_notifier = conn_notifier;
 
         this.neo = new Neo(config, Neo.Settings(this.conn_notifier));
-        this.neo.enableSocketNoDelay();
 
         this.blocking = new Blocking;
     }

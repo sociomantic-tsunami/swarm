@@ -221,20 +221,15 @@ public final class Connection: ConnectionBase
             credentials  = authentication credentials
             request_set  = the request set
             epoll        = epoll select dispatcher
-            no_delay     = if false, data written to the socket will be buffered
-                and sent according to Nagle's algorithm and TCP Cork. If true,
-                no buffering will occur. (The no-delay option is not generally
-                suited to live servers, where efficient packing of packets is
-                desired, but can be useful for low-bandwidth test setups.)
 
     ***************************************************************************/
 
     public this ( Const!(Credentials) credentials, IRequestSet request_set,
-                  EpollSelectDispatcher epoll, bool no_delay = false )
+                  EpollSelectDispatcher epoll )
     {
         this.client_socket = new ClientSocket;
 
-        super(this.client_socket.socket, epoll, no_delay);
+        super(this.client_socket.socket, epoll);
 
         this.conn_init = new ClientConnect(credentials);
         this.request_set = request_set;

@@ -47,18 +47,6 @@ public final class ConnectionSet : RequestOnConn.IConnectionGetter
 
     /***************************************************************************
 
-        Set this flag to `true` before calling `start` to prevent TCP socket
-        output data buffering through Nagle's algorithm and TCP Cork.
-        Warning: This is meant to be used only in tests which perform sequential
-        requests. For a high data throughput rate it may impact performance so
-        do not use it in a production environment.
-
-    ***************************************************************************/
-
-    public bool socket_no_delay = false;
-
-    /***************************************************************************
-
         Registry of connections.
 
     ***************************************************************************/
@@ -299,8 +287,7 @@ public final class ConnectionSet : RequestOnConn.IConnectionGetter
         bool added;
         auto connection = this.connections.put(node_address, added,
             this.connection_pool.get(new Connection(
-                this.credentials, this.request_set_, this.epoll,
-                this.socket_no_delay
+                this.credentials, this.request_set_, this.epoll
             ))
         );
 

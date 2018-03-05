@@ -91,7 +91,6 @@ public class GetAllImpl_v0 : IRequest
                     payload.addCopy(MessageType.End);
                 }
             );
-            this.outer.connection.event_dispatcher.flush();
 
             this.outer.request_event_dispatcher.receive(this.fiber,
                 Message(MessageType.Ack));
@@ -136,7 +135,6 @@ public class GetAllImpl_v0 : IRequest
                         payload.addCopy(MessageType.Ack);
                     }
                 );
-                this.outer.connection.event_dispatcher.flush();
 
                 // Carry out the specified control message.
                 with ( MessageType ) switch ( message.type )

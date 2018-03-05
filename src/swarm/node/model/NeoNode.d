@@ -674,12 +674,9 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
             Flag controlling whether Nagle's algorithm is disabled (true) or
             left enabled (false) on the underlying socket.
 
-            (The no-delay option is not generally suited to live servers, where
-            efficient packing of packets is desired, but can be useful for
-            low-bandwidth test setups.)
-
         ***********************************************************************/
 
+        deprecated("This field now doesn't affect anything, since TCP_NODELAY is always on")
         public bool no_delay;
 
         /***********************************************************************
@@ -803,10 +800,12 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
             credentials = &s.cred;
         }
 
+        auto no_delay = true;
+
         // Instantiate params object shared by all neo connection handlers.
         auto neo_conn_setup_params = new Neo.ConnectionHandler.SharedParams(
             options.epoll, options.requests,
-            options.no_delay, *credentials, this, &this.getResourceAcquirer);
+            no_delay, *credentials, this, &this.getResourceAcquirer);
 
         // Set up unix listener socket, if specified.
         UnixListener unix_listener;

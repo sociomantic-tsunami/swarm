@@ -70,6 +70,5 @@ public class PutImpl_v0 : IRequest
                 payload.addCopy(RequestStatusCode.Succeeded);
             }
         );
-        ed.flush();
     }
 }

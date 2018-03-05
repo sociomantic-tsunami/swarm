@@ -5,6 +5,18 @@
     This class is suitable for both half and full duplex because it does not
     handle epoll notifications directly (it is not a select client).
 
+    Once upon a time there was an explicit flush method. It relied on the
+    TCP_CORK being set and it would then pull out and put the cork back in.
+    However this wouldn't work, because putting the cork back in had to be done
+    after all the packets are actually sent, otherwise the last incomplete packet
+    would be delayed for the 200ms. Since we moved to the explicit application
+    buffering for the large data and to the explicit flushing for the control
+    messages this flush was deprecated. If there's a need to bring it in again,
+    instead of TCP_CORK on/off, what it should do is to set the TCP_NODELAY
+    on (which is overridden by TCP_CORK, but still forces explicit flush of all
+    pending data). See https://github.com/sociomantic-tsunami/dmqproto/issues/48
+    for more info.
+
     Copyright: Copyright (c) 2010-2017 sociomantic labs GmbH. All rights reserved
 
     License:
@@ -59,14 +71,6 @@ class MessageSender
     ***************************************************************************/
 
     alias Epoll.Event Event;
-
-    /***************************************************************************
-
-        true if the TCP Cork feature is currently enabled or false otherwise.
-
-    ***************************************************************************/
-
-    private bool cork_ = false;
 
     /***************************************************************************
 
@@ -213,71 +217,6 @@ class MessageSender
         do
             this.io_stats.num_iowait_calls++;
         while (!this.write(src, wait));
-    }
-
-    /***************************************************************************
-
-        Flushes the TCP Cork buffer.
-
-        Note that apart from TCP Cork no output data buffering is done in this
-        class: All sending methods return only after write() accepted all output
-        data. If TCP Cork is enabled then write() may do internal buffering of
-        the payload of one TCP frame; that buffer is flushed after 200 ms.
-        See man 7 tcp.
-
-    ***************************************************************************/
-
-    public void flush ( )
-    {
-        if (this.cork_)
-        {
-            this.cork = false;
-            this.cork = true;
-        }
-    }
-
-    /***************************************************************************
-
-        Enables or disables the TCP Cork feature.
-
-        TCP Cork is a Linux feature to buffer output data for a TCP/IP
-        connection until a full TCP frame (network packet) can be sent. It uses
-        a timeout of 200ms. See man 7 tcp.
-
-        No further output data buffering is done in this class: All sending
-        methods return only after write() accepted all output data.
-
-        Params:
-            enabled = true: enable the TCP Cork option; false: disable it.
-                      Disabling sends all pending data immediately.
-
-        Returns:
-            enable
-
-        Throws:
-            IOException on error setting the TCP Cork option.
-
-    ***************************************************************************/
-
-    public bool cork ( bool enable )
-    {
-        this.error_e.enforce(!this.socket.setsockoptVal(IPPROTO_TCP, TCP_CORK, enable), "unable to set TCP_CORK");
-        this.cork_ = enable;
-        return this.cork_;
-    }
-
-    /**************************************************************************
-
-        Tells whether TCP Cork feature is currently enabled.
-
-        Returns:
-            true if TCP Cork is currently enabled or false otherwise.
-
-     **************************************************************************/
-
-    public bool cork ( )
-    {
-        return this.cork_;
     }
 
     /***************************************************************************
