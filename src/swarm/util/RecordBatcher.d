@@ -447,6 +447,15 @@ public class RecordBatch
 {
     /***************************************************************************
 
+        Maximum uncompressed batch size.
+
+    ***************************************************************************/
+
+    deprecated("Specifying a batch size no longer has any effect. Drop usage of this constant.")
+    public const DefaultMaxBatchSize = 64 * 1024;
+
+    /***************************************************************************
+
         Buffer used to store/extract batch of records.
 
     ***************************************************************************/

@@ -9,3 +9,6 @@ The optional constructor argument `batch_size` is deprecated. Any code that uses
 this argument should be adapted to use the other constructor. `RecordBatch` will
 internally adapt to the size of incoming batches.
 
+The constant `RecordBatch.DefaultMaxBatchSize` is deprecated. Any usages should
+be removed.
+
