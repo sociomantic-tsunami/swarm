@@ -129,7 +129,7 @@ class RequestSet
 
         ***********************************************************************/
 
-        public RequestId id ( ) /* d1to2fix_inject: const */
+        public RequestId id ( ) const
         {
             return this.request_id;
         }
@@ -169,7 +169,7 @@ class RequestSet
 
         ***********************************************************************/
 
-        override public void getPayloadForSending ( void delegate ( in void[][] payload ) send )
+        override public void getPayloadForSending ( scope void delegate ( in void[][] payload ) send )
         {
             super.getPayloadForSending(send);
         }
@@ -422,7 +422,7 @@ class RequestSet
 
     ***************************************************************************/
 
-    private const max_requests = 5_000;
+    private static immutable max_requests = 5_000;
 
     /***************************************************************************
 
@@ -441,7 +441,7 @@ class RequestSet
     ***************************************************************************/
 
     public this ( Connection connection, RequestPool request_pool,
-                  YieldedRequestOnConns yielded_rqonconns, Handler handler )
+                  YieldedRequestOnConns yielded_rqonconns, scope Handler handler )
     {
         this.connection = connection;
         this.handler = handler;

@@ -51,7 +51,7 @@ struct HmacAuthCode
 
     ***************************************************************************/
 
-    const hash_algoritm = gcry_md_algos.GCRY_MD_SHA512;
+    enum hash_algoritm = gcry_md_algos.GCRY_MD_SHA512;
 
     private HMAC hmac;
 
