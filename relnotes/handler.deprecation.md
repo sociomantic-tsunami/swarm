@@ -1,4 +1,4 @@
-## Old unusued request handler delegate alias deprecated
+### Old unusued request handler delegate alias deprecated
 
 `swarm.neo.node.ConnectionHandler`
 
