@@ -1,4 +1,4 @@
-## Make ocean's `verify` always available
+### Make ocean's `verify` always available
 
 `swarm.util.Verify`
 
