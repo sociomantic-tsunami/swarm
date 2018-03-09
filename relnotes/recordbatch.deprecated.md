@@ -1,4 +1,4 @@
-## Specifying a batch size in `RecordBatch`'s ctor no longer allowed
+### Specifying a batch size in `RecordBatch`'s ctor no longer allowed
 
 `swarm.util.RecordBatcher`
 
