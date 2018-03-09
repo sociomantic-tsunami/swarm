@@ -521,26 +521,20 @@ class ConnectionHandler : IConnectionHandler
     {
         StopWatch timer;
 
-        if ( rq.name )
-        {
-            this.shared_params.node_info.neo_request_stats
-                .started(rq.name);
-
-            if ( rq.timing )
-                timer.start();
-        }
+        // Inform stats tracker that this request has started.
+        this.shared_params.node_info.neo_request_stats.started(rq.name);
+        if ( rq.timing )
+            timer.start();
 
         scope ( exit )
         {
-            if ( rq.name )
-            {
-                if ( rq.timing )
-                    this.shared_params.node_info.neo_request_stats
-                        .finished(rq.name, timer.microsec);
-                else
-                    this.shared_params.node_info.neo_request_stats
-                        .finished(rq.name);
-            }
+            // Inform stats tracker that this request has finished.
+            if ( rq.timing )
+                this.shared_params.node_info.neo_request_stats
+                    .finished(rq.name, timer.microsec);
+            else
+                this.shared_params.node_info.neo_request_stats
+                    .finished(rq.name);
         }
 
         try
