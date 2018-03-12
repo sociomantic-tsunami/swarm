@@ -105,7 +105,7 @@ public template IRequestResources_T ( Shared )
 
     template Getter ( T, size_t i )
     {
-        const istring Getter = GetterReturnType!(T, i).stringof ~ " " ~
+        static immutable istring Getter = GetterReturnType!(T, i).stringof ~ " " ~
             FieldName!(i, T) ~ "();";
     }
 
@@ -113,11 +113,11 @@ public template IRequestResources_T ( Shared )
     {
         static if ( i == T.tupleof.length - 1 )
         {
-            const istring Getters = Getter!(T, i);
+            static immutable istring Getters = Getter!(T, i);
         }
         else
         {
-            const istring Getters =
+            static immutable istring Getters =
                 Getter!(T, i) ~ Getters!(T, i + 1);
         }
     }
@@ -203,12 +203,12 @@ public template RequestResources_T ( Shared )
     {
         static if ( isDynamicArrayType!(FieldType!(T, i)) )
         {
-            const istring GetterReturnValue =
+            static immutable istring GetterReturnValue =
                 "&this.acquired." ~ FieldName!(i, T) ~ ";";
         }
         else
         {
-            const istring GetterReturnValue =
+            static immutable istring GetterReturnValue =
                 "this.acquired." ~ FieldName!(i, T) ~ ";";
         }
     }
@@ -233,7 +233,7 @@ public template RequestResources_T ( Shared )
 
     template Getter ( T, size_t i )
     {
-        const istring Getter =
+        static immutable istring Getter =
             GetterReturnType!(T, i).stringof ~ " " ~ FieldName!(i, T) ~ "()" ~
             "{" ~
                 "if(!this.acquired." ~ FieldName!(i, T) ~ ")" ~
@@ -252,11 +252,11 @@ public template RequestResources_T ( Shared )
     {
         static if ( i == T.tupleof.length - 1 )
         {
-            const istring Getters = Getter!(T, i);
+            static immutable istring Getters = Getter!(T, i);
         }
         else
         {
-            const istring Getters = Getter!(T, i) ~ Getters!(T, i + 1);
+            static immutable istring Getters = Getter!(T, i) ~ Getters!(T, i + 1);
         }
     }
 
@@ -279,7 +279,7 @@ public template RequestResources_T ( Shared )
 
     template Newer ( T, size_t i )
     {
-        const istring Newer = "protected abstract " ~ FieldType!(T, i).stringof ~ " " ~
+        static immutable istring Newer = "protected abstract " ~ FieldType!(T, i).stringof ~ " " ~
             "new_" ~ FieldName!(i, T) ~ "();";
     }
 
@@ -287,11 +287,11 @@ public template RequestResources_T ( Shared )
     {
         static if ( i == T.tupleof.length - 1 )
         {
-            const istring Newers = Newer!(T, i);
+            static immutable istring Newers = Newer!(T, i);
         }
         else
         {
-            const istring Newers = Newer!(T, i) ~ Newers!(T, i + 1);
+            static immutable istring Newers = Newer!(T, i) ~ Newers!(T, i + 1);
         }
     }
 
@@ -321,14 +321,14 @@ public template RequestResources_T ( Shared )
     {
         static if ( isDynamicArrayType!(FieldType!(T, i)) )
         {
-            const istring Initialiser =
+            static immutable istring Initialiser =
                 "protected void " ~
                 "init_" ~ FieldName!(i, T) ~ "(ref " ~ FieldType!(T, i).stringof ~ " f)" ~
                 "{f.length=0; enableStomping(f);}";
         }
         else
         {
-            const istring Initialiser =
+            static immutable istring Initialiser =
                 "protected void " ~
                 "init_" ~ FieldName!(i, T) ~ "(" ~ FieldType!(T, i).stringof ~ "){}";
         }
@@ -338,11 +338,11 @@ public template RequestResources_T ( Shared )
     {
         static if ( i == T.tupleof.length - 1 )
         {
-            const istring Initialisers = Initialiser!(T, i);
+            static immutable istring Initialisers = Initialiser!(T, i);
         }
         else
         {
-            const istring Initialisers =
+            static immutable istring Initialisers =
                 Initialiser!(T, i) ~ Initialisers!(T, i + 1);
         }
     }
@@ -364,7 +364,7 @@ public template RequestResources_T ( Shared )
 
     template Recycler ( T, size_t i )
     {
-        const istring Recycler =
+        static immutable istring Recycler =
             "if(this.acquired." ~ FieldName!(i, T) ~ ")" ~
             "{" ~
                 "this.shared_resources." ~ FieldName!(i, T) ~ "_freelist" ~
@@ -376,11 +376,11 @@ public template RequestResources_T ( Shared )
     {
         static if ( i == T.tupleof.length - 1 )
         {
-            const istring Recyclers = Recycler!(T, i);
+            static immutable istring Recyclers = Recycler!(T, i);
         }
         else
         {
-            const istring Recyclers = Recycler!(T, i) ~ Recyclers!(T, i + 1);
+            static immutable istring Recyclers = Recycler!(T, i) ~ Recyclers!(T, i + 1);
         }
     }
 
