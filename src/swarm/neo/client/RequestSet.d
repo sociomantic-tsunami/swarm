@@ -439,7 +439,7 @@ public final class RequestSet: IRequestSet
         }
         body
         {
-            if ( this.getRequestOnConnForNode(connection.remote_address) !is null )
+            if ( this.request_on_conns.get(connection.remote_address) !is null )
                 return;
 
             auto request_on_conn = this.request_on_conns.add(
@@ -452,21 +452,37 @@ public final class RequestSet: IRequestSet
         /***********************************************************************
 
             Obtains the handler of this request that is currently communicating
-            with a node, if any.
+            with a node, if any. Expects the handler to be active and throws `e`
+            if not.
 
             Params:
                 node_address = the address of the node to look up the handler
                                for
+                e = the exception to throw if a handler was found that is not
+                    active any more but has finished
 
             Returns:
                 the handler of this request that is currently communicating with
                 the node or null if none is doing that right now.
 
+            Throws:
+                `ProtocolError` if a handler was found that is not active any
+                more but has finished.
+
         ***********************************************************************/
 
-        public RequestOnConn getRequestOnConnForNode ( AddrPort node_address )
+        public RequestOnConn getRequestOnConnForNode ( AddrPort node_address,
+            ProtocolError e )
         {
-            return this.request_on_conns.get(node_address);
+            if (auto roc = this.request_on_conns.get(node_address))
+            {
+                if (roc.active)
+                    return roc;
+                else
+                    throw e.set("Unexpected incoming message");
+            }
+            else
+                return null;
         }
 
         /***********************************************************************
@@ -617,7 +633,7 @@ public final class RequestSet: IRequestSet
 
         public void handlerFinished ( RequestOnConn request_on_conn )
         {
-            if (this.request_on_conns.finished())
+            if (this.request_on_conns.finished(request_on_conn))
             {
                 scope working_data_iter = new RequestWorkingData;
                 this.finished_notifier(this.context, working_data_iter);
