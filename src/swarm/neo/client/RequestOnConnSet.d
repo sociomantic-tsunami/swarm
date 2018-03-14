@@ -135,6 +135,7 @@ public struct RequestOnConnSet
     {
         this.list ~= request_on_conn;
         this.num_active++;
+        request_on_conn.active = true;
 
         return request_on_conn;
     }
@@ -167,6 +168,7 @@ public struct RequestOnConnSet
             "request-on-connection already exists for the specified node");
 
         this.num_active++;
+        request_on_conn.active = true;
 
         return request_on_conn;
     }
@@ -250,20 +252,29 @@ public struct RequestOnConnSet
 
     /***************************************************************************
 
-        Decrements the `num_active` counter and returns whether it is now 0.
+        Registers `roc` as inactive, decrements the `num_active` counter and
+        returns whether the counter is now 0.
+
+        Params:
+            roc = the `RequestOnConn` instance that has finished
 
         Returns:
             true if `num_active` is 0
 
     ***************************************************************************/
 
-    public bool finished ( )
+    public bool finished ( RequestOnConn roc )
     in
     {
         assert(this.num_active);
     }
     body
     {
+        // TODO: Consider `this.all_nodes.remove(roc)` instead of using the
+        // `active` flag. Not doing this now for a patch release to avoid
+        // potentially introducing a bug if there is an unobvious reason why it
+        // isn't done.
+        roc.active = false;
         return --this.num_active == 0;
     }
 
