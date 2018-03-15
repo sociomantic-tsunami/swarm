@@ -92,7 +92,7 @@ public class LoopCeder
 
     ***************************************************************************/
 
-    private const uint DefaultCedePoint = 5;
+    private static immutable uint DefaultCedePoint = 5;
 
 
     /***************************************************************************

@@ -60,7 +60,7 @@ public class DisablableNodeSet : NodeSet
 
     ***************************************************************************/
 
-    public this ( size_t expected_nodes, ModifiedDg modified )
+    public this ( size_t expected_nodes, scope ModifiedDg modified )
     {
         super(expected_nodes, modified);
 
@@ -144,7 +144,7 @@ public class DisablableNodeSet : NodeSet
 
     ***************************************************************************/
 
-    public int opApply ( int delegate ( ref NodeItem, ref NodeConnectionPool ) dg )
+    public int opApply ( scope int delegate ( ref NodeItem, ref NodeConnectionPool ) dg )
     {
         int res;
         foreach ( node_item, conn_pool; this.disabled_nodes )
