@@ -273,6 +273,14 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
 
     /***************************************************************************
 
+        Used by `RequestOnConnSet`.
+
+    ***************************************************************************/
+
+    public bool active;
+
+    /***************************************************************************
+
         Serialised request context data, set when starting a new request and
         passed to all request handlers when the request fiber is started.
 
