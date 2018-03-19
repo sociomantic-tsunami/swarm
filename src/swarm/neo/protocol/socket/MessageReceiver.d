@@ -193,7 +193,7 @@ private class MessageReceiverBase
     ***************************************************************************/
 
     public void receive ( lazy Event wait,
-        void delegate ( MessageType type, Const!(void)[] msg_body ) dg,
+        scope void delegate ( MessageType type, Const!(void)[] msg_body ) dg,
         bool one_message = false )
     {
         scope (failure) this.buffer_content_end = 0;
@@ -613,9 +613,9 @@ unittest
         }
 
         // The magic string to stomp the rest of the message body with
-        const magic = "UNITTEST"[];
+        static immutable magic = "UNITTEST"[];
 
-        const msg_len_min = 60,
+        static immutable msg_len_min = 60,
               msg_len_max = 100;
 
         // The buffer containing the sequence of messages

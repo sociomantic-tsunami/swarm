@@ -44,7 +44,7 @@ public interface IRequestStats
 
         public double mean_handled_time_micros ( )
         {
-            return cast(double)this.total_time_micros / cast(double)this.count;
+            return cast(double)(&this).total_time_micros / cast(double)(&this).count;
         }
     }
 
