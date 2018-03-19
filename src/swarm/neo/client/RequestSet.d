@@ -42,6 +42,7 @@ public final class RequestSet: IRequestSet
     import swarm.neo.client.RequestOnConnSet;
     import swarm.neo.client.RequestHandlers;
     import swarm.neo.connection.YieldedRequestOnConns;
+    import swarm.neo.protocol.ProtocolError;
     import swarm.neo.util.TreeMap;
     import ocean.transition;
     import swarm.neo.AddrPort;
