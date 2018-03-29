@@ -239,6 +239,7 @@ template ClientCore ( )
             settings.conn_notifier, settings.auto_connect);
         this.request_resources = settings.request_resources;
 
+        this.enableSocketNoDelay();
         this.addNodes(config.nodes_file());
     }
 
