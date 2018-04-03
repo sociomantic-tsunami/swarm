@@ -467,7 +467,7 @@ public final class Connection: ConnectionBase
             // This may happen if the timer failed due to OS resource
             // exhaustion.
             log.error("connect: retry failed - {} @{}:{}",
-                getMsg(e), e.file, e.line);
+                e.message(), e.file, e.line);
             this.status_ = this.status_.Disconnected;
         }
 
@@ -544,7 +544,7 @@ public final class Connection: ConnectionBase
             debug ( SwarmConn )
                 Stdout.formatln("{}:{}: Connection.tryConnect() failed with "
                     "exception '{}' @{}:{}", node_address.address_bytes,
-                    node_address.port, getMsg(e), e.file, e.line);
+                    node_address.port, e.message(), e.file, e.line);
             return false;
         }
 

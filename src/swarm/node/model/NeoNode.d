@@ -955,7 +955,7 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
         catch (Exception e)
         {
             send_response("Error updating credentials: ");
-            send_response(getMsg(e));
+            send_response(e.message());
             send_response("\n");
         }
     }

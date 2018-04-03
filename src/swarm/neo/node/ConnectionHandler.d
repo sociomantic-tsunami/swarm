@@ -638,7 +638,7 @@ class ConnectionHandler : IConnectionHandler
         {
             log.error("{}:{}: Exception thrown from request handler: {} @ {}:{}",
                 this.connection.connected_client, rq.name,
-                getMsg(e), e.file, e.line);
+                e.message(), e.file, e.line);
             throw e;
         }
     }

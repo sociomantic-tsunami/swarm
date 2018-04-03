@@ -440,7 +440,7 @@ class ConnectProtocol: ISelectClient
         catch (Exception e)
         {
             Log.lookup(this.classinfo.name).error("unregisterEpoll: {} @{}:{}",
-                getMsg(e), e.file, e.line);
+                e.message(), e.file, e.line);
         }
     }
 
