@@ -165,7 +165,7 @@ delegate looks something like this imaginary example:
   void notifier ( NotificationUnion info, RequestArgs args )
   {
     // As info is a smart-union, we can tell which member is active.
-    with ( info.Active ) switch ( info.active ) 
+    with ( info.Active ) switch ( info.active )
     {
       case success: // example success notification
         Stdout.formatln("Request on channel {} succeeded and returned the "
