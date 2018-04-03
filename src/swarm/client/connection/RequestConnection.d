@@ -817,14 +817,14 @@ public abstract class IRequestConnection :
             // connection.
             debug ( SwarmClient ) Stderr.formatln("[{}:{}.{}]: Caught fiber kill exception: {}",
                 this.conn_pool.address, this.conn_pool.port,
-                this.id, getMsg(e));
+                this.id, e.message());
             throw e;
         }
         catch ( Exception e )
         {
             debug ( SwarmClient ) Stderr.formatln("[{}:{}.{}]: Caught exception in fiber: {}",
                 this.conn_pool.address, this.conn_pool.port,
-                this.id, getMsg(e));
+                this.id, e.message());
             this.exception = e;
         }
     }
@@ -931,7 +931,7 @@ public abstract class IRequestConnection :
         {
             debug ( SwarmClient ) Stderr.formatln("[{}:{}.{}]: An exception was caught while handling the request: {}",
                 this.conn_pool.address, this.conn_pool.port,
-                this.id, getMsg(this.exception));
+                this.id, this.exception.message());
             this.disconnect();
         }
     }

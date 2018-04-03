@@ -174,7 +174,7 @@ delegate looks something like this imaginary example:
 
       case error: // example I/O error notification
         Stderr.formatln("Request on channel {} failed due to error {} "
-            "on {}:{}", args.channel, getMsg(info.e),
+            "on {}:{}", args.channel, info.e.message(),
             cast(char[])info.node_addr.address_bytes, info.node_addr.port);
         break;
 

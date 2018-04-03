@@ -176,7 +176,7 @@ body
             }
             catch (Exception e)
             {
-                auto msg = getMsg(e);
+                auto msg = e.message();
                 stdio.fprintf(stdio.stderr, ("Error unregistering " ~
                         typeof(this).stringof ~
                         " from epoll: %.*s @%s:%u\n\0").ptr,
