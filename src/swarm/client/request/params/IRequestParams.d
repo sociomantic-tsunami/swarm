@@ -222,7 +222,7 @@ public abstract class IRequestParams
     ***************************************************************************/
 
     protected abstract void notify_
-        ( void delegate ( IRequestNotification ) info_dg );
+        ( scope void delegate ( IRequestNotification ) info_dg );
 
 
     /***************************************************************************
@@ -537,10 +537,10 @@ public abstract class IRequestParams
 
         ***********************************************************************/
 
-        static typeof(this) serialized ( void[] data )
+        static typeof((&this)) serialized ( void[] data )
         in
         {
-            alias typeof(*this) This;
+            alias typeof(*(&this)) This;
 
             /*
              * The static assertions don't actually belong in the scope of this
@@ -568,7 +568,7 @@ public abstract class IRequestParams
         }
         body
         {
-            return cast(typeof(this))data.ptr;
+            return cast(typeof((&this)))data.ptr;
         }
     }
 }
@@ -582,7 +582,7 @@ version (UnitTest)
         long data;
         mixin Serialize!();
 
-        protected override void notify_ ( void delegate ( IRequestNotification ) info_dg ) { }
+        protected override void notify_ ( scope void delegate ( IRequestNotification ) info_dg ) { }
         protected override void copy_ ( IRequestParams params ) { }
     }
 }
