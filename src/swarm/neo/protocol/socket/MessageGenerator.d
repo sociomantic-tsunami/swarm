@@ -59,36 +59,36 @@ struct IoVecMessage // MessageGenerator
     }
     body
     {
-        this.tracker.fields.length = 1 + static_fields.length + dynamic_fields.length;
-        enableStomping(this.tracker.fields);
+        (&this).tracker.fields.length = 1 + static_fields.length + dynamic_fields.length;
+        enableStomping((&this).tracker.fields);
 
-        with (this.tracker.fields[0])
+        with ((&this).tracker.fields[0])
         {
-            iov_base = &this.header;
-            iov_len  = this.header.sizeof;
+            iov_base = &(&this).header;
+            iov_len  = (&this).header.sizeof;
         }
 
-        this.tracker.length = this.header.sizeof;
+        (&this).tracker.length = (&this).header.sizeof;
 
-        foreach (i, ref iov_field; this.tracker.fields[1 .. 1 + static_fields.length])
+        foreach (i, ref iov_field; (&this).tracker.fields[1 .. 1 + static_fields.length])
         {
             iov_field.iov_base = static_fields[i].ptr;
             iov_field.iov_len = static_fields[i].length;
-            this.tracker.length += iov_field.iov_len;
+            (&this).tracker.length += iov_field.iov_len;
         }
 
-        foreach (i, ref iov_field; this.tracker.fields[1 + static_fields.length .. $])
+        foreach (i, ref iov_field; (&this).tracker.fields[1 + static_fields.length .. $])
         {
             iov_field.iov_base = dynamic_fields[i].ptr;
             iov_field.iov_len = dynamic_fields[i].length;
-            this.tracker.length += iov_field.iov_len;
+            (&this).tracker.length += iov_field.iov_len;
         }
 
-        this.header.type = type;
-        this.header.body_length = this.tracker.length - this.header.sizeof;
-        this.header.setParity();
+        (&this).header.type = type;
+        (&this).header.body_length = (&this).tracker.length - (&this).header.sizeof;
+        (&this).header.setParity();
 
-        return &this.tracker;
+        return &(&this).tracker;
     }
 
 
@@ -156,7 +156,7 @@ struct IoVecTracker
 
     invariant ( )
     {
-        assert(this.length || this.fields.length == 0);
+        assert((&this).length || (&this).fields.length == 0);
     }
 
     /***************************************************************************
@@ -185,22 +185,22 @@ struct IoVecTracker
     size_t advance ( size_t n )
     in
     {
-        assert(n <= this.length);
+        assert(n <= (&this).length);
     }
     body
     {
         if (n)
         {
-            if (n == this.length)
+            if (n == (&this).length)
             {
-                this.fields.length = 0;
-                enableStomping(this.fields);
+                (&this).fields.length = 0;
+                enableStomping((&this).fields);
             }
             else
             {
                 size_t bytes = 0;
 
-                foreach (i, ref field; this.fields)
+                foreach (i, ref field; (&this).fields)
                 {
                     bytes += field.iov_len;
                     if (bytes > n)
@@ -208,16 +208,16 @@ struct IoVecTracker
                         size_t d = bytes - n;
                         field.iov_base += field.iov_len - d;
                         field.iov_len  = d;
-                        this.fields = this.fields[i .. $];
-                        enableStomping(this.fields);
+                        (&this).fields = (&this).fields[i .. $];
+                        enableStomping((&this).fields);
                         break;
                     }
                 }
             }
-            this.length -= n;
+            (&this).length -= n;
         }
 
-        return this.length;
+        return (&this).length;
     }
 
     /***************************************************************************
@@ -233,42 +233,42 @@ struct IoVecTracker
     void moveTo ( ref void[] dst )
     out
     {
-        assert(this.length == dst.length);
+        assert((&this).length == dst.length);
 
         if (dst.length)
         {
-            assert(this.fields.length == 1);
-            with (this.fields[0]) assert(iov_base[0 .. iov_len] is dst);
+            assert((&this).fields.length == 1);
+            with ((&this).fields[0]) assert(iov_base[0 .. iov_len] is dst);
         }
     }
     body
     {
-        if (this.length)
+        if ((&this).length)
         {
             if (dst)
             {
                 dst.enableStomping();
-                dst.length = this.length;
+                dst.length = (&this).length;
             }
             else
             {
-                dst = new ubyte[this.length];
+                dst = new ubyte[(&this).length];
             }
 
             size_t start = 0;
 
-            foreach (field; this.fields)
+            foreach (field; (&this).fields)
             {
                 size_t end = start + field.iov_len;
                 dst[start .. end] = field.iov_base[0 .. field.iov_len];
                 start = end;
             }
 
-            assert(start == this.length);
+            assert(start == (&this).length);
 
-            this.fields = this.fields[0 .. 1];
-            enableStomping(this.fields);
-            this.fields[0] = iovec_const(dst.ptr, this.length);
+            (&this).fields = (&this).fields[0 .. 1];
+            enableStomping((&this).fields);
+            (&this).fields[0] = iovec_const(dst.ptr, (&this).length);
         }
         else if (dst)
         {

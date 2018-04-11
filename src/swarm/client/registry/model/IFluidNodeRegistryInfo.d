@@ -75,7 +75,7 @@ public interface IFluidNodeRegistryInfo : INodeRegistryInfo
 
         ***********************************************************************/
 
-        int opApply ( int delegate ( ref NodeItem,
+        int opApply ( scope int delegate ( ref NodeItem,
             ref INodeConnectionPoolInfo ) dg );
     }
 
@@ -92,6 +92,6 @@ public interface IFluidNodeRegistryInfo : INodeRegistryInfo
 
     ***************************************************************************/
 
-    void disabled_nodes ( void delegate ( IDisabledIterator ) dg );
+    void disabled_nodes ( scope void delegate ( IDisabledIterator ) dg );
 }
 
