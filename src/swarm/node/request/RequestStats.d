@@ -745,4 +745,327 @@ public class RequestStats
             stats.resetCounters();
         }
     }
+
+    /// Struct encapsulating API for tracking requests that are scheduled for
+    /// removal.
+    public struct ScheduledForRemoval
+    {
+        import core.stdc.time : time_t, time;
+        import ocean.io.digest.Fnv1;
+        import swarm.neo.AddrPort;
+
+        import ocean.util.log.Logger;
+
+        /// Logger for info on requests that are scheduled for removal.
+        private static Logger logger;
+
+        /// Static ctor. Initialises the logger.
+        static this ( )
+        {
+            logger = Log.lookup("ScheduledForRemoval");
+        }
+
+        /// Tracks information about when a specific client sent a specific
+        /// scheduled-for-removal request.
+        private struct ClientRequestInfo
+        {
+            /// Indicates whether any recent activity has occurred for this
+            /// client/request pair. (We use this flag to essentially remove
+            /// items from the map (`client_request_info`, below), rather than
+            /// using the memory-leaky AA remove operation.)
+            private bool recent_activity;
+
+            /// The number of requests of the specified type that are active for
+            /// the specified client.
+            private ulong active_count;
+
+            /// Timestamp of the last activity (start, stop) of this request
+            /// type for this client.
+            private time_t last_activity;
+
+            /// Seconds in an hour.
+            private static const one_hour = 60 * 60;
+
+            invariant ( )
+            {
+                if ( this.active_count )
+                    assert(this.recent_activity);
+            }
+
+            /*******************************************************************
+
+                Called when a request sent by this client has started to be
+                handled.
+
+                Params:
+                    now = current timestamp
+
+            *******************************************************************/
+
+            public void started ( time_t now )
+            {
+                this.hadActivity(now);
+                this.active_count++;
+            }
+
+            /*******************************************************************
+
+                Called when a request sent by this client has finished being
+                handled.
+
+                Params:
+                    now = current timestamp
+
+            *******************************************************************/
+
+            public void finished ( time_t now )
+            {
+                this.hadActivity(now);
+                verify(this.active_count > 0);
+                this.active_count--;
+            }
+
+            /*******************************************************************
+
+                Checks whether this client has had activity with this request
+                within the last hour.
+
+                Params:
+                    now = current timestamp
+
+                Returns:
+                    true if this client has had activity with this request
+                    within the last hour
+
+            *******************************************************************/
+
+            public bool active_this_hour ( time_t now )
+            {
+                return this.timeSinceLastActivity(now) <= one_hour;
+            }
+
+            /*******************************************************************
+
+                Checks whether this client had activity with this request in the
+                previous hour (i.e. > 1 hour ago, <= 2 hours ago), but no longer
+                has activity with this request. Note that this is an
+                edge-triggered condition, and will only return true once when
+                the condition is true.
+
+                Params:
+                    now = current timestamp
+
+                Returns:
+                    true if this client had activity with this request in the
+                    previous hour, but no longer
+
+            *******************************************************************/
+
+            public bool activity_stopped ( time_t now )
+            {
+                if ( this.recent_activity )
+                    return false;
+
+                auto time_since_activity = this.timeSinceLastActivity(now);
+                if ( time_since_activity > one_hour &&
+                    time_since_activity <= (2 * one_hour) )
+                {
+                    this.recent_activity = false;
+                    return true;
+                }
+                else
+                    return false;
+            }
+
+            /*******************************************************************
+
+                Called when any kind of activity for this request/client pair
+                occurs.
+
+                Params:
+                    now = current timestamp
+
+            *******************************************************************/
+
+            private void hadActivity ( time_t now )
+            {
+                this.last_activity = now;
+                this.recent_activity = true;
+            }
+
+            /*******************************************************************
+
+                Calculates the time since the last activity of this
+                request/client pair.
+
+                Params:
+                    now = current timestamp
+
+                Returns:
+                    time since the last activity. If a request is currently
+                    active, returns 0
+
+            *******************************************************************/
+
+            private time_t timeSinceLastActivity ( time_t now )
+            {
+                return this.active_count ? 0 : now - this.last_activity;
+            }
+        }
+
+        /// Encapsulates the name of a client and the name of a scheduled-for-
+        /// removal request that the client sent to the node.
+        private struct ClientRequest
+        {
+            /// Scheduled-for-removal request that was sent.
+            cstring request;
+
+            /// Name of the client that sent the request.
+            cstring client;
+
+            /*******************************************************************
+
+                Struct hashing function. Required for use as an AA key in D1 and
+                D2.
+
+                Returns:
+                    hash of this instance
+
+            *******************************************************************/
+
+            public hash_t toHash ( ) /* d1to2fix_inject: const */
+            {
+                return Fnv1a.combined(this.request, this.client);
+            }
+
+            /*******************************************************************
+
+                Struct equality function. Required for use as an AA key in D2.
+
+                Params:
+                    rhs = other instance to compare against
+
+                Returns:
+                    true if rhs is equal to this instance
+
+            *******************************************************************/
+
+            mixin (genOpEquals("
+            {
+                return this.request == rhs.request && this.client == rhs.client;
+            }
+            "));
+
+            /*******************************************************************
+
+                Struct comparison function. Required for use as an AA key in D1.
+
+                TODO: can be removed, when we ditch D1.
+
+                Params:
+                    rhs = other instance to compare against
+
+                Returns:
+                    0 if rhs is equal to this instance, 1 otherwise
+
+            *******************************************************************/
+
+            mixin (genOpCmp("
+            {
+                return this.request != rhs.request || this.client != rhs.client;
+            }
+            "));
+        }
+
+        /// Per-client/request information map.
+        private ClientRequestInfo[ClientRequest] client_request_info;
+
+        /***********************************************************************
+
+            Called when a scheduled-for-removal request starts to be handled.
+
+            Params:
+                rq = name of request
+                client = name of client that sent the request
+                addr = remote addr/port of client
+
+        ***********************************************************************/
+
+        public void started ( cstring rq, cstring client, AddrPort addr )
+        {
+            auto now = time(null);
+            auto cl_rq = ClientRequest(client, rq);
+            auto info = cl_rq in this.client_request_info;
+            if ( info is null )
+            {
+                this.client_request_info[ClientRequest(client.dup, rq.dup)]
+                    = ClientRequestInfo.init;
+                info = cl_rq in this.client_request_info;
+            }
+            assert(info !is null);
+
+            // Warn the first time a client sends an old request version (and
+            // again every hour).
+            if ( !info.active_this_hour(now) )
+                logger.warn("Client '{}' on {}:{} sent an old version of request '{}'",
+                    client, addr.address_bytes, addr.port, rq);
+
+            info.started(now);
+        }
+
+        /***********************************************************************
+
+            Called when a scheduled-for-removal request stop being handled.
+
+            Params:
+                rq = name of request
+                client = name of client that sent the request
+
+        ***********************************************************************/
+
+        public void finished ( cstring rq, cstring client )
+        {
+            auto now = time(null);
+            auto cl_rq = ClientRequest(client, rq);
+            auto info = cl_rq in this.client_request_info;
+            verify(info !is null);
+
+            info.finished(now);
+        }
+
+        /***********************************************************************
+
+            Performs two functions:
+                1. Logs when no scheduled-for-removal requests have been
+                   handled for a specific client in the last hour.
+                2. Returns whether a scheduled-for-removal request has been
+                   handled for *any* client in the last hour.
+
+            Returns:
+                true if a scheduled-for-removal request has been handled for
+                any client in the last hour; false otherwise
+
+        ***********************************************************************/
+
+        public bool log ( )
+        {
+            auto now = time(null);
+
+            // Log when a client has no activity with a request for an hour.
+            bool activity_in_last_hour;
+            foreach ( names, ref info; this.client_request_info )
+            {
+                if ( info.active_this_hour(now) )
+                    activity_in_last_hour = true;
+                else if ( info.activity_stopped(now) )
+                    logger.info("Client '{}' has had no activity with old versions of request '{}' in the last hour",
+                        names.request, names.client);
+            }
+
+            return activity_in_last_hour;
+        }
+    }
+
+    /// API for tracking stats about request that are scheduled for removal.
+    public ScheduledForRemoval scheduled_for_removal;
 }

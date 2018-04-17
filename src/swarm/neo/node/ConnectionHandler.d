@@ -553,6 +553,12 @@ class ConnectionHandler : IConnectionHandler
         if ( rq.timing )
             timer.start();
 
+        if ( rq.scheduled_for_removal )
+            this.shared_params.node_info.neo_request_stats
+                .scheduled_for_removal
+                .started(rq.name, this.connection.connected_client,
+                    this.connection.remote_address);
+
         scope ( exit )
         {
             // Inform stats tracker that this request has finished.
@@ -562,6 +568,11 @@ class ConnectionHandler : IConnectionHandler
             else
                 this.shared_params.node_info.neo_request_stats
                     .finished(rq.name);
+
+            if ( rq.scheduled_for_removal )
+                this.shared_params.node_info.neo_request_stats
+                    .scheduled_for_removal
+                    .finished(rq.name, this.connection.connected_client);
         }
 
         try
