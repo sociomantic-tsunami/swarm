@@ -109,6 +109,12 @@ class ConnectionHandler : IConnectionHandler
             /// Indicates whether timing stats should be gathered about the
             /// request.
             bool timing;
+
+            /// Indicates that this request is scheduled for removal. The node
+            /// will handle it, but will log a warning.
+            // (Deliberately not named as a deprecation to avoid messing up
+            // searches for that keyword.)
+            bool scheduled_for_removal;
         }
 
         /// Map of request info by request/version code.
@@ -142,6 +148,7 @@ class ConnectionHandler : IConnectionHandler
             ri.name = idup(name);
             ri.class_info = class_info;
             ri.timing = timing;
+            ri.scheduled_for_removal = false;
             this.request_info[command] = ri;
             this.supported_requests[command.code] = true;
         }
@@ -177,6 +184,15 @@ class ConnectionHandler : IConnectionHandler
                 ri.timing = Request.timing;
             else
                 ri.timing = timing;
+
+            // In the next major release, the presence of a
+            // `scheduled_for_removal` field in request structs can be made
+            // obligatory and this static if removed. (Obligatory search term:
+            // deprecated.)
+            static if ( hasMember!(Request, "scheduled_for_removal") )
+                ri.scheduled_for_removal = Request.scheduled_for_removal;
+            else
+                ri.scheduled_for_removal = false;
 
             this.request_info[Request.command] = ri;
             this.supported_requests[Request.command.code] = true;
