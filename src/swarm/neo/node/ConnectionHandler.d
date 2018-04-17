@@ -68,6 +68,7 @@ class ConnectionHandler : IConnectionHandler
     public struct RequestMap
     {
         import swarm.node.request.RequestStats;
+        import ocean.meta.traits.Aggregates : hasMember;
 
         /***********************************************************************
 
@@ -154,7 +155,9 @@ class ConnectionHandler : IConnectionHandler
                     and is expected to have a public, static member called
                     `command`, of type `Command`
                 timing = if true, timing stats about request of this type are
-                    tracked
+                    tracked. Use of this argument is deprecated. If a field
+                    named `timing` of type bool is present in Request, that
+                    value is used instead of this argument
 
         ***********************************************************************/
 
@@ -166,7 +169,15 @@ class ConnectionHandler : IConnectionHandler
             ri.old_handler = false;
             ri.name = Request.name;
             ri.class_info = Request.classinfo;
-            ri.timing = timing;
+
+            // In the next major release, the presence of a `timing` field in
+            // request structs can be made obligatory and this static if
+            // removed. (Obligatory search term: deprecated.)
+            static if ( hasMember!(Request, "timing") )
+                ri.timing = Request.timing;
+            else
+                ri.timing = timing;
+
             this.request_info[Request.command] = ri;
             this.supported_requests[Request.command.code] = true;
         }
