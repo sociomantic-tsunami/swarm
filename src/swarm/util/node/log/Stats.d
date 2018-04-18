@@ -131,6 +131,7 @@ private class NodeStatsTemplate ( Logger = StatsLog )
             return;
 
         this.logGlobalStats();
+        this.logScheduledForRemovalRequestStats(this.node.neo_request_stats);
         this.logRequestStats!("request")(this.node.request_stats);
         this.logRequestStats!("neo_request")(this.node.neo_request_stats);
         this.logActionStats();
@@ -178,6 +179,31 @@ private class NodeStatsTemplate ( Logger = StatsLog )
                 / this.node.neo_connection_limit);
         }
 
+        this.stats_log.add(stats);
+    }
+
+    /***************************************************************************
+
+        Logs stats about the use of neo requests that are scheduled for removal.
+
+        TODO: when support for the legacy protocol is removed, this method can
+        be melded into logGlobalStats().
+
+        Params:
+            request_stats = request stats tracker to log from
+
+    ***************************************************************************/
+
+    private void logScheduledForRemovalRequestStats ( RequestStats request_stats )
+    {
+        struct ScheduledForRemovalRequestStats
+        {
+            uint old_request_versions_in_use;
+        }
+        ScheduledForRemovalRequestStats stats;
+
+        stats.old_request_versions_in_use =
+            request_stats.scheduled_for_removal.log() ? 1 : 0;
         this.stats_log.add(stats);
     }
 
@@ -418,7 +444,7 @@ unittest
         stats.log();
         test!("==")(log.output,
             "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 " ~
-            "handling_neo_connections:0 handling_neo_connections_pcnt:0 ");
+            "handling_neo_connections:0 handling_neo_connections_pcnt:0 old_request_versions_in_use:0 ");
     }
 
     // One request. (Note that it's inconvenient to test with multiple requests,
@@ -432,7 +458,7 @@ unittest
         stats.log();
         test!("==")(log.output,
             "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 " ~
-            "handling_neo_connections:0 handling_neo_connections_pcnt:0 " ~
+            "handling_neo_connections:0 handling_neo_connections_pcnt:0 old_request_versions_in_use:0 " ~
             "request/Put/max_active:0 request/Put/handled:0 " ~
             "request/Put/mean_handled_time_micros:-nan request/Put/handled_10_micros:0 " ~
             "request/Put/handled_100_micros:0 request/Put/handled_1_ms:0 " ~
@@ -451,7 +477,7 @@ unittest
         stats.log();
         test!("==")(log.output,
             "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 " ~
-            "handling_neo_connections:0 handling_neo_connections_pcnt:0 " ~
+            "handling_neo_connections:0 handling_neo_connections_pcnt:0 old_request_versions_in_use:0 " ~
             "action/written/records:0 action/written/bytes:0 ");
     }
 
@@ -464,7 +490,7 @@ unittest
         stats.log();
         test!("==")(log.output,
             "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 " ~
-            "handling_neo_connections:0 handling_neo_connections_pcnt:0 " ~
+            "handling_neo_connections:0 handling_neo_connections_pcnt:0 old_request_versions_in_use:0 " ~
             "request/Put/max_active:0 request/Put/handled:0 " ~
             "request/Put/mean_handled_time_micros:-nan request/Put/handled_10_micros:0 " ~
             "request/Put/handled_100_micros:0 request/Put/handled_1_ms:0 " ~
@@ -493,14 +519,14 @@ unittest
         stats.log();
         test!("==")(log.output,
             "bytes_sent:23 bytes_received:23 handling_connections:0 handling_connections_pcnt:0 " ~
-            "handling_neo_connections:0 handling_neo_connections_pcnt:0 ");
+            "handling_neo_connections:0 handling_neo_connections_pcnt:0 old_request_versions_in_use:0 ");
 
         // Test that the counters have been reset
         log.output.length = 0;
         stats.log();
         test!("==")(log.output,
             "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 " ~
-            "handling_neo_connections:0 handling_neo_connections_pcnt:0 ");
+            "handling_neo_connections:0 handling_neo_connections_pcnt:0 old_request_versions_in_use:0 ");
     }
 
     // Test for action stats
@@ -513,7 +539,7 @@ unittest
         stats.log();
         test!("==")(log.output,
             "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 " ~
-            "handling_neo_connections:0 handling_neo_connections_pcnt:0 " ~
+            "handling_neo_connections:0 handling_neo_connections_pcnt:0 old_request_versions_in_use:0 " ~
             "action/written/records:1 action/written/bytes:23 ");
 
         // Test that the action stats have been reset
@@ -521,7 +547,7 @@ unittest
         stats.log();
         test!("==")(log.output,
             "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 " ~
-            "handling_neo_connections:0 handling_neo_connections_pcnt:0 " ~
+            "handling_neo_connections:0 handling_neo_connections_pcnt:0 old_request_versions_in_use:0 " ~
             "action/written/records:0 action/written/bytes:0 ");
     }
 
@@ -536,7 +562,7 @@ unittest
         stats.log();
         test!("==")(log.output,
             "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 " ~
-            "handling_neo_connections:0 handling_neo_connections_pcnt:0 " ~
+            "handling_neo_connections:0 handling_neo_connections_pcnt:0 old_request_versions_in_use:0 " ~
             "request/Put/max_active:1 request/Put/handled:0 " ~
             "request/Put/mean_handled_time_micros:-nan request/Put/handled_10_micros:0 " ~
             "request/Put/handled_100_micros:0 request/Put/handled_1_ms:0 " ~
@@ -554,7 +580,7 @@ unittest
         stats.log();
         test!("==")(log.output,
             "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 " ~
-            "handling_neo_connections:0 handling_neo_connections_pcnt:0 " ~
+            "handling_neo_connections:0 handling_neo_connections_pcnt:0 old_request_versions_in_use:0 " ~
             "request/Put/max_active:1 request/Put/handled:1 " ~
             "request/Put/mean_handled_time_micros:0.00 request/Put/handled_10_micros:0 " ~
             "request/Put/handled_100_micros:0 request/Put/handled_1_ms:0 " ~
@@ -572,7 +598,7 @@ unittest
         stats.log();
         test!("==")(log.output,
             "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 " ~
-            "handling_neo_connections:0 handling_neo_connections_pcnt:0 " ~
+            "handling_neo_connections:0 handling_neo_connections_pcnt:0 old_request_versions_in_use:0 " ~
             "request/Put/max_active:0 request/Put/handled:0 " ~
             "request/Put/mean_handled_time_micros:-nan request/Put/handled_10_micros:0 " ~
             "request/Put/handled_100_micros:0 request/Put/handled_1_ms:0 " ~
@@ -590,7 +616,7 @@ unittest
         stats.log();
         test!("==")(log.output,
             "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 " ~
-            "handling_neo_connections:0 handling_neo_connections_pcnt:0 " ~
+            "handling_neo_connections:0 handling_neo_connections_pcnt:0 old_request_versions_in_use:0 " ~
             "request/Put/max_active:0 request/Put/handled:0 " ~
             "request/Put/mean_handled_time_micros:-nan request/Put/handled_10_micros:0 " ~
             "request/Put/handled_100_micros:0 request/Put/handled_1_ms:0 " ~
@@ -607,7 +633,7 @@ unittest
         stats.log();
         test!("==")(log.output,
             "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 " ~
-            "handling_neo_connections:0 handling_neo_connections_pcnt:0 " ~
+            "handling_neo_connections:0 handling_neo_connections_pcnt:0 old_request_versions_in_use:0 " ~
             "request/Put/max_active:0 request/Put/handled:0 " ~
             "request/Put/mean_handled_time_micros:-nan request/Put/handled_10_micros:0 " ~
             "request/Put/handled_100_micros:0 request/Put/handled_1_ms:0 " ~
@@ -626,7 +652,7 @@ unittest
         stats.log();
         test!("==")(log.output,
             "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 " ~
-            "handling_neo_connections:0 handling_neo_connections_pcnt:0 " ~
+            "handling_neo_connections:0 handling_neo_connections_pcnt:0 old_request_versions_in_use:0 " ~
             "request/Put/max_active:1 request/Put/handled:1 " ~
             "request/Put/mean_handled_time_micros:23.00 request/Put/handled_10_micros:0 " ~
             "request/Put/handled_100_micros:1 request/Put/handled_1_ms:0 " ~
@@ -645,7 +671,7 @@ unittest
         stats.log();
         test!("==")(log.output,
             "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 " ~
-            "handling_neo_connections:0 handling_neo_connections_pcnt:0 " ~
+            "handling_neo_connections:0 handling_neo_connections_pcnt:0 old_request_versions_in_use:0 " ~
             "request/Put/max_active:0 request/Put/handled:0 " ~
             "request/Put/mean_handled_time_micros:-nan request/Put/handled_10_micros:0 " ~
             "request/Put/handled_100_micros:0 request/Put/handled_1_ms:0 " ~
@@ -670,7 +696,7 @@ unittest
         stats.log();
         test!("==")(log.output,
             "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 " ~
-            "handling_neo_connections:0 handling_neo_connections_pcnt:0 " ~
+            "handling_neo_connections:0 handling_neo_connections_pcnt:0 old_request_versions_in_use:0 " ~
             "neo_request/Put/max_active:1 neo_request/Put/handled:0 ");
 
         // Finish a neo request
@@ -679,7 +705,7 @@ unittest
         stats.log();
         test!("==")(log.output,
             "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 " ~
-            "handling_neo_connections:0 handling_neo_connections_pcnt:0 " ~
+            "handling_neo_connections:0 handling_neo_connections_pcnt:0 old_request_versions_in_use:0 " ~
             "neo_request/Put/max_active:1 neo_request/Put/handled:1 ");
     }
 }
@@ -702,9 +728,8 @@ unittest
         test!("==")(log.output,
             "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 " ~
             "handling_neo_connections:0 handling_neo_connections_pcnt:0 " ~
-            "total_bytes:0 total_records:0 ");
+            "total_bytes:0 total_records:0 old_request_versions_in_use:0 ");
     }
-
     // One channel.
     {
         auto node = new TestChannelsNode([], [], [], ["test"], []);
@@ -716,6 +741,6 @@ unittest
             "bytes_sent:0 bytes_received:0 handling_connections:0 handling_connections_pcnt:0 " ~
             "handling_neo_connections:0 handling_neo_connections_pcnt:0 " ~
             "total_bytes:0 total_records:0 " ~
-            "channel/test/bytes:0 channel/test/records:0 ");
+            "channel/test/bytes:0 channel/test/records:0 old_request_versions_in_use:0 ");
     }
 }
