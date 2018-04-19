@@ -160,7 +160,7 @@ public scope class IRequestNotification
 
     ***************************************************************************/
 
-    private const istring invalid_code = "INVALID";
+    private static immutable istring invalid_code = "INVALID";
 
 
     /***************************************************************************
