@@ -149,8 +149,8 @@ public class RequestScheduler
 
     ***************************************************************************/
 
-    public void schedule ( IRequestParams params, AssignParamsDg assign_params,
-        AssignScheduledRequestDg assign_scheduled_request, uint schedule_ms )
+    public void schedule ( IRequestParams params, scope AssignParamsDg assign_params,
+        scope AssignScheduledRequestDg assign_scheduled_request, uint schedule_ms )
     {
         if ( schedule_ms == 0 )
         {
@@ -197,7 +197,7 @@ public class RequestScheduler
     ***************************************************************************/
 
     protected bool scheduleParams ( IRequestParams params,
-        AssignScheduledRequestDg assign_scheduled_request, uint schedule_ms )
+        scope AssignScheduledRequestDg assign_scheduled_request, uint schedule_ms )
     {
         try
         {

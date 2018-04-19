@@ -51,7 +51,7 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
 
     ***************************************************************************/
 
-    public const FiberResumeCodeReconnected = FiberResumeCode.min - 1;
+    public static immutable FiberResumeCodeReconnected = FiberResumeCode.min - 1;
 
     /***************************************************************************
 
@@ -91,7 +91,7 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
 
         ***********************************************************************/
 
-        int iterateRoundRobin ( int delegate ( Connection conn ) dg );
+        int iterateRoundRobin ( scope int delegate ( Connection conn ) dg );
     }
 
     /***************************************************************************
@@ -223,7 +223,7 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
 
         ***********************************************************************/
 
-        public int opApply ( int delegate ( ref EventDispatcher ed ) dg )
+        public int opApply ( scope int delegate ( ref EventDispatcher ed ) dg )
         {
             assert(this.outer.connection is null,
                    typeof(this).stringof ~ ".opApply: " ~
@@ -433,7 +433,7 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
     ***************************************************************************/
 
     public void start ( RequestId id, void[] context_blob,
-        HandlerFinishedDg finished_dg, SingleNodeHandler handler )
+        scope HandlerFinishedDg finished_dg, scope SingleNodeHandler handler )
     in
     {
         assert(!this.handler.active);
@@ -465,8 +465,8 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
     ***************************************************************************/
 
     public void start ( RequestId id, void[] context_blob,
-        void delegate ( ) start_on_new_connection,
-        HandlerFinishedDg finished_dg, MultiNodeHandler handler )
+        scope void delegate ( ) start_on_new_connection,
+        scope HandlerFinishedDg finished_dg, scope MultiNodeHandler handler )
     in
     {
         assert(!this.handler.active);
@@ -497,7 +497,7 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
     ***************************************************************************/
 
     public void start ( RequestId id, void[] context_blob,
-        HandlerFinishedDg finished_dg, AllNodesHandler handler, Connection connection )
+        scope HandlerFinishedDg finished_dg, scope AllNodesHandler handler, Connection connection )
     in
     {
         assert(!this.handler.active);
@@ -527,7 +527,7 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
     **************************************************************************/
 
     public void start ( RequestId id, void[] context_blob,
-        HandlerFinishedDg finished_dg, RoundRobinHandler handler )
+        scope HandlerFinishedDg finished_dg, scope RoundRobinHandler handler )
     in
     {
         assert(!this.handler.active);
@@ -623,7 +623,7 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
 
     ***************************************************************************/
 
-    override public void getPayloadForSending ( void delegate ( in void[][] payload ) send )
+    override public void getPayloadForSending ( scope void delegate ( in void[][] payload ) send )
     {
         super.getPayloadForSending(send);
     }
@@ -706,7 +706,7 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
     ***************************************************************************/
 
     private void setupRequest ( RequestId id, void[] context_blob,
-        HandlerFinishedDg finished_dg )
+        scope HandlerFinishedDg finished_dg )
     {
         this.request_id = id;
         this.request_context = context_blob;
@@ -729,8 +729,8 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
     ***************************************************************************/
 
     private void setupRequest ( RequestId id, void[] context_blob,
-        void delegate ( ) start_on_new_connection,
-        HandlerFinishedDg finished_dg )
+        scope void delegate ( ) start_on_new_connection,
+        scope HandlerFinishedDg finished_dg )
     {
         this.request_id = id;
         this.request_context = context_blob;
@@ -772,7 +772,7 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
     ***************************************************************************/
 
     private bool useNode ( AddrPort node_address,
-        void delegate ( EventDispatcher ed ) dg )
+        scope void delegate ( EventDispatcher ed ) dg )
     {
         assert(this.connection is null,
                typeof(this).stringof ~ ".useNode: " ~
