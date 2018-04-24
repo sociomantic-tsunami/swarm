@@ -39,7 +39,7 @@ public class GetAllImpl_v0 : IRequestHandler
 
     /// Code that suspended writer fiber waits for when the request is
     /// suspended.
-    const ResumeSuspendedFiber = 1;
+    static immutable ResumeSuspendedFiber = 1;
 
     /// Fiber which handles iterating and sending records to the client.
     private class Writer
