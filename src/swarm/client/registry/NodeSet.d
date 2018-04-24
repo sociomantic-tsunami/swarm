@@ -205,7 +205,7 @@ public class NodeSet
 
     ***************************************************************************/
 
-    public this ( size_t expected_nodes, ModifiedDg modified = null )
+    public this ( size_t expected_nodes, scope ModifiedDg modified = null )
     {
         this.map_ = new ConnPoolByNode(expected_nodes);
         this.modified_ = modified;

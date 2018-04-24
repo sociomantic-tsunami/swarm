@@ -146,18 +146,18 @@ struct SuspendableRequest
         ***********************************************************************/
 
         public bool setDesiredState ( RequestState new_state,
-            void delegate ( ) begin_state_change, void delegate ( ) state_changed )
+            scope void delegate ( ) begin_state_change, scope void delegate ( ) state_changed )
         {
             // It's illegal to change the state while still waiting for an ACK
             // on the last state change.
-            if ( this.waiting_for_ack_count )
+            if ( (&this).waiting_for_ack_count )
                 return false;
 
-            this.desired_state = new_state;
+            (&this).desired_state = new_state;
 
             // If one or more connections are ready to send a state change
             // message to the node, we initiate this.
-            if ( this.initialised_count )
+            if ( (&this).initialised_count )
             {
                 begin_state_change();
             }
@@ -289,8 +289,8 @@ struct SuspendableRequest
     }
     body
     {
-        this.conn = conn;
-        this.shared_working = shared_working;
+        (&this).conn = conn;
+        (&this).shared_working = shared_working;
     }
 
     /***************************************************************************
@@ -312,15 +312,15 @@ struct SuspendableRequest
     ***************************************************************************/
 
     public State establishConnection (
-        bool delegate ( int resume_code ) resumed_by_controller )
+        scope bool delegate ( int resume_code ) resumed_by_controller )
     {
         while ( true )
         {
-            int resume_code = this.conn.waitForReconnect();
+            int resume_code = (&this).conn.waitForReconnect();
             if ( resumed_by_controller(resume_code) )
             {
-                if ( this.shared_working.desired_state ==
-                    this.shared_working.desired_state.Stopped )
+                if ( (&this).shared_working.desired_state ==
+                    (&this).shared_working.desired_state.Stopped )
                     // The user requested to stop this request, so we don't
                     // need to wait for a reconnection any more.
                     return State.Exit;
@@ -368,41 +368,41 @@ struct SuspendableRequest
     ***************************************************************************/
 
     public State initialiseRequest (
-        void delegate ( RequestOnConn.EventDispatcherAllNodes.Payload ) set_payload,
-        bool delegate ( StatusCode ) received_status_ok,
-        void delegate ( ) first_initialisation )
+        scope void delegate ( RequestOnConn.EventDispatcherAllNodes.Payload ) set_payload,
+        scope bool delegate ( StatusCode ) received_status_ok,
+        scope void delegate ( ) first_initialisation )
     in
     {
-        assert(!this.ready_for_state_change);
+        assert(!(&this).ready_for_state_change);
     }
     out ( state )
     {
         if (state == state.Exit)
-            assert(!this.ready_for_state_change);
+            assert(!(&this).ready_for_state_change);
         else
-            assert(this.ready_for_state_change);
+            assert((&this).ready_for_state_change);
     }
     body
     {
         // Memorize the state that will be sent to the node in order to detect a
         // requested state change in one of the delegates.
-        auto last_state = this.shared_working.desired_state;
+        auto last_state = (&this).shared_working.desired_state;
 
         try
         {
             // establishConnection() should guarantee we're already connected
-            assert(this.conn.waitForReconnect() == 0);
+            assert((&this).conn.waitForReconnect() == 0);
 
             // We know that the connection is up, so from now on we count this
             // request-on-conn as being in the state of waiting for an
             // acknowledgement from the node (the status code, in this case).
-            this.shared_working.waiting_for_ack_count++;
+            (&this).shared_working.waiting_for_ack_count++;
 
             // Send request initialisation data to the node
-            this.conn.send(set_payload);
+            (&this).conn.send(set_payload);
 
             // Receive status from node and stop the request if not Ok
-            auto status = this.conn.receiveValue!(StatusCode)();
+            auto status = (&this).conn.receiveValue!(StatusCode)();
             if ( !received_status_ok(status) )
             {
                 return State.Exit;
@@ -412,25 +412,25 @@ struct SuspendableRequest
         {
             // After receiving the status (whether an error or OK), this
             // request-on-conn is no longer counted as waiting for an ack.
-            assert(this.shared_working.waiting_for_ack_count);
-            --this.shared_working.waiting_for_ack_count;
+            assert((&this).shared_working.waiting_for_ack_count);
+            --(&this).shared_working.waiting_for_ack_count;
         }
 
         // Now we're ready to receive records from the node or to handle state
         // change requests from the user via the controller.
-        this.setReadyForStateChange();
+        (&this).setReadyForStateChange();
 
         // Handle first initialisation notification
-        if ( !this.shared_working.first_initialisation &&
-            !this.shared_working.waiting_for_ack_count )
+        if ( !(&this).shared_working.first_initialisation &&
+            !(&this).shared_working.waiting_for_ack_count )
         {
-            this.shared_working.first_initialisation = true;
+            (&this).shared_working.first_initialisation = true;
             first_initialisation();
         }
 
         // Return the next state, handling the case where the desired state of
         // the request has changed since the start of this method.
-        return (last_state == this.shared_working.desired_state)
+        return (last_state == (&this).shared_working.desired_state)
             ? State.Receiving
             : State.RequestingStateChange;
     }
@@ -454,13 +454,13 @@ struct SuspendableRequest
 
     ***************************************************************************/
 
-    public State receive ( ReceivedMessageDg handle_received_message )
+    public State receive ( scope ReceivedMessageDg handle_received_message )
     {
         // Memorize the current desired state in order to detect a requested
         // state change in the delegate.
-        auto last_state = this.shared_working.desired_state;
+        auto last_state = (&this).shared_working.desired_state;
         ReceivedMessageAction msg_action;
-        int resume_code = this.conn.receiveAndHandleEvents(
+        int resume_code = (&this).conn.receiveAndHandleEvents(
             ( in void[] received )
             {
                 msg_action = handle_received_message(received);
@@ -476,12 +476,12 @@ struct SuspendableRequest
                 case Continue:
                     break;
                 default:
-                    throw this.conn.shutdownWithProtocolError(
+                    throw (&this).conn.shutdownWithProtocolError(
                         "Unexpected message type while receiving");
             }
         }
 
-        return (last_state == this.shared_working.desired_state)
+        return (last_state == (&this).shared_working.desired_state)
             ? State.Receiving
             : State.RequestingStateChange;
     }
@@ -517,30 +517,30 @@ struct SuspendableRequest
     ***************************************************************************/
 
     public State requestStateChange ( ubyte control_msg,
-        ReceivedMessageDg handle_received_message, void delegate ( ) state_changed )
+        scope ReceivedMessageDg handle_received_message, scope void delegate ( ) state_changed )
     {
-        this.shared_working.waiting_for_ack_count++;
+        (&this).shared_working.waiting_for_ack_count++;
 
         // Memorize the state that will be sent to the node in order to detect a
         // requested state change in the state_change delegate.
-        auto signaled_state = this.shared_working.desired_state;
+        auto signaled_state = (&this).shared_working.desired_state;
 
         try
         {
             // If throwing, set this request not ready for a state change
             // *before* calling state_change() in the `finally` clause, where
             // the user may request a state change.
-            scope (failure) this.setNotReadyForStateChange();
+            scope (failure) (&this).setNotReadyForStateChange();
 
-            if ( !this.sendStateChangeMessage(control_msg, handle_received_message) )
+            if ( !(&this).sendStateChangeMessage(control_msg, handle_received_message) )
                 return State.Exit;
-            if ( !this.waitForAck(handle_received_message) )
+            if ( !(&this).waitForAck(handle_received_message) )
                 return State.Exit;
         }
         finally
         {
-            assert(this.shared_working.waiting_for_ack_count);
-            if ( !--this.shared_working.waiting_for_ack_count )
+            assert((&this).shared_working.waiting_for_ack_count);
+            if ( !--(&this).shared_working.waiting_for_ack_count )
             {
                 // If this was the last request-on-conn waiting for the
                 // acknowledgement, inform the caller that the requested control
@@ -551,7 +551,7 @@ struct SuspendableRequest
 
         // Handle further state change requests that happened during this
         // method.
-        if ( this.shared_working.desired_state != signaled_state )
+        if ( (&this).shared_working.desired_state != signaled_state )
             return State.RequestingStateChange;
 
         return (signaled_state == signaled_state.Stopped)
@@ -581,7 +581,7 @@ struct SuspendableRequest
     ***************************************************************************/
 
     private bool sendStateChangeMessage ( ubyte control_msg,
-        ReceivedMessageDg handle_received_message )
+        scope ReceivedMessageDg handle_received_message )
     {
         bool send_interrupted;
         do
@@ -593,7 +593,7 @@ struct SuspendableRequest
             // SharedWorking.setDesiredState().)
             ReceivedMessageAction msg_action;
             send_interrupted = false;
-            this.conn.sendReceive(
+            (&this).conn.sendReceive(
                 ( in void[] received )
                 {
                     send_interrupted = true;
@@ -604,7 +604,7 @@ struct SuspendableRequest
                     payload.add(control_msg);
                 }
             );
-            this.conn.flush();
+            (&this).conn.flush();
 
             if ( !send_interrupted ) // The control message was sent
                 break;
@@ -616,7 +616,7 @@ struct SuspendableRequest
                 case Continue:
                     break;
                 default:
-                    throw this.conn.shutdownWithProtocolError(
+                    throw (&this).conn.shutdownWithProtocolError(
                         "Unexpected message type while sending state change");
             }
         }
@@ -645,13 +645,13 @@ struct SuspendableRequest
     ***************************************************************************/
 
     private bool waitForAck (
-        ReceivedMessageDg handle_received_message )
+        scope ReceivedMessageDg handle_received_message )
     {
         bool ack;
         do
         {
             ReceivedMessageAction msg_action;
-            int resume_code = this.conn.receiveAndHandleEvents(
+            int resume_code = (&this).conn.receiveAndHandleEvents(
                 ( in void[] received )
                 {
                     msg_action = handle_received_message(received);
@@ -669,7 +669,7 @@ struct SuspendableRequest
                     ack = true;
                     break;
                 default:
-                    throw this.conn.shutdownWithProtocolError(
+                    throw (&this).conn.shutdownWithProtocolError(
                         "Unexpected message type while awaiting ACK");
             }
         }
@@ -688,8 +688,8 @@ struct SuspendableRequest
 
     private void setReadyForStateChange ( )
     {
-        this.ready_for_state_change = true;
-        this.shared_working.initialised_count++;
+        (&this).ready_for_state_change = true;
+        (&this).shared_working.initialised_count++;
     }
 
     /***************************************************************************
@@ -708,11 +708,11 @@ struct SuspendableRequest
 
     public void setNotReadyForStateChange ( )
     {
-        if ( this.ready_for_state_change )
+        if ( (&this).ready_for_state_change )
         {
-            assert(this.shared_working.initialised_count);
-            this.shared_working.initialised_count--;
-            this.ready_for_state_change = false;
+            assert((&this).shared_working.initialised_count);
+            (&this).shared_working.initialised_count--;
+            (&this).ready_for_state_change = false;
         }
     }
 }

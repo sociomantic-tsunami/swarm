@@ -156,8 +156,8 @@ public class IListeners ( Data ... )
         public void add ( Listener listener )
         {
             bool added;
-            this.listeners.put(cast(ulong)cast(void*)listener, added);
-            this.n += added;
+            (&this).listeners.put(cast(ulong)cast(void*)listener, added);
+            (&this).n += added;
         }
 
 
@@ -172,13 +172,13 @@ public class IListeners ( Data ... )
 
         public Listener next ( )
         {
-            if (this.current is null)
-                this.current = this.listeners.getBoundary!()();
+            if ((&this).current is null)
+                (&this).current = (&this).listeners.getBoundary!()();
 
-            if (this.current !is null)
+            if ((&this).current !is null)
             {
-                auto listener = cast(Listener)cast(void*)(this.current.key);
-                this.current = this.current.next;
+                auto listener = cast(Listener)cast(void*)((&this).current.key);
+                (&this).current = (&this).current.next;
                 return listener;
             }
             else
@@ -197,12 +197,12 @@ public class IListeners ( Data ... )
 
         public Listener remove ( Listener l )
         {
-            if (auto node = (cast(ulong)cast(void*)l) in this.listeners)
+            if (auto node = (cast(ulong)cast(void*)l) in (&this).listeners)
             {
-                if (node is this.current)
-                    this.current = null;
-                this.listeners.remove(*node);
-                this.n--;
+                if (node is (&this).current)
+                    (&this).current = null;
+                (&this).listeners.remove(*node);
+                (&this).n--;
                 return l;
             }
             else
@@ -219,7 +219,7 @@ public class IListeners ( Data ... )
 
         public size_t length ( )
         {
-            return this.n;
+            return (&this).n;
         }
 
 
@@ -229,9 +229,9 @@ public class IListeners ( Data ... )
 
         ***********************************************************************/
 
-        public int opApply ( int delegate ( ref Listener listener ) dg )
+        public int opApply ( scope int delegate ( ref Listener listener ) dg )
         {
-            return this.listeners.opApply(
+            return (&this).listeners.opApply(
                 (ref eb64_node node)
                 {
                     auto listener = cast(Listener)cast(void*)node.key;
@@ -250,7 +250,7 @@ public class IListeners ( Data ... )
 
         public bool is_empty ( )
         {
-            return this.listeners.is_empty;
+            return (&this).listeners.is_empty;
         }
     }
 
