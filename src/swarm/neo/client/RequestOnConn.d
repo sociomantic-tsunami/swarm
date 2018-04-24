@@ -336,7 +336,7 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
 
     ***************************************************************************/
 
-    private static class AbortException : Exception
+    public static class AbortException : Exception
     {
         /***********************************************************************
 
