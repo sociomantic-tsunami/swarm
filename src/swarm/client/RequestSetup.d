@@ -504,6 +504,7 @@ public template ClientCommandBase ( )
 public template Node ( )
 {
     import ocean.transition;
+    import ocean.core.Verify;
     import swarm.Const;
     import swarm.client.request.params.IRequestParams;
 
@@ -548,12 +549,8 @@ public template Node ( )
     ***************************************************************************/
 
     public This* node ( NodeItem node )
-    in
     {
-        assert(node.set(), "Invalid NodeItem passed to node()!");
-    }
-    body
-    {
+        verify(node.set(), "Invalid NodeItem passed to node()!");
         this.node_item = node;
         version (D_Version2)
             return &this;
@@ -612,6 +609,7 @@ public template Node ( )
 public template Channel ( )
 {
     import ocean.transition;
+    import ocean.core.Verify;
     import ocean.core.TypeConvert : downcast;
     import swarm.client.request.params.IRequestParams;
     import swarm.client.request.params.IChannelRequestParams;
@@ -663,7 +661,7 @@ public template Channel ( )
     private void setup_channel_name ( IRequestParams params )
     {
         auto channel_params = downcast!(IChannelRequestParams)(params);
-        assert(channel_params);
+        verify(channel_params !is null);
         channel_params.channel = this.channel_name;
     }
 }
@@ -682,6 +680,7 @@ public template Channel ( )
 public template Suspendable ( )
 {
     import ocean.transition;
+    import ocean.core.Verify;
     import ocean.core.TypeConvert : downcast;
     import swarm.client.request.params.IRequestParams;
 
@@ -733,7 +732,7 @@ public template Suspendable ( )
     private void setup_suspend_register ( IRequestParams params )
     {
         auto params_ = downcast!(RequestParams)(params);
-        assert(params_);
+        verify(params_ !is null);
 
         params_.suspend_register = this.suspend_register;
     }
@@ -753,6 +752,7 @@ public template Suspendable ( )
 public template StreamInfo ( )
 {
     import ocean.transition;
+    import ocean.core.Verify;
     import ocean.core.TypeConvert : downcast;
     import swarm.client.request.params.IRequestParams;
 
@@ -804,7 +804,7 @@ public template StreamInfo ( )
     private void setup_stream_info_register ( IRequestParams params )
     {
         auto params_ = downcast!(RequestParams)(params);
-        assert(params_);
+        verify(params_ !is null);
 
         params_.stream_info_register = this.stream_info_register;
     }
