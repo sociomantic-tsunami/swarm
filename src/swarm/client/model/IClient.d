@@ -109,8 +109,8 @@ public abstract class IClient
 
         ***********************************************************************/
 
-        public const default_connection_limit = 5;
-        public const default_queue_size = 32 * 1024;
+        public static immutable default_connection_limit = 5;
+        public static immutable default_queue_size = 32 * 1024;
 
         /***********************************************************************
 
@@ -150,7 +150,7 @@ public abstract class IClient
 
     ***************************************************************************/
 
-    public const size_t default_fiber_stack_size = size_t.sizeof * 2 * 1024;
+    public static immutable size_t default_fiber_stack_size = size_t.sizeof * 2 * 1024;
 
 
     /***************************************************************************
@@ -338,7 +338,7 @@ public abstract class IClient
     }
 
     public SuspendNode suspend ( NodeItem nodeitem,
-        IRequestNotification.Callback notifier )
+        scope IRequestNotification.Callback notifier )
     {
         return *SuspendNode(ClientCommandParams.Command.SuspendNode, notifier)
             .node(nodeitem);
@@ -370,7 +370,7 @@ public abstract class IClient
     }
 
     public ResumeNode resume ( NodeItem nodeitem,
-        IRequestNotification.Callback notifier )
+        scope IRequestNotification.Callback notifier )
     {
         return *ResumeNode(ClientCommandParams.Command.ResumeNode, notifier)
             .node(nodeitem);
@@ -401,7 +401,7 @@ public abstract class IClient
     }
 
     public DisconnectIdle disconnectIdle ( NodeItem nodeitem,
-        IRequestNotification.Callback notifier )
+        scope IRequestNotification.Callback notifier )
     {
         return *DisconnectIdle(
             ClientCommandParams.Command.DisconnectNodeIdleConns, notifier)
@@ -430,7 +430,7 @@ public abstract class IClient
         mixin RequestParamsSetup; // private setup() method, used by assign()
     }
 
-    public Disconnect disconnect ( IRequestNotification.Callback notifier )
+    public Disconnect disconnect ( scope IRequestNotification.Callback notifier )
     {
         return Disconnect(ClientCommandParams.Command.Disconnect, notifier);
     }
@@ -464,7 +464,7 @@ public abstract class IClient
     }
 
     public DisableNode disableNode ( NodeItem nodeitem,
-        IRequestNotification.Callback notifier )
+        scope IRequestNotification.Callback notifier )
     {
         return *DisableNode(
             ClientCommandParams.Command.DisableNode, notifier)
@@ -500,7 +500,7 @@ public abstract class IClient
     }
 
     public EnableNode enableNode ( NodeItem nodeitem,
-        IRequestNotification.Callback notifier )
+        scope IRequestNotification.Callback notifier )
     {
         return *EnableNode(
             ClientCommandParams.Command.EnableNode, notifier)
@@ -588,7 +588,7 @@ public abstract class IClient
     ***************************************************************************/
 
     abstract protected void scopeRequestParams (
-        void delegate ( IRequestParams params ) dg );
+        scope void delegate ( IRequestParams params ) dg );
 
 
     /***************************************************************************
