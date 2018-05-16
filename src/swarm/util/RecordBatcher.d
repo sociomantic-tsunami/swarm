@@ -41,7 +41,7 @@ private abstract class RecordBatchBase
 
     ***************************************************************************/
 
-    public const DefaultMaxBatchSize = 64 * 1024;
+    public static immutable DefaultMaxBatchSize = 64 * 1024;
 
 
     /***************************************************************************
@@ -522,7 +522,7 @@ public class RecordBatch : RecordBatchBase
 
     ***************************************************************************/
 
-    public int opApply ( int delegate ( ref cstring value ) record_dg )
+    public int opApply ( scope int delegate ( ref cstring value ) record_dg )
     {
         int r;
         size_t consumed;
@@ -549,7 +549,7 @@ public class RecordBatch : RecordBatchBase
     ***************************************************************************/
 
     public int opApply (
-        int delegate ( ref cstring value1, ref cstring value2 ) record_dg )
+        scope int delegate ( ref cstring value1, ref cstring value2 ) record_dg )
     {
         int r;
         size_t consumed;

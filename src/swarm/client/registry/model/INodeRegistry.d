@@ -89,7 +89,7 @@ public interface INodeRegistry : INodeRegistryInfo
 
     ***************************************************************************/
 
-    void assign ( IRequestParams request, AssignErrorDg error_dg );
+    void assign ( IRequestParams request, scope AssignErrorDg error_dg );
 
 
     /***************************************************************************
