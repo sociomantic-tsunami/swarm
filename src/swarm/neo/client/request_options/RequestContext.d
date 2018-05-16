@@ -150,7 +150,7 @@ public struct RequestContext
 
     ***************************************************************************/
 
-    public ulong integer ( )
+    public ulong integer ( ) /* d1to2fix_inject: const */
     {
         return this.context().integer;
     }
@@ -165,7 +165,7 @@ public struct RequestContext
 
     ***************************************************************************/
 
-    public Object object ( )
+    public Object object ( ) /* d1to2fix_inject: const */
     {
         return this.context().object;
     }
@@ -180,7 +180,7 @@ public struct RequestContext
 
     ***************************************************************************/
 
-    public void* pointer ( )
+    public void* pointer ( ) /* d1to2fix_inject: const */
     {
         return this.context().pointer;
     }
@@ -192,7 +192,7 @@ public struct RequestContext
 
     ***************************************************************************/
 
-    public ContextUnion.Active active ( )
+    public ContextUnion.Active active ( ) /* d1to2fix_inject: const */
     {
         return this.context().active;
     }
@@ -204,7 +204,7 @@ public struct RequestContext
 
     ***************************************************************************/
 
-    private ContextUnion* context ( )
+    private ContextUnion* context ( ) /* d1to2fix_inject: const */
     {
         return cast(ContextUnion*)this.context_.ptr;
     }
