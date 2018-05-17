@@ -205,15 +205,14 @@ class ConnectProtocol: ISelectClient
 
     /***************************************************************************
 
-        Sets up this.protocol_error_ with a message containing the server and client
-        protocol version.
+        Enforces that the client and node protocol versions match.
 
         Params:
-            client_timestamp = client time stamp
-            node_timestamp   = client time stamp
+            client_protocol = client protocol version
+            node_protocol   = client protocol version
 
-        Returns:
-            this.protocol_error_.
+        Throws:
+            `ProtocolError` if there is a protocol version mismatch
 
     ***************************************************************************/
 
