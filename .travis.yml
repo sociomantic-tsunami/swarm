@@ -45,6 +45,11 @@ jobs:
 
         # Additional stages
 
+        - stage: Closure allocation check
+          env: DMD=2.070.2.s* F=devel
+          install: beaver dlang install
+          script: ci/closures.sh
+
         - stage: D2 Release
           if: tag IS present AND NOT tag =~ \+d2$
           env: DMD=2.070.2.s* F=devel
