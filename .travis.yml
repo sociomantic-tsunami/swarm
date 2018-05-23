@@ -18,31 +18,35 @@ env:
     global:
         # Make sure beaver is in the PATH
         - PATH="$(git config -f .gitmodules submodule.beaver.path)/bin:$PATH"
-    matrix:
-        - DMD=1.080.0 DIST=xenial F=production AFTER_SCRIPT=1
-        - DMD=1.080.0 DIST=xenial F=devel
-        - DMD=2.070.2.s12 DIST=xenial F=production
-        - DMD=2.070.2.s12 DIST=xenial F=devel
+        - DIST=xenial
+        - COV=1
 
-# Don't build tags already converted to D2
-if: NOT tag =~ \+d2$
-
-install: beaver dlang install
-
-script: beaver dlang make
-
+# Basic config is inherited from the global scope
 jobs:
+    templates:
+        - &test-matrix
+          stage: Test
+          # Don't build tags already converted to D2
+          if: NOT tag =~ \+d2$
+          after_success: beaver dlang codecov
+          install: beaver dlang install
+          script: beaver dlang make
     include:
+        # Test matrix
+
+        - <<: *test-matrix
+          env: DMD=1.080.* F=production
+        - <<: *test-matrix
+          env: DMD=1.080.* F=devel
+        - <<: *test-matrix
+          env: DMD=2.070.2.s* F=production
+        - <<: *test-matrix
+          env: DMD=2.070.2.s* F=devel
+
+        # Additional stages
+
         - stage: D2 Release
-          # We need to include the exclusion of D2 tags because this "if"
-          # replaces the global one
           if: tag IS present AND NOT tag =~ \+d2$
-          # env: is inherited from the first matrix row, for converting code to
-          # D2 it doesn't matter what compiler version or F we use, it only
-          # matters that we have a DIST and DMD variables defined, so we just
-          # use whatever the first row have.
-          # before_install: and install: are also inherited and we don't need
-          # to override them.
+          env: DMD=2.070.2.s* F=devel
+          install: beaver dlang install
           script: beaver dlang d2-release
-          # Overridden to NOP, otherwise is inherited
-          after_success: true
