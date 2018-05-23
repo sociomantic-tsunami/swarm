@@ -150,69 +150,69 @@ public struct DoublePut
             start_request_on_new_conn();
 
         // Send to the selected node.
-        use_node(node,
-            ( RequestOnConn.EventDispatcher conn )
+        scope dg = ( RequestOnConn.EventDispatcher conn )
+        {
+            try
             {
-                try
-                {
-                    // Send request info to node
-                    conn.send(
-                        ( conn.Payload payload )
-                        {
-                            payload.add(DoublePut.cmd.code);
-                            payload.add(DoublePut.cmd.ver);
-                            payload.add(context.user_params.args.key);
-                            payload.addArray(context.user_params.args.value);
-                        }
-                    );
-                    conn.flush();
-
-                    // Receive supported status from node
-                    auto supported = conn.receiveValue!(SupportedStatus)();
-                    if ( !DoublePut.handleSupportedCodes(supported, context,
-                        conn.remote_address) )
+                // Send request info to node
+                conn.send(
+                    ( conn.Payload payload )
                     {
-                        // Global codes (not supported / version not supported)
-                        *state = SharedWorking.NodeState.Error;
+                        payload.add(DoublePut.cmd.code);
+                        payload.add(DoublePut.cmd.ver);
+                        payload.add(context.user_params.args.key);
+                        payload.addArray(context.user_params.args.value);
                     }
-                    else
-                    {
-                        // Receive result code from node
-                        auto result = conn.receiveValue!(StatusCode)();
+                );
+                conn.flush();
 
-                        with ( RequestStatusCode ) switch ( result )
-                        {
-                            case Succeeded:
-                                *state = SharedWorking.NodeState.Success;
-                                break;
-
-                            case Error:
-                                *state = SharedWorking.NodeState.Error;
-
-                                // The node returned an error code. Notify the user.
-                                Notification n;
-                                n.node_error = RequestNodeInfo(
-                                    context.request_id, conn.remote_address);
-                                DoublePut.notify(context.user_params, n);
-                                break;
-
-                            default:
-                                // Treat unknown codes as internal errors.
-                                goto case Error;
-                        }
-                    }
-                }
-                catch ( IOError e )
+                // Receive supported status from node
+                auto supported = conn.receiveValue!(SupportedStatus)();
+                if ( !DoublePut.handleSupportedCodes(supported, context,
+                    conn.remote_address) )
                 {
-                    // A connection error occurred. Notify the user.
+                    // Global codes (not supported / version not supported)
                     *state = SharedWorking.NodeState.Error;
-
-                    Notification n;
-                    n.node_disconnected = RequestNodeExceptionInfo(
-                        context.request_id, conn.remote_address, e);
-                    DoublePut.notify(context.user_params, n);
                 }
-            });
+                else
+                {
+                    // Receive result code from node
+                    auto result = conn.receiveValue!(StatusCode)();
+
+                    with ( RequestStatusCode ) switch ( result )
+                    {
+                        case Succeeded:
+                            *state = SharedWorking.NodeState.Success;
+                            break;
+
+                        case Error:
+                            *state = SharedWorking.NodeState.Error;
+
+                            // The node returned an error code. Notify the user.
+                            Notification n;
+                            n.node_error = RequestNodeInfo(
+                                context.request_id, conn.remote_address);
+                            DoublePut.notify(context.user_params, n);
+                            break;
+
+                        default:
+                            // Treat unknown codes as internal errors.
+                            goto case Error;
+                    }
+                }
+            }
+            catch ( IOError e )
+            {
+                // A connection error occurred. Notify the user.
+                *state = SharedWorking.NodeState.Error;
+
+                Notification n;
+                n.node_disconnected = RequestNodeExceptionInfo(
+                    context.request_id, conn.remote_address, e);
+                DoublePut.notify(context.user_params, n);
+            }
+        };
+        use_node(node, dg);
     }
 
     /***************************************************************************
