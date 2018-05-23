@@ -330,35 +330,38 @@ version ( UnitTest )
 
     void setupArgs ( Options ... ) ( ref Args args, Options options )
     {
-        setupOptionalArgs!(options.length)(options,
-            ( A a )
-            {
-                args.a = a.a;
-            },
-            ( B b )
-            {
-                args.b = b.b;
-            }
-        );
+        scope dg1 = ( A a )
+        {
+            args.a = a.a;
+        };
+
+        scope dg2 = ( B b )
+        {
+            args.b = b.b;
+        };
+
+        setupOptionalArgs!(options.length)(options, dg1, dg2);
     }
 
     // for testing eraseFromArgs
     void setupArgsWithErase ( Options ... ) ( ref Args args, Options options )
     {
-        setupOptionalArgs!(options.length)(options,
-            ( A a )
-            {
-                args.a = 1;
-            },
-            ( B b )
-            {
-                args.b = 2;
-            },
-            (ToErase c)
-            {
-                args.c = c.c;
-            }
-        );
+        scope dg1 = ( A a )
+        {
+            args.a = 1;
+        };
+
+        scope dg2 = ( B b )
+        {
+            args.b = 2;
+        };
+
+        scope dg3 = (ToErase c)
+        {
+            args.c = c.c;
+        };
+
+        setupOptionalArgs!(options.length)(options, dg1, dg2, dg3);
 
         // forward to setupArgs
         setupArgs(args, eraseFromArgs!(ToErase, options));
