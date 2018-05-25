@@ -1,9 +1,9 @@
 /*******************************************************************************
 
-    Full-duplex client connection base class. Contains the send and receive
-    loops, message dispatching and epoll registration logic and is the select
-    client registered with epoll. Subclasses need to implement the connection
-    setup, authentication and request dispatching logic.
+    Full-duplex connection base class. Contains the send and receive loops,
+    message dispatching and epoll registration logic and is the select client
+    registered with epoll. Subclasses need to implement the connection setup,
+    authentication and request dispatching logic.
 
     Copyright: Copyright (c) 2016-2017 dunnhumby Germany GmbH. All rights reserved
 
