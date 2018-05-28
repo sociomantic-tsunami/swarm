@@ -1145,6 +1145,34 @@ public final class RequestSet: IRequestSet
         return this.active_requests.length;
     }
 
+    /**************************************************************************
+
+        Aborts the request, as requested by the user.
+
+        Params:
+            id = id of request to abort
+
+    **************************************************************************/
+
+    public void abortRequest ( RequestId id )
+    {
+        this.abortRequest(id, RequestOnConn.AbortReason.UserRequested);
+    }
+
+    /**************************************************************************
+
+        Aborts all requests, as requested by the user.
+
+    **************************************************************************/
+
+    public void abortAllRequests ( )
+    {
+        foreach (id, rq; this.active_requests)
+        {
+            this.abortRequest(id, RequestOnConn.AbortReason.UserRequested);
+        }
+    }
+
     /***************************************************************************
 
         Returns:
