@@ -144,3 +144,36 @@ A request-on-conn has the following important components:
   manually suspend and resume the RoC fiber based on events other than those
   managed by `RequestOnConnBase`.)
 * A method to resume the fiber with either a numerical code or an exception.
+
+# Client Overview
+
+TODO topics to cover:
+* Connection
+* Connection set
+* Request
+* Request set
+* Request handlers
+* User notifiers
+
+## Requests
+
+TODO topics to cover:
+* Request versioning
+* Types of request
+* Access to connections
+
+# Node Overview
+
+TODO topics to cover:
+* Connection
+* Connection set
+* Request
+* Request set
+* Request handlers
+
+## Requests
+
+TODO topics to cover:
+* Request versioning
+* Types of request
+* Access to connections
