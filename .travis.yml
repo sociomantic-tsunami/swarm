@@ -35,9 +35,9 @@ jobs:
         # Test matrix
 
         - <<: *test-matrix
-          env: DMD=1.080.* F=production
+          env: DMD=1.081.* F=production
         - <<: *test-matrix
-          env: DMD=1.080.* F=devel
+          env: DMD=1.081.* F=devel
         - <<: *test-matrix
           env: DMD=2.071.2.s* F=production
         - <<: *test-matrix
