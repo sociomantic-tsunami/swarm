@@ -120,72 +120,72 @@ public struct Put
         AddrPort node;
         node.setAddress("127.0.0.1");
         node.port = 10_000;
-
-        use_node(node,
-            ( RequestOnConn.EventDispatcher conn )
+        scope dg = ( RequestOnConn.EventDispatcher conn )
+        {
+            try
             {
-                try
-                {
-                    // Send request info to node
-                    conn.send(
-                        ( conn.Payload payload )
-                        {
-                            payload.add(Put.cmd.code);
-                            payload.add(Put.cmd.ver);
-                            payload.add(context.user_params.args.key);
-                            payload.addArray(context.user_params.args.value);
-                        }
-                    );
-
-                    // Receive supported status from node
-                    auto supported = conn.receiveValue!(SupportedStatus)();
-                    if ( !Put.handleSupportedCodes(supported, context,
-                        conn.remote_address) )
+                // Send request info to node
+                conn.send(
+                    ( conn.Payload payload )
                     {
-                        // Global codes (not supported / version not supported)
-                        context.shared_working.result = SharedWorking.Result.Error;
+                        payload.add(Put.cmd.code);
+                        payload.add(Put.cmd.ver);
+                        payload.add(context.user_params.args.key);
+                        payload.addArray(context.user_params.args.value);
                     }
-                    else
+                );
+
+                // Receive supported status from node
+                auto supported = conn.receiveValue!(SupportedStatus)();
+                if ( !Put.handleSupportedCodes(supported, context,
+                    conn.remote_address) )
+                {
+                    // Global codes (not supported / version not supported)
+                    context.shared_working.result = SharedWorking.Result.Error;
+                }
+                else
+                {
+                    // Receive result code from node
+                    auto result = conn.receiveValue!(StatusCode)();
+
+                    with ( RequestStatusCode ) switch ( result )
                     {
-                        // Receive result code from node
-                        auto result = conn.receiveValue!(StatusCode)();
+                        case Succeeded:
+                            context.shared_working.result =
+                                SharedWorking.Result.Put;
+                            break;
 
-                        with ( RequestStatusCode ) switch ( result )
-                        {
-                            case Succeeded:
-                                context.shared_working.result =
-                                    SharedWorking.Result.Put;
-                                break;
+                        case Error:
+                            context.shared_working.result =
+                                SharedWorking.Result.Error;
 
-                            case Error:
-                                context.shared_working.result =
-                                    SharedWorking.Result.Error;
+                            // The node returned an error code. Notify the user.
+                            Notification n;
+                            n.node_error = RequestNodeInfo(
+                                context.request_id, conn.remote_address);
+                            Put.notify(context.user_params, n);
+                            break;
 
-                                // The node returned an error code. Notify the user.
-                                Notification n;
-                                n.node_error = RequestNodeInfo(
-                                    context.request_id, conn.remote_address);
-                                Put.notify(context.user_params, n);
-                                break;
-
-                            default:
-                                // Treat unknown codes as internal errors.
-                                goto case Error;
-                        }
+                        default:
+                            // Treat unknown codes as internal errors.
+                            goto case Error;
                     }
                 }
-                catch ( IOError e )
-                {
-                    // A connection error occurred. Notify the user.
-                    context.shared_working.result =
-                        SharedWorking.Result.Error;
+            }
+            catch ( IOError e )
+            {
+                // A connection error occurred. Notify the user.
+                context.shared_working.result =
+                    SharedWorking.Result.Error;
 
-                    Notification n;
-                    n.node_disconnected = RequestNodeExceptionInfo(
-                        context.request_id, conn.remote_address, e);
-                    Put.notify(context.user_params, n);
-                }
-            });
+                Notification n;
+                n.node_disconnected = RequestNodeExceptionInfo(
+                    context.request_id, conn.remote_address, e);
+                Put.notify(context.user_params, n);
+            }
+        };
+
+        use_node(node, dg);
     }
 
     /***************************************************************************

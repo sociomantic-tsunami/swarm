@@ -130,91 +130,90 @@ public struct VersionedGet ( ubyte Version )
         AddrPort node;
         node.setAddress("127.0.0.1");
         node.port = 10_000;
-
-        use_node(node,
-            ( RequestOnConn.EventDispatcher conn )
+        scope dg = ( RequestOnConn.EventDispatcher conn )
+        {
+            try
             {
-                try
+                // Send request info to node
+                scope send_cb = ( conn.Payload payload )
                 {
-                    // Send request info to node
-                    conn.send(
-                        ( conn.Payload payload )
-                        {
-                            payload.add(This.cmd.code);
-                            payload.add(This.cmd.ver);
-                            payload.add(context.user_params.args.key);
-                        }
-                    );
+                    payload.add(This.cmd.code);
+                    payload.add(This.cmd.ver);
+                    payload.add(context.user_params.args.key);
+                };
+                conn.send(send_cb);
 
-                    // Receive supported status from node
-                    auto supported = conn.receiveValue!(SupportedStatus)();
-                    if ( !This.handleSupportedCodes(supported, context,
-                        conn.remote_address) )
+                // Receive supported status from node
+                auto supported = conn.receiveValue!(SupportedStatus)();
+                if ( !This.handleSupportedCodes(supported, context,
+                    conn.remote_address) )
+                {
+                    // Global codes (not supported / version not supported)
+                    context.shared_working.result = SharedWorking.Result.Error;
+                }
+                else
+                {
+                    // Receive result code from node
+                    auto result = conn.receiveValue!(StatusCode)();
+
+                    with ( RequestStatusCode ) switch ( result )
                     {
-                        // Global codes (not supported / version not supported)
-                        context.shared_working.result = SharedWorking.Result.Error;
-                    }
-                    else
-                    {
-                        // Receive result code from node
-                        auto result = conn.receiveValue!(StatusCode)();
+                        case Value:
+                            context.shared_working.result =
+                                SharedWorking.Result.Received;
 
-                        with ( RequestStatusCode ) switch ( result )
-                        {
-                            case Value:
-                                context.shared_working.result =
-                                    SharedWorking.Result.Received;
+                            scope recv_cb = ( in void[] const_payload )
+                            {
+                                Const!(void)[] payload = const_payload;
+                                auto value =
+                                    conn.message_parser.getArray!(void)(payload);
 
-                                // Receive record value from node.
-                                conn.receive(
-                                    ( in void[] const_payload )
-                                    {
-                                        Const!(void)[] payload = const_payload;
-                                        auto value =
-                                            conn.message_parser.getArray!(void)(payload);
-
-                                        Notification n;
-                                        n.received = RequestDataInfo(
-                                            context.request_id, value);
-                                        This.notify(context.user_params, n);
-                                    }
-                                );
-                                break;
-
-                            case Empty:
-                                context.shared_working.result =
-                                    SharedWorking.Result.Empty;
-                                break;
-
-                            case Error:
-                                context.shared_working.result =
-                                    SharedWorking.Result.Error;
-
-                                // The node returned an error code. Notify the user.
                                 Notification n;
-                                n.node_error = RequestNodeInfo(
-                                    context.request_id, conn.remote_address);
+                                n.received = RequestDataInfo(
+                                    context.request_id, value);
                                 This.notify(context.user_params, n);
-                                break;
+                            };
 
-                            default:
-                                // Treat unknown codes as internal errors.
-                                goto case Error;
-                        }
+                            // Receive record value from node.
+                            conn.receive(recv_cb);
+                            break;
+
+                        case Empty:
+                            context.shared_working.result =
+                                SharedWorking.Result.Empty;
+                            break;
+
+                        case Error:
+                            context.shared_working.result =
+                                SharedWorking.Result.Error;
+
+                            // The node returned an error code. Notify the user.
+                            Notification n;
+                            n.node_error = RequestNodeInfo(
+                                context.request_id, conn.remote_address);
+                            This.notify(context.user_params, n);
+                            break;
+
+                        default:
+                            // Treat unknown codes as internal errors.
+                            goto case Error;
                     }
                 }
-                catch ( IOError e )
-                {
-                    // A connection error occurred. Notify the user.
-                    context.shared_working.result =
-                        SharedWorking.Result.Error;
+            }
+            catch ( IOError e )
+            {
+                // A connection error occurred. Notify the user.
+                context.shared_working.result =
+                    SharedWorking.Result.Error;
 
-                    Notification n;
-                    n.node_disconnected = RequestNodeExceptionInfo(
-                        context.request_id, conn.remote_address, e);
-                    This.notify(context.user_params, n);
-                }
-            });
+                Notification n;
+                n.node_disconnected = RequestNodeExceptionInfo(
+                    context.request_id, conn.remote_address, e);
+                This.notify(context.user_params, n);
+            }
+        };
+
+        use_node(node, dg);
     }
 
     /***************************************************************************

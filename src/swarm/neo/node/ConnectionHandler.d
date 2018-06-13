@@ -528,29 +528,32 @@ class ConnectionHandler : IConnectionHandler
                 {
                     // TODO: when the old deprecated handlers are removed, this
                     // logic can be moved into handleRequest.
-                    this.handleRequest(*rq, connection,
+                    scope handle_cb = () {
+                        bool acquired;
+
+                        scope get_cb = ( Object request_resources )
                         {
-                            bool acquired;
-                            this.shared_params.get_resource_acquirer(
-                                ( Object request_resources )
-                                {
-                                    acquired = true;
-                                    auto rq_handler =
-                                        this.emplace!(IRequestHandler)
-                                        (connection.emplace_buf, rq.class_info);
-                                    rq_handler.initialise(connection,
-                                        request_resources);
-                                    rq_handler.preSupportedCodeSent(
-                                        init_payload);
-                                    this.sendSupportedStatus(connection,
-                                        SupportedStatus.RequestSupported);
-                                    rq_handler.postSupportedCodeSent();
-                                }
-                            );
-                            // TODO: this check can be removed when the old
-                            // deprecated handlers are removed.
-                            assert(acquired);
-                        });
+                            acquired = true;
+                            auto rq_handler =
+                                this.emplace!(IRequestHandler)
+                                (connection.emplace_buf, rq.class_info);
+                            rq_handler.initialise(connection,
+                                request_resources);
+                            rq_handler.preSupportedCodeSent(
+                                init_payload);
+                            this.sendSupportedStatus(connection,
+                                SupportedStatus.RequestSupported);
+                            rq_handler.postSupportedCodeSent();
+                        };
+
+                        this.shared_params.get_resource_acquirer(get_cb);
+
+                        // TODO: this check can be removed when the old
+                        // deprecated handlers are removed.
+                        assert(acquired);
+                    };
+
+                    this.handleRequest(*rq, connection, handle_cb);
                 }
                 // Unsupported version codes.
                 else
