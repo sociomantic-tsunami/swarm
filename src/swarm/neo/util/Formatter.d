@@ -39,7 +39,7 @@ static if (hasFeaturesFrom!("ocean", 2, 8))
     ***************************************************************************/
 
     public bool sformat (Args...) (
-            void delegate ( cstring chunk) sink,
+            scope void delegate ( cstring chunk) sink,
             cstring fmt, Args args )
     {
         return Formatter.sformat(sink, fmt, args);
@@ -63,7 +63,7 @@ else
     ***************************************************************************/
 
     public bool sformat (Args...) (
-            void delegate ( cstring chunk) sink,
+            scope void delegate ( cstring chunk) sink,
             cstring fmt, Args args )
     {
         return Formatter.sformat(
