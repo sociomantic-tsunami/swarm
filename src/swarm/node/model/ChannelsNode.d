@@ -153,7 +153,7 @@ public class ChannelsNodeBase
 
      **************************************************************************/
 
-    public int opApply ( int delegate ( ref IStorageEngineInfo ) dg )
+    public int opApply ( scope int delegate ( ref IStorageEngineInfo ) dg )
     {
         int result = 0;
 
@@ -209,7 +209,7 @@ version (UnitTest)
 
     private class TestConnectionHandler : ISwarmConnectionHandler
     {
-        public this (void delegate(IConnectionHandler) a, ConnectionSetupParams b)
+        public this (scope void delegate(IConnectionHandler) a, ConnectionSetupParams b)
         {
             super(a, b);
         }
