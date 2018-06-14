@@ -577,7 +577,7 @@ class ConnectionHandler : IConnectionHandler
 
         try
         {
-            this.shared_params.get_resource_acquirer(
+            scope handle_request =
                 ( Object request_resources )
                 {
                     if ( rq.old_handler )
@@ -600,8 +600,9 @@ class ConnectionHandler : IConnectionHandler
                         rq_handler.handle(connection, request_resources,
                             connection.init_payload_buf);
                     }
-                }
-            );
+                };
+
+            this.shared_params.get_resource_acquirer(handle_request);
         }
         catch ( Exception e )
         {
