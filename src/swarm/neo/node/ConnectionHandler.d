@@ -510,7 +510,7 @@ class ConnectionHandler : IConnectionHandler
 
         try
         {
-            this.shared_params.get_resource_acquirer(
+            scope handle_request =
                 ( Object request_resources )
                 {
                     auto rq_handler = this.emplace!(IRequestHandler)
@@ -520,8 +520,9 @@ class ConnectionHandler : IConnectionHandler
                     this.sendSupportedStatus(connection,
                         SupportedStatus.RequestSupported);
                     rq_handler.postSupportedCodeSent();
-                }
-            );
+                };
+
+            this.shared_params.get_resource_acquirer(handle_request);
         }
         catch ( Exception e )
         {
