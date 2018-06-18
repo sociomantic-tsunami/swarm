@@ -45,7 +45,7 @@ public class NodeErrorTracker : INodeConnectionPoolErrorReporter
 
     ***************************************************************************/
 
-    public const ulong window_size_s_default = 60;
+    public static immutable ulong window_size_s_default = 60;
 
 
     /***************************************************************************
@@ -196,32 +196,32 @@ public class NodeErrorTracker : INodeConnectionPoolErrorReporter
 
             public bool inc ( time_t now, Weights weights )
             {
-                assert(now >= this.last_time);
+                assert(now >= (&this).last_time);
                 bool updated;
 
-                if ( now > this.last_time && this.last_time > this.last_time.init )
+                if ( now > (&this).last_time && (&this).last_time > (&this).last_time.init )
                 {
                     // Push accumulated tick count.
-                    this.updateAvg(this.count, weights);
-                    this.count = 0;
+                    (&this).updateAvg((&this).count, weights);
+                    (&this).count = 0;
                     updated = true;
 
                     // Push empty counts for additional seconds which have
                     // passed. If more than window_size_s have passed, simply
                     // reset the moving average to 0.
-                    auto extra_secs = now - this.last_time;
+                    auto extra_secs = now - (&this).last_time;
                     if ( extra_secs > weights.window_size_s )
                     {
-                        this.exp_moving_avg = 0.0;
+                        (&this).exp_moving_avg = 0.0;
                     }
                     else while ( --extra_secs )
                     {
-                        this.updateAvg(0, weights);
+                        (&this).updateAvg(0, weights);
                     }
                 }
 
-                this.count++;
-                this.last_time = now;
+                (&this).count++;
+                (&this).last_time = now;
 
                 return updated;
             }
@@ -238,7 +238,7 @@ public class NodeErrorTracker : INodeConnectionPoolErrorReporter
 
             public real per_sec ( )
             {
-                return this.exp_moving_avg;
+                return (&this).exp_moving_avg;
             }
 
 
@@ -253,9 +253,9 @@ public class NodeErrorTracker : INodeConnectionPoolErrorReporter
 
             public void reset ( real exp_moving_avg = 0.0 )
             {
-                this.count = 0;
-                this.exp_moving_avg = exp_moving_avg;
-                this.last_time = 0;
+                (&this).count = 0;
+                (&this).exp_moving_avg = exp_moving_avg;
+                (&this).last_time = 0;
             }
 
 
@@ -271,9 +271,9 @@ public class NodeErrorTracker : INodeConnectionPoolErrorReporter
 
             private void updateAvg ( uint v, Weights weights )
             {
-                this.exp_moving_avg =
+                (&this).exp_moving_avg =
                     (cast(real)v * weights.new_weight) +
-                    (this.exp_moving_avg * weights.old_weight);
+                    ((&this).exp_moving_avg * weights.old_weight);
             }
         }
 
@@ -319,7 +319,7 @@ public class NodeErrorTracker : INodeConnectionPoolErrorReporter
         {
             real sum = 0.0;
 
-            foreach ( counter; this.counters )
+            foreach ( counter; (&this).counters )
             {
                 auto per_sec = counter.per_sec;
                 if ( !isNaN(per_sec) )
@@ -346,7 +346,7 @@ public class NodeErrorTracker : INodeConnectionPoolErrorReporter
 
         public real per_sec ( CounterType type )
         {
-            return this.counters[type].per_sec;
+            return (&this).counters[type].per_sec;
         }
 
 
@@ -364,8 +364,8 @@ public class NodeErrorTracker : INodeConnectionPoolErrorReporter
 
         public void reset ( real exp_moving_avg = 0.0 )
         {
-            auto per_counter = exp_moving_avg / this.counters.length;
-            foreach ( ref counter; this.counters )
+            auto per_counter = exp_moving_avg / (&this).counters.length;
+            foreach ( ref counter; (&this).counters )
             {
                 counter.reset(per_counter);
             }

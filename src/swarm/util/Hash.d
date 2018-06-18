@@ -88,7 +88,7 @@ public alias Fnv1a.HexDigest HexDigest;
 
 ***************************************************************************/
 
-public const HashDigits = Fnv1a.HEXDGT_LENGTH;
+public static immutable HashDigits = Fnv1a.HEXDGT_LENGTH;
 
 /***************************************************************************
 
@@ -338,8 +338,8 @@ public bool isWithinNodeResponsibility ( hash_t hash, hash_t min, hash_t max )
 
 unittest
 {
-    const hash_t min = 0b0000000000000000000000000000000000000000000000000000000000000010;
-    const hash_t max = 0b0000000000000000000000000000000000000000000000000000000000010000;
+    static immutable hash_t min = 0b0000000000000000000000000000000000000000000000000000000000000010;
+    static immutable hash_t max = 0b0000000000000000000000000000000000000000000000000000000000010000;
     hash_t hash;
 
     // Maximum
@@ -490,7 +490,7 @@ public mstring intToHex ( hash_t val, mstring hash )
 
 public template isKeyType ( T )
 {
-    const isKeyType = is (T == hash_t)    ||
+    static immutable isKeyType = is (T == hash_t)    ||
                       is (T == HexDigest) ||
                       is (T == time_t)    ||
                       is (Unqual!(T[0]) == char);
@@ -591,7 +591,7 @@ version ( UnitTest )
 
 unittest
 {
-    const Iterations = 10_000;
+    static immutable Iterations = 10_000;
     mstring str;
     cstring cstr;
 

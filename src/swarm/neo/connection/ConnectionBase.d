@@ -66,7 +66,7 @@ abstract class ConnectionBase: ISelectClient
 
     ***************************************************************************/
 
-    private const FIBER_STACK_SIZE = 64 * 1024;
+    private static immutable FIBER_STACK_SIZE = 64 * 1024;
 
     /***************************************************************************
 
@@ -232,7 +232,7 @@ abstract class ConnectionBase: ISelectClient
 
         ***********************************************************************/
 
-        public int unregisterAll ( int delegate ( ref RequestId id ) dg )
+        public int unregisterAll ( scope int delegate ( ref RequestId id ) dg )
         {
             return this.queue.opApply(dg);
         }
@@ -544,7 +544,7 @@ abstract class ConnectionBase: ISelectClient
 
         ***********************************************************************/
 
-        public int unregisterAll ( int delegate ( ref RequestId id ) dg )
+        public int unregisterAll ( scope int delegate ( ref RequestId id ) dg )
         {
             return this.set.opApply(
                 (ref eb64_node ebnode)
@@ -1175,7 +1175,7 @@ abstract class ConnectionBase: ISelectClient
     ***************************************************************************/
 
     abstract protected void getPayloadForSending ( RequestId id,
-        void delegate ( in void[][] payload ) send );
+        scope void delegate ( in void[][] payload ) send );
 
     /***************************************************************************
 
