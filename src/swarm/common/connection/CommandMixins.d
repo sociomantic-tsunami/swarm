@@ -41,11 +41,11 @@ public template CommandCases ( T : IEnum, size_t i = 0 )
 {
     static if ( i == T._internal_names.length )
     {
-        const istring CommandCases = "";
+        static immutable istring CommandCases = "";
     }
     else
     {
-        const istring CommandCases = "case " ~  ctfe_i2a(T._internal_values[i]) ~
+        static immutable istring CommandCases = "case " ~  ctfe_i2a(T._internal_values[i]) ~
             ": this.handle" ~ T._internal_names[i] ~ "(); break;" ~
             CommandCases!(T, i + 1);
     }
@@ -67,11 +67,11 @@ public template CommandMethods ( T : IEnum, size_t i = 0 )
 {
     static if ( i == T._internal_names.length )
     {
-        const istring CommandMethods = "";
+        static immutable istring CommandMethods = "";
     }
     else
     {
-        const istring CommandMethods =
+        static immutable istring CommandMethods =
             "abstract protected void handle" ~ T._internal_names[i] ~ "();" ~
             CommandMethods!(T, i + 1);
     }
