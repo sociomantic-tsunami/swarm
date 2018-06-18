@@ -183,7 +183,7 @@ public struct NodeExceptionInfo
             sformat(sink,
                 "Exception '{}' @ {}:{} occurred in the client while handling the " ~
                 "request on node {}:{}",
-                getMsg(this.e), this.e.file, this.e.line,
+                this.e.message(), this.e.file, this.e.line,
                 this.node_addr.address_bytes, this.node_addr.port);
         }
         else
@@ -232,7 +232,7 @@ public struct RequestNodeExceptionInfo
             sformat(sink,
                 "Exception '{}' @ {}:{} occurred in the client while handling " ~
                 "request #{} on node {}:{}",
-                getMsg(this.e), this.e.file, this.e.line, this.request_id,
+                this.e.message(), this.e.file, this.e.line, this.request_id,
                 this.node_addr.address_bytes, this.node_addr.port);
         }
         else

@@ -286,7 +286,7 @@ public scope class IRequestNotification
                     this.notification_description,
                     this.nodeitem.Address, this.nodeitem.Port,
                     this.command_description, this.status_description,
-                    getMsg(this.exception), this.exception.file, this.exception.line);
+                    this.exception.message(), this.exception.file, this.exception.line);
             }
             else
             {
@@ -294,7 +294,7 @@ public scope class IRequestNotification
                     this.notification_description,
                     this.nodeitem.Address, this.nodeitem.Port,
                     this.command_description, this.status_description,
-                    getMsg(this.exception));
+                    this.exception.message());
             }
         }
 

@@ -165,7 +165,7 @@ delegate looks something like this imaginary example:
   void notifier ( NotificationUnion info, RequestArgs args )
   {
     // As info is a smart-union, we can tell which member is active.
-    with ( info.Active ) switch ( info.active ) 
+    with ( info.Active ) switch ( info.active )
     {
       case success: // example success notification
         Stdout.formatln("Request on channel {} succeeded and returned the "
@@ -174,7 +174,7 @@ delegate looks something like this imaginary example:
 
       case error: // example I/O error notification
         Stderr.formatln("Request on channel {} failed due to error {} "
-            "on {}:{}", args.channel, getMsg(info.e),
+            "on {}:{}", args.channel, info.e.message(),
             cast(char[])info.node_addr.address_bytes, info.node_addr.port);
         break;
 

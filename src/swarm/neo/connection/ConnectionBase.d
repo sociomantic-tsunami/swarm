@@ -318,13 +318,13 @@ abstract class ConnectionBase: ISelectClient
                     debug ( SwarmConn )
                         Stdout.formatln("SendLoop.fiberMethod(): ResumeException! @{}:{}", e.file, e.line);
 
-                    log.error("SendLoop: {} @{}:{}", getMsg(e), e.file, e.line);
+                    log.error("SendLoop: {} @{}:{}", e.message(), e.file, e.line);
                     throw e;
                 }
                 catch (Exception e)
                 {
                     debug ( SwarmConn )
-                        Stdout.formatln("SendLoop.fiberMethod() caught \"{}\" @{}:{}", getMsg(e), e.file, e.line);
+                        Stdout.formatln("SendLoop.fiberMethod() caught \"{}\" @{}:{}", e.message(), e.file, e.line);
 
                     this.outer.shutdownImpl(e);
                     this.send_loop_exited_ex = e;
@@ -338,7 +338,7 @@ abstract class ConnectionBase: ISelectClient
             {
                 debug ( SwarmConn )
                     Stdout.formatln("SendLoop.fiberMethod() caught \"{}\" @{}:{} while connecting",
-                        getMsg(e), e.file, e.line);
+                        e.message(), e.file, e.line);
 
                 this.outer.shutdownImpl(e);
                 this.send_loop_exited_ex = e;
@@ -595,7 +595,7 @@ abstract class ConnectionBase: ISelectClient
             }
             catch (ResumeException e)
             {
-                log.error("ReceiveLoop: {} @{}:{}", getMsg(e), e.file, e.line);
+                log.error("ReceiveLoop: {} @{}:{}", e.message(), e.file, e.line);
             }
             catch (Exception e)
             {

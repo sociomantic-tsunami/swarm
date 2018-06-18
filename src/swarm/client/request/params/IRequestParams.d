@@ -200,7 +200,7 @@ public abstract class IRequestParams
                 {
                     log.error("exception caught while calling notifier "
                               ~ "delegate: '{}' @ {}:{}",
-                              getMsg(e), e.file, e.line);
+                              e.message(), e.file, e.line);
                 }
             });
         }

@@ -12,6 +12,7 @@
 
 module swarm.neo.client.mixins.DeserializeMethod;
 
+import ocean.transition;
 import ocean.util.serialize.contiguous.MultiVersionDecorator;
 
 /*******************************************************************************
@@ -74,3 +75,37 @@ template DeserializeMethod ( alias src )
 *******************************************************************************/
 
 public VersionDecorator client_deserializer_version_decorator;
+
+version ( UnitTest )
+{
+    import ocean.core.Test;
+    import ocean.util.serialize.contiguous.Contiguous;
+    import ocean.util.serialize.contiguous.Serializer;
+
+    struct Request
+    {
+        void[] value;
+        mixin DeserializeMethod!(value);
+    }
+}
+
+unittest
+{
+    struct Record
+    {
+        mstring name;
+        hash_t id;
+    }
+
+    Request rq;
+    Record r;
+    r.name = "whatever".dup;
+    r.id = 23;
+    void[] serialized;
+    Serializer.serialize(r, rq.value);
+
+    Contiguous!(Record) buf;
+    auto deserialized = rq.deserialize(buf);
+    test!("==")(deserialized.name, r.name);
+    test!("==")(deserialized.id, r.id);
+}
