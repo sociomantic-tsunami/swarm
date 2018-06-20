@@ -801,12 +801,12 @@ abstract public class ISwarmConnectionHandler : IFiberConnectionHandlerBase,
             if ( this.cmd )
             {
                 Stderr.formatln("[{}]: Error handling request {}: '{}'",
-                super.connection_id, this.cmd, getMsg(e));
+                super.connection_id, this.cmd, e.message());
             }
             else
             {
                 Stderr.formatln("[{}]: Error reading request command: '{}'",
-                super.connection_id, getMsg(e));
+                super.connection_id, e.message());
             }
         }
 
