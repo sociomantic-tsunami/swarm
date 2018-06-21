@@ -103,7 +103,7 @@ private final class TimerEvent: ISelectClient
     override Handle fileHandle ( ) {return timer.fileHandle;}
 
     /// Table of timer expiration delays
-    const delay =
+    static immutable delay =
     [
         timespec(0,   9_765_625),
         timespec(0,  19_531_250),
