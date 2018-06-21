@@ -146,7 +146,8 @@ class Connection: ConnectionBase
     {
         debug (SwarmConn)
         {
-            Stdout.formatln("node connection shutdown \"{}\" @{}:{}", e.message(), e.file, e.line);
+            Stdout.formatln("node connection shutdown \"{}\" @{}:{}",
+                e.message(), e.file, e.line);
             scope (success) Stdout.formatln("node connection shutdown success");
             scope (failure) Stdout.formatln("node connection shutdown failure");
         }
