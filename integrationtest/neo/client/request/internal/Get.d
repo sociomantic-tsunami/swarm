@@ -118,7 +118,7 @@ public struct VersionedGet ( ubyte Version )
 
     ***************************************************************************/
 
-    public static void handler ( UseNodeDg use_node, void[] context_blob,
+    public static void handler ( scope UseNodeDg use_node, void[] context_blob,
         void[] working_blob )
     {
         auto context = This.getContext(context_blob);
