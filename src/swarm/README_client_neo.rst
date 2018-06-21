@@ -168,12 +168,12 @@ delegate looks something like this imaginary example:
     with ( info.Active ) switch ( info.active )
     {
       case success: // example success notification
-        Stdout.formatln("Request on channel {} succeeded and returned the "
+        Stdout.formatln("Request on channel {} succeeded and returned the " ~
             "value {}", args.channel, info.value);
         break;
 
       case error: // example I/O error notification
-        Stderr.formatln("Request on channel {} failed due to error {} "
+        Stderr.formatln("Request on channel {} failed due to error {} " ~
             "on {}:{}", args.channel, info.e.message(),
             cast(char[])info.node_addr.address_bytes, info.node_addr.port);
         break;

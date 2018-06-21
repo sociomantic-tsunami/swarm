@@ -324,7 +324,8 @@ abstract class ConnectionBase: ISelectClient
                 catch (Exception e)
                 {
                     debug ( SwarmConn )
-                        Stdout.formatln("SendLoop.fiberMethod() caught \"{}\" @{}:{}", e.message(), e.file, e.line);
+                        Stdout.formatln("SendLoop.fiberMethod() caught \"{}\"@{}:{}",
+                            e.message(), e.file, e.line);
 
                     this.outer.shutdownImpl(e);
                     this.send_loop_exited_ex = e;
