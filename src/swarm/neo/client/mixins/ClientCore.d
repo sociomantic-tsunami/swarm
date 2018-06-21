@@ -127,7 +127,7 @@ template ClientCore ( )
 
     deprecated("Use the ctor that accepts a Settings instance instead")
     private this ( cstring auth_name, in ubyte[] auth_key,
-        ConnectionNotifier conn_notifier, Object request_resources = null )
+        scope ConnectionNotifier conn_notifier, Object request_resources = null )
     {
         Settings settings;
         settings.conn_notifier = conn_notifier;
@@ -180,7 +180,7 @@ template ClientCore ( )
     ***************************************************************************/
 
     deprecated("Use the ctor that accepts a Config instance instead")
-    private this ( cstring auth_file, ConnectionNotifier conn_notifier,
+    private this ( cstring auth_file, scope ConnectionNotifier conn_notifier,
         Object request_resources = null )
     {
         auto cred = fromFile(auth_file);
@@ -206,7 +206,7 @@ template ClientCore ( )
     ***************************************************************************/
 
     deprecated("Use the ctor that accepts a Settings instance instead")
-    private this ( Config config, ConnectionNotifier conn_notifier,
+    private this ( Config config, scope ConnectionNotifier conn_notifier,
         Object request_resources = null )
     {
         Settings settings;
@@ -259,7 +259,7 @@ template ClientCore ( )
     ***************************************************************************/
 
     deprecated("Use the ctor that accepts a Config instance instead")
-    private this ( Credentials cred, ConnectionNotifier conn_notifier,
+    private this ( Credentials cred, scope ConnectionNotifier conn_notifier,
         Object request_resources = null )
     {
         this.connections = new ConnectionSet(cred, this.outer.epoll,
@@ -475,10 +475,10 @@ template ClientCore ( )
             *******************************************************************/
 
             public int opApply (
-                int delegate ( ref IOStats sender, ref IOStats receiver ) dg )
+                scope int delegate ( ref IOStats sender, ref IOStats receiver ) dg )
             {
                 int res;
-                foreach ( conn; this.connections )
+                foreach ( conn; (&this).connections )
                 {
                     auto sender_stats = conn.getIOStats(true);
                     auto receiver_stats = conn.getIOStats(false);
@@ -497,11 +497,11 @@ template ClientCore ( )
             *******************************************************************/
 
             public int opApply (
-                int delegate ( ref AddrPort node_address, ref IOStats sender,
+                scope int delegate ( ref AddrPort node_address, ref IOStats sender,
                     ref IOStats receiver ) dg )
             {
                 int res;
-                foreach ( conn; this.connections )
+                foreach ( conn; (&this).connections )
                 {
                     auto sender_stats = conn.getIOStats(true);
                     auto receiver_stats = conn.getIOStats(false);
@@ -544,10 +544,10 @@ template ClientCore ( )
 
             *******************************************************************/
 
-            public int opApply ( int delegate ( ref TreeQueueStats ) dg )
+            public int opApply ( scope int delegate ( ref TreeQueueStats ) dg )
             {
                 int res;
-                foreach ( conn; this.connections )
+                foreach ( conn; (&this).connections )
                 {
                     auto queue_stats = conn.getSendQueueStats();
                     res = dg(queue_stats);
@@ -564,11 +564,11 @@ template ClientCore ( )
 
             *******************************************************************/
 
-            public int opApply ( int delegate ( ref AddrPort node_address,
+            public int opApply ( scope int delegate ( ref AddrPort node_address,
                 ref TreeQueueStats ) dg )
             {
                 int res;
-                foreach ( conn; this.connections )
+                foreach ( conn; (&this).connections )
                 {
                     auto queue_stats = conn.getSendQueueStats();
                     auto addr = conn.remote_address;
@@ -749,7 +749,7 @@ template ClientCore ( )
 
             *******************************************************************/
 
-            public int opApply ( int delegate ( ref istring request_name,
+            public int opApply ( scope int delegate ( ref istring request_name,
                 ref IRequestStats.RequestStats request_stats ) dg )
             {
                 int res;
@@ -758,7 +758,7 @@ template ClientCore ( )
                     static assert(is(typeof(rq_name) : istring));
 
                     auto slice = rq_name[];
-                    auto stats = this.outer.request!(rq_name)();
+                    auto stats = (&this).outer.request!(rq_name)();
                     res = dg(slice, stats);
                     if ( res )
                         break;
@@ -891,7 +891,7 @@ template ClientCore ( )
     ***************************************************************************/
 
     private bool controlImpl ( Request, ControllerInterface ) ( RequestId id,
-        void delegate ( ControllerInterface ) dg )
+        scope void delegate ( ControllerInterface ) dg )
     {
         if ( auto rq_control =
             this.connections.request_set.getRequestController(id,

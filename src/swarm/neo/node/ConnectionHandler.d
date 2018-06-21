@@ -132,15 +132,15 @@ class ConnectionHandler : IConnectionHandler
 
         deprecated("Use the other version of `add` that provides info for "
             "specific request versions")
-        public void add ( Command.Code code, cstring name, Handler handler,
+        public void add ( Command.Code code, cstring name, scope Handler handler,
             bool timing = true )
         {
             RequestInfo ri;
             ri.name = idup(name);
             ri.handler = handler;
             ri.timing = timing;
-            this.map[code] = ri;
-            this.supported_requests[code] = true;
+            (&this).map[code] = ri;
+            (&this).supported_requests[code] = true;
         }
 
         /***********************************************************************
@@ -160,7 +160,7 @@ class ConnectionHandler : IConnectionHandler
             bool timing = true )
         in
         {
-            assert((command.code in this.map) is null,
+            assert((command.code in (&this).map) is null,
                 "Either add a single handler for all versions of a request or "
                 ~ "separate handlers for each version");
             assert(name.length > 0);
@@ -172,8 +172,8 @@ class ConnectionHandler : IConnectionHandler
             ri.name = idup(name);
             ri.class_info = class_info;
             ri.timing = timing;
-            this.request_info[command] = ri;
-            this.supported_requests[command.code] = true;
+            (&this).request_info[command] = ri;
+            (&this).supported_requests[command.code] = true;
         }
 
         /***********************************************************************
@@ -189,13 +189,13 @@ class ConnectionHandler : IConnectionHandler
         ***********************************************************************/
 
         deprecated("Use the `add` method instead, specifying a name for the request.")
-        public void opIndexAssign ( Handler handler, Command.Code code )
+        public void opIndexAssign ( scope Handler handler, Command.Code code )
         {
             RequestInfo ri;
             ri.handler = handler;
             ri.timing = true;
-            this.map[code] = ri;
-            this.supported_requests[code] = true;
+            (&this).map[code] = ri;
+            (&this).supported_requests[code] = true;
         }
 
         /***********************************************************************
@@ -209,11 +209,11 @@ class ConnectionHandler : IConnectionHandler
 
         public void initStats ( RequestStats request_stats )
         {
-            foreach ( code, rq; this.map )
+            foreach ( code, rq; (&this).map )
                 if ( rq.name.length > 0 )
                     request_stats.init(rq.name, rq.timing);
 
-            foreach ( command, rq; this.request_info )
+            foreach ( command, rq; (&this).request_info )
                 if ( !(rq.name in request_stats.request_stats ) )
                     request_stats.init(rq.name, rq.timing);
         }
@@ -366,7 +366,7 @@ class ConnectionHandler : IConnectionHandler
         public this ( EpollSelectDispatcher epoll, Object shared_resources,
             RequestMap requests, bool no_delay,
             ref Const!(Key[istring]) credentials, INodeInfo node_info,
-            GetResourceAcquirerDg get_resource_acquirer )
+            scope GetResourceAcquirerDg get_resource_acquirer )
         {
             assert(requests.supported_requests.length > 0);
 
@@ -420,7 +420,7 @@ class ConnectionHandler : IConnectionHandler
 
     ***************************************************************************/
 
-    public this ( FinalizeDg return_to_pool, SharedParams shared_params )
+    public this ( scope FinalizeDg return_to_pool, SharedParams shared_params )
     {
         auto socket = new AddressIPSocket!();
         super(socket, null, null);
@@ -607,7 +607,7 @@ class ConnectionHandler : IConnectionHandler
     ***************************************************************************/
 
     private void handleRequest ( RequestMap.RequestInfo rq,
-        RequestOnConn connection, void delegate ( ) handle_request )
+        RequestOnConn connection, scope void delegate ( ) handle_request )
     {
         StopWatch timer;
 

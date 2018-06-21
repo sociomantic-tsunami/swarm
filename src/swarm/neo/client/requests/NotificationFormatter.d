@@ -66,7 +66,7 @@ public cstring formatNotification ( SU ) ( SU notification, ref mstring buf )
 
 *******************************************************************************/
 
-public void formatNotification ( SU ) ( SU notification, Sink sink )
+public void formatNotification ( SU ) ( SU notification, scope Sink sink )
 {
     static assert(is(TemplateInstanceArgs!(SmartUnion, SU)));
 

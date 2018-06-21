@@ -634,7 +634,7 @@ abstract class RequestOnConnBase
         ***********************************************************************/
 
         public EventNotification nextEvent (
-            NextEventFlags flags, FillPayloadDg fill_payload = null )
+            NextEventFlags flags, scope FillPayloadDg fill_payload = null )
         out ( fired_event )
         {
             auto fired_event_non_const = cast(EventNotification)fired_event;
@@ -815,7 +815,7 @@ abstract class RequestOnConnBase
 
         ***********************************************************************/
 
-        public void send ( void delegate ( Payload ) fill_payload )
+        public void send ( scope void delegate ( Payload ) fill_payload )
         {
             auto event = this.nextEvent(NextEventFlags.None, fill_payload);
             assert(event.active == event.active.sent);
@@ -869,7 +869,7 @@ abstract class RequestOnConnBase
         ***********************************************************************/
 
         deprecated("Use nextEvent instead")
-        public int sendAndHandleEvents ( void delegate ( Payload ) fill_payload )
+        public int sendAndHandleEvents ( scope void delegate ( Payload ) fill_payload )
         {
             scope payload = this.new Payload;
             fill_payload(payload);
@@ -997,7 +997,7 @@ abstract class RequestOnConnBase
         ***********************************************************************/
 
         public T receiveValue ( T ) (
-            void delegate ( int resume_code ) on_other_resume_code = null
+            scope void delegate ( int resume_code ) on_other_resume_code = null
         )
         {
             static assert(!hasIndirections!(T), typeof(this).stringof ~
@@ -1026,7 +1026,7 @@ abstract class RequestOnConnBase
 
         ***********************************************************************/
 
-        public void receive ( void delegate ( in void[] payload ) received )
+        public void receive ( scope void delegate ( in void[] payload ) received )
         {
             auto event = this.nextEvent(NextEventFlags.Receive);
             received(event.received.payload);
@@ -1056,7 +1056,7 @@ abstract class RequestOnConnBase
 
         deprecated("Use nextEvent instead")
         public int receiveAndHandleEvents (
-            void delegate ( in void[] payload ) received )
+            scope void delegate ( in void[] payload ) received )
         in
         {
             assert(this.outer.fiber.running, "receive: fiber not running");
@@ -1207,7 +1207,7 @@ abstract class RequestOnConnBase
 
         deprecated("Use nextEvent instead")
         public int yieldReceiveAndHandleEvents (
-            void delegate ( in void[] payload ) received
+            scope void delegate ( in void[] payload ) received
         )
         in
         {
@@ -1347,7 +1347,7 @@ abstract class RequestOnConnBase
         deprecated("Use either nextEvent, with your own counter or"
             "RequestEventDispatcher.periodicYield")
         public int periodicYieldReceiveAndHandleEvents ( ref uint call_count,
-            Const!(uint) yield_after, void delegate ( in void[] payload ) received )
+            Const!(uint) yield_after, scope void delegate ( in void[] payload ) received )
         {
             if ( call_count >= yield_after )
             {
@@ -1382,8 +1382,8 @@ abstract class RequestOnConnBase
         ***********************************************************************/
 
         deprecated("Use nextEvent instead")
-        public void sendReceive ( void delegate ( in void[] payload ) received,
-            void delegate ( Payload ) fill_payload )
+        public void sendReceive ( scope void delegate ( in void[] payload ) received,
+            scope void delegate ( Payload ) fill_payload )
         {
             scope payload = this.new Payload;
             fill_payload(payload);
@@ -1411,7 +1411,7 @@ abstract class RequestOnConnBase
 
         deprecated("Use nextEvent instead")
         public void sendReceive (
-            void delegate ( in void[] payload ) received,
+            scope void delegate ( in void[] payload ) received,
             in void[][] payload ...
         )
         in
@@ -1455,8 +1455,8 @@ abstract class RequestOnConnBase
 
         deprecated("Use nextEvent instead")
         public int sendReceiveAndHandleEvents (
-            void delegate ( in void[] payload ) received,
-            void delegate ( Payload ) fill_payload )
+            scope void delegate ( in void[] payload ) received,
+            scope void delegate ( Payload ) fill_payload )
         {
             scope payload = this.new Payload;
             fill_payload(payload);
@@ -1494,7 +1494,7 @@ abstract class RequestOnConnBase
 
         deprecated("Use nextEvent instead")
         public int sendReceiveAndHandleEvents (
-            void delegate ( in void[] recv_payload ) received,
+            scope void delegate ( in void[] recv_payload ) received,
             in void[][] payload ...
         )
         in
@@ -1720,7 +1720,7 @@ abstract class RequestOnConnBase
 
     ***************************************************************************/
 
-    protected void getPayloadForSending ( void delegate ( in void[][] payload ) send )
+    protected void getPayloadForSending ( scope void delegate ( in void[][] payload ) send )
     {
         try
             send(this.send_payload_);

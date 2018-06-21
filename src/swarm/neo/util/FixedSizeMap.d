@@ -87,7 +87,7 @@ class FixedSizeMap ( V, K ) : StandardKeyHashingMap!(V, K)
 
     ***************************************************************************/
 
-    public void removeExisting ( K key, void delegate ( ref V val ) removed = null )
+    public void removeExisting ( K key, scope void delegate ( ref V val ) removed = null )
     {
         bool was_present = this.remove(key, removed);
         assert(was_present, typeof(this).stringof ~
