@@ -51,21 +51,21 @@ struct FiberTokenHashGenerator
     {
         if (receive)
         {
-            assert(this.receiving);
+            assert((&this).receiving);
         }
         else
         {
-            assert(!this.receiving);
+            assert(!(&this).receiving);
         }
     }
     body
     {
-        this.hash = rand();
+        (&this).hash = rand();
 
         if (receive)
-            this.hash = ~this.hash;
+            (&this).hash = ~(&this).hash;
 
-        return this.get();
+        return (&this).get();
     }
 
     /***************************************************************************
@@ -78,7 +78,7 @@ struct FiberTokenHashGenerator
 
     MessageFiber.Token get ( )
     {
-        return MessageFiber.Token(this.hash);
+        return MessageFiber.Token((&this).hash);
     }
 
     /***************************************************************************
@@ -90,6 +90,6 @@ struct FiberTokenHashGenerator
 
     bool receiving ( )
     {
-        return this.hash < 0;
+        return (&this).hash < 0;
     }
 }
