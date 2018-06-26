@@ -102,6 +102,21 @@ public class Credentials
 
     /***************************************************************************
 
+        Passes the list of registered clients to a delegate, one by one.
+
+        Params:
+            sink = delegate to pass registered clients to.
+
+    ***************************************************************************/
+
+    public void listRegisteredClients ( void delegate ( cstring ) sink )
+    {
+        foreach (client, _; this.credentials_)
+            sink(client);
+    }
+
+    /***************************************************************************
+
         Specialised exception class containing the file and line where a parsing
         error occurred.
 
