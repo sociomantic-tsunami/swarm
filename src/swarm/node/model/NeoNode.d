@@ -57,6 +57,8 @@ import ocean.util.log.Logger;
 
 import ocean.core.Enforce;
 
+import swarm.util.Verify;
+
 /*******************************************************************************
 
     Static module logger
@@ -817,7 +819,8 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
             if ( this.credentials_file )
             {
                 unix_socket_handlers =
-                    ["update-credentials": &this.handleUpdateCredentials];
+                    ["update-credentials"[]: &this.handleUpdateCredentials,
+                     "list-credentials": &this.handleListCredentials];
             }
 
             unix_listener = new UnixListener(
@@ -955,6 +958,45 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
         catch (Exception e)
         {
             send_response("Error updating credentials: ");
+            send_response(e.message());
+            send_response("\n");
+        }
+    }
+
+    /***************************************************************************
+
+        Unix domain socket connection handler, lists the credentials.
+
+        Params:
+            args          = command arguments
+            send_response = delegate to write to the client socket
+
+    ***************************************************************************/
+
+    private void handleListCredentials ( cstring args,
+        void delegate ( cstring response ) send_response )
+    {
+        verify (this.credentials_file !is null);
+
+        if (args.length)
+        {
+            send_response("Error: No command arguments expected\n");
+            return;
+        }
+
+        scope print_with_nl = ( cstring line )
+        {
+            send_response(line);
+            send_response("\n");
+        };
+        try
+        {
+            send_response("Registered credentials:\n");
+            this.credentials_file.listRegisteredClients(print_with_nl);
+        }
+        catch (Exception e)
+        {
+            send_response("Error listing credentials: ");
             send_response(e.message());
             send_response("\n");
         }
