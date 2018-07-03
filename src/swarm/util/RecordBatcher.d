@@ -648,7 +648,7 @@ unittest
 {
     auto lzo = new Lzo;
     auto writer = new RecordBatcher(lzo, 200);
-    auto reader = new RecordBatch(lzo, 200);
+    auto reader = new RecordBatch(lzo);
 
     mstring key, value_S, value_M, value_L;
     key.length = 16;
@@ -703,7 +703,7 @@ unittest
 {
     auto lzo = new Lzo;
     auto writer = new RecordBatcher(lzo, RecordBatcher.DefaultMaxBatchSize * 10);
-    auto reader = new RecordBatch(lzo, RecordBatcher.DefaultMaxBatchSize);
+    auto reader = new RecordBatch(lzo);
 
     ubyte[] compressed;
     uint added;
