@@ -33,10 +33,10 @@ public class DoublePutImpl_v0 : IRequest
     mixin RequestCore!();
 
     /// Request code / version. Required by ConnectionHandler.
-    const Command command = Command(RequestCode.DoublePut, 0);
+    static immutable Command command = Command(RequestCode.DoublePut, 0);
 
     /// Request name for stats tracking. Required by ConnectionHandler.
-    const istring name = "DoublePut";
+    static immutable istring name = "DoublePut";
 
     /***************************************************************************
 
