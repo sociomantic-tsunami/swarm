@@ -625,7 +625,7 @@ abstract class RequestOnConnBase
         ***********************************************************************/
 
         public EventNotification nextEvent (
-            NextEventFlags flags, FillPayloadDg fill_payload = null )
+            NextEventFlags flags, scope FillPayloadDg fill_payload = null )
         out ( fired_event )
         {
             auto fired_event_non_const = cast(EventNotification)fired_event;
@@ -816,7 +816,7 @@ abstract class RequestOnConnBase
 
         ***********************************************************************/
 
-        public void send ( void delegate ( Payload ) fill_payload )
+        public void send ( scope void delegate ( Payload ) fill_payload )
         {
             auto event = this.nextEvent(NextEventFlags.None, fill_payload);
             verify(event.active == event.active.sent);
@@ -850,7 +850,7 @@ abstract class RequestOnConnBase
         ***********************************************************************/
 
         public T receiveValue ( T ) (
-            void delegate ( int resume_code ) on_other_resume_code = null
+            scope void delegate ( int resume_code ) on_other_resume_code = null
         )
         {
             static assert(!hasIndirections!(T), typeof(this).stringof ~
@@ -879,7 +879,7 @@ abstract class RequestOnConnBase
 
         ***********************************************************************/
 
-        public void receive ( void delegate ( in void[] payload ) received )
+        public void receive ( scope void delegate ( in void[] payload ) received )
         {
             auto event = this.nextEvent(NextEventFlags.Receive);
             received(event.received.payload);
@@ -1017,7 +1017,7 @@ abstract class RequestOnConnBase
 
     ***************************************************************************/
 
-    protected void getPayloadForSending ( void delegate ( in void[][] payload ) send )
+    protected void getPayloadForSending ( scope void delegate ( in void[][] payload ) send )
     {
         try
             send(this.send_payload_);
