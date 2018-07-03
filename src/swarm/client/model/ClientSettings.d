@@ -57,8 +57,8 @@ public struct ClientSettings
 
     invariant ()
     {
-        assert(this.conn_limit > 0);
-        assert(this.queue_size > 0);
-        assert(this.fiber_stack_size > 0);
+        assert((&this).conn_limit > 0);
+        assert((&this).queue_size > 0);
+        assert((&this).fiber_stack_size > 0);
     }
 }

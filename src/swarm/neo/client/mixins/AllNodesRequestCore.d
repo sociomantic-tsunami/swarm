@@ -133,30 +133,30 @@ public struct AllNodesRequest ( Request, Connector, Disconnected, Initialiser,
 
             try
             {
-                if ( !this.connector() )
+                if ( !(&this).connector() )
                     return; // request aborted
 
-                if ( !this.initialiser.initialise() )
+                if ( !(&this).initialiser.initialise() )
                     return; // request aborted
 
-                this.handler();
+                (&this).handler();
             }
             // Only retry in the case of a connection I/O error or error event
             // in epoll. Other errors indicate internal problems and should not
             // be retried.
             catch ( IOError e )
             {
-                this.disconnected(e);
+                (&this).disconnected(e);
                 reconnect = true;
             }
             catch ( EpollException e )
             {
-                this.disconnected(e);
+                (&this).disconnected(e);
                 reconnect = true;
             }
             finally
             {
-                this.initialiser.reset();
+                (&this).initialiser.reset();
             }
         }
         while ( reconnect );
@@ -195,7 +195,7 @@ public AllNodesRequest!(Request, Connector, Disconnected, Initialiser, Handler)
     createAllNodesRequest ( Request, Connector, Disconnected, Initialiser, Handler )
     ( RequestOnConn.EventDispatcherAllNodes conn,
     Request.Context* context, Connector connector, Disconnected disconnected,
-    Initialiser initialiser, Handler handler )
+    Initialiser initialiser, scope Handler handler )
 {
     return
         AllNodesRequest!(Request, Connector, Disconnected, Initialiser, Handler)
@@ -385,9 +385,9 @@ public struct AllNodesRequestInitialiser ( Request, FillPayload,
     public bool initialise ( )
     {
         // establishConnection() should guarantee we're already connected
-        assert(this.conn.connection_status() == Connection.Status.Connected);
+        assert((&this).conn.connection_status() == Connection.Status.Connected);
 
-        auto all_nodes = &this.context.shared_working.all_nodes;
+        auto all_nodes = &(&this).context.shared_working.all_nodes;
 
         // We know that the connection is up, so from now on we count this
         // request among those which the started notification depends on.
@@ -396,18 +396,18 @@ public struct AllNodesRequestInitialiser ( Request, FillPayload,
             all_nodes.initialising--;
 
         // Send request info to node
-        this.conn.send(
+        (&this).conn.send(
             ( conn.Payload payload )
             {
                 payload.add(Request.cmd.code);
                 payload.add(Request.cmd.ver);
-                this.fill_payload(payload);
+                (&this).fill_payload(payload);
             }
         );
 
         // Receive status from node and stop the request if not Ok
         auto status = conn.receiveValue!(ubyte)();
-        if ( !this.handle_status_code(status) )
+        if ( !(&this).handle_status_code(status) )
             return false;
 
         return true;
@@ -558,7 +558,7 @@ public struct AllNodesRequestSharedWorkingData
 
     public uint num_initialising ( )
     {
-        return this.initialising;
+        return (&this).initialising;
     }
 
     /***************************************************************************
@@ -583,14 +583,14 @@ public struct AllNodesRequestSharedWorkingData
     public bool allInitialised ( Request ) ( Request.Context* context )
     in
     {
-        assert(this.initialising == 0);
+        assert((&this).initialising == 0);
     }
     body
     {
-        if ( this.called_started_notifier )
+        if ( (&this).called_started_notifier )
             return false;
 
-        this.called_started_notifier = true;
+        (&this).called_started_notifier = true;
 
         Request.Notification n;
         n.started = RequestInfo(context.request_id);
@@ -612,8 +612,8 @@ private template ExampleRequestCore ( )
     import ocean.core.SmartUnion;
 
     // Required by RequestCore
-    const ubyte RequestCode = 0;
-    const ubyte RequestVersion = 0;
+    static immutable ubyte RequestCode = 0;
+    static immutable ubyte RequestVersion = 0;
 
     // Required by RequestCore
     struct Args
