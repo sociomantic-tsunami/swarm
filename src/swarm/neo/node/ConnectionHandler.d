@@ -56,6 +56,7 @@ class ConnectionHandler : IConnectionHandler
     import swarm.neo.request.Command;
 
     import ocean.io.select.EpollSelectDispatcher;
+    import ocean.io.select.protocol.generic.ErrnoIOException;
     import ocean.time.StopWatch;
 
     import ClassicSwarm =
@@ -523,6 +524,13 @@ class ConnectionHandler : IConnectionHandler
                 };
 
             this.shared_params.get_resource_acquirer(handle_request);
+        }
+        catch ( IOError e )
+        {
+            log.info("{}:{}: IOError thrown from request handler: {} @ {}:{}",
+                this.connection.connected_client, rq.name,
+                e.message(), e.file, e.line);
+            throw e;
         }
         catch ( Exception e )
         {
