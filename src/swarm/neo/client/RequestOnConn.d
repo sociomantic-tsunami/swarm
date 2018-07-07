@@ -334,7 +334,9 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
     public enum AbortReason
     {
         /// The request was aborted due to a timeout
-        Timeout
+        Timeout,
+        /// The request was aborted due to a user request
+        UserRequested
     }
 
     /***************************************************************************

@@ -844,8 +844,6 @@ template ClientCore ( )
 
     /***************************************************************************
 
-        Note: currently unimplemented.
-
         Aborts all requests. This will be useful for an application which
         wants to shut down while it still has requests pending. Aborting all
         requests should cause their finished notifications to be fired,
@@ -856,7 +854,24 @@ template ClientCore ( )
 
     public void abortAllRequests ( )
     {
-        // TODO
+        this.connections.request_set.abortAllRequests();
+    }
+
+    /***************************************************************************
+
+        Aborts a specific requests. This is useful if there's no way to
+        end a request cleanly. Note that this doesn't notify the node that the
+        request has ended, so it's wise to call `reconnect` to drop all
+        connections after that.
+
+        Params:
+            id = id of request to abort
+
+    ***************************************************************************/
+
+    public void abortAllRequests ( RequestId id )
+    {
+        this.connections.request_set.abortRequest(id);
     }
 
     /***************************************************************************
