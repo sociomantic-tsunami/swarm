@@ -87,7 +87,7 @@ public class DisconnectDetector : ISelectClient
 
     ***************************************************************************/
 
-    public this ( Handle fd, DisconnectionHandler handler )
+    public this ( Handle fd, scope DisconnectionHandler handler )
     {
         verify (fd != -1, "You have to provide a valid open file descriptor");
         verify (handler !is null, "You need to provide a non-null handler");
