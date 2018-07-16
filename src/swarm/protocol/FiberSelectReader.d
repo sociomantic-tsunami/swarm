@@ -80,7 +80,7 @@ public class FiberSelectReader : Ocean.FiberSelectReader
     public IAddrPort addr_port;
 
     /// Maximum array size to read
-    protected size_t max_array_size;
+    protected size_t max_array_size = 10 * 1024 * 1024;
 
     /***************************************************************************
 
