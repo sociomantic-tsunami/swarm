@@ -253,7 +253,7 @@ public class RequestStats
         ***********************************************************************/
 
         public int opApply (
-            int delegate ( ref ulong bucket_end, ref ulong count ) dg )
+            scope int delegate ( ref ulong bucket_end, ref ulong count ) dg )
         {
             int ret;
             foreach ( i, count; this.bucket_count )
