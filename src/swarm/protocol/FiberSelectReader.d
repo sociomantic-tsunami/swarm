@@ -31,6 +31,8 @@ import ocean.transition;
 
 import ocean.core.Array;
 
+import ocean.core.Exception;
+
 import Ocean = ocean.io.select.protocol.fiber.FiberSelectReader;
 
 import ocean.io.select.protocol.fiber.model.IFiberSelectProtocol;
@@ -42,6 +44,33 @@ import ocean.core.Traits;
 import ocean.math.Math : min, max;
 
 
+/***************************************************************************
+
+    Exception instance to throw in case of the input validation error.
+
+***************************************************************************/
+
+public static class InputTooLargeException : Exception
+{
+    mixin ReusableExceptionImplementation!();
+}
+
+
+/// ditto
+protected static InputTooLargeException input_exception;
+
+
+/***************************************************************************
+
+    Static constructor.
+
+***************************************************************************/
+
+static this ()
+{
+    .input_exception = new InputTooLargeException;
+}
+
 
 public class FiberSelectReader : Ocean.FiberSelectReader
 {
@@ -49,6 +78,9 @@ public class FiberSelectReader : Ocean.FiberSelectReader
 
     /// Address/port getter for underlying connection.
     public IAddrPort addr_port;
+
+    /// Maximum array size to read
+    protected size_t max_array_size;
 
     /***************************************************************************
 
@@ -64,14 +96,17 @@ public class FiberSelectReader : Ocean.FiberSelectReader
                           remote hung up
             error_e     = exception to throw on I/O error
             buffer_size = input buffer size
+            max_array_size = maximum array length to allow
 
     ***************************************************************************/
 
     public this ( IInputDevice input, SelectFiber fiber,
         IOWarning warning_e, IOError error_e,
-        size_t buffer_size = this.default_buffer_size )
+        size_t buffer_size = this.default_buffer_size,
+        size_t max_array_size = 10 * 1024 * 1024 )
     {
         super(input, fiber, warning_e, error_e, buffer_size);
+        this.max_array_size = max_array_size;
     }
 
 
@@ -155,6 +190,8 @@ public class FiberSelectReader : Ocean.FiberSelectReader
                 - IOWarning if neither error is reported by errno nor socket
                   error
                 - IOError if an error is reported by errno or socket error
+                - InputTooLargeException if the array is longer than allowed
+                  size.
 
     ***************************************************************************/
 
@@ -162,11 +199,10 @@ public class FiberSelectReader : Ocean.FiberSelectReader
     {
         static assert ( !isArrayType!(T), "Reading multi-dimensional arrays not currently supported");
 
-        // Read array length
-        SizeT array_len;
-        this.read(array_len);
-
-        this.readArray(array, array_len);
+        if (!this.readArrayLimit(array, this.max_array_size))
+        {
+            throw .input_exception.set("The input array is too long.");
+        }
 
         return this;
     }
