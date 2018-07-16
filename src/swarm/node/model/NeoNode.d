@@ -234,7 +234,7 @@ public abstract class INodeBase : INode, INodeInfo
 
      **************************************************************************/
 
-    public void error_callback ( ErrorDg error_dg )
+    public void error_callback ( scope ErrorDg error_dg )
     {
         this.error_dg = error_dg;
     }
@@ -913,7 +913,7 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
     ***************************************************************************/
 
     abstract protected void getResourceAcquirer (
-        void delegate ( Object resource_acquirer ) handle_request_dg );
+        scope void delegate ( Object resource_acquirer ) handle_request_dg );
 
     /***************************************************************************
 
@@ -926,7 +926,7 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
     ***************************************************************************/
 
     private void handleUpdateCredentials ( cstring args,
-        void delegate ( cstring response ) send_response )
+        scope void delegate ( cstring response ) send_response )
     {
         verify(this.credentials_file !is null);
 
@@ -1022,7 +1022,7 @@ version (UnitTest)
 {
     private class TestConnectionHandler : ISwarmConnectionHandler
     {
-        public this (void delegate(IConnectionHandler) a, ConnectionSetupParams b)
+        public this (scope void delegate(IConnectionHandler) a, ConnectionSetupParams b)
         {
             super(a, b);
         }
