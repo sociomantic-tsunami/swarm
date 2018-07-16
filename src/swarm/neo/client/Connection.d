@@ -263,7 +263,7 @@ public final class Connection: ConnectionBase
 
     ***************************************************************************/
 
-    public Status start ( AddrPort node_address, StartupNotifier startup_notifier )
+    public Status start ( AddrPort node_address, scope StartupNotifier startup_notifier )
     {
         debug ( SwarmConn )
         {
@@ -626,7 +626,7 @@ public final class Connection: ConnectionBase
     ***************************************************************************/
 
     override protected void getPayloadForSending (
-        RequestId id, void delegate ( in void[][] payload ) send
+        RequestId id, scope void delegate ( in void[][] payload ) send
     )
     {
         if (auto request_handler = this.getRequestOnConn(id))

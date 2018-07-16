@@ -50,7 +50,7 @@ public struct AddrPort
 
     public bool is_set ( ) // const
     {
-        return this.naddress && this.nport;
+        return (&this).naddress && (&this).nport;
     }
 
     /***************************************************************************
@@ -63,7 +63,7 @@ public struct AddrPort
 
     public uint address ( )
     {
-        return ntohl(this.naddress);
+        return ntohl((&this).naddress);
     }
 
     /***************************************************************************
@@ -81,7 +81,7 @@ public struct AddrPort
 
     public uint address ( uint address )
     {
-        this.naddress = htonl(address);
+        (&this).naddress = htonl(address);
         return address;
     }
 
@@ -115,7 +115,7 @@ public struct AddrPort
 
         if (inet_aton(buf.ptr, &result))
         {
-            this.naddress = result.s_addr;
+            (&this).naddress = result.s_addr;
             return true;
         }
 
@@ -124,7 +124,7 @@ public struct AddrPort
 
     unittest
     {
-        typeof(*this) x;
+        typeof(*(&this)) x;
         bool success = x.setAddress("192.168.222.111");
         test(success);
         test!("==")(x.address_bytes, [cast(ubyte)192, 168, 222, 111]);
@@ -144,7 +144,7 @@ public struct AddrPort
 
     public ushort port ( ) // const
     {
-        return ntohs(this.nport);
+        return ntohs((&this).nport);
     }
 
     /***************************************************************************
@@ -161,7 +161,7 @@ public struct AddrPort
 
     public ushort port ( ushort port )
     {
-        return this.nport = htons(port);
+        return (&this).nport = htons(port);
     }
 
     /***************************************************************************
@@ -188,7 +188,7 @@ public struct AddrPort
 
     public ubyte[] address_bytes ( )
     {
-        return (cast(ubyte*)&this.naddress)[0 .. this.naddress.sizeof];
+        return (cast(ubyte*)&(&this).naddress)[0 .. (&this).naddress.sizeof];
     }
 
      /***************************************************************************
@@ -205,8 +205,8 @@ public struct AddrPort
     {
         sockaddr_in result;
         result.sin_family      = AF_INET;
-        result.sin_port        = this.nport;
-        result.sin_addr.s_addr = this.naddress;
+        result.sin_port        = (&this).nport;
+        result.sin_addr.s_addr = (&this).naddress;
         return result;
     }
 
@@ -222,11 +222,11 @@ public struct AddrPort
 
     ***************************************************************************/
 
-    public typeof(this) set ( sockaddr_in src )
+    public typeof((&this)) set ( sockaddr_in src )
     {
-        this.naddress = src.sin_addr.s_addr;
-        this.nport    = src.sin_port;
-        return this;
+        (&this).naddress = src.sin_addr.s_addr;
+        (&this).nport    = src.sin_port;
+        return (&this);
     }
 
     /***************************************************************************
@@ -253,7 +253,7 @@ public struct AddrPort
          * Make sure address & port really fit in a long without a signed
          * overflow.
          */
-        static assert(this.address.sizeof + this.port.sizeof < long.sizeof);
-        return ((cast(long)this.address) << (this.port.sizeof * 8)) | this.port;
+        static assert((&this).address.sizeof + (&this).port.sizeof < long.sizeof);
+        return ((cast(long)(&this).address) << ((&this).port.sizeof * 8)) | (&this).port;
     }
 }
