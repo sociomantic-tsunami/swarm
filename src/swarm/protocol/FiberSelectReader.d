@@ -118,13 +118,16 @@ public class FiberSelectReader : Ocean.FiberSelectReader
         Params:
             socket      = socket to read from
             buffer_size = input buffer size
+            max_array_size = maximum array length to allow
 
     ***************************************************************************/
 
     public this ( IFiberSelectProtocol socket,
-           size_t buffer_size = this.default_buffer_size )
+        size_t buffer_size = this.default_buffer_size,
+        size_t max_array_size = 10 * 1024 * 1024 )
     {
         super(socket, buffer_size);
+        this.max_array_size = max_array_size;
     }
 
     /***************************************************************************
