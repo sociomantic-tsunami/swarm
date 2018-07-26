@@ -34,7 +34,95 @@ import ocean.core.Verify;
 
 *******************************************************************************/
 
-public abstract class Node ( NodeType, istring id ) : ITurtleEnv
+
+public class Cluster ( NodeType, istring id )
+{
+    import swarm.neo.AddrPort;
+    import core.stdc.stdlib : rand;
+
+    /// Used to prevent creating multiple fake nodes of the same type.
+    static bool already_created = false;
+
+    /// TODO indexed by legacy port
+    protected Node!(NodeType)[] nodes;
+
+    /***************************************************************************
+
+        Constructor
+
+    ***************************************************************************/
+
+    public this ( )
+    {
+        verify(!already_created, "Can only have one " ~ id ~ " per turtle test app");
+        already_created = true;
+    }
+
+    /// TODO
+    public Node!(NodeType) addNode ( AddrPort addr )
+    {
+        auto node = new Node!(NodeType);
+        node.start(addr);
+        this.nodes ~= node;
+        return node;
+    }
+
+    /// TODO
+    public Node!(NodeType) randomNode ( )
+    {
+        verify(this.nodes.length > 0);
+        return this.nodes[rand() % this.nodes.length];
+    }
+
+    /***************************************************************************
+
+        Generate nodes files for the fake nodes. If the node supports the neo
+        protocol then the neo nodes file will also be written.
+
+        Params:
+            directory = The directory the files will be written to.
+
+    ***************************************************************************/
+
+    public void genConfigFiles ( cstring directory )
+    {
+        shell("mkdir -p " ~ directory);
+
+        auto legacyfile = new File(directory ~ "/" ~ id ~ ".nodes",
+            File.WriteCreate);
+        scope (exit) legacyfile.close();
+
+        static if ( is(typeof(NodeType.neo_address)) )
+        {
+            auto neofile = new File(directory ~ "/" ~ id ~ ".neo.nodes",
+                File.WriteCreate);
+            scope (exit) neofile.close();
+        }
+
+        foreach ( addr, node; this.nodes )
+        {
+            auto node_address = format("{}.{}.{}.{}",
+                addr.address_bytes[0],
+                addr.address_bytes[1],
+                addr.address_bytes[2],
+                addr.address_bytes[3]);
+
+            legacyfile.write(node_address ~ ":" ~
+                Integer.toString(node.node_addrport.port));
+            legacyfile.write("\n");
+
+            static if ( is(typeof(NodeType.neo_address)) )
+            {
+                neofile.write(node_address ~ ":" ~
+                    Integer.toString(node.neo_address.port));
+                neofile.write("\n");
+            }
+        }
+    }
+}
+
+/// TODO
+public abstract class Node ( NodeType ) : ITurtleEnv
 {
     import swarm.Const : NodeItem;
     import swarm.neo.AddrPort;
@@ -54,23 +142,8 @@ public abstract class Node ( NodeType, istring id ) : ITurtleEnv
     /// State of the fake node service.
     private State state;
 
-    /// Used to prevent creating multiple fake nodes of the same type.
-    static bool already_created = false;
-
     /// Node service object. Instantiated when start() is called.
     protected NodeType node;
-
-    /***************************************************************************
-
-        Constructor
-
-    ***************************************************************************/
-
-    public this ( )
-    {
-        verify(!already_created, "Can only have one " ~ id ~ " per turtle test app");
-        already_created = true;
-    }
 
     /***************************************************************************
 
@@ -141,46 +214,6 @@ public abstract class Node ( NodeType, istring id ) : ITurtleEnv
     public void reset ( )
     {
         this.clear();
-    }
-
-    /***************************************************************************
-
-        Generate nodes files for the fake nodes. If the node supports the neo
-        protocol then the neo nodes file will also be written.
-
-        Params:
-            directory = The directory the files will be written to.
-
-    ***************************************************************************/
-
-    public void genConfigFiles ( cstring directory )
-    {
-        shell("mkdir -p " ~ directory);
-
-        auto legacyfile = new File(directory ~ "/" ~ id ~ ".nodes",
-            File.WriteCreate);
-        scope (exit) legacyfile.close();
-
-        auto node_address = format("{}.{}.{}.{}",
-            this.node_addrport.address_bytes[0],
-            this.node_addrport.address_bytes[1],
-            this.node_addrport.address_bytes[2],
-            this.node_addrport.address_bytes[3]);
-
-        legacyfile.write(node_address ~ ":" ~
-            Integer.toString(this.node_addrport.port));
-        legacyfile.write("\n");
-
-        static if ( is(typeof(this.node.neo_address)) )
-        {
-            auto neofile = new File(directory ~ "/" ~ id ~ ".neo.nodes",
-                File.WriteCreate);
-            scope (exit) neofile.close();
-
-            neofile.write(node_address ~ ":" ~
-                Integer.toString(this.node.neo_address.port));
-            neofile.write("\n");
-        }
     }
 
     /***************************************************************************
