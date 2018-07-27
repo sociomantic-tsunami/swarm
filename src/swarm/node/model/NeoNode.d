@@ -199,6 +199,32 @@ public abstract class INodeBase : INode, INodeInfo
 
         Params:
             node = node addres & port
+            conn_setup_params = connection handler constructor arguments.
+                Note that the `error_dg` field should not be set by the user; it
+                is set internally. To set a user-defined error callback, use the
+                `error_callback` method
+            listener = select listener, is evaluated exactly once after
+                       conn_setup_params have been populated
+
+    ***************************************************************************/
+
+    deprecated("Use the ctor that accepts an AddrPort")
+    public this ( NodeItem node, ConnectionSetupParams conn_setup_params,
+        lazy ISelectListener listener, ISelectListener neo_listener = null,
+        ISelectListener unix_listener = null )
+    {
+        AddrPort addr;
+        addr.set(node);
+        this(addr, conn_setup_params, listener, neo_listener, unix_listener);
+    }
+
+
+    /***************************************************************************
+
+        Constructor
+
+        Params:
+            node = node addres & port
             conn_setup_params = connection handler constructor arguments
             listener = select listener, is evaluated exactly once after
                        conn_setup_params have been populated
@@ -208,12 +234,11 @@ public abstract class INodeBase : INode, INodeInfo
 
     ***************************************************************************/
 
-    public this ( NodeItem node, ConnectionSetupParams conn_setup_params,
-                  lazy ISelectListener listener,
-                  ISelectListener neo_listener = null,
-                  ISelectListener unix_listener = null )
+    public this ( AddrPort node, ConnectionSetupParams conn_setup_params,
+        lazy ISelectListener listener, ISelectListener neo_listener = null,
+        ISelectListener unix_listener = null )
     {
-        this.legacy_address_.set(node);
+        this.legacy_address_ = node;
 
         this.request_stats_ = new RequestStats;
         this.neo_request_stats_ = new RequestStats;
@@ -648,6 +673,7 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
     import ocean.net.server.unix.UnixConnectionHandler;
     import swarm.neo.authentication.NodeCredentials;
     import swarm.neo.authentication.HmacDef : Key;
+    import core.sys.posix.netinet.in_ : sockaddr_in, sockaddr;
 
     /***************************************************************************
 
@@ -786,15 +812,35 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
 
     ***************************************************************************/
 
+    deprecated("Use the ctor that accepts an AddrPort")
     public this ( NodeItem node, ushort neo_port,
+        ConnectionSetupParams conn_setup_params, Options options, int backlog )
+    {
+        AddrPort addr;
+        addr.set(node);
+        this(addr, neo_port, conn_setup_params, options, backlog);
+    }
+
+    /***************************************************************************
+
+        Constructor
+
+        Params:
+            node = node addres & port
+            neo_port = port of neo listener (same address as above)
+            conn_setup_params = connection handler constructor arguments
+            options = options for the neo node and connection handlers
+            backlog = (see ISelectListener ctor)
+
+    ***************************************************************************/
+
+    public this ( AddrPort node, ushort neo_port,
                   ConnectionSetupParams conn_setup_params, Options options,
                   int backlog )
     {
         verify(options.epoll !is null);
 
         this.shared_resources = options.shared_resources;
-
-        InetAddress!(false) addr, neo_addr;
 
         // Create listener sockets.
         this.socket = new AddressIPSocket!();
@@ -846,13 +892,18 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
         }
 
         // Super ctor.
+        InetAddress!(false) addr, neo_addr;
+        addr = cast(sockaddr_in)node;
+        neo_addr = addr;
+        neo_addr.port = neo_port;
+
         super(node, conn_setup_params,
             this.listener = new Listener(
-                addr(node.Address, node.Port), this.socket, conn_setup_params,
+                cast(sockaddr*)&addr.addr, this.socket, conn_setup_params,
                 backlog
             ),
             this.neo_listener = new NeoListener(
-                neo_addr(node.Address, neo_port), this.neo_socket,
+                cast(sockaddr*)&neo_addr.addr, this.neo_socket,
                 neo_conn_setup_params, backlog
             ),
             unix_listener
@@ -869,6 +920,7 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
         this.neo_address_.setAddress(this.neo_socket.address());
         this.neo_address_.port(this.neo_socket.port());
     }
+
 
     /**************************************************************************
 
@@ -1022,15 +1074,36 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
 
     ***************************************************************************/
 
+    deprecated("Use the ctor that accepts an AddrPort")
     public this ( NodeItem node, ConnectionSetupParams conn_setup_params,
+        int backlog )
+    {
+        AddrPort addr;
+        addr.set(node);
+        this(addr, conn_setup_params, backlog);
+    }
+
+    /***************************************************************************
+
+        Constructor
+
+        Params:
+            node = node addres & port
+            conn_setup_params = connection handler constructor arguments
+            backlog = (see ISelectListener ctor)
+
+    ***************************************************************************/
+
+    public this ( AddrPort node, ConnectionSetupParams conn_setup_params,
                   int backlog )
     {
         InetAddress!(false) addr;
+        addr = cast(sockaddr_in)node;
 
         this.socket = new AddressIPSocket!();
         super(node, conn_setup_params,
             this.listener = new Listener(
-                addr(node.Address, node.Port), this.socket, conn_setup_params,
+                cast(sockaddr*)&addr.addr, this.socket, conn_setup_params,
                 backlog
             )
         );
@@ -1095,7 +1168,10 @@ version (UnitTest)
     {
         public this ( )
         {
-            super(NodeItem("127.0.0.1", 2323), new ConnectionSetupParams, 1);
+            AddrPort addr;
+            addr.setAddress("127.0.0.1");
+            addr.port = 2323;
+            super(addr, new ConnectionSetupParams, 1);
         }
 
         protected override cstring id ( )
