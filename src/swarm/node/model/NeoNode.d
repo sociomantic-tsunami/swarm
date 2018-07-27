@@ -151,11 +151,20 @@ public abstract class INodeBase : INode, INodeInfo
 
     /***************************************************************************
 
+        Buffer used for formatting human-readable addresses.
+
+    ***************************************************************************/
+
+    private mstring addr_buf;
+
+
+    /***************************************************************************
+
         Node item struct, containing node address and port.
 
     ***************************************************************************/
 
-    private NodeItem node_item_;
+    private AddrPort legacy_address_;
 
 
     /***************************************************************************
@@ -204,7 +213,7 @@ public abstract class INodeBase : INode, INodeInfo
                   ISelectListener neo_listener = null,
                   ISelectListener unix_listener = null )
     {
-        this.node_item_ = node;
+        this.legacy_address_.set(node);
 
         this.request_stats_ = new RequestStats;
         this.neo_request_stats_ = new RequestStats;
@@ -535,13 +544,26 @@ public abstract class INodeBase : INode, INodeInfo
     /***************************************************************************
 
         Returns:
-            Node item struct, containing node address, port & hash range.
+            Node item struct, containing node address & port
 
     ***************************************************************************/
 
     public NodeItem node_item ( )
     {
-        return this.node_item_;
+        return this.legacy_address_.asNodeItem(this.addr_buf);
+    }
+
+
+    /***************************************************************************
+
+        Returns:
+            AddrPort struct, containing node address & port
+
+    ***************************************************************************/
+
+    public AddrPort addr_port ( )
+    {
+        return this.legacy_address_;
     }
 
 
@@ -843,7 +865,7 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
         enforce(this.socket.updateAddress() == 0, "socket.updateAddress() failed!");
         enforce(this.neo_socket.updateAddress() == 0, "socket.updateAddress() failed!");
 
-        this.node_item_.Port = this.socket.port();
+        this.legacy_address_.port = this.socket.port();
         this.neo_address_.setAddress(this.neo_socket.address());
         this.neo_address_.port(this.neo_socket.port());
     }

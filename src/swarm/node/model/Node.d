@@ -27,6 +27,7 @@ module swarm.node.model.Node;
 import ocean.transition;
 
 import swarm.Const : NodeItem;
+import swarm.neo.AddrPort;
 
 import swarm.node.model.INode;
 import swarm.node.model.INodeInfo;
@@ -149,11 +150,20 @@ public abstract class INodeBase : INode, INodeInfo
 
     /***************************************************************************
 
+        Buffer used for formatting human-readable addresses.
+
+    ***************************************************************************/
+
+    private mstring addr_buf;
+
+
+    /***************************************************************************
+
         Node item struct, containing node address and port.
 
     ***************************************************************************/
 
-    private NodeItem node_item_;
+    private AddrPort address_;
 
 
     /***************************************************************************
@@ -192,7 +202,7 @@ public abstract class INodeBase : INode, INodeInfo
     public this ( NodeItem node, ConnectionSetupParams conn_setup_params,
                   lazy ISelectListener listener )
     {
-        this.node_item_ = node;
+        this.address_.set(node);
 
         this.request_stats_ = new RequestStats;
         this.neo_request_stats_ = new RequestStats;
@@ -497,7 +507,20 @@ public abstract class INodeBase : INode, INodeInfo
 
     public NodeItem node_item ( )
     {
-        return this.node_item_;
+        return this.address_.asNodeItem(this.addr_buf);
+    }
+
+
+    /***************************************************************************
+
+        Returns:
+            AddrPort struct, containing node address & port
+
+    ***************************************************************************/
+
+    public AddrPort addr_port ( )
+    {
+        return this.address_;
     }
 
 
