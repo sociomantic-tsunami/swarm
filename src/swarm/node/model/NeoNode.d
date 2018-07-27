@@ -1068,9 +1068,27 @@ version (UnitTest)
         }
         override protected void handleCommand () {}
     }
+
+    private class TestNode : NodeBase!(TestConnectionHandler)
+    {
+        public this ( )
+        {
+            super(NodeItem("127.0.0.1", 2323), new ConnectionSetupParams, 1);
+        }
+
+        protected override cstring id ( )
+        {
+            return "test";
+        }
+
+        protected override void getResourceAcquirer (
+            void delegate ( Object resource_acquirer ) handle_request_dg )
+        {
+        }
+   }
 }
 
 unittest
 {
-    alias NodeBase!(TestConnectionHandler) Instance;
+    auto node = new TestNode;
 }
