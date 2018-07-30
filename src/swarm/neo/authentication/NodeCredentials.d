@@ -99,4 +99,19 @@ public class Credentials
     {
         this.credentials_ = CredFile.parse(this.filepath);
     }
+
+    /***************************************************************************
+
+        Passes the list of registered clients to a delegate, one by one.
+
+        Params:
+            sink = delegate to pass registered clients to.
+
+    ***************************************************************************/
+
+    public void listRegisteredClients ( void delegate ( cstring ) sink )
+    {
+        foreach (client, _; this.credentials_)
+            sink(client);
+    }
 }
