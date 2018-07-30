@@ -131,7 +131,7 @@ template Controllers ( )
 
         ***********************************************************************/
 
-        public void control ( void delegate ( ControllerInterface ) dg )
+        public void control ( scope void delegate ( ControllerInterface ) dg )
         in
         {
             assert(this.initialised);

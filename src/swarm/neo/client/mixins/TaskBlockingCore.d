@@ -151,7 +151,7 @@ template TaskBlockingCore ( )
 
     ***************************************************************************/
 
-    private void waitConnect ( bool delegate ( ) finished )
+    private void waitConnect ( scope bool delegate ( ) finished )
     {
         auto task = Task.getThis();
         assert(task !is null, "This method may only be called from inside a Task");
