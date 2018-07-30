@@ -23,7 +23,7 @@
     of the network protocol, and the plausibility of the other header fields
     must always be verified.
 
-    Copyright: Copyright (c) 2016-2017 sociomantic labs GmbH. All rights reserved
+    Copyright: Copyright (c) 2016-2017 dunnhumby Germany GmbH. All rights reserved
 
     License:
         Boost Software License Version 1.0. See LICENSE.txt for details.

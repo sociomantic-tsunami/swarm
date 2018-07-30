@@ -5,7 +5,7 @@
     `ocean.core.Verify`. This is to allow for writing new swarm code that can be
     safely merged into v5.
 
-    Copyright: Copyright (c) 2018 sociomantic labs GmbH. All rights reserved
+    Copyright: Copyright (c) 2018 dunnhumby Germany GmbH. All rights reserved
 
     License:
         Boost Software License Version 1.0. See LICENSE_BOOST.txt for details.

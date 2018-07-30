@@ -2,7 +2,7 @@
 
     Client request stats tracker internals plus public interface.
 
-    Copyright (c) 2017 sociomantic labs GmbH. All rights reserved.
+    Copyright (c) 2017 dunnhumby Germany GmbH. All rights reserved.
 
 *******************************************************************************/
 

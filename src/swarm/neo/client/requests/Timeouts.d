@@ -2,7 +2,7 @@
 
     Client request timeout manager.
 
-    Copyright (c) 2016-2017 sociomantic labs GmbH. All rights reserved.
+    Copyright (c) 2016-2017 dunnhumby Germany GmbH. All rights reserved.
 
 *******************************************************************************/
 

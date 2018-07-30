@@ -14,7 +14,7 @@
            statusActionFatal() method is called for the former case, and
            an exception is thrown, causing the connection to be broken.
 
-    copyright:      Copyright (c) 2010-2017 sociomantic labs GmbH. All rights reserved
+    copyright:      Copyright (c) 2010-2017 dunnhumby Germany GmbH. All rights reserved
 
     License:
         Boost Software License Version 1.0. See LICENSE.txt for details.

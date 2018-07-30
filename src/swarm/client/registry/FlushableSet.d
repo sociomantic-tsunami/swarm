@@ -3,7 +3,7 @@
     A set of flushable things (IFlushables). IFlushables can be added to and
     removed from the set. The flush() method flushes all registered IFlushables.
 
-    copyright:      Copyright (c) 2012-2017 sociomantic labs GmbH. All rights reserved
+    copyright:      Copyright (c) 2012-2017 dunnhumby Germany GmbH. All rights reserved
 
     License:
         Boost Software License Version 1.0. See LICENSE.txt for details.

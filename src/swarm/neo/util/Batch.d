@@ -17,7 +17,7 @@
            takes the batch as a whole over the maximum size.
         5. The batch extractor has no concept of a maximum batch size.
 
-    copyright: Copyright (c) 2017 sociomantic labs GmbH. All rights reserved
+    copyright: Copyright (c) 2017 dunnhumby Germany GmbH. All rights reserved
 
     License:
         Boost Software License Version 1.0. See LICENSE.txt for details.

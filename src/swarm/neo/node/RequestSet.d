@@ -10,7 +10,7 @@
     dropped. The node should be configured so that this can only happen in
     extreme situations or in case of a bug in the client.
 
-    Copyright: Copyright (c) 2016-2017 sociomantic labs GmbH. All rights reserved
+    Copyright: Copyright (c) 2016-2017 dunnhumby Germany GmbH. All rights reserved
 
     License:
         Boost Software License Version 1.0. See LICENSE.txt for details.

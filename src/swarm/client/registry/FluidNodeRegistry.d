@@ -9,7 +9,7 @@
     either fluid, or where each node is essentially identical -- allowing
     requests to be routed flexibly.
 
-    Copyright:      Copyright (c) 2014-2017 sociomantic labs GmbH. All rights reserved
+    Copyright:      Copyright (c) 2014-2017 dunnhumby Germany GmbH. All rights reserved
 
     License:
         Boost Software License Version 1.0. See LICENSE.txt for details.

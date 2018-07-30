@@ -16,7 +16,7 @@
     Note: this module isn't particularly careful with memory allocations, but
     it's generally only called once in an application, so it's not a problem.
 
-    copyright:      Copyright (c) 2011-2017 sociomantic labs GmbH. All rights reserved
+    copyright:      Copyright (c) 2011-2017 dunnhumby Germany GmbH. All rights reserved
 
     License:
         Boost Software License Version 1.0. See LICENSE.txt for details.
