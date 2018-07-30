@@ -20,7 +20,7 @@
       connecting a request-on-conn of an all-nodes batch request. To be called
       from the Connector policy instance of an AllNodesRequest.
 
-    Copyright: Copyright (c) 2017 sociomantic labs GmbH. All rights reserved
+    Copyright: Copyright (c) 2017 dunnhumby Germany GmbH. All rights reserved
 
     License:
         Boost Software License Version 1.0. See LICENSE_BOOST.txt for details.

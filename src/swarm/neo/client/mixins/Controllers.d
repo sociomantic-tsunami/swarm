@@ -6,7 +6,7 @@
     These classes are implemented as a template mixin because they need access
     to the outer class' (i.e. the neo client's) `control` method.
 
-    Copyright: Copyright (c) 2016-2017 sociomantic labs GmbH. All rights reserved
+    Copyright: Copyright (c) 2016-2017 dunnhumby Germany GmbH. All rights reserved
 
     License:
         Boost Software License Version 1.0. See LICENSE.txt for details.

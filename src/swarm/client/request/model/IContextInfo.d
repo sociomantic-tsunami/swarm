@@ -2,7 +2,7 @@
 
     An interface to get the context associated with a request
 
-    copyright:      Copyright (c) 2013-2017 sociomantic labs GmbH. All rights reserved
+    copyright:      Copyright (c) 2013-2017 dunnhumby Germany GmbH. All rights reserved
 
     License:
         Boost Software License Version 1.0. See LICENSE.txt for details.

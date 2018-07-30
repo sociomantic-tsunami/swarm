@@ -5,7 +5,7 @@
     indicate which error has occurred in the client. They are not necessarily
     actually thrown anywhere (though some are).
 
-    copyright:      Copyright (c) 2011-2017 sociomantic labs GmbH. All rights reserved
+    copyright:      Copyright (c) 2011-2017 dunnhumby Germany GmbH. All rights reserved
 
     License:
         Boost Software License Version 1.0. See LICENSE.txt for details.

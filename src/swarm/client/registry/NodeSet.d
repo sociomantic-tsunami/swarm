@@ -8,7 +8,7 @@
     optional delegate to be passed to its constructor, which will be called
     when the contents of the set are modified.
 
-    Copyright:      Copyright (c) 2014-2017 sociomantic labs GmbH. All rights reserved
+    Copyright:      Copyright (c) 2014-2017 dunnhumby Germany GmbH. All rights reserved
 
     License:
         Boost Software License Version 1.0. See LICENSE.txt for details.

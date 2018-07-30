@@ -3,7 +3,7 @@
     I/O statistics aggregated by `MessageReceiver` and `MessageSender`.
     To reset them use `IOStats.init`.
 
-    copyright: Copyright (c) 2017 sociomantic labs GmbH. All rights reserved.
+    copyright: Copyright (c) 2017 dunnhumby Germany GmbH. All rights reserved.
 
     License:
         Boost Software License Version 1.0. See LICENSE.txt for details.

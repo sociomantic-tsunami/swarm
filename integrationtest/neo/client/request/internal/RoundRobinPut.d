@@ -3,7 +3,7 @@
     Internal implementation of the client's RoundRobinPut request.
 
     Copyright:
-        Copyright (c) 2018 sociomantic labs GmbH. All rights reserved
+        Copyright (c) 2018 dunnhumby Germany GmbH. All rights reserved
 
     License:
         Boost Software License Version 1.0. See LICENSE.txt for details.

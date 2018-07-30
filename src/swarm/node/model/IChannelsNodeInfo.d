@@ -6,7 +6,7 @@
     storage engine of some kind. This is not necessarily the case, and could be
     modified if need be at some point.
 
-    copyright:      Copyright (c) 2012-2017 sociomantic labs GmbH. All rights reserved
+    copyright:      Copyright (c) 2012-2017 dunnhumby Germany GmbH. All rights reserved
 
     License:
         Boost Software License Version 1.0. See LICENSE.txt for details.

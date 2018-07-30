@@ -6,7 +6,7 @@
     implementing classes to have neither constructors nor destructors. The
     reason for this is documented in `ConnectionHandler.emplace`.
 
-    copyright: Copyright (c) 2018 sociomantic labs GmbH. All rights reserved
+    copyright: Copyright (c) 2018 dunnhumby Germany GmbH. All rights reserved
 
     License:
         Boost Software License Version 1.0. See LICENSE.txt for details.

@@ -11,7 +11,7 @@
         * A Task-derivative which connects to at least the specified number of
           nodes. (Intended for use with Scheduler.await().)
 
-    Copyright: Copyright (c) 2016-2017 sociomantic labs GmbH. All rights reserved
+    Copyright: Copyright (c) 2016-2017 dunnhumby Germany GmbH. All rights reserved
 
     License:
         Boost Software License Version 1.0. See LICENSE.txt for details.
