@@ -27,6 +27,7 @@ module swarm.node.model.Node;
 import ocean.transition;
 
 import swarm.Const : NodeItem;
+import swarm.neo.AddrPort;
 
 import swarm.node.model.INode;
 import swarm.node.model.INodeInfo;
@@ -149,11 +150,20 @@ public abstract class INodeBase : INode, INodeInfo
 
     /***************************************************************************
 
+        Buffer used for formatting human-readable addresses.
+
+    ***************************************************************************/
+
+    private mstring addr_buf;
+
+
+    /***************************************************************************
+
         Node item struct, containing node address and port.
 
     ***************************************************************************/
 
-    private NodeItem node_item_;
+    private AddrPort address_;
 
 
     /***************************************************************************
@@ -189,10 +199,35 @@ public abstract class INodeBase : INode, INodeInfo
 
     ***************************************************************************/
 
+    deprecated("Use the ctor that accepts an AddrPort")
     public this ( NodeItem node, ConnectionSetupParams conn_setup_params,
                   lazy ISelectListener listener )
     {
-        this.node_item_ = node;
+        AddrPort addr;
+        addr.set(node);
+        this(addr, conn_setup_params, listener);
+    }
+
+
+    /***************************************************************************
+
+        Constructor
+
+        Params:
+            node = node addres & port
+            conn_setup_params = connection handler constructor arguments.
+                Note that the `error_dg` field should not be set by the user; it
+                is set internally. To set a user-defined error callback, use the
+                `error_callback` method
+            listener = select listener, is evaluated exactly once after
+                       conn_setup_params have been populated
+
+    ***************************************************************************/
+
+    public this ( AddrPort node, ConnectionSetupParams conn_setup_params,
+        lazy ISelectListener listener )
+    {
+        this.address_ = node;
 
         this.request_stats_ = new RequestStats;
         this.neo_request_stats_ = new RequestStats;
@@ -497,7 +532,20 @@ public abstract class INodeBase : INode, INodeInfo
 
     public NodeItem node_item ( )
     {
-        return this.node_item_;
+        return this.address_.asNodeItem(this.addr_buf);
+    }
+
+
+    /***************************************************************************
+
+        Returns:
+            AddrPort struct, containing node address & port
+
+    ***************************************************************************/
+
+    public AddrPort addr_port ( )
+    {
+        return this.address_;
     }
 
 
@@ -567,6 +615,8 @@ public abstract class INodeBase : INode, INodeInfo
 public class NodeBase ( ConnHandler : ISwarmConnectionHandler,
                         Setup : ConnectionSetupParams = ConnectionSetupParams ) : INodeBase
 {
+    import core.sys.posix.netinet.in_ : sockaddr_in, sockaddr;
+
     /***************************************************************************
 
         Select listener alias
@@ -603,20 +653,39 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler,
 
     ***************************************************************************/
 
+    deprecated("Use the ctor that accepts an AddrPort")
     public this ( NodeItem node, Setup conn_setup_params, int backlog )
     {
+        AddrPort addr;
+        addr.set(node);
+        this(addr, conn_setup_params, backlog);
+    }
+
+    /***************************************************************************
+
+        Constructor
+
+        Params:
+            node = node addres & port
+            conn_setup_params = connection handler constructor arguments
+            backlog = (see ISelectListener ctor)
+
+    ***************************************************************************/
+
+    public this ( AddrPort node, Setup conn_setup_params, int backlog )
+    {
         InetAddress!(false) addr;
+        addr = cast(sockaddr_in)node;
 
         this.socket = new AddressIPSocket!();
-        this.listener = new Listener(addr(node.Address, node.Port),
+        this.listener = new Listener(cast(sockaddr*)&addr.addr,
             this.socket, conn_setup_params, backlog);
 
         enforce(this.socket.updateAddress() == 0, "socket.updateAddress() failed!");
 
-        node.Port = this.socket.port();
+        node.port = this.socket.port();
         super(node, conn_setup_params, this.listener);
     }
-
 
     /***************************************************************************
 
@@ -631,14 +700,15 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler,
 
     public this ( ushort port, Setup conn_setup_params, int backlog )
     {
-        NodeItem node;
-        node.Port = port;
+        AddrPort node;
+        node.port = port;
 
         InetAddress!(false) addr;
+        addr(port);
 
         this.socket = new AddressIPSocket!();
-        this.listener = new Listener(addr(node.Port), this.socket, conn_setup_params,
-            backlog);
+        this.listener = new Listener(cast(sockaddr*)&addr.addr, this.socket,
+            conn_setup_params, backlog);
 
         enforce(this.socket.updateAddress() == 0, "socket.updateAddress() failed!");
 
@@ -698,9 +768,25 @@ version (UnitTest)
         }
         override protected void handleCommand () {}
     }
+
+    private class TestNode : NodeBase!(TestConnectionHandler)
+    {
+        public this ( )
+        {
+            AddrPort addr;
+            addr.setAddress("127.0.0.1");
+            addr.port = 2323;
+            super(addr, new ConnectionSetupParams, 1);
+        }
+
+        protected override cstring id ( )
+        {
+            return "test";
+        }
+   }
 }
 
 unittest
 {
-    alias NodeBase!(TestConnectionHandler) Instance;
+    auto node = new TestNode;
 }

@@ -19,7 +19,8 @@ module swarm.node.model.INodeInfo;
 
 *******************************************************************************/
 
-import swarm.Const;
+import swarm.Const : NodeItem;
+import swarm.neo.AddrPort;
 
 import swarm.node.request.RequestStats;
 
@@ -38,7 +39,18 @@ public interface INodeInfo
 
      **************************************************************************/
 
+    deprecated("Use addr_port instead")
     public NodeItem node_item ( );
+
+
+    /**************************************************************************
+
+        Returns:
+            NodeItem struct containing the address & port of the node
+
+     **************************************************************************/
+
+    public AddrPort addr_port ( );
 
 
     /**************************************************************************
@@ -211,7 +223,7 @@ version ( UnitTest )
 
         ***********************************************************************/
 
-        NodeItem node_item_;
+        AddrPort addr_port_;
         size_t num_connections_;
         size_t num_open_connections_;
         size_t connection_limit_;
@@ -263,7 +275,13 @@ version ( UnitTest )
 
         override NodeItem node_item ( )
         {
-            return this.node_item_;
+            mstring buf;
+            return this.addr_port_.asNodeItem(buf);
+        }
+
+        override AddrPort addr_port ( )
+        {
+            return this.addr_port_;
         }
 
         override size_t num_connections ( )

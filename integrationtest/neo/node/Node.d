@@ -22,7 +22,8 @@ module integrationtest.neo.node.Node;
 import ocean.transition;
 import swarm.node.model.NeoNode;
 import swarm.node.connection.ConnectionHandler;
-import swarm.Const : ICommandCodes, NodeItem;
+import swarm.Const : ICommandCodes;
+import swarm.neo.AddrPort;
 
 /// ditto
 public class Node : NodeBase!(ConnHandler)
@@ -75,8 +76,10 @@ public class Node : NodeBase!(ConnHandler)
         options.shared_resources = this.shared_resources;
 
         const backlog = 1_000;
-        auto legacy_port = NodeItem(addr.dup, cast(ushort)(neo_port - 1));
-        super(legacy_port, neo_port, new ConnectionSetupParams,
+        AddrPort legacy_addr;
+        legacy_addr.setAddress(addr);
+        legacy_addr.port = cast(ushort)(neo_port - 1);
+        super(legacy_addr, neo_port, new ConnectionSetupParams,
             options, backlog);
 
         // Register the listening ports with epoll.

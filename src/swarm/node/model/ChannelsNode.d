@@ -50,6 +50,8 @@ public class ChannelsNodeBase
     ( Storage : IStorageEngine, ConnHandler : ISwarmConnectionHandler )
     : NodeBase!(ConnHandler), IChannelsNodeInfo
 {
+    import swarm.neo.AddrPort;
+
     /***************************************************************************
 
         Storage channel registry instance
@@ -73,7 +75,29 @@ public class ChannelsNodeBase
 
     ***************************************************************************/
 
+    deprecated("Use the ctor that accepts an AddrPort")
     public this ( NodeItem node, NodeStorageChannels channels,
+        ConnectionSetupParams conn_setup_params, int backlog )
+    {
+        AddrPort addr;
+        addr.set(node);
+        this(addr, channels, conn_setup_params, backlog);
+    }
+
+
+    /***************************************************************************
+
+        Constructor
+
+        Params:
+            node = node addres & port
+            channels = storage channels instance
+            conn_setup_params = connection handler constructor arguments
+            backlog = (see ISelectListener ctor)
+
+    ***************************************************************************/
+
+    public this ( AddrPort node, NodeStorageChannels channels,
         ConnectionSetupParams conn_setup_params, int backlog )
     {
         this.channels = channels;

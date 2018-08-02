@@ -25,8 +25,9 @@ public struct AddrPort
     import core.sys.posix.arpa.inet: ntohl, ntohs, htonl, htons, inet_ntop;
     import core.stdc.string: strlen;
 
-    import ocean.util.container.map.model.StandardHash;
+    import swarm.Const : NodeItem;
 
+    import ocean.util.container.map.model.StandardHash;
     import ocean.core.Test;
     import swarm.util.Verify;
 
@@ -268,6 +269,42 @@ public struct AddrPort
         this.naddress = src.sin_addr.s_addr;
         this.nport    = src.sin_port;
         return this;
+    }
+
+    /***************************************************************************
+
+        Sets the address and port of this instance to those in node_item.
+
+        Params:
+            node_item = the input address and port
+
+        Returns:
+            this instance
+
+    ***************************************************************************/
+
+    public typeof(this) set ( NodeItem node_item )
+    {
+        this.port = node_item.Port;
+        this.setAddress(node_item.Address);
+        return this;
+    }
+
+    /***************************************************************************
+
+        Gets the address and port of this instance in the format of a NodeItem.
+
+        Params:
+            buf = buffer used to format the address
+
+        Returns:
+            NodeItem instance
+
+    ***************************************************************************/
+
+    public NodeItem asNodeItem ( ref mstring buf )
+    {
+        return NodeItem(this.getAddress(buf), this.port);
     }
 
     /***************************************************************************
