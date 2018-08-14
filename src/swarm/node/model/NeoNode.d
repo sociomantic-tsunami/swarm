@@ -343,6 +343,24 @@ public abstract class INodeBase : INode, INodeInfo
 
     /***************************************************************************
 
+        Restarts all listeners by reconstructing them. Assumed to be called
+        after the listeners have been shutdown via stopListener().
+
+        Note: this method should not be called frequently, as it creates new
+        sockets each time.
+
+    ***************************************************************************/
+
+    public void restartListeners ( )
+    {
+        this.listener = this.newListener();
+        this.neo_listener = this.newNeoListener();
+        this.unix_listener = this.newUnixSocketListener();
+    }
+
+
+    /***************************************************************************
+
         Shuts down the node. The base implementation does nothing.
 
     ***************************************************************************/
