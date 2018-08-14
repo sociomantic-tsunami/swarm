@@ -191,18 +191,10 @@ public abstract class INodeBase : INode, INodeInfo
         Params:
             node = node addres & port
             conn_setup_params = connection handler constructor arguments
-            listener = select listener, is evaluated exactly once after
-                       conn_setup_params have been populated
-            neo_listener = select listener to handle the neo protocol
-            unix_listener = select listener to handle control requests through
-                the Unix domain server socket
 
     ***************************************************************************/
 
-    public this ( NodeItem node, ConnectionSetupParams conn_setup_params,
-                  lazy ISelectListener listener,
-                  ISelectListener neo_listener = null,
-                  ISelectListener unix_listener = null )
+    public this ( NodeItem node, ConnectionSetupParams conn_setup_params )
     {
         this.node_item_ = node;
 
@@ -211,13 +203,12 @@ public abstract class INodeBase : INode, INodeInfo
 
         conn_setup_params.error_dg = &this.error;
 
-        this.listener = listener;
-        this.neo_listener = neo_listener;
-        this.unix_listener = unix_listener;
+        this.listener = this.newListener();
+        this.neo_listener = this.newNeoListener();
+        this.unix_listener = this.newUnixSocketListener();
 
         this.record_action_counters_ = new RecordActionCounters(this.record_action_counter_ids);
     }
-
 
     /**************************************************************************
 
@@ -580,6 +571,36 @@ public abstract class INodeBase : INode, INodeInfo
     /***************************************************************************
 
         Returns:
+            new ISelectListener instance for the legacy protocol
+
+    ***************************************************************************/
+
+    protected abstract ISelectListener newListener ( );
+
+
+    /***************************************************************************
+
+        Returns:
+            new ISelectListener instance for the neo protocol
+
+    ***************************************************************************/
+
+    protected abstract ISelectListener newNeoListener ( );
+
+
+    /***************************************************************************
+
+        Returns:
+            new ISelectListener instance for the unix socket protocol
+
+    ***************************************************************************/
+
+    protected abstract ISelectListener newUnixSocketListener ( );
+
+
+    /***************************************************************************
+
+        Returns:
             identifier string for this node
 
     ***************************************************************************/
@@ -751,6 +772,21 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
 
     protected Object shared_resources;
 
+    /// Port for the neo protocol.
+    private ushort neo_port;
+
+    /// Connection setup params to pass to each legacy connection handler.
+    private ConnectionSetupParams conn_setup_params;
+
+    /// Connection setup params to pass to each neo connection handler.
+    private Neo.ConnectionHandler.SharedParams neo_conn_setup_params;
+
+    /// Options for the neo node and connection handlers.
+    private Options options;
+
+    /// Socket connection backlog.
+    private int backlog;
+
     /***************************************************************************
 
         Constructor
@@ -768,15 +804,14 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
                   ConnectionSetupParams conn_setup_params, Options options,
                   int backlog )
     {
+        this.neo_port = neo_port;
+        this.conn_setup_params = conn_setup_params;
+        this.options = options;
+        this.backlog = backlog;
+
         verify(options.epoll !is null);
 
         this.shared_resources = options.shared_resources;
-
-        InetAddress!(false) addr, neo_addr;
-
-        // Create listener sockets.
-        this.socket = new AddressIPSocket!();
-        this.neo_socket = new AddressIPSocket!();
 
         // Load credentials from specified file.
         Const!(Key[istring])* credentials;
@@ -803,38 +838,12 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
         auto no_delay = true;
 
         // Instantiate params object shared by all neo connection handlers.
-        auto neo_conn_setup_params = new Neo.ConnectionHandler.SharedParams(
+        this.neo_conn_setup_params = new Neo.ConnectionHandler.SharedParams(
             options.epoll, options.requests,
             no_delay, *credentials, this, &this.getResourceAcquirer);
 
-        // Set up unix listener socket, if specified.
-        UnixListener unix_listener;
-        if ( options.unix_socket_path.length )
-        {
-            BasicCommandHandler.Handler[istring] unix_socket_handlers;
-            if ( this.credentials_file )
-            {
-                unix_socket_handlers =
-                    ["update-credentials"[]: &this.handleUpdateCredentials,
-                     "list-credentials": &this.handleListCredentials];
-            }
-
-            unix_listener = new UnixListener(
-                options.unix_socket_path, options.epoll, unix_socket_handlers);
-        }
-
         // Super ctor.
-        super(node, conn_setup_params,
-            this.listener = new Listener(
-                addr(node.Address, node.Port), this.socket, conn_setup_params,
-                backlog
-            ),
-            this.neo_listener = new NeoListener(
-                neo_addr(node.Address, neo_port), this.neo_socket,
-                neo_conn_setup_params, backlog
-            ),
-            unix_listener
-        );
+        super(node, conn_setup_params);
 
         // Set up stats tracking for all named requests specified.
         options.requests.initStats(this.neo_request_stats);
@@ -900,6 +909,67 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
 
         return ret;
     }
+
+
+    /***************************************************************************
+
+        Returns:
+            new ISelectListener instance for the legacy protocol
+
+    ***************************************************************************/
+
+    protected override ISelectListener newListener ( )
+    {
+        InetAddress!(false) addr;
+        this.socket = new AddressIPSocket!();
+        return this.listener = new Listener(
+            addr(this.node_item.Address, this.node_item.Port), this.socket,
+            this.conn_setup_params, this.backlog);
+    }
+
+
+    /***************************************************************************
+
+        Returns:
+            new ISelectListener instance for the neo protocol
+
+    ***************************************************************************/
+
+    protected override ISelectListener newNeoListener ( )
+    {
+        InetAddress!(false) neo_addr;
+        this.neo_socket = new AddressIPSocket!();
+        return this.neo_listener = new NeoListener(
+            neo_addr(this.node_item.Address, this.neo_port), this.neo_socket,
+            this.neo_conn_setup_params, this.backlog);
+    }
+
+
+    /***************************************************************************
+
+        Returns:
+            new ISelectListener instance for the unix socket protocol
+
+    ***************************************************************************/
+
+    protected override ISelectListener newUnixSocketListener ( )
+    {
+        if ( !this.options.unix_socket_path.length )
+            return null;
+
+        BasicCommandHandler.Handler[istring] unix_socket_handlers;
+        if ( this.credentials_file )
+        {
+            unix_socket_handlers =
+                ["update-credentials"[]: &this.handleUpdateCredentials,
+                    "list-credentials": &this.handleListCredentials];
+        }
+
+        return this.unix_listener = new UnixListener(
+            this.options.unix_socket_path, this.options.epoll,
+            unix_socket_handlers);
+    }
+
 
     /***************************************************************************
 
@@ -1003,15 +1073,12 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
     public this ( NodeItem node, ConnectionSetupParams conn_setup_params,
                   int backlog )
     {
+        this.conn_setup_params = conn_setup_params;
+        this.backlog = backlog;
+
         InetAddress!(false) addr;
 
-        this.socket = new AddressIPSocket!();
-        super(node, conn_setup_params,
-            this.listener = new Listener(
-                addr(node.Address, node.Port), this.socket, conn_setup_params,
-                backlog
-            )
-        );
+        super(node, conn_setup_params);
 
         enforce(this.socket.updateAddress() == 0, "socket.updateAddress() failed!");
     }
