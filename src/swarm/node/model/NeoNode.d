@@ -322,7 +322,20 @@ public abstract class INodeBase : INode, INodeInfo
 
     ***************************************************************************/
 
+    deprecated("Use `stopListeners()` instead")
     public void stopListener ( EpollSelectDispatcher epoll )
+    {
+        this.stopListeners(epoll);
+    }
+
+
+    /***************************************************************************
+
+        Shuts down the listeners and all connections.
+
+    ***************************************************************************/
+
+    public void stopListeners ( EpollSelectDispatcher epoll )
     {
         epoll.unregister(this.listener);
         this.listener.shutdown;
