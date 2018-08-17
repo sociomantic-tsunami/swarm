@@ -11,6 +11,7 @@ module swarm.neo.client.requests.Stats;
 import swarm.neo.client.IRequestSet : IRequest;
 
 import ocean.core.Enforce;
+import ocean.core.Verify;
 
 /*******************************************************************************
 
@@ -26,15 +27,70 @@ public interface IRequestStats
         Stats about a single request, together with read-only methods exposed in
         the public API of the client.
 
+        TODO: in the next major, this can be replaced with a TimeHistogram.
+
     ***************************************************************************/
 
     public struct RequestStats
     {
-        /// The number of requests of this type that have finished.
-        public ulong count;
+        import swarm.neo.util.TimeHistogram;
 
-        /// The total time (in microseconds) taken by all finished requests.
-        public ulong total_time_micros;
+        /// Request timing stats.
+        public TimeHistogram histogram;
+
+        /***********************************************************************
+
+            Returns:
+                the number of requests of this type that have finished
+
+        ***********************************************************************/
+
+        public ulong count ( )
+        {
+            return this.histogram.count;
+        }
+
+        /***********************************************************************
+
+            Count setter.
+
+            Params:
+                c = the number of requests of this type that have finished
+
+        ***********************************************************************/
+
+        public void count ( ulong c )
+        {
+            verify(c <= uint.max);
+            this.histogram.count = cast(uint)c;
+        }
+
+        /***********************************************************************
+
+            Returns:
+                the total time (in microseconds) taken by all finished requests
+
+        ***********************************************************************/
+
+        public ulong total_time_micros ( )
+        {
+            return this.histogram.total_time_micros;
+        }
+
+        /***********************************************************************
+
+            Total time setter.
+
+            Params:
+                t = the total time (in microseconds) taken by all finished
+                    requests
+
+        ***********************************************************************/
+
+        public void total_time_micros ( ulong t )
+        {
+            this.histogram.total_time_micros = t;
+        }
 
         /***********************************************************************
 
@@ -44,9 +100,23 @@ public interface IRequestStats
 
         ***********************************************************************/
 
+        public double mean_time_micros ( )
+        {
+            return this.histogram.mean_time_micros();
+        }
+
+        /***********************************************************************
+
+            Returns:
+                the mean time (in microseconds) taken by each request of this
+                type (may, of course, be nan or -nan, if this.count == 0)
+
+        ***********************************************************************/
+
+        deprecated("Use mean_time_micros instead")
         public double mean_handled_time_micros ( )
         {
-            return cast(double)this.total_time_micros / cast(double)this.count;
+            return this.histogram.mean_time_micros();
         }
     }
 
@@ -137,8 +207,7 @@ public class Stats : IRequestStats
             assert(rq_stats !is null);
         }
 
-        rq_stats.count++;
-        rq_stats.total_time_micros += duration;
+        rq_stats.histogram.countMicros(duration);
     }
 
     /***************************************************************************
