@@ -628,6 +628,30 @@ template ClientCore ( )
 
         /***********************************************************************
 
+            Checks whether the request with the specified name has ever been
+            assigned by this client.
+
+            Note that it is assumed that the symbol `Internals.<name>` can be
+            resolved in the outer class (the client's Neo object) to the
+            internal request wrapper struct for the appropriate request.
+
+            Params:
+                name = name of request to check
+
+            Returns:
+                true if the request has occurred
+
+        ***********************************************************************/
+
+        public bool requestHasOccurred ( istring name ) ( )
+        {
+            mixin("alias Internals." ~ name ~ " Request;");
+            return this.outer.connections.request_set.stats.requestHasOccurred(
+                &Request.all_finished_notifier);
+        }
+
+        /***********************************************************************
+
             Foreach struct ("fruct") providing opApply over stats getter
             instances for all requests specified in Requests.
 
