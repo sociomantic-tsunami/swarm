@@ -939,6 +939,6 @@ unittest
 
         foreach ( rq, stats; rq_stats.allRequests() )
             Stdout.formatln("{} stats: {} finished in {} microseconds mean",
-                rq, stats.count, stats.mean_handled_time_micros);
+                rq, stats.count, stats.mean_time_micros);
     }
 }
