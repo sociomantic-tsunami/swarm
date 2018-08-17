@@ -662,6 +662,9 @@ template ClientCore ( )
             /// Reference to outer object.
             private This outer;
 
+            /// If true, only iterate over requests that have occurred.
+            bool occurred_only;
+
             /*******************************************************************
 
                 Foreach iterator over request names and stats getter instances
@@ -678,10 +681,14 @@ template ClientCore ( )
                     static assert(is(typeof(rq_name) : istring));
 
                     auto slice = rq_name[];
-                    auto stats = this.outer.request!(rq_name)();
-                    res = dg(slice, stats);
-                    if ( res )
-                        break;
+                    if ( !this.occurred_only ||
+                        this.outer.requestHasOccurred!(rq_name) )
+                    {
+                        auto stats = this.outer.request!(rq_name)();
+                        res = dg(slice, stats);
+                        if ( res )
+                            break;
+                    }
                 }
                 return res;
             }
@@ -689,15 +696,22 @@ template ClientCore ( )
 
         /***********************************************************************
 
+            Gets an iterator over the stats for all requests (or all requests
+            that have occurred).
+
+            Params:
+                occurred_only = if true, only iterate over requests that have
+                    occurred
+
             Returns:
                 iterator over request names and stats getter instances for all
                 requests specified in Requests
 
         ***********************************************************************/
 
-        public RequestStatsFruct allRequests ( )
+        public RequestStatsFruct allRequests ( bool occurred_only = false )
         {
-            return RequestStatsFruct(this);
+            return RequestStatsFruct(this, occurred_only);
         }
 
         /***********************************************************************
@@ -711,19 +725,49 @@ template ClientCore ( )
             this.outer.connections.request_set.stats.clear();
         }
 
+        /// Flags defining the behaviour of log().
+        public struct LogSettings
+        {
+            /// If true, only log stats for requests that have occurred at least
+            /// once in the lifetime of this program; if false, log stats for
+            /// all requests.
+            bool occurred_only;
+
+            /// If true, log the full timing histogram; if false, log just count
+            /// and total time.
+            bool timing_histogram;
+        }
+
         /***********************************************************************
 
             Writes stats about all requests to the provided stats log.
 
             Params:
                 logger = stats log to write the filled instance of Aggr to
+                settings = flags definining what exactly to log
 
         ***********************************************************************/
 
-        public void log ( StatsLog logger )
+        public void log ( StatsLog logger,
+            LogSettings settings = LogSettings.init )
         {
-            foreach ( rq, stats; this.allRequests() )
-                logger.addObject!("request")(rq, stats);
+            foreach ( rq, stats; this.allRequests(settings.occurred_only) )
+            {
+                if ( settings.timing_histogram )
+                    logger.addObject!("request")(rq, stats.histogram.stats);
+                else
+                {
+                    struct BasicStats
+                    {
+                        ulong count;
+                        ulong total_time_micros;
+                    }
+                    BasicStats basic_stats;
+                    basic_stats.count = stats.count;
+                    basic_stats.total_time_micros = stats.histogram.total_time_micros;
+                    logger.addObject!("request")(rq, basic_stats);
+                }
+            }
         }
     }
 
