@@ -59,6 +59,23 @@ public interface IRequestStats
 
     /***************************************************************************
 
+        Checks whether stats for the specified request have ever been collected.
+        This is useful in situations where the user wants to differentiate
+        between a request that has not occurred since the last call to clear()
+        vs a request that has _never_ occurred.
+
+        Params:
+            request_type = identifier for the request to check
+
+        Returns:
+            true if this request has ever occurred
+
+    ***************************************************************************/
+
+    public bool requestHasOccurred ( RequestTypeIdentifier request_type );
+
+    /***************************************************************************
+
         Gets stats about the specified request.
 
         Params:
@@ -122,6 +139,26 @@ public class Stats : IRequestStats
 
         rq_stats.count++;
         rq_stats.total_time_micros += duration;
+    }
+
+    /***************************************************************************
+
+        Checks whether stats for the specified request have ever been collected.
+        This is useful in situations where the user wants to differentiate
+        between a request that has not occurred since the last call to clear()
+        vs a request that has _never_ occurred.
+
+        Params:
+            request_type = identifier for the request to check
+
+        Returns:
+            true if this request has ever occurred
+
+    ***************************************************************************/
+
+    public bool requestHasOccurred ( RequestTypeIdentifier request_type )
+    {
+        return (request_type in this.stats) !is null;
     }
 
     /***************************************************************************
