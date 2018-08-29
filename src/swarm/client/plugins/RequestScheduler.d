@@ -47,6 +47,12 @@ import ocean.transition;
 
 public class RequestScheduler
 {
+    import BucketElementFreeList
+        = ocean.util.container.map.model.BucketElementFreeList;
+    import ocean.util.container.map.Map;
+    import ocean.time.timeout.model.IExpiryRegistration;
+    import ocean.time.timeout.model.ExpiryRegistrationBase;
+
     /***************************************************************************
 
         Local type redefinitions.
@@ -112,7 +118,9 @@ public class RequestScheduler
 
     public this ( EpollSelectDispatcher epoll, uint max_events = 0 )
     {
-        this.scheduler = new RequestScheduler(epoll, max_events);
+        this.scheduler = new RequestScheduler(epoll, max_events,
+            BucketElementFreeList.instantiateAllocator!(Map!(
+                IExpiryRegistration, Expiry*)));
 
         this.scheduler_queue_full = new SchedulerQueueFullException;
     }
