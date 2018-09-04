@@ -48,7 +48,7 @@ public class RecordBatcher
 
     ***************************************************************************/
 
-    public const DefaultMaxBatchSize = 64 * 1024;
+    public static immutable DefaultMaxBatchSize = 64 * 1024;
 
 
     /***************************************************************************
@@ -453,7 +453,7 @@ public class RecordBatch
     ***************************************************************************/
 
     deprecated("Specifying a batch size no longer has any effect. Drop usage of this constant.")
-    public const DefaultMaxBatchSize = 64 * 1024;
+    public static immutable DefaultMaxBatchSize = 64 * 1024;
 
     /***************************************************************************
 
@@ -541,7 +541,7 @@ public class RecordBatch
 
     ***************************************************************************/
 
-    public int opApply ( int delegate ( ref cstring value ) record_dg )
+    public int opApply ( scope int delegate ( ref cstring value ) record_dg )
     {
         int r;
         size_t consumed;
@@ -568,7 +568,7 @@ public class RecordBatch
     ***************************************************************************/
 
     public int opApply (
-        int delegate ( ref cstring value1, ref cstring value2 ) record_dg )
+        scope int delegate ( ref cstring value1, ref cstring value2 ) record_dg )
     {
         int r;
         size_t consumed;
