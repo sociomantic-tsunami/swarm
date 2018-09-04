@@ -807,7 +807,7 @@ public abstract class IRequestConnection :
 
     ***************************************************************************/
 
-    private void handleExceptions ( void delegate ( ) dg )
+    private void handleExceptions ( scope void delegate ( ) dg )
     {
         try
         {
