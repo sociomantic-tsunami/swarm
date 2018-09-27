@@ -10,15 +10,24 @@ A Tale of Two Protocols
 -----------------------
 
 The code in swarm is currently in transition. There exist two parallel client/
-server architectures in the repo, a new architecture (dubbed "neo") -- located
+server architectures in the repo: a new architecture (dubbed "neo") -- located
 in the ``src/swarm/neo`` package -- and a legacy architecture -- located in the
 other packages of ``src/swarm``. The neo protocol is being introduced in stages,
 progressively adding features to the core client and server code over a series
 of releases.
 
-When sufficient neo features have been implemented and the legacy protocol is no
-longer in active use, the legacy protocol will be deprecated and eventually
-removed.
+When the legacy protocol is no longer in active use, it will be deprecated and
+eventually removed.
+
+User Documentation
+==================
+
+An overview of the features of the legacy and neo client architecture can be
+found here:
+
+`Legacy client documentation <src/swarm/README_client.rst>`_.
+
+`Neo client documentation <src/swarm/README_client_neo.rst>`_.
 
 Neo Support in Clients
 ----------------------
@@ -33,15 +42,12 @@ associated client features remain unchanged -- indeed, there is no interaction
 between the neo functionality and the legacy functionality of the client, except
 at the system level (e.g. the allocation of file descriptors, etc).
 
-Client Documentation
---------------------
+Developer Documentation
+=======================
 
-An overview of the features of the legacy and neo client architecture can be
-found here
+Architectural overviews of the neo client/protocol/server:
 
-`Legacy client documentation <src/swarm/README_client.rst>`_.
-
-`Neo client documentation <src/swarm/README_client_neo.rst>`_.
+`Neo protocol overview <src/swarm/README_protocol_neo.md>`_.
 
 Example
 -------
