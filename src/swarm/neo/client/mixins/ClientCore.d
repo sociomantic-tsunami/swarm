@@ -153,6 +153,8 @@ template ClientCore ( )
 
     private this ( Config config, Settings settings )
     {
+        verify(config !is null, "Neo config instance is null!");
+
         Credentials cred;
         cred.setFromFile(config.credentials_file());
 
