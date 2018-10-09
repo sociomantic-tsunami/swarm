@@ -15,6 +15,8 @@
 
 module swarm.client.RequestSetup;
 
+import ocean.core.Traits;
+
 import swarm.client.request.params.IChannelRequestParams;
 
 /*******************************************************************************
@@ -31,9 +33,9 @@ public template RequestParamsSetup ( )
         Imports needed by template.
 
     ***************************************************************************/
-    
+
     import ocean.transition;
-    import ocean.core.Traits : FieldName;
+    import ocean.core.Traits : FieldName, hasMember;
     import swarm.client.request.params.IRequestParams;
 
     mixin TypeofThis;
@@ -690,6 +692,7 @@ public template Suspendable ( )
     /***************************************************************************
 
         Delegate to receive ISuspendable interface(s) from request
+        that is used to register an instance when the request starts
 
     ***************************************************************************/
 
@@ -698,10 +701,21 @@ public template Suspendable ( )
 
     /***************************************************************************
 
+        Delegate to receive ISuspendable interface(s) from request
+        that is used to unregister an instance when the request finishes.
+
+    ***************************************************************************/
+
+    private RequestParams.RegisterSuspendableDg suspend_unregister;
+
+
+    /***************************************************************************
+
         Sets the suspender callback for the request.
 
         Params:
             suspend_register = request's suspender delegate
+            suspend_unregister = request's suspender delegate
 
         Returns:
             this pointer for method chaining
@@ -709,9 +723,11 @@ public template Suspendable ( )
     ***************************************************************************/
 
     public This* suspendable (
-        RequestParams.RegisterSuspendableDg suspend_register )
+        RequestParams.RegisterSuspendableDg suspend_register,
+        RequestParams.RegisterSuspendableDg suspend_unregister = null )
     {
         this.suspend_register = suspend_register;
+        this.suspend_unregister = suspend_unregister;
         version (D_Version2)
             return &this;
         else
@@ -735,6 +751,29 @@ public template Suspendable ( )
         verify(params_ !is null);
 
         params_.suspend_register = this.suspend_register;
+    }
+
+
+    /***************************************************************************
+
+        Copies the value of the suspend unregister member into the provided
+        request params class instance.
+
+        Params:
+            params = IRequestParams instance to write into
+
+    ***************************************************************************/
+
+    private void setup_suspend_unregister ( IRequestParams params )
+    {
+        // deprecated: remove in swarm v6
+        static if (hasMember!(RequestParams, "suspend_unregister"))
+        {
+            auto params_ = downcast!(RequestParams)(params);
+            verify(params_ !is null);
+
+            params_.suspend_unregister = this.suspend_unregister;
+        }
     }
 }
 
@@ -829,6 +868,7 @@ unittest
             RegisterStreamInfoDg stream_info_register;
             alias void delegate () RegisterSuspendableDg;
             RegisterSuspendableDg suspend_register;
+            RegisterSuspendableDg suspend_unregister;
         }
     }
 
@@ -836,7 +876,7 @@ unittest
 
     // try using each mixin separately to ensure those compile
     // and provide all necessary imports internally
-        
+
     alias Tuple!(StreamInfo, Suspendable, Channel, RequestParamsSetup,
         ClientCommandBase, Node) Mixins;
 
