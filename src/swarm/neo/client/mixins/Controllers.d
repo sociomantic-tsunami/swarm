@@ -191,6 +191,20 @@ template Controllers ( )
 
         private Pending pending;
 
+
+        /***********************************************************************
+
+            Internal state of this ISuspendable. Note that the this indicates the
+            last action done through this suspendable, and it may not reflect
+            the actual reality (the streams may need time to suspend). This
+            implies that one can't control stream directly through the controller
+            if using ISuspendable.
+
+        ***********************************************************************/
+
+        private bool suspended_;
+
+
         /***********************************************************************
 
             Constructor. Does not bind this instance to a request id. Use this
@@ -242,6 +256,8 @@ template Controllers ( )
                         this.pending = Pending.Suspend;
                 }
             );
+
+            this.suspended_ = true;
         }
 
         /***********************************************************************
@@ -267,6 +283,8 @@ template Controllers ( )
                         this.pending = Pending.Resume;
                 }
             );
+
+            this.suspended_ = false;
         }
 
         /***********************************************************************
@@ -303,25 +321,15 @@ template Controllers ( )
 
         /***********************************************************************
 
-            This method of `ISuspendable` cannot currently be implemented and
-            thus always throws. To implement this method correctly, this class
-            would need to somehow hook into the notifications of the request
-            being controlled, in order to receive the suspended/resumed
-            notifications to know when the request had actually changed state
-            (on the nodes' side).
-
             Returns:
-                true if the process is suspended
-
-            Throws:
-                always; unsupported
+                true if the process is suspended or being suspended. Note
+                that this tracks only the suspensions made through this interface.
 
         ***********************************************************************/
 
         public bool suspended ( )
         {
-            throw new Exception("ISuspendable.suspended() is not currently supported "
-                ~ "by " ~ typeof(this).stringof);
+            return this.suspended_;
         }
     }
 }
