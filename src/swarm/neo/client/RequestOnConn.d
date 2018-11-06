@@ -782,6 +782,11 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
         if (!this.connection)
             return false;
 
+        auto client_connection = cast(Connection)this.connection;
+        assert(client_connection);
+        if (client_connection.status != Connection.Status.Connected)
+            return false;
+
         scope (exit)
         {
             // the request may decide to use another connection, so we need to
