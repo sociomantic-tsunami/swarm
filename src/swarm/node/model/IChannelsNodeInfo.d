@@ -50,7 +50,7 @@ public interface IChannelsNodeInfo : INodeInfo
 
     ***************************************************************************/
 
-    public int opApply ( int delegate ( ref IStorageEngineInfo ) dg );
+    public int opApply ( scope int delegate ( ref IStorageEngineInfo ) dg );
 
 
     /***************************************************************************
@@ -204,7 +204,7 @@ version ( UnitTest )
             return this.storage_type_;
         }
 
-        override int opApply ( int delegate ( ref IStorageEngineInfo ) dg )
+        override int opApply ( scope int delegate ( ref IStorageEngineInfo ) dg )
         {
             int r;
             foreach ( c; this.channels )
