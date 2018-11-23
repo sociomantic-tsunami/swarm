@@ -86,7 +86,7 @@ struct TreeMap ( Node = eb64_node )
 
     public bool is_empty ( ) // const
     {
-        return this.root.is_empty();
+        return (&this).root.is_empty();
     }
 
     /***************************************************************************
@@ -101,8 +101,8 @@ struct TreeMap ( Node = eb64_node )
 
     public void reinit ( )
     {
-        this.root = eb_root.init;
-        this.root.unique = true;
+        (&this).root = eb_root.init;
+        (&this).root.unique = true;
     }
 
     /***************************************************************************
@@ -167,7 +167,7 @@ struct TreeMap ( Node = eb64_node )
 
         public UserElement put ( ulong key, out bool added, lazy UserElement new_element )
         {
-            auto node = this.put_(key, added);
+            auto node = (&this).put_(key, added);
 
             if (added)
             {
@@ -202,7 +202,7 @@ struct TreeMap ( Node = eb64_node )
 
         public UserElement opIn_r ( ulong key )
         {
-            return nodeToUserElement(cast(Node*)eb64_lookup(&this.root, key));
+            return nodeToUserElement(cast(Node*)eb64_lookup(&(&this).root, key));
         }
 
          /**********************************************************************
@@ -231,7 +231,7 @@ struct TreeMap ( Node = eb64_node )
             else
                 alias eb64_lookup_le eb64_function;
 
-            return nodeToUserElement(cast(Node*)eb64_function(&this.root, key));
+            return nodeToUserElement(cast(Node*)eb64_function(&(&this).root, key));
         }
 
         /***********************************************************************
@@ -255,7 +255,7 @@ struct TreeMap ( Node = eb64_node )
             else
                 alias eb64_last eb64_function;
 
-            return nodeToUserElement(cast(Node*)eb64_function(&this.root));
+            return nodeToUserElement(cast(Node*)eb64_function(&(&this).root));
         }
 
         /***********************************************************************
@@ -293,11 +293,11 @@ struct TreeMap ( Node = eb64_node )
 
         ***********************************************************************/
 
-        public int opApply ( int delegate ( ref UserElement user_element ) dg )
+        public int opApply ( scope int delegate ( ref UserElement user_element ) dg )
         {
             int stop = 0;
 
-            for (auto node = eb64_first(&this.root); node && !stop;)
+            for (auto node = eb64_first(&(&this).root); node && !stop;)
             {
                 // Backup node.next here because dg() may change or delete node!
                 auto next         = node.next,
@@ -381,7 +381,7 @@ struct TreeMap ( Node = eb64_node )
 
         public Node* put ( ulong key, out bool added )
         {
-            return this.put_(key, added);
+            return (&this).put_(key, added);
         }
 
         /***********************************************************************
@@ -398,7 +398,7 @@ struct TreeMap ( Node = eb64_node )
 
         public Node* opIn_r ( ulong key )
         {
-            return cast(Node*)eb64_lookup(&this.root, key);
+            return cast(Node*)eb64_lookup(&(&this).root, key);
         }
 
         /***********************************************************************
@@ -421,7 +421,7 @@ struct TreeMap ( Node = eb64_node )
             else
                 alias eb64_last eb64_function;
 
-            return cast(Node*)eb64_function(&this.root);
+            return cast(Node*)eb64_function(&(&this).root);
         }
 
         /***********************************************************************
@@ -431,11 +431,11 @@ struct TreeMap ( Node = eb64_node )
 
         ***********************************************************************/
 
-        public int opApply ( int delegate ( ref Node node ) dg )
+        public int opApply ( scope int delegate ( ref Node node ) dg )
         {
             int stop = 0;
 
-            for (auto node = eb64_first(&this.root); node && !stop;)
+            for (auto node = eb64_first(&(&this).root); node && !stop;)
             {
                 // Backup node.next here because dg() may change or delete node!
                 auto next = node.next;
@@ -496,7 +496,7 @@ struct TreeMap ( Node = eb64_node )
             eb64_node* ebnode = &node.tupleof[0];
 
         ebnode.key = key;
-        eb64_node* added_ebnode = eb64_insert(&this.root, ebnode);
+        eb64_node* added_ebnode = eb64_insert(&(&this).root, ebnode);
         added = added_ebnode is ebnode;
 
         if (!added)
@@ -542,9 +542,9 @@ struct TreeMap ( Node = eb64_node )
 
         Node* allocate ( )
         {
-            if (auto node = this.spare)
+            if (auto node = (&this).spare)
             {
-                this.spare = null;
+                (&this).spare = null;
                 return node;
             }
 
@@ -555,7 +555,7 @@ struct TreeMap ( Node = eb64_node )
             }
             else
             {
-                const istring msg = "malloc(" ~ Node.sizeof.stringof ~
+                enum istring msg = "malloc(" ~ Node.sizeof.stringof ~
                                    ") failed: Out of memory\n\0";
                 fputs(msg.ptr, stderr);
                 exit(EXIT_FAILURE);
@@ -575,10 +575,10 @@ struct TreeMap ( Node = eb64_node )
 
         void deallocate ( Node* node )
         {
-            if (this.spare is null)
+            if ((&this).spare is null)
             {
                 *node = (*node).init;
-                this.spare = node;
+                (&this).spare = node;
             }
             else
             {
@@ -596,7 +596,7 @@ struct TreeMap ( Node = eb64_node )
 
 *******************************************************************************/
 
-private const eb_root empty_unique_ebtroot =
+private static immutable eb_root empty_unique_ebtroot =
     function ( )
     {
         eb_root root;

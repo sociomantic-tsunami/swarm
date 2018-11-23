@@ -32,7 +32,7 @@ public struct AddrPort
     import swarm.util.Verify;
 
     /// Minimum length required for an address format buffer.
-    public const AddrBufLength = INET6_ADDRSTRLEN;
+    public enum AddrBufLength = INET6_ADDRSTRLEN;
 
     /***************************************************************************
 
@@ -58,7 +58,7 @@ public struct AddrPort
 
     public bool is_set ( ) // const
     {
-        return this.naddress && this.nport;
+        return (&this).naddress && (&this).nport;
     }
 
     /***************************************************************************
@@ -71,7 +71,7 @@ public struct AddrPort
 
     public uint address ( )
     {
-        return ntohl(this.naddress);
+        return ntohl((&this).naddress);
     }
 
     /***************************************************************************
@@ -89,7 +89,7 @@ public struct AddrPort
 
     public uint address ( uint address )
     {
-        this.naddress = htonl(address);
+        (&this).naddress = htonl(address);
         return address;
     }
 
@@ -123,7 +123,7 @@ public struct AddrPort
 
         if (inet_aton(buf.ptr, &result))
         {
-            this.naddress = result.s_addr;
+            (&this).naddress = result.s_addr;
             return true;
         }
 
@@ -159,7 +159,7 @@ public struct AddrPort
     {
         verify(dst.length >= INET_ADDRSTRLEN,
             "dst.length expected to be at least INET_ADDRSTRLEN");
-        auto src = in_addr(this.naddress);
+        auto src = in_addr((&this).naddress);
         inet_ntop(AF_INET, &src, dst.ptr, cast(socklen_t)dst.length);
         // The only possible errors for inet_ntop  are a wrong address family
         // and `dst.length < INET_ADDRSTRLEN`. Neither can be the case here.
@@ -168,7 +168,7 @@ public struct AddrPort
 
     unittest
     {
-        typeof(*this) x;
+        typeof(*(&this)) x;
         test(x.setAddress("192.168.222.111"));
         test!("==")(x.address_bytes, [cast(ubyte)192, 168, 222, 111]);
 
@@ -189,7 +189,7 @@ public struct AddrPort
 
     public ushort port ( ) // const
     {
-        return ntohs(this.nport);
+        return ntohs((&this).nport);
     }
 
     /***************************************************************************
@@ -206,7 +206,7 @@ public struct AddrPort
 
     public ushort port ( ushort port )
     {
-        return this.nport = htons(port);
+        return (&this).nport = htons(port);
     }
 
     /***************************************************************************
@@ -233,7 +233,7 @@ public struct AddrPort
 
     public ubyte[] address_bytes ( )
     {
-        return (cast(ubyte*)&this.naddress)[0 .. this.naddress.sizeof];
+        return (cast(ubyte*)&(&this).naddress)[0 .. (&this).naddress.sizeof];
     }
 
      /***************************************************************************
@@ -250,8 +250,8 @@ public struct AddrPort
     {
         sockaddr_in result;
         result.sin_family      = AF_INET;
-        result.sin_port        = this.nport;
-        result.sin_addr.s_addr = this.naddress;
+        result.sin_port        = (&this).nport;
+        result.sin_addr.s_addr = (&this).naddress;
         return result;
     }
 
@@ -267,11 +267,11 @@ public struct AddrPort
 
     ***************************************************************************/
 
-    public typeof(this) set ( sockaddr_in src )
+    public typeof((&this)) set ( sockaddr_in src )
     {
-        this.naddress = src.sin_addr.s_addr;
-        this.nport    = src.sin_port;
-        return this;
+        (&this).naddress = src.sin_addr.s_addr;
+        (&this).nport    = src.sin_port;
+        return (&this);
     }
 
     /***************************************************************************
@@ -286,11 +286,11 @@ public struct AddrPort
 
     ***************************************************************************/
 
-    public typeof(this) set ( NodeItem node_item )
+    public typeof((&this)) set ( NodeItem node_item )
     {
-        this.port = node_item.Port;
-        this.setAddress(node_item.Address);
-        return this;
+        (&this).port = node_item.Port;
+        (&this).setAddress(node_item.Address);
+        return (&this);
     }
 
     /***************************************************************************
@@ -308,7 +308,7 @@ public struct AddrPort
 
     public NodeItem asNodeItem ( ref mstring buf )
     {
-        return NodeItem(this.getAddress(buf), this.port);
+        return NodeItem((&this).getAddress(buf), (&this).port);
     }
 
     /***************************************************************************
@@ -335,7 +335,7 @@ public struct AddrPort
          * Make sure address & port really fit in a long without a signed
          * overflow.
          */
-        static assert(this.address.sizeof + this.port.sizeof < long.sizeof);
-        return ((cast(long)this.address) << (this.port.sizeof * 8)) | this.port;
+        static assert((&this).address.sizeof + (&this).port.sizeof < long.sizeof);
+        return ((cast(long)(&this).address) << ((&this).port.sizeof * 8)) | (&this).port;
     }
 }

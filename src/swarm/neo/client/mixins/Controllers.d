@@ -128,7 +128,7 @@ template Controllers ( )
 
         ***********************************************************************/
 
-        public void control ( void delegate ( ControllerInterface ) dg )
+        public void control ( scope void delegate ( ControllerInterface ) dg )
         {
             verify(this.initialised);
             enforce(this.outer.control(this.id_, dg),
@@ -337,7 +337,7 @@ version (UnitTest) private class ControllersTemplateTest
         bool resume();
     }
 
-    abstract bool control(RequestId, void delegate(DummyControllerInterface));
+    abstract bool control(RequestId, scope void delegate(DummyControllerInterface));
 
     mixin Controllers!();
     class C: Controller!(DummyControllerInterface) {}

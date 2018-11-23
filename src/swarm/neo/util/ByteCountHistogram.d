@@ -138,7 +138,7 @@ struct ByteCountHistogram
 
         private static istring divisionBinVariables ( uint max_power )
         {
-            const type = typeof(ByteCountHistogram.bins[0]).stringof;
+            enum type = typeof(ByteCountHistogram.bins[0]).stringof;
 
             istring res;
 
@@ -201,9 +201,9 @@ struct ByteCountHistogram
 
     ulong countBytes ( ulong n )
     {
-        this.count++;
-        this.total += n;
-        this.bins[n? (n < (1UL << 16))? bsr(n) + 1 : $ - 1 : 0]++;
+        (&this).count++;
+        (&this).total += n;
+        (&this).bins[n? (n < (1UL << 16))? bsr(n) + 1 : $ - 1 : 0]++;
         return n;
     }
 
@@ -217,9 +217,9 @@ struct ByteCountHistogram
 
     public double mean_bytes ( )
     {
-        verify(this.count || !this.total);
+        verify((&this).count || !(&this).total);
 
-        return this.total / cast(double)this.count;
+        return (&this).total / cast(double)(&this).count;
     }
 
     /***************************************************************************
@@ -240,8 +240,8 @@ struct ByteCountHistogram
         mixin("static assert(is(typeof(Bins.init." ~ bin_name ~ ")));");
 
         mixin("const offset = Bins.init." ~ bin_name ~ ".offsetof;");
-        const index = offset / this.bins[0].sizeof;
-        return this.bins[index];
+        enum index = offset / (&this).bins[0].sizeof;
+        return (&this).bins[index];
     }
 
     unittest
@@ -260,7 +260,7 @@ struct ByteCountHistogram
 
     public Bins stats ( )
     {
-        return Bins.fromArray(this.bins);
+        return Bins.fromArray((&this).bins);
     }
 
     unittest

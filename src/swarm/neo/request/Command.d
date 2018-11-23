@@ -34,7 +34,7 @@ public struct Command
 
     import swarm.neo.util.FieldSizeSum;
 
-    static assert(FieldSizeSum!(typeof(*this)) == typeof(*this).sizeof);
+    static assert(FieldSizeSum!(typeof(*(&this))) == typeof(*(&this)).sizeof);
 }
 
 /*******************************************************************************

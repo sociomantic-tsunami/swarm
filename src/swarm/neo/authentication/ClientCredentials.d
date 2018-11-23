@@ -54,7 +54,7 @@ public struct Credentials
 
     invariant ( )
     {
-        assert(this.name.length <= CredDef.LengthLimit.Name);
+        assert((&this).name.length <= CredDef.LengthLimit.Name);
     }
 
     /***************************************************************************
@@ -79,8 +79,8 @@ public struct Credentials
             "Client credentials file must contain only a single entry");
         foreach ( name, key; credentials )
         {
-            this.name = name.dup;
-            this.key = key;
+            (&this).name = name.dup;
+            (&this).key = key;
         }
     }
 }
