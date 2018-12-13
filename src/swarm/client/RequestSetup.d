@@ -144,7 +144,7 @@ public template RequestBase ( )
     ***************************************************************************/
 
     static private This opCall ( ICommandCodes.Value command,
-        IRequestNotification.Callback notifier )
+        scope IRequestNotification.Callback notifier )
     {
         This inst;
 
@@ -166,7 +166,7 @@ public template RequestBase ( )
 
     ***************************************************************************/
 
-    public This* notifier ( IRequestNotification.Callback notifier )
+    public This* notifier ( scope IRequestNotification.Callback notifier )
     {
         this.notification_dg = notifier;
         version (D_Version2)
@@ -453,7 +453,7 @@ public template ClientCommandBase ( )
     ***************************************************************************/
 
     static private This opCall ( ClientCommandParams.Command command,
-        IRequestNotification.Callback notifier )
+        scope IRequestNotification.Callback notifier )
     {
         This inst;
 

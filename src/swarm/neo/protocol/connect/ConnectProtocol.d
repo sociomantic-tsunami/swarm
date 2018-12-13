@@ -343,7 +343,7 @@ class ConnectProtocol: ISelectClient
 
     ***************************************************************************/
 
-    public void receive ( Fields ... ) ( void delegate ( Fields fields ) dg )
+    public void receive ( Fields ... ) ( scope void delegate ( Fields fields ) dg )
     {
         this.receive_(
             (Const!(void)[] message_body)
@@ -370,7 +370,7 @@ class ConnectProtocol: ISelectClient
 
     ***************************************************************************/
 
-    private void receive_ ( void delegate ( Const!(void)[] message_body ) dg )
+    private void receive_ ( scope void delegate ( Const!(void)[] message_body ) dg )
     {
         this.receiver.receive(
             {

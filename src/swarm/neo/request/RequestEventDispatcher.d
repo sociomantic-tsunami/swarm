@@ -304,12 +304,12 @@ public struct RequestEventDispatcher
 
     public void initialise ( void[]* delegate() getVoidArray)
     {
-        verify(this.last_event == this.last_event.init);
+        verify((&this).last_event == (&this).last_event.init);
 
-        this.waiting_fibers = VoidBufferAsArrayOf!(WaitingFiber)(getVoidArray());
-        this.waiting_fibers_to_iterate
+        (&this).waiting_fibers = VoidBufferAsArrayOf!(WaitingFiber)(getVoidArray());
+        (&this).waiting_fibers_to_iterate
             = VoidBufferAsArrayOf!(WaitingFiber)(getVoidArray());
-        this.queued_signals = VoidBufferAsArrayOf!(ubyte)(getVoidArray());
+        (&this).queued_signals = VoidBufferAsArrayOf!(ubyte)(getVoidArray());
     }
 
     /***************************************************************************
@@ -343,7 +343,7 @@ public struct RequestEventDispatcher
             else
                 static assert(false, "Invalid event type");
 
-            this.register(fiber, register_event);
+            (&this).register(fiber, register_event);
         }
 
         scope ( exit )
@@ -351,17 +351,17 @@ public struct RequestEventDispatcher
             // This unregisters *all* events for this fiber. Since it's illegal
             // for events to be registered for a fiber while it's not suspended,
             // this is safe.
-            this.unregisterFiber(fiber);
+            (&this).unregisterFiber(fiber);
 
-            this.last_event = this.last_event.init;
-            verify(this.last_event.active == this.last_event.active.none);
+            (&this).last_event = (&this).last_event.init;
+            verify((&this).last_event.active == (&this).last_event.active.none);
         }
 
-        fiber.suspend(this.token);
+        fiber.suspend((&this).token);
         // The code which resumes the fiber is expected to set the value of
         // this.last_event immediately before calling resume().
-        verify(this.last_event.active != this.last_event.active.none);
-        return this.last_event;
+        verify((&this).last_event.active != (&this).last_event.active.none);
+        return (&this).last_event;
     }
 
     /***************************************************************************
@@ -374,9 +374,9 @@ public struct RequestEventDispatcher
 
     ***************************************************************************/
 
-    public void send ( MessageFiber fiber, Send.GetPayloadDg fill_payload )
+    public void send ( MessageFiber fiber, scope Send.GetPayloadDg fill_payload )
     {
-        auto event = this.nextEvent(fiber, Send(fill_payload));
+        auto event = (&this).nextEvent(fiber, Send(fill_payload));
         enforce(event.active == event.active.sent,
             "Unexpected event: waiting only for write success");
     }
@@ -401,7 +401,7 @@ public struct RequestEventDispatcher
         foreach ( message; messages )
             static assert(is(typeof(message) == Message));
 
-        auto event = this.nextEvent(fiber, messages);
+        auto event = (&this).nextEvent(fiber, messages);
         return event.message;
     }
 
@@ -416,7 +416,7 @@ public struct RequestEventDispatcher
 
     public void yield ( MessageFiber fiber )
     {
-        auto event = this.nextEvent(fiber, Yield());
+        auto event = (&this).nextEvent(fiber, Yield());
     }
 
     /***************************************************************************
@@ -438,7 +438,7 @@ public struct RequestEventDispatcher
         if ( call_count >= yield_after )
         {
             call_count = 0;
-            this.yield(fiber);
+            (&this).yield(fiber);
         }
         else
             call_count++;
@@ -457,7 +457,7 @@ public struct RequestEventDispatcher
     {
         verify(!fiber.running, "Cannot abort self");
 
-        this.unregisterFiber(fiber);
+        (&this).unregisterFiber(fiber);
 
         if ( fiber.finished )
             return;
@@ -488,8 +488,8 @@ public struct RequestEventDispatcher
             // (Otherwise, a signal can be popped from the list, the waiting
             // fiber resumed, then the signal popped again -- now there's no
             // fiber waiting for it.)
-            if ( !Array.contains(this.queued_signals.array(), code) )
-                this.queued_signals ~= code;
+            if ( !Array.contains((&this).queued_signals.array(), code) )
+                (&this).queued_signals ~= code;
         }
     }
 
@@ -514,18 +514,18 @@ public struct RequestEventDispatcher
     {
         WaitingFiber writer;
 
-        try while ( this.enabled_events )
+        try while ( (&this).enabled_events )
         {
             writer = writer.init;
 
-            this.dispatchQueuedSignals(conn);
+            (&this).dispatchQueuedSignals(conn);
 
-            if ( this.waitingWriters() )
-                writer = this.popWaitingWriter();
-            else if ( !this.enabled_events )
+            if ( (&this).waitingWriters() )
+                writer = (&this).popWaitingWriter();
+            else if ( !(&this).enabled_events )
                 break;
 
-            this.handleNextEvent(conn, writer);
+            (&this).handleNextEvent(conn, writer);
         }
         catch ( Exception e )
         {
@@ -537,18 +537,18 @@ public struct RequestEventDispatcher
             // Copy all WaitingFibers into a separate buffer. This is to avoid
             // the array being iterated over being modified by one of the fibers
             // which is resumed from inside the loop.
-            this.waiting_fibers_to_iterate.length = this.waiting_fibers.length;
-            this.waiting_fibers_to_iterate.array()[] = this.waiting_fibers.array()[];
+            (&this).waiting_fibers_to_iterate.length = (&this).waiting_fibers.length;
+            (&this).waiting_fibers_to_iterate.array()[] = (&this).waiting_fibers.array()[];
 
-            foreach ( waiting_fiber; this.waiting_fibers_to_iterate.array() )
+            foreach ( waiting_fiber; (&this).waiting_fibers_to_iterate.array() )
                 if ( waiting_fiber.fiber.waiting )
-                    waiting_fiber.fiber.resume(this.token, null, msg);
+                    waiting_fiber.fiber.resume((&this).token, null, msg);
 
             // If a writer fiber was popped from the list, abort that too.
             if ( writer.fiber !is null && writer.fiber.waiting )
-                writer.fiber.resume(this.token, null, msg);
+                writer.fiber.resume((&this).token, null, msg);
 
-            this.waiting_fibers.length = 0;
+            (&this).waiting_fibers.length = 0;
             throw e;
         }
     }
@@ -574,10 +574,10 @@ public struct RequestEventDispatcher
 
         do
         {
-            this.dispatchQueuedSignals(conn);
+            (&this).dispatchQueuedSignals(conn);
 
             RequestOnConnBase.EventDispatcher.NextEventFlags flags;
-            flags = flags.Receive | this.nextEventYieldResumeFlags();
+            flags = flags.Receive | (&this).nextEventYieldResumeFlags();
 
             auto event = conn.nextEvent(flags,
                 sending ? writer.event.send.get_payload : null);
@@ -587,19 +587,19 @@ public struct RequestEventDispatcher
                     sent = true;
                     EventNotification fired_event;
                     fired_event.sent = Sent();
-                    this.notifyWaitingFiber(writer.fiber, fired_event);
+                    (&this).notifyWaitingFiber(writer.fiber, fired_event);
                     break;
 
                 case event.active.received:
-                    this.dispatchReceivedPayload(conn, event.received.payload);
+                    (&this).dispatchReceivedPayload(conn, event.received.payload);
                     break;
 
                 case event.active.resumed:
-                    this.dispatchSignal(conn, event.resumed.code);
+                    (&this).dispatchSignal(conn, event.resumed.code);
                     break;
 
                 case event.active.yielded_resumed:
-                    this.resumeYieldedFibers(conn);
+                    (&this).resumeYieldedFibers(conn);
                     break;
 
                 default:
@@ -637,7 +637,7 @@ public struct RequestEventDispatcher
     {
         // See if a matching element is already in this.waiting_fibers.
         WaitingFiber* in_list;
-        foreach ( ref waiting_fiber; this.waiting_fibers.array() )
+        foreach ( ref waiting_fiber; (&this).waiting_fibers.array() )
         {
             if ( waiting_fiber.fiber == fiber && waiting_fiber.event == event )
             {
@@ -679,12 +679,12 @@ public struct RequestEventDispatcher
         // Add the new fiber/event to the list, if it was not found.
         if ( in_list is null )
         {
-            this.waiting_fibers ~= WaitingFiber(fiber, event);
-            in_list = &this.waiting_fibers.array()[$-1];
+            (&this).waiting_fibers ~= WaitingFiber(fiber, event);
+            in_list = &(&this).waiting_fibers.array()[$-1];
         }
 
         // Set the list element to enabled.
-        this.enable(*in_list);
+        (&this).enable(*in_list);
     }
 
     /***************************************************************************
@@ -699,11 +699,11 @@ public struct RequestEventDispatcher
 
     private void unregister ( MessageFiber fiber, EventRegistration event )
     {
-        foreach ( ref waiting_fiber; this.waiting_fibers.array() )
+        foreach ( ref waiting_fiber; (&this).waiting_fibers.array() )
         {
             if ( waiting_fiber.fiber == fiber && waiting_fiber.event == event )
             {
-                this.disable(waiting_fiber);
+                (&this).disable(waiting_fiber);
                 break;
             }
         }
@@ -720,10 +720,10 @@ public struct RequestEventDispatcher
 
     private void unregisterFiber ( MessageFiber fiber )
     {
-        foreach ( ref waiting_fiber; this.waiting_fibers.array() )
+        foreach ( ref waiting_fiber; (&this).waiting_fibers.array() )
         {
             if ( waiting_fiber.fiber == fiber )
-                this.disable(waiting_fiber);
+                (&this).disable(waiting_fiber);
         }
     }
 
@@ -736,7 +736,7 @@ public struct RequestEventDispatcher
 
     private bool waitingWriters ( )
     {
-        foreach ( waiting_fiber; this.waiting_fibers.array() )
+        foreach ( waiting_fiber; (&this).waiting_fibers.array() )
             if ( waiting_fiber.enabled &&
                 waiting_fiber.event.active == waiting_fiber.event.active.send )
                 return true;
@@ -759,9 +759,9 @@ public struct RequestEventDispatcher
 
         // All the flags that this method sets, used for short-circuit the
         // array iteration if we set all relevant flags.
-        const all_set_flags = flags.Yield | flags.Resume;
+        enum all_set_flags = flags.Yield | flags.Resume;
 
-        foreach ( waiting_fiber; this.waiting_fibers.array() )
+        foreach ( waiting_fiber; (&this).waiting_fibers.array() )
         {
             if ( waiting_fiber.enabled )
             {
@@ -803,14 +803,14 @@ public struct RequestEventDispatcher
     }
     body
     {
-        verify(this.waiting_fibers.length > 0);
-        verify(this.enabled_events > 0);
+        verify((&this).waiting_fibers.length > 0);
+        verify((&this).enabled_events > 0);
 
-        foreach ( ref waiting_fiber; this.waiting_fibers.array() )
+        foreach ( ref waiting_fiber; (&this).waiting_fibers.array() )
             if ( waiting_fiber.enabled &&
                 waiting_fiber.event.active == waiting_fiber.event.active.send )
             {
-                this.disable(waiting_fiber);
+                (&this).disable(waiting_fiber);
                 return waiting_fiber;
             }
 
@@ -830,24 +830,24 @@ public struct RequestEventDispatcher
     private void dispatchQueuedSignals ( RequestOnConnBase.EventDispatcher conn )
     out
     {
-        assert(this.queued_signals.length == 0);
+        assert((&this).queued_signals.length == 0);
     }
     body
     {
-        while ( this.queued_signals.length > 0 )
+        while ( (&this).queued_signals.length > 0 )
         {
-            auto code = this.queued_signals.array()[0];
+            auto code = (&this).queued_signals.array()[0];
 
             // Shift all the elements to the left by one
-            void* src = this.queued_signals.array().ptr + 1;
-            void* dst = this.queued_signals.array().ptr;
-            size_t num = ubyte.sizeof * (this.queued_signals.length - 1);
+            void* src = (&this).queued_signals.array().ptr + 1;
+            void* dst = (&this).queued_signals.array().ptr;
+            size_t num = ubyte.sizeof * ((&this).queued_signals.length - 1);
             memmove(dst, src, num);
 
             // adjust buffer length
-            this.queued_signals.length = this.queued_signals.length - 1;
+            (&this).queued_signals.length = (&this).queued_signals.length - 1;
 
-            this.dispatchSignal(conn, code);
+            (&this).dispatchSignal(conn, code);
         }
     }
 
@@ -875,7 +875,7 @@ public struct RequestEventDispatcher
         verify(signal <= 255);
         ubyte signal_ubyte = cast(ubyte)signal;
 
-        foreach ( waiting_fiber; this.waiting_fibers.array() )
+        foreach ( waiting_fiber; (&this).waiting_fibers.array() )
         {
             if ( waiting_fiber.enabled &&
                 waiting_fiber.event.active == waiting_fiber.event.active.signal
@@ -884,7 +884,7 @@ public struct RequestEventDispatcher
                 EventNotification fired_event;
                 fired_event.signal = Signalled(signal_ubyte);
 
-                this.notifyWaitingFiber(waiting_fiber.fiber, fired_event);
+                (&this).notifyWaitingFiber(waiting_fiber.fiber, fired_event);
                 return;
             }
         }
@@ -914,7 +914,7 @@ public struct RequestEventDispatcher
     {
         auto message_type = *conn.message_parser.getValue!(ubyte)(payload);
 
-        foreach ( waiting_fiber; this.waiting_fibers.array() )
+        foreach ( waiting_fiber; (&this).waiting_fibers.array() )
         {
             if ( waiting_fiber.enabled &&
                 waiting_fiber.event.active == waiting_fiber.event.active.message
@@ -923,7 +923,7 @@ public struct RequestEventDispatcher
                 EventNotification fired_event;
                 fired_event.message = ReceivedMessage(message_type, payload);
 
-                this.notifyWaitingFiber(waiting_fiber.fiber, fired_event);
+                (&this).notifyWaitingFiber(waiting_fiber.fiber, fired_event);
                 return;
             }
         }
@@ -952,26 +952,26 @@ public struct RequestEventDispatcher
         // into a separate buffer. This is to avoid the array being iterated
         // over being modified by one of the fibers which is resumed from inside
         // the loop.
-        this.waiting_fibers_to_iterate.length = 0;
+        (&this).waiting_fibers_to_iterate.length = 0;
 
-        foreach ( waiting_fiber; this.waiting_fibers.array() )
+        foreach ( waiting_fiber; (&this).waiting_fibers.array() )
         {
             if ( waiting_fiber.enabled &&
                 waiting_fiber.event.active == waiting_fiber.event.active.yield )
             {
-                this.waiting_fibers_to_iterate ~= waiting_fiber;
+                (&this).waiting_fibers_to_iterate ~= waiting_fiber;
             }
         }
 
-        if ( this.waiting_fibers_to_iterate.length == 0 )
+        if ( (&this).waiting_fibers_to_iterate.length == 0 )
             throw conn.shutdownWithProtocolError("Unhandled resume after yield");
 
-        foreach ( fiber_to_notify; this.waiting_fibers_to_iterate.array() )
+        foreach ( fiber_to_notify; (&this).waiting_fibers_to_iterate.array() )
         {
             EventNotification fired_event;
             fired_event.yielded_resumed = YieldedThenResumed();
 
-            this.notifyWaitingFiber(fiber_to_notify.fiber, fired_event);
+            (&this).notifyWaitingFiber(fiber_to_notify.fiber, fired_event);
         }
     }
 
@@ -990,7 +990,7 @@ public struct RequestEventDispatcher
         if ( !waiting_fiber.enabled )
         {
             waiting_fiber.enabled = true;
-            this.enabled_events++;
+            (&this).enabled_events++;
         }
     }
 
@@ -1009,7 +1009,7 @@ public struct RequestEventDispatcher
         if ( waiting_fiber.enabled )
         {
             waiting_fiber.enabled = false;
-            this.enabled_events--;
+            (&this).enabled_events--;
         }
     }
 
@@ -1027,9 +1027,9 @@ public struct RequestEventDispatcher
 
     private void notifyWaitingFiber ( MessageFiber fiber, EventNotification event )
     {
-        verify(this.last_event.active == this.last_event.active.none);
-        this.last_event = event;
-        verify(this.last_event.active != this.last_event.active.none);
-        fiber.resume(this.token);
+        verify((&this).last_event.active == (&this).last_event.active.none);
+        (&this).last_event = event;
+        verify((&this).last_event.active != (&this).last_event.active.none);
+        fiber.resume((&this).token);
     }
 }

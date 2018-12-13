@@ -85,7 +85,7 @@ template SharedResources_T ( T )
 
         template DeclareFreeList ( T, size_t i )
         {
-            const istring DeclareFreeList = "public FreeList!("
+            static immutable istring DeclareFreeList = "public FreeList!("
                 ~ FieldType!(T, i).stringof ~ ") " ~ FieldName!(i, T) ~ "_freelist;";
         }
 
@@ -93,11 +93,11 @@ template SharedResources_T ( T )
         {
             static if ( i == T.tupleof.length - 1 )
             {
-                const istring DeclareFreeLists = DeclareFreeList!(T, i);
+                static immutable istring DeclareFreeLists = DeclareFreeList!(T, i);
             }
             else
             {
-                const istring DeclareFreeLists = DeclareFreeList!(T, i) ~
+                static immutable istring DeclareFreeLists = DeclareFreeList!(T, i) ~
                     DeclareFreeLists!(T, i + 1);
             }
         }
@@ -119,7 +119,7 @@ template SharedResources_T ( T )
 
         template NewFreeList ( T, size_t i )
         {
-            const istring NewFreeList = "this." ~ FieldName!(i, T) ~ "_freelist"
+            static immutable istring NewFreeList = "this." ~ FieldName!(i, T) ~ "_freelist"
                 ~ " = new FreeList!(" ~ FieldType!(T, i).stringof ~ ");";
         }
 
@@ -127,11 +127,11 @@ template SharedResources_T ( T )
         {
             static if ( i == T.tupleof.length - 1 )
             {
-                const istring NewFreeLists = NewFreeList!(T, i);
+                static immutable istring NewFreeLists = NewFreeList!(T, i);
             }
             else
             {
-                const istring NewFreeLists = NewFreeList!(T, i) ~
+                static immutable istring NewFreeLists = NewFreeList!(T, i) ~
                     NewFreeLists!(T, i + 1);
             }
         }

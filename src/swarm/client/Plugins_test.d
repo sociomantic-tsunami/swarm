@@ -36,7 +36,7 @@ class Client : IClient
     }
 
     override protected void scopeRequestParams (
-        void delegate ( IRequestParams params ) dg ) { }
+        scope void delegate ( IRequestParams params ) dg ) { }
 
     // Required by NodeDeactivator
     void assign ( T ) ( T request ) { }
