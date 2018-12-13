@@ -275,7 +275,6 @@ public abstract class ConnectionHandlerTemplate ( Commands : ICommandCodes )
     {
         debug
         {
-            const float Mb = 1024 * 1024;
             size_t used1, free1;
             gc_usage(used1, free1);
 
