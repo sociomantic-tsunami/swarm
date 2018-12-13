@@ -85,6 +85,6 @@ public interface INodeRegistryInfo
 
     ***************************************************************************/
 
-    public int opApply ( int delegate ( ref INodeConnectionPoolInfo ) dg );
+    public int opApply ( scope int delegate ( ref INodeConnectionPoolInfo ) dg );
 }
 
