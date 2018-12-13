@@ -297,8 +297,6 @@ public abstract class ConnectionHandlerTemplate ( Commands : ICommandCodes )
             // Log a warning if the length of any buffers acquired from the pool
             // of shared resources while handling this command exceed a sanity
             // limit afterwards.
-            const warn_limit = 1024 * 64; // anything > 64K will be logged
-
             foreach ( i, F; typeof(Resources.tupleof) )
             {
                 static if ( isArrayType!(F) )
@@ -307,7 +305,7 @@ public abstract class ConnectionHandlerTemplate ( Commands : ICommandCodes )
                     // while it is converted in `static immutable`
                     mixin("auto buffer = acquired."
                         ~ FieldName!(i, Resources) ~ ";");
-                    if ( buffer.length > warn_limit )
+                    if ( buffer.length > this.bufferSizeWarnLimit() )
                     {
                         log.warn("Request resource '{}' grew to {} bytes while " ~
                             "handling {}", FieldName!(i, Resources), buffer.length,
@@ -338,6 +336,20 @@ public abstract class ConnectionHandlerTemplate ( Commands : ICommandCodes )
         request.handle();
     }
 
+
+    /***************************************************************************
+
+        Returns:
+            the maximum buffer size that is considered sane for this node type.
+            (The buffer allocation behaviour of each node type can vary, so this
+            value is overrideable.)
+
+    ***************************************************************************/
+
+    protected ulong bufferSizeWarnLimit ( )
+    {
+        return 1024 * 64;
+    }
 
     /***************************************************************************
 
