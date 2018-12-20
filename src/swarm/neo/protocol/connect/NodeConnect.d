@@ -34,8 +34,23 @@ class NodeConnect
     import ocean.core.Verify;
     import ocean.core.array.Mutation : copy;
     import ocean.transition;
+    import ocean.util.log.Logger;
 
     debug ( SwarmConn ) import ocean.io.Stdout_tango;
+
+
+    /***************************************************************************
+
+        Logger (shared by all instances).
+
+    ***************************************************************************/
+
+    protected static Logger log;
+
+    static this ( )
+    {
+        log = Log.lookup("swarm.neo.protocol.connect.NodeConnect");
+    }
 
     /***************************************************************************
 
@@ -167,6 +182,8 @@ class NodeConnect
         {
             try
             {
+                this.client_name.copy(client_name);
+
                 // Validate the client name.
                 enforce(this.e_auth_rejected.set("Empty client name"),
                         client_name.length);
@@ -190,7 +207,6 @@ class NodeConnect
 
                     // Authentication successful.
                     success = true;
-                    this.client_name.copy(client_name);
                 }
                 else
                 {   // Client name not found: Extra check for invalid name,
@@ -227,6 +243,9 @@ class NodeConnect
 
         if (!success)
         {
+            log.warn("Authentication failure for client '{}': {}",
+                this.client_name, this.e_auth_rejected.message);
+
             this.client_name.length = 0;
             enableStomping(this.client_name);
             throw this.e_auth_rejected;
