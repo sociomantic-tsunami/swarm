@@ -15,6 +15,7 @@ module swarm.neo.util.FieldSizeSum;
 
 *******************************************************************************/
 
+deprecated("Use ocean.core.Traits : SizeofTuple instead")
 template FieldSizeSum ( S, size_t i = 0 )
 {
     static if (i < S.tupleof.length)
