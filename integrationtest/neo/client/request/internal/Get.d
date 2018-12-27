@@ -13,6 +13,7 @@
 module integrationtest.neo.client.request.internal.Get;
 
 import ocean.transition;
+import integrationtest.neo.common.Get;
 
 /// Default (v0) Get implementation.
 public alias VersionedGet!(0) Get;
@@ -45,7 +46,6 @@ public alias VersionedGet!(0) Get;
 
 public struct VersionedGet ( ubyte Version )
 {
-    import integrationtest.neo.common.Get;
     import integrationtest.neo.client.request.Get;
     import integrationtest.neo.common.RequestCodes;
     import swarm.neo.AddrPort;
