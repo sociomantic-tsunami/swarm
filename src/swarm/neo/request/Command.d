@@ -32,9 +32,9 @@ public struct Command
 
     ***************************************************************************/
 
-    import swarm.neo.util.FieldSizeSum;
+    import ocean.core.Traits : SizeofTuple;
 
-    static assert(FieldSizeSum!(typeof(*this)) == typeof(*this).sizeof);
+    static assert(SizeofTuple!(typeof(typeof(*this).tupleof)) == typeof(*this).sizeof);
 }
 
 /*******************************************************************************
