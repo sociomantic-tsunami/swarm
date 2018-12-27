@@ -768,6 +768,8 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
                   ConnectionSetupParams conn_setup_params, Options options,
                   int backlog )
     {
+        enforce(node.validateAddress() == NodeItem.IPVersion.IPv4,
+            "Node listener IP address invalid");
         verify(options.epoll !is null);
 
         this.shared_resources = options.shared_resources;
