@@ -607,6 +607,9 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler,
 
     public this ( NodeItem node, Setup conn_setup_params, int backlog )
     {
+        enforce(node.validateAddress() == NodeItem.IPVersion.IPv4,
+            "Node listener IP address invalid");
+
         InetAddress!(false) addr;
 
         this.socket = new AddressIPSocket!();
