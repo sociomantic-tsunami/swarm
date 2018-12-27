@@ -3,11 +3,26 @@
     Functions to pack a struct instance and all contained array buffers into a
     contiguous chunk of memory.
 
-    The packer is similar to ocean's contiguous serializer, but:
+    The packer is distinct from a serializer (e.g. ocean's contiguous
+    serializer) in that it stores memory addresses in the packed data. Thus,
+    packed data can explicitly *not* be exported to disk or sent over the
+    network.
+
+    Packing (as opposed to serializing) is useful in scenarios where you need to
+    store data of an undefined type in a reusable buffer. For example, swarm
+    client requests use the packer to store the data required for their context
+    in a reusable buffer in an abstract aggregate that knows nothing about the
+    different types of requests.
+
+    Internally, the packer is similar to ocean's contiguous serializer, but:
         * Can handle non-array reference types (e.g. delegates, pointers).
         * Can handle unions.
         * Automatically sets the pointers of packed arrays to point to the
           array data contained in the packed buffer.
+
+    Note: this code is generic (i.e. does not rely on anything else in swarm),
+    but is not placed in ocean as there are no other current use cases for it,
+    outside of the request core of swarm neo.
 
     Copyright:
         Copyright (c) 2017 dunnhumby Germany GmbH. All rights reserved
