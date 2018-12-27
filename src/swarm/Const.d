@@ -26,6 +26,11 @@ import ocean.io.digest.Fnv1;
 import ocean.transition;
 import core.stdc.ctype : isalnum;
 
+version ( UnitTest )
+{
+    import ocean.core.Test;
+}
+
 
 
 /*******************************************************************************
@@ -78,6 +83,8 @@ public class IStatusCodes : IEnum
 
 public struct NodeItem
 {
+    import ocean.sys.socket.InetAddress;
+
     /***************************************************************************
 
         Node address & port.
@@ -112,6 +119,45 @@ public struct NodeItem
     public hash_t toHash ( ) /* d1to2fix_inject: const */
     {
         return Fnv1a(this.Address) ^ this.Port;
+    }
+
+
+    /// Enum of IP validation results. (See validateAddress().)
+    public enum IPVersion
+    {
+        Invalid,
+        IPv4,
+        IPv6
+    }
+
+    /***************************************************************************
+
+        Returns:
+            code reporting whether this.Address is a valid IPv4 / IPv6 address
+            or is invalid
+
+    ***************************************************************************/
+
+    public IPVersion validateAddress ( )
+    {
+        InetAddress!(false) check_ipv4;
+        InetAddress!(true) check_ipv6;
+        if ( check_ipv4.inet_pton(this.Address) == 1 )
+            return IPVersion.IPv4;
+        if ( check_ipv6.inet_pton(this.Address) == 1 )
+            return IPVersion.IPv6;
+        return IPVersion.Invalid;
+    }
+
+    unittest
+    {
+        NodeItem node;
+        node.Address = "localhost".dup;
+        test!("==")(node.validateAddress(), IPVersion.Invalid);
+        node.Address = "127.0.0.1".dup;
+        test!("==")(node.validateAddress(), IPVersion.IPv4);
+        node.Address = "0:0:0:0:0:0:0:1".dup;
+        test!("==")(node.validateAddress(), IPVersion.IPv6);
     }
 
 
