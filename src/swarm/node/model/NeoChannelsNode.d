@@ -52,6 +52,8 @@ public class ChannelsNodeBase (
     ConnHandler : ISwarmConnectionHandler
 ) : NodeBase!(ConnHandler), IChannelsNodeInfo
 {
+    import swarm.Const : validateChannelName;
+
     /***************************************************************************
 
         Storage channel registry instance
@@ -84,6 +86,11 @@ public class ChannelsNodeBase (
         this.channels = channels;
 
         super(node, neo_port, conn_setup_params, options, backlog);
+
+        if ( options.unix_socket_path.length )
+        {
+            this.unix_socket_handlers["new-channel"] = &this.handleNewChannel;
+        }
     }
 
 
@@ -225,6 +232,36 @@ public class ChannelsNodeBase (
     public cstring storage_type ( )
     {
         return this.channels.type;
+    }
+
+
+    /***************************************************************************
+
+        Unix domain socket connection handler, creates a new storage channel.
+
+        Params:
+            args = command arguments (the channel name)
+            send_response = delegate to write to the client socket
+
+    ***************************************************************************/
+
+    private void handleNewChannel ( cstring args,
+        void delegate ( cstring response ) send_response )
+    {
+        if ( !validateChannelName(args) )
+        {
+            send_response("Invalid channel name.\n");
+            return;
+        }
+
+        if ( args in this.channels )
+        {
+            send_response("Channel already exists.\n");
+            return;
+        }
+
+        this.channels.create(args);
+        send_response("Channel created.\n");
     }
 }
 
