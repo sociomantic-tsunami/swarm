@@ -200,6 +200,7 @@ abstract public class IStorageChannelsTemplate ( Storage : IStorageEngine )
 
     ***************************************************************************/
 
+    deprecated("Use `opIn_r` instead. Request handlers should no longer create channels.")
     public Storage getCreate ( cstring channel_id )
     {
         auto channel = channel_id in this.channels;
