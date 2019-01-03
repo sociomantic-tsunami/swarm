@@ -728,6 +728,14 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
 
     /***************************************************************************
 
+        Unix socket command handlers map.
+
+    ***************************************************************************/
+
+    protected BasicCommandHandler.Handler[istring] unix_socket_handlers;
+
+    /***************************************************************************
+
         The server socket.
 
     ***************************************************************************/
@@ -813,16 +821,15 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
         UnixListener unix_listener;
         if ( options.unix_socket_path.length )
         {
-            BasicCommandHandler.Handler[istring] unix_socket_handlers;
             if ( this.credentials_file )
             {
-                unix_socket_handlers =
+                this.unix_socket_handlers =
                     ["update-credentials"[]: &this.handleUpdateCredentials,
                      "list-credentials": &this.handleListCredentials];
             }
 
-            unix_listener = new UnixListener(
-                options.unix_socket_path, options.epoll, unix_socket_handlers);
+            unix_listener = new UnixListener(options.unix_socket_path,
+                options.epoll, this.unix_socket_handlers);
         }
 
         // Super ctor.
