@@ -46,6 +46,7 @@ import ocean.transition;
 
 *******************************************************************************/
 
+deprecated("Use the neo-capable node base in swarm.node.model.NeoChannelsNode")
 public class ChannelsNodeBase
     ( Storage : IStorageEngine, ConnHandler : ISwarmConnectionHandler )
     : NodeBase!(ConnHandler), IChannelsNodeInfo

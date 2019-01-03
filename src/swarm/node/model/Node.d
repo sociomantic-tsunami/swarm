@@ -77,6 +77,7 @@ static this ( )
 
 *******************************************************************************/
 
+deprecated("Use the neo-capable node base in swarm.node.model.NeoNode")
 public abstract class INodeBase : INode, INodeInfo
 {
     /***************************************************************************
@@ -564,6 +565,7 @@ public abstract class INodeBase : INode, INodeInfo
 
 *******************************************************************************/
 
+deprecated("Use the neo-capable node base in swarm.node.model.NeoNode")
 public class NodeBase ( ConnHandler : ISwarmConnectionHandler,
                         Setup : ConnectionSetupParams = ConnectionSetupParams ) : INodeBase
 {
@@ -699,7 +701,7 @@ version (UnitTest)
         override protected void handleCommand () {}
     }
 
-    private class TestNode : NodeBase!(TestConnectionHandler)
+    deprecated private class TestNode : NodeBase!(TestConnectionHandler)
     {
         public this ( )
         {
@@ -711,9 +713,4 @@ version (UnitTest)
             return "test";
         }
    }
-}
-
-unittest
-{
-    auto node = new TestNode;
 }
