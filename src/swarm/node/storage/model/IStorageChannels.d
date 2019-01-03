@@ -308,9 +308,7 @@ abstract public class IStorageChannelsTemplate ( Storage : IStorageEngine )
     /***************************************************************************
 
         Creates a new Storage instance and adds it to the channels
-        registry with identifier string channel_id. Called by the public
-        getCreate() method, above, but may also be called by sub-classes (for
-        example when loading saved channels upon construction).
+        registry with identifier string channel_id.
 
         Params:
             channel_id = channel identifier string
@@ -321,7 +319,7 @@ abstract public class IStorageChannelsTemplate ( Storage : IStorageEngine )
 
     ***************************************************************************/
 
-    protected Storage create ( cstring channel_id )
+    public Storage create ( cstring channel_id )
     {
         verify(!(channel_id in this.channels),
             idup(typeof(this).stringof ~ ".create: channel '" ~
