@@ -95,19 +95,6 @@ abstract public class IStorageChannelsTemplate ( Storage : IStorageEngine )
 
     /***************************************************************************
 
-        Flag set to true if the creation of a channel (by the create_() method)
-        fails due to an OutOfMemory exception. In this case further requests to
-        create new channels will be ignored, in order to prevent the case where
-        the node gets into the state where it's constantly attempting and
-        failing to create a new channel.
-
-    ***************************************************************************/
-
-    private bool no_more_channels;
-
-
-    /***************************************************************************
-
         Constructor.
 
     ***************************************************************************/
@@ -326,33 +313,20 @@ abstract public class IStorageChannelsTemplate ( Storage : IStorageEngine )
             idup(typeof(this).stringof ~ ".create: channel '" ~
                           channel_id ~ "' already exists!"));
 
-        if ( !this.no_more_channels )
-        {
-            try
-            {
-                auto channel = this.channel_pool.get(this.create_(channel_id));
-                channel.initialise(channel_id);
-                this.channels[channel.id] = channel;
+        auto channel = this.channel_pool.get(this.create_(channel_id));
+        channel.initialise(channel_id);
+        this.channels[channel.id] = channel;
 
-                verify(channel.id == channel_id, idup(typeof(this).stringof ~
-                    ".create: channel name mismatch - '" ~ channel_id ~
-                    " vs '" ~ channel.id ~ "'"));
+        verify(channel.id == channel_id, idup(typeof(this).stringof ~
+            ".create: channel name mismatch - '" ~ channel_id ~
+            " vs '" ~ channel.id ~ "'"));
 
-                verify((channel_id in this.channels) !is null,
-                    idup(typeof(this).stringof ~
-                        ".create: channel '" ~ channel_id ~
-                        "' not in map after creation!"));
+        verify((channel_id in this.channels) !is null,
+            idup(typeof(this).stringof ~
+                ".create: channel '" ~ channel_id ~
+                "' not in map after creation!"));
 
-                return channel;
-            }
-            catch ( OutOfMemoryException e )
-            {
-                log.error("Node out of memory -- failed to create requested channel '{}'", channel_id);
-                this.no_more_channels = true;
-            }
-        }
-
-        return null;
+        return channel;
     }
 
 
