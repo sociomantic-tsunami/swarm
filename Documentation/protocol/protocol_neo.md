@@ -6,6 +6,7 @@ should refer to [`README_client.rst`](README_client.rst) and
 
 Note that the legacy features of swarm are not discussed, as those are
 considered (more or less) deprecated. This includes the following packages:
+
 * `swarm.client`
 * `swarm.common`
 * `swarm.protocol`
@@ -13,6 +14,7 @@ considered (more or less) deprecated. This includes the following packages:
 # Protocol Overview
 
 The swarm protocol consists of the following components:
+
 * TCP transport layer.
 * Protocol version handshake.
 * Message protocol.
@@ -30,12 +32,14 @@ no further communication can occur.
 
 Subsequent stages of the protocol transmit all data in the form of messages,
 where a message consists of:
+
 * A message header.
 * A message body (a.k.a. payload).
 
 ### Message Header
 
 The message header specifies:
+
 * The type of the message. The message may either form part of a _request_ or
   part of the _authentication_ process.
 * The length of the message payload (bytes).
@@ -54,6 +58,7 @@ authentication key. The node has a list of the names and keys of clients which
 are allowed access.
 
 The protocol works as follows:
+
 1. The client sends the current timestamp.
 2. The node sends a nonce (a random number).
 3. The client creates an HMAC code from its authorisation key, the timestamp it
@@ -75,6 +80,7 @@ reading and writing at all times, allowing asynchronous, bidirectional (full
 duplex) communication. (The previous stages of the protocol use half duplex.)
 
 The request protocol works as follows:
+
 * The first 64 bits of all message payloads contains the id of a request.
 * Using this id, the client/node can look up the request to which a message is
   directed, and notify it that a message has arrived.
@@ -94,6 +100,7 @@ however there are many similarities. These are discussed in this section.
 
 The `ConnectionBase` class (`swarm.neo.connection.ConnectionBase`) provides the
 basic functionality of a full-duplex connection. It contains:
+
 * Two fibers, one handling sending over the connection and one handling
   receiving. The send and receive fibers both run a loop, internally, waiting
   for a message to be provided for sending or to arrive from the connection,
@@ -123,6 +130,7 @@ over the connection . Requests on connections are commonly referred to as
 "request-on-conns" or as "RoCs".
 
 A request-on-conn has the following important components:
+
 * A fiber that manages asynchronous I/O operations for the request on the
   connection.
 * An event dispatcher (the nested class `EventDispatcher`) instance that
