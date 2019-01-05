@@ -68,6 +68,16 @@ public interface INode
 
     /***************************************************************************
 
+        Restarts all listeners by reconstructing them. Assumed to be called
+        after the listeners have been shutdown via stopListener().
+
+    ***************************************************************************/
+
+    public void restartListeners ( );
+
+
+    /***************************************************************************
+
         Performs any required shutdown behaviour for the node.
 
     ***************************************************************************/

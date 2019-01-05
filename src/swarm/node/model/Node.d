@@ -185,13 +185,10 @@ public abstract class INodeBase : INode, INodeInfo
                 Note that the `error_dg` field should not be set by the user; it
                 is set internally. To set a user-defined error callback, use the
                 `error_callback` method
-            listener = select listener, is evaluated exactly once after
-                       conn_setup_params have been populated
 
     ***************************************************************************/
 
-    public this ( NodeItem node, ConnectionSetupParams conn_setup_params,
-                  lazy ISelectListener listener )
+    public this ( NodeItem node, ConnectionSetupParams conn_setup_params )
     {
         this.node_item_ = node;
 
@@ -200,7 +197,7 @@ public abstract class INodeBase : INode, INodeInfo
 
         conn_setup_params.error_dg = &this.error;
 
-        this.listener = listener;
+        this.listener = this.newListener();
 
         this.record_action_counters_ = new RecordActionCounters(this.record_action_counter_ids);
     }
@@ -310,6 +307,22 @@ public abstract class INodeBase : INode, INodeInfo
     {
         epoll.unregister(this.listener);
         this.listener.shutdown;
+    }
+
+
+    /***************************************************************************
+
+        Restarts all listeners by reconstructing them. Assumed to be called
+        after the listeners have been shutdown via stopListener().
+
+        Note: this method should not be called frequently, as it creates new
+        sockets each time.
+
+    ***************************************************************************/
+
+    public void restartListeners ( )
+    {
+        this.listener = this.newListener();
     }
 
 
@@ -523,6 +536,16 @@ public abstract class INodeBase : INode, INodeInfo
     /***************************************************************************
 
         Returns:
+            new ISelectListener instance for the legacy protocol
+
+    ***************************************************************************/
+
+    protected abstract ISelectListener newListener ( );
+
+
+    /***************************************************************************
+
+        Returns:
             identifier string for this node
 
     ***************************************************************************/
@@ -594,6 +617,12 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler,
 
     private AddressIPSocket!() socket;
 
+    /// Connection setup params to pass to each legacy connection handler.
+    private ConnectionSetupParams conn_setup_params;
+
+    /// Socket connection backlog.
+    private int backlog;
+
     /***************************************************************************
 
         Constructor
@@ -607,16 +636,13 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler,
 
     public this ( NodeItem node, Setup conn_setup_params, int backlog )
     {
-        InetAddress!(false) addr;
+        this.conn_setup_params = conn_setup_params;
+        this.backlog = backlog;
 
-        this.socket = new AddressIPSocket!();
-        this.listener = new Listener(addr(node.Address, node.Port),
-            this.socket, conn_setup_params, backlog);
+        super(node, conn_setup_params);
 
         enforce(this.socket.updateAddress() == 0, "socket.updateAddress() failed!");
-
         node.Port = this.socket.port();
-        super(node, conn_setup_params, this.listener);
     }
 
 
@@ -633,18 +659,15 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler,
 
     public this ( ushort port, Setup conn_setup_params, int backlog )
     {
+        this.conn_setup_params = conn_setup_params;
+        this.backlog = backlog;
+
         NodeItem node;
         node.Port = port;
 
-        InetAddress!(false) addr;
-
-        this.socket = new AddressIPSocket!();
-        this.listener = new Listener(addr(node.Port), this.socket, conn_setup_params,
-            backlog);
+        super(node, conn_setup_params);
 
         enforce(this.socket.updateAddress() == 0, "socket.updateAddress() failed!");
-
-        super(node, conn_setup_params, this.listener);
     }
 
 
@@ -686,6 +709,23 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler,
                     events);
             }
         }
+    }
+
+
+    /***************************************************************************
+
+        Returns:
+            new ISelectListener instance for the legacy protocol
+
+    ***************************************************************************/
+
+    protected override ISelectListener newListener ( )
+    {
+        InetAddress!(false) addr;
+        this.socket = new AddressIPSocket!();
+        return this.listener = new Listener(
+            addr(this.node_item.Address, this.node_item.Port), this.socket,
+            this.conn_setup_params, this.backlog);
     }
 }
 

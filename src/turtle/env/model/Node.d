@@ -34,9 +34,9 @@ import ocean.core.Verify;
 
 *******************************************************************************/
 
+deprecated("Use turtle.env.model.TestNode instead")
 public abstract class Node ( NodeType, istring id ) : ITurtleEnv
 {
-    import swarm.Const : NodeItem;
     import swarm.neo.AddrPort;
     import ocean.io.device.File;
     import ocean.core.Buffer;
