@@ -76,8 +76,16 @@ The protocol works as follows:
 
 Once a connection is established and authenticated, the request protocol begins.
 From this point onward, the protocol keeps the underlying socket active for
-reading and writing at all times, allowing asynchronous, bidirectional (full
+reading and writing at all times, allowing bidirectional (full
 duplex) communication. (The previous stages of the protocol use half duplex.)
+
+The connection uses one socket per client/node connection.
+However, there may be more than one request between the same client and node
+active at a time. Therefore the messages exchanged for these simultaneously
+active requests have to be multiplexed through the same socket.
+Furthermore, both parties, the server and the client can send data through the
+socket connection at any time so they must always expect data to arrive
+from the other party.
 
 The request protocol works as follows:
 
@@ -98,26 +106,55 @@ however there are many similarities. These are discussed in this section.
 
 ## Connections
 
-The `ConnectionBase` class (`swarm.neo.connection.ConnectionBase`) provides the
-basic functionality of a full-duplex connection. It contains:
+One way to always expect and therefore be ready to handle incoming messages is
+to separate the code for sending and receiving messages through the same socket.
+This is done in `MessageReceiver` and `MessageSender`.
+Both of which have the same principle of operation. They have:
 
-* Two fibers, one handling sending over the connection and one handling
-  receiving. The send and receive fibers both run a loop, internally, waiting
-  for a message to be provided for sending or to arrive from the connection,
-  handling the operation, then returning to waiting.
-* Message dispatching logic that reads the request id from the message payload
+* A message source, something which produces messages to be forwarded.
+* A message sink, something where they forward the received messages to.
+* An input queue from which they pop the messages which have been
+  produced by the message source.
+* A notification mechanism that there are now messages in the queue.
+* A fiber which, in a loop, waits for the notification and then pops
+  all messages from the queue and forwards it to the sink, one at a time.
+
+For the message receiver:
+
+* The message source is the socket.
+* The message sink is a callback which passes the message on to the
+  request it refers to (the delegate parameter of `MessageReceiver.receive`).
+* The input queue is the socket input buffer.
+* The notification mechanism is epoll.
+* The fiber with the loop is `ConnectionBase.ReceiveLoop`.
+
+For the message sender:
+
+* The message sources are the requests.
+* The message sink is the socket.
+* The input queue is the queue of pending messages:
+  `ConnectionBase.SendLoop.queue`.
+* The notification mechanism is in
+  `ConnectionBase.SendLoop.registerForSending`, which is called
+  whenever a request wants to send a message.
+* The fiber with the loop is `ConnectionBase.SendLoop`.
+
+The `ConnectionBase` (`swarm.neo.connection.ConnectionBase`) combines
+`MessageReceiver` and `MessageSender` in one class and provides the
+basic functionality of one full-duplex node - client connection. It contains:
+
+* The two fibers, one handling sending (using `MessageSender`) over the connection
+  and one handling receiving (using `MessageReceiver`).
+* The message dispatching logic that reads the request id from the message payload
   (the first 64 bits), looks up the appropriate request, and passes the
   remainder of the message payload to it.
-* Logic for registering the connection socket with epoll. (A `ConnectionBase`
-  object is an `ISelectClient`. See
+* Then logic for registering the connection socket with epoll for I/O multiplexing.
+  (A `ConnectionBase` object is an `ISelectClient`. See
   `ocean.io.select.client.model.ISelectClient`.)
 
-### The Send Queue
-
-The send fiber owned by each connection has an integrated queue of requests that
-are waiting to send something. When a request wishes to send, it must register
-itself with the appropriate connection; its message will be sent down the
-connection after all other pending writes have completed.
+Note that the read loop is always registered to epoll waiting for incoming messages
+while the send loop usualy sends messages imediatly. The send loop only registeres
+itself to epoll if the socket file descriptor is not ready for sending.
 
 ## Requests on Connections
 
