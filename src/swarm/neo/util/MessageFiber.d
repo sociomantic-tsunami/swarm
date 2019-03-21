@@ -269,7 +269,7 @@ public class OceanMessageFiber
 
      **************************************************************************/
 
-    public this ( void delegate ( ) coroutine )
+    public this ( scope void delegate ( ) coroutine )
     {
         this.fiber = new Fiber(coroutine);
         this.e_killed = new KilledException;
@@ -293,7 +293,7 @@ public class OceanMessageFiber
 
      **************************************************************************/
 
-    public this ( void delegate ( ) coroutine, size_t sz )
+    public this ( scope void delegate ( ) coroutine, size_t sz )
     {
         this.fiber = new Fiber(coroutine, sz);
         this.e_killed = new KilledException;
@@ -727,7 +727,7 @@ public class OceanMessageFiber
 
      **************************************************************************/
 
-    public void reset ( void delegate() coroutine )
+    public void reset ( scope void delegate() coroutine )
     {
         this.fiber.reset(coroutine);
     }
@@ -803,7 +803,7 @@ public class MessageFiber: OceanMessageFiber
 
      **************************************************************************/
 
-    public this ( void delegate ( ) coroutine ) { super(coroutine); }
+    public this ( scope void delegate ( ) coroutine ) { super(coroutine); }
 
     /**************************************************************************
 
@@ -815,7 +815,7 @@ public class MessageFiber: OceanMessageFiber
 
      **************************************************************************/
 
-    public this ( void delegate ( ) coroutine, size_t sz ) { super(coroutine, sz); }
+    public this ( scope void delegate ( ) coroutine, size_t sz ) { super(coroutine, sz); }
 
     /***************************************************************************
 

@@ -47,7 +47,7 @@ public interface IRequestStats
 
         public ulong count ( )
         {
-            return this.histogram.count;
+            return (&this).histogram.count;
         }
 
         /***********************************************************************
@@ -62,7 +62,7 @@ public interface IRequestStats
         public void count ( ulong c )
         {
             verify(c <= uint.max);
-            this.histogram.count = cast(uint)c;
+            (&this).histogram.count = cast(uint)c;
         }
 
         /***********************************************************************
@@ -74,7 +74,7 @@ public interface IRequestStats
 
         public ulong total_time_micros ( )
         {
-            return this.histogram.total_time_micros;
+            return (&this).histogram.total_time_micros;
         }
 
         /***********************************************************************
@@ -89,7 +89,7 @@ public interface IRequestStats
 
         public void total_time_micros ( ulong t )
         {
-            this.histogram.total_time_micros = t;
+            (&this).histogram.total_time_micros = t;
         }
 
         /***********************************************************************
@@ -102,7 +102,7 @@ public interface IRequestStats
 
         public double mean_time_micros ( )
         {
-            return this.histogram.mean_time_micros();
+            return (&this).histogram.mean_time_micros();
         }
 
         /***********************************************************************
@@ -116,7 +116,7 @@ public interface IRequestStats
         deprecated("Use mean_time_micros instead")
         public double mean_handled_time_micros ( )
         {
-            return this.histogram.mean_time_micros();
+            return (&this).histogram.mean_time_micros();
         }
     }
 

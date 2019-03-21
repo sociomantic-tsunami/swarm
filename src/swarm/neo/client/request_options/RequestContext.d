@@ -109,7 +109,7 @@ public struct RequestContext
 
     public void integer ( ulong i )
     {
-        this.context().integer = i;
+        (&this).context().integer = i;
     }
 
     /***************************************************************************
@@ -123,7 +123,7 @@ public struct RequestContext
 
     public void object ( Object o )
     {
-        this.context().object = o;
+        (&this).context().object = o;
     }
 
     /***************************************************************************
@@ -137,7 +137,7 @@ public struct RequestContext
 
     public void pointer ( void* p )
     {
-        this.context().pointer = p;
+        (&this).context().pointer = p;
     }
 
     /***************************************************************************
@@ -150,9 +150,9 @@ public struct RequestContext
 
     ***************************************************************************/
 
-    public ulong integer ( ) /* d1to2fix_inject: const */
+    public ulong integer ( ) const
     {
-        return this.context().integer;
+        return (&this).context().integer;
     }
 
     /***************************************************************************
@@ -165,9 +165,9 @@ public struct RequestContext
 
     ***************************************************************************/
 
-    public Object object ( ) /* d1to2fix_inject: const */
+    public Object object ( ) const
     {
-        return this.context().object;
+        return (&this).context().object;
     }
 
     /***************************************************************************
@@ -180,9 +180,9 @@ public struct RequestContext
 
     ***************************************************************************/
 
-    public void* pointer ( ) /* d1to2fix_inject: const */
+    public void* pointer ( ) const
     {
-        return this.context().pointer;
+        return (&this).context().pointer;
     }
 
     /***************************************************************************
@@ -192,9 +192,9 @@ public struct RequestContext
 
     ***************************************************************************/
 
-    public ContextUnion.Active active ( ) /* d1to2fix_inject: const */
+    public ContextUnion.Active active ( ) const
     {
-        return this.context().active;
+        return (&this).context().active;
     }
 
     /***************************************************************************
@@ -204,8 +204,8 @@ public struct RequestContext
 
     ***************************************************************************/
 
-    private ContextUnion* context ( ) /* d1to2fix_inject: const */
+    private ContextUnion* context ( ) const
     {
-        return cast(ContextUnion*)this.context_.ptr;
+        return cast(ContextUnion*)(&this).context_.ptr;
     }
 }

@@ -136,7 +136,7 @@ public class RecordActionCounters
 
     ***************************************************************************/
 
-    public int opApply ( int delegate ( ref istring id, ref Counter counter ) dg )
+    public int opApply ( scope int delegate ( ref istring id, ref Counter counter ) dg )
     {
         foreach (id, counter; this.counters)
         {

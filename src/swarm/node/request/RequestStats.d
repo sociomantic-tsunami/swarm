@@ -254,7 +254,7 @@ public class RequestStats
         ***********************************************************************/
 
         public int opApply (
-            int delegate ( ref ulong bucket_end, ref ulong count ) dg )
+            scope int delegate ( ref ulong bucket_end, ref ulong count ) dg )
         {
             int ret;
             foreach ( i, count; this.bucket_count )
@@ -784,12 +784,12 @@ public class RequestStats
             private time_t last_activity;
 
             /// Seconds in an hour.
-            private static const one_hour = 60 * 60;
+            private static enum one_hour = 60 * 60;
 
             invariant ( )
             {
-                if ( this.active_count )
-                    assert(this.recent_activity);
+                if ( (&this).active_count )
+                    assert((&this).recent_activity);
             }
 
             /*******************************************************************
@@ -804,8 +804,8 @@ public class RequestStats
 
             public void started ( time_t now )
             {
-                this.hadActivity(now);
-                this.active_count++;
+                (&this).hadActivity(now);
+                (&this).active_count++;
             }
 
             /*******************************************************************
@@ -820,9 +820,9 @@ public class RequestStats
 
             public void finished ( time_t now )
             {
-                this.hadActivity(now);
-                verify(this.active_count > 0);
-                this.active_count--;
+                (&this).hadActivity(now);
+                verify((&this).active_count > 0);
+                (&this).active_count--;
             }
 
             /*******************************************************************
@@ -841,7 +841,7 @@ public class RequestStats
 
             public bool active_this_hour ( time_t now )
             {
-                return this.timeSinceLastActivity(now) <= one_hour;
+                return (&this).timeSinceLastActivity(now) <= one_hour;
             }
 
             /*******************************************************************
@@ -863,14 +863,14 @@ public class RequestStats
 
             public bool activity_stopped ( time_t now )
             {
-                if ( this.recent_activity )
+                if ( (&this).recent_activity )
                     return false;
 
-                auto time_since_activity = this.timeSinceLastActivity(now);
+                auto time_since_activity = (&this).timeSinceLastActivity(now);
                 if ( time_since_activity > one_hour &&
                     time_since_activity <= (2 * one_hour) )
                 {
-                    this.recent_activity = false;
+                    (&this).recent_activity = false;
                     return true;
                 }
                 else
@@ -889,8 +889,8 @@ public class RequestStats
 
             private void hadActivity ( time_t now )
             {
-                this.last_activity = now;
-                this.recent_activity = true;
+                (&this).last_activity = now;
+                (&this).recent_activity = true;
             }
 
             /*******************************************************************
@@ -909,7 +909,7 @@ public class RequestStats
 
             private time_t timeSinceLastActivity ( time_t now )
             {
-                return this.active_count ? 0 : now - this.last_activity;
+                return (&this).active_count ? 0 : now - (&this).last_activity;
             }
         }
 
@@ -933,9 +933,9 @@ public class RequestStats
 
             *******************************************************************/
 
-            public hash_t toHash ( ) /* d1to2fix_inject: const */
+            public hash_t toHash ( ) const
             {
-                return Fnv1a.combined(this.request, this.client);
+                return Fnv1a.combined((&this).request, (&this).client);
             }
 
             /*******************************************************************
@@ -995,12 +995,12 @@ public class RequestStats
         {
             auto now = time(null);
             auto cl_rq = ClientRequest(client, rq);
-            auto info = cl_rq in this.client_request_info;
+            auto info = cl_rq in (&this).client_request_info;
             if ( info is null )
             {
-                this.client_request_info[ClientRequest(client.dup, rq.dup)]
+                (&this).client_request_info[ClientRequest(client.dup, rq.dup)]
                     = ClientRequestInfo.init;
-                info = cl_rq in this.client_request_info;
+                info = cl_rq in (&this).client_request_info;
             }
             assert(info !is null);
 
@@ -1027,7 +1027,7 @@ public class RequestStats
         {
             auto now = time(null);
             auto cl_rq = ClientRequest(client, rq);
-            auto info = cl_rq in this.client_request_info;
+            auto info = cl_rq in (&this).client_request_info;
             verify(info !is null);
 
             info.finished(now);
@@ -1053,7 +1053,7 @@ public class RequestStats
 
             // Log when a client has no activity with a request for an hour.
             bool activity_in_last_hour;
-            foreach ( names, ref info; this.client_request_info )
+            foreach ( names, ref info; (&this).client_request_info )
             {
                 if ( info.active_this_hour(now) )
                     activity_in_last_hour = true;
