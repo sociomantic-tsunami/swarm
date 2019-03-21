@@ -150,8 +150,8 @@ class ConnectionHandler : IConnectionHandler
             ri.class_info = class_info;
             ri.timing = timing;
             ri.scheduled_for_removal = false;
-            this.request_info[command] = ri;
-            this.supported_requests[command.code] = true;
+            (&this).request_info[command] = ri;
+            (&this).supported_requests[command.code] = true;
         }
 
         /***********************************************************************
@@ -195,8 +195,8 @@ class ConnectionHandler : IConnectionHandler
             else
                 ri.scheduled_for_removal = false;
 
-            this.request_info[Request.command] = ri;
-            this.supported_requests[Request.command.code] = true;
+            (&this).request_info[Request.command] = ri;
+            (&this).supported_requests[Request.command.code] = true;
         }
 
         /***********************************************************************
@@ -210,7 +210,7 @@ class ConnectionHandler : IConnectionHandler
 
         public void initStats ( RequestStats request_stats )
         {
-            foreach ( command, rq; this.request_info )
+            foreach ( command, rq; (&this).request_info )
                 if ( !(rq.name in request_stats.request_stats ) )
                     request_stats.init(rq.name, rq.timing);
         }
@@ -341,7 +341,7 @@ class ConnectionHandler : IConnectionHandler
         public this ( EpollSelectDispatcher epoll,
             RequestMap requests, bool no_delay,
             ref Const!(Key[istring]) credentials, INodeInfo node_info,
-            GetResourceAcquirerDg get_resource_acquirer )
+            scope GetResourceAcquirerDg get_resource_acquirer )
         {
             verify(requests.supported_requests.length > 0);
 
@@ -393,7 +393,7 @@ class ConnectionHandler : IConnectionHandler
 
     ***************************************************************************/
 
-    public this ( FinalizeDg return_to_pool, SharedParams shared_params )
+    public this ( scope FinalizeDg return_to_pool, SharedParams shared_params )
     {
         auto socket = new AddressIPSocket!();
         super(socket, null, null);
@@ -721,16 +721,16 @@ unittest
 {
     class Rq1_v0 : IRequest
     {
-        const Command command = Command(1, 0);
-        const istring name = "Request1";
+        static immutable Command command = Command(1, 0);
+        static immutable istring name = "Request1";
         void handle ( RequestOnConn connection, Object resources,
             Const!(void)[] init_payload ) { }
     }
 
     class Rq1_v1 : IRequest
     {
-        const Command command = Command(1, 1);
-        const istring name = "Request1";
+        static immutable Command command = Command(1, 1);
+        static immutable istring name = "Request1";
         void handle ( RequestOnConn connection, Object resources,
             Const!(void)[] init_payload ) { }
     }
