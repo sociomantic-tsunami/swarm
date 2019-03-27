@@ -109,7 +109,7 @@ public class Credentials
 
     ***************************************************************************/
 
-    public void listRegisteredClients ( void delegate ( cstring ) sink )
+    public void listRegisteredClients ( scope void delegate ( cstring ) sink )
     {
         foreach (client, _; this.credentials_)
             sink(client);
