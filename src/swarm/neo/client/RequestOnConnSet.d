@@ -197,8 +197,12 @@ public struct RequestOnConnSet
 
             case AllNodes:
                 foreach ( roc; this.map )
+                {
                     if ( auto ret = dg(roc) )
                         return ret;
+                    if (this.num_active == 0)
+                        break;
+                }
                 return 0;
 
             version (D_Version2) {} else default: assert(false);
