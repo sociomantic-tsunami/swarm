@@ -35,10 +35,10 @@ public class GetAllImpl_v0 : IRequest
     mixin RequestCore!();
 
     /// Request code / version. Required by ConnectionHandler.
-    const Command command = Command(RequestCode.GetAll, 0);
+    static immutable Command command = Command(RequestCode.GetAll, 0);
 
     /// Request name for stats tracking. Required by ConnectionHandler.
-    const istring name = "GetAll";
+    static immutable istring name = "GetAll";
 
     /// Set by the Writer when the iteration over the records has finished. Used
     /// by the Controller to ignore incoming messages from that point.
@@ -46,7 +46,7 @@ public class GetAllImpl_v0 : IRequest
 
     /// Code that suspended writer fiber waits for when the request is
     /// suspended.
-    const ResumeSuspendedFiber = 1;
+    static immutable ResumeSuspendedFiber = 1;
 
     /// Fiber which handles iterating and sending records to the client.
     private class Writer

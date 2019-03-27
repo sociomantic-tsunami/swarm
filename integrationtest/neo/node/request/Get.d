@@ -33,10 +33,10 @@ public class GetImpl_v0 : IRequest
     mixin RequestCore!();
 
     /// Request code / version. Required by ConnectionHandler.
-    const Command command = Command(RequestCode.Get, 0);
+    static immutable Command command = Command(RequestCode.Get, 0);
 
     /// Request name for stats tracking. Required by ConnectionHandler.
-    const istring name = "Get";
+    static immutable istring name = "Get";
 
     /***************************************************************************
 
