@@ -118,6 +118,9 @@ public final class ConnectionSet : RequestOnConn.IConnectionGetter
         /// An error (indicated by the `e` field) occurred while connecting. The
         /// connection attempt will automatically be retried.
         NodeExceptionInfo error_while_connecting;
+
+        /// An error (indicated by the `e` field) occurred
+        NodeExceptionInfo error;
     }
 
     /***************************************************************************
@@ -287,7 +290,8 @@ public final class ConnectionSet : RequestOnConn.IConnectionGetter
         bool added;
         auto connection = this.connections.put(node_address, added,
             this.connection_pool.get(new Connection(
-                this.credentials, this.request_set_, this.epoll
+                this.credentials, this.request_set_, this.epoll,
+                &this.notifyConnectionError
             ))
         );
 
@@ -569,6 +573,28 @@ public final class ConnectionSet : RequestOnConn.IConnectionGetter
             info.error_while_connecting =
                 NodeExceptionInfo(connection.remote_address, e);
         }
+
+        this.conn_notifier(info);
+    }
+
+    /***************************************************************************
+
+        Connection error notification callback method. Calls the user notifier.
+
+        Params:
+            connection = the connection giving the startup notification
+            e          = information about an error connecting; the
+                          connection will retry connecting in this case
+
+    ***************************************************************************/
+
+    private void notifyConnectionError ( Connection connection,
+        Exception e )
+    {
+        ConnNotification info;
+
+        info.error_while_connecting =
+            NodeExceptionInfo(connection.remote_address, e);
 
         this.conn_notifier(info);
     }

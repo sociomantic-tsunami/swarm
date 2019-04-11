@@ -166,9 +166,18 @@ public final class Connection: ConnectionBase
 
     ***************************************************************************/
 
-    public alias void delegate ( Connection connection, Exception e = null ) StartupNotifier;
+    public alias void delegate ( Connection connection, Exception e = null ) Notifier;
 
-    private StartupNotifier startup_notifier = null;
+    private Notifier startup_notifier = null;
+
+    /***************************************************************************
+
+        Callback for notification when the an error happened
+        (`e` then reflects the error).
+
+    ***************************************************************************/
+
+    private Notifier connection_error_notifier = null;
 
     /***************************************************************************
 
@@ -225,7 +234,8 @@ public final class Connection: ConnectionBase
     ***************************************************************************/
 
     public this ( Const!(Credentials) credentials, IRequestSet request_set,
-                  EpollSelectDispatcher epoll )
+                  EpollSelectDispatcher epoll,
+                  Notifier connection_error_notifier )
     {
         this.client_socket = new ClientSocket;
 
@@ -233,6 +243,7 @@ public final class Connection: ConnectionBase
 
         this.conn_init = new ClientConnect(credentials);
         this.request_set = request_set;
+        this.connection_error_notifier = connection_error_notifier;
     }
 
     /***************************************************************************
@@ -258,7 +269,7 @@ public final class Connection: ConnectionBase
 
     ***************************************************************************/
 
-    public Status start ( AddrPort node_address, StartupNotifier startup_notifier )
+    public Status start ( AddrPort node_address, Notifier startup_notifier )
     {
         debug ( SwarmConn )
         {
@@ -285,6 +296,19 @@ public final class Connection: ConnectionBase
     public Status status ( )
     {
         return this.status_;
+    }
+
+    /***************************************************************************
+
+        Shuts the connection down if epoll reports an error event for the
+        socket.
+
+    ***************************************************************************/
+
+    override protected void error_ ( Exception exception, Event event )
+    {
+        super.error_(exception, event);
+        connection_error_notifier(this, exception);
     }
 
     /***************************************************************************
