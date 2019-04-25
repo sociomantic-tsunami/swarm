@@ -96,7 +96,7 @@ struct MessageParser
         {
             static if (Fields.length == 1 && is(Fields[0] Element == Element[]))
             {
-                fields[0] = this.getSingleArrayBody!(Element)(msg_body);
+                fields[0] = (&this).getSingleArrayBody!(Element)(msg_body);
             }
             // else do the following foreach loop
         }
@@ -107,15 +107,15 @@ struct MessageParser
 
             static if (is(Field Element == Element[]))
             {
-                field = this.getArray!(Element)(msg_body);
+                field = (&this).getArray!(Element)(msg_body);
             }
             else
             {
-                field = *this.getValue!(Field)(msg_body);
+                field = *(&this).getValue!(Field)(msg_body);
             }
         }
 
-        this.e.enforceFmt(!msg_body.length, "message too long: {} extra byte(s)", msg_body.length);
+        (&this).e.enforceFmt(!msg_body.length, "message too long: {} extra byte(s)", msg_body.length);
     }
 
     /***************************************************************************
@@ -143,7 +143,7 @@ struct MessageParser
     public Const!(T)* getValue ( T ) ( ref Const!(void)[] msg_body_rest )
     {
         static assert(!hasIndirections!(T));
-        this.e.enforceFmt(msg_body_rest.length >= T.sizeof,
+        (&this).e.enforceFmt(msg_body_rest.length >= T.sizeof,
                      "message too short: {} byte(s) missing",
                      T.sizeof - msg_body_rest.length);
         scope (exit) msg_body_rest = msg_body_rest[T.sizeof .. $];
@@ -182,7 +182,7 @@ struct MessageParser
         static assert(!hasIndirections!(T));
 
         static if (T.sizeof != 1)
-            this.e.enforceFmt(!(msg_body.length % T.sizeof),
+            (&this).e.enforceFmt(!(msg_body.length % T.sizeof),
                 "the length {} of an array message is not a multiple of the " ~
                 "array element length {}", msg_body.length, T.sizeof);
 
@@ -220,13 +220,13 @@ struct MessageParser
             Stdout.formatln("\tgetArray {} {:X2}", T.stringof, msg_body_rest);
 
         static assert(!hasIndirections!(T));
-        auto n_bytes = *this.getValue!(size_t)(msg_body_rest) * T.sizeof;
+        auto n_bytes = *(&this).getValue!(size_t)(msg_body_rest) * T.sizeof;
 
         debug (MessageProtocol)
             Stdout.formatln("\tn_bytes = 0x{:X} ({}), content = {:X2}",
                             n_bytes, n_bytes, msg_body_rest);
 
-        this.e.enforceFmt(msg_body_rest.length >= n_bytes,
+        (&this).e.enforceFmt(msg_body_rest.length >= n_bytes,
                                    "message too short: {} byte(s) missing",
                                    n_bytes - msg_body_rest.length);
         scope (exit) msg_body_rest = msg_body_rest[n_bytes .. $];

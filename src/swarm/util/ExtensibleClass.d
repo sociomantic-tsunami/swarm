@@ -210,7 +210,7 @@ public template ExtensibleClass ( Plugins ... )
 
         public template HasPlugin ( T )
         {
-            const bool HasPlugin = IndexOf!(T, Plugins) < Plugins.length;
+            static immutable bool HasPlugin = IndexOf!(T, Plugins) < Plugins.length;
         }
 
 

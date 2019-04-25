@@ -46,10 +46,10 @@ public struct RequestKeyDataInfo
 
     ***************************************************************************/
 
-    public void toString ( void delegate ( cstring chunk ) sink )
+    public void toString ( scope void delegate ( cstring chunk ) sink )
     {
             sformat(sink,
             "Request #{} provided the key {} and the value {}",
-            this.request_id, this.key, this.value);
+            (&this).request_id, (&this).key, (&this).value);
     }
 }

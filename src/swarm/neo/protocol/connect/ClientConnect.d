@@ -195,7 +195,7 @@ class ClientConnect
             Stdout.formatln("{}:{}: ClientConnect.autenticate()",
                 node_address.address_bytes, node_address.port);
 
-        const protocol_version = 1;
+        static immutable protocol_version = 1;
 
         protocol.sendProtocolVersion(protocol_version);
         debug ( SwarmConn )

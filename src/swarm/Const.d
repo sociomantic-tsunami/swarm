@@ -105,7 +105,7 @@ public struct NodeItem
 
     public bool set ( )
     {
-        return this.Address.length > 0 && this.Port > 0;
+        return (&this).Address.length > 0 && (&this).Port > 0;
     }
 
 
@@ -116,9 +116,9 @@ public struct NodeItem
 
     ***************************************************************************/
 
-    public hash_t toHash ( ) /* d1to2fix_inject: const */
+    public hash_t toHash ( ) const
     {
-        return Fnv1a(this.Address) ^ this.Port;
+        return Fnv1a((&this).Address) ^ (&this).Port;
     }
 
 
@@ -142,9 +142,9 @@ public struct NodeItem
     {
         InetAddress!(false) check_ipv4;
         InetAddress!(true) check_ipv6;
-        if ( check_ipv4.inet_pton(this.Address) == 1 )
+        if ( check_ipv4.inet_pton((&this).Address) == 1 )
             return IPVersion.IPv4;
-        if ( check_ipv6.inet_pton(this.Address) == 1 )
+        if ( check_ipv6.inet_pton((&this).Address) == 1 )
             return IPVersion.IPv6;
         return IPVersion.Invalid;
     }
@@ -169,7 +169,7 @@ public struct NodeItem
 
     public int opEquals ( NodeItem* nodeitem )
     {
-        return this.opEquals(*nodeitem);
+        return (&this).opEquals(*nodeitem);
     }
 
 
@@ -192,7 +192,7 @@ public struct NodeItem
     {
         public equals_t opEquals ( NodeItem nodeitem )
         {
-            return nodeitem.Address == this.Address && nodeitem.Port == this.Port;
+            return nodeitem.Address == (&this).Address && nodeitem.Port == (&this).Port;
         }
     }
 

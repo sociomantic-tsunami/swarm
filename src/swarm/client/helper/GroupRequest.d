@@ -331,7 +331,7 @@ public abstract class IGroupRequest
     ***************************************************************************/
 
     protected abstract void sendNotification (
-        void delegate ( IRequestNotification info ) notify_dg );
+        scope void delegate ( IRequestNotification info ) notify_dg );
 
 
     /***************************************************************************
@@ -429,7 +429,7 @@ public class IGroupRequestTemplate ( Request, RequestParams : IRequestParams,
     ***************************************************************************/
 
     override protected void sendNotification (
-        void delegate ( IRequestNotification info ) notify_dg )
+        scope void delegate ( IRequestNotification info ) notify_dg )
     {
         scope info = new RequestNotification(request.command,
             request.context);

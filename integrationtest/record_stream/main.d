@@ -83,12 +83,12 @@ public void runListener ()
     assert(eos, "End Of Stream not received!");
 }
 
-private const istring[] Verbatim = [
+private static immutable istring[] Verbatim = [
     "\n\n\n",
     "bbbbbbbbbbbbbbbb:AAAAAAAAAAAAAAAA\n",
 ];
 
-private const Record[] Input = [
+private static immutable Record[] Input = [
     // Two records without keys (values only)
     Record(null,     [ 0x52, 0x45, 0x50, 0x4F, 0x52, 0x54, 0x49, 0x4E, 0x47 ]),
     Record(null,     [ 0x20, 0x57, 0x41, 0x53 ]),
@@ -98,7 +98,7 @@ private const Record[] Input = [
            [ 0x48, 0x65, 0x6C, 0x6C, 0x6F, 0x20, 0x57, 0x6F, 0x72, 0x6C, 0x64 ]),
 ];
 
-private const Record[] Output = [
+private static immutable Record[] Output = [
     // Input
     Input[0], Input[1], Input[2],
     // Verbatim: 3 newlines = 3 empty records

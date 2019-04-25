@@ -167,7 +167,7 @@ public interface IRoundRobinConnIterator
     ***************************************************************************/
 
     public int opApply (
-        int delegate ( ref RequestOnConn.EventDispatcher ed ) dg );
+        scope int delegate ( ref RequestOnConn.EventDispatcher ed ) dg );
 }
 
 /*******************************************************************************
