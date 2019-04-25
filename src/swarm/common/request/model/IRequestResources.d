@@ -28,8 +28,8 @@ module swarm.common.request.model.IRequestResources;
 
 *******************************************************************************/
 
-import ocean.core.Traits : FieldType;
-import ocean.core.Traits : isDynamicArrayType;
+import ocean.meta.codegen.Identifier : identifier;
+import ocean.meta.traits.Basic : ArrayKind, isArrayType;
 import ocean.transition;
 
 
@@ -47,13 +47,13 @@ import ocean.transition;
 
 public template GetterReturnType ( T, size_t i )
 {
-    static if ( isDynamicArrayType!(FieldType!(T, i)) )
+    static if ( isArrayType!(typeof(T.tupleof[i])) == ArrayKind.Dynamic )
     {
-        alias FieldType!(T, i)* GetterReturnType;
+        alias typeof(T.tupleof[i])* GetterReturnType;
     }
     else
     {
-        alias FieldType!(T, i) GetterReturnType;
+        alias typeof(T.tupleof[i]) GetterReturnType;
     }
 }
 
@@ -87,8 +87,8 @@ public template IRequestResources_T ( Shared )
 
     ***************************************************************************/
 
+    import ocean.meta.codegen.Identifier : identifier;
     import ocean.transition;
-    import ocean.core.Traits : FieldType, FieldName;
 
 
     /***************************************************************************
@@ -106,7 +106,7 @@ public template IRequestResources_T ( Shared )
     template Getter ( T, size_t i )
     {
         static immutable istring Getter = GetterReturnType!(T, i).stringof ~ " " ~
-            FieldName!(i, T) ~ "();";
+            identifier!(T.tupleof[i]) ~ "();";
     }
 
     template Getters ( T, size_t i = 0 )
@@ -181,9 +181,9 @@ public template RequestResources_T ( Shared )
 
     ***************************************************************************/
 
-    import ocean.core.Traits : FieldType, FieldName;
+    import ocean.meta.codegen.Identifier : identifier;
+    import ocean.meta.traits.Basic : isArrayType;
     import ocean.transition;
-    import ocean.core.Traits : isDynamicArrayType;
 
 
     /***************************************************************************
@@ -201,15 +201,15 @@ public template RequestResources_T ( Shared )
 
     template GetterReturnValue ( T, size_t i )
     {
-        static if ( isDynamicArrayType!(FieldType!(T, i)) )
+        static if ( isArrayType!(typeof(T.tupleof[i])) == ArrayKind.Dynamic )
         {
             static immutable istring GetterReturnValue =
-                "&this.acquired." ~ FieldName!(i, T) ~ ";";
+                "&this.acquired." ~ identifier!(T.tupleof[i]) ~ ";";
         }
         else
         {
             static immutable istring GetterReturnValue =
-                "this.acquired." ~ FieldName!(i, T) ~ ";";
+                "this.acquired." ~ identifier!(T.tupleof[i]) ~ ";";
         }
     }
 
@@ -234,15 +234,15 @@ public template RequestResources_T ( Shared )
     template Getter ( T, size_t i )
     {
         static immutable istring Getter =
-            GetterReturnType!(T, i).stringof ~ " " ~ FieldName!(i, T) ~ "()" ~
+            GetterReturnType!(T, i).stringof ~ " " ~ identifier!(T.tupleof[i]) ~ "()" ~
             "{" ~
-                "if(!this.acquired." ~ FieldName!(i, T) ~ ")" ~
+                "if(!this.acquired." ~ identifier!(T.tupleof[i]) ~ ")" ~
                 "{" ~
-                    "this.acquired." ~ FieldName!(i, T) ~ "=" ~
-                    "this.shared_resources." ~ FieldName!(i, T) ~ "_freelist" ~
-                    ".get(this.new_" ~ FieldName!(i, T) ~ ");" ~
-                    "this.init_" ~ FieldName!(i, T) ~
-                        "(this.acquired." ~ FieldName!(i, T) ~ ");" ~
+                    "this.acquired." ~ identifier!(T.tupleof[i]) ~ "=" ~
+                    "this.shared_resources." ~ identifier!(T.tupleof[i]) ~ "_freelist" ~
+                    ".get(this.new_" ~ identifier!(T.tupleof[i]) ~ ");" ~
+                    "this.init_" ~ identifier!(T.tupleof[i]) ~
+                        "(this.acquired." ~ identifier!(T.tupleof[i]) ~ ");" ~
                 "}" ~
                 "return " ~ GetterReturnValue!(T, i) ~
             "}";
@@ -279,8 +279,8 @@ public template RequestResources_T ( Shared )
 
     template Newer ( T, size_t i )
     {
-        static immutable istring Newer = "protected abstract " ~ FieldType!(T, i).stringof ~ " " ~
-            "new_" ~ FieldName!(i, T) ~ "();";
+        static immutable istring Newer = "protected abstract " ~ typeof(T.tupleof[i]).stringof ~ " " ~
+            "new_" ~ identifier!(T.tupleof[i]) ~ "();";
     }
 
     template Newers ( T, size_t i = 0 )
@@ -319,18 +319,18 @@ public template RequestResources_T ( Shared )
 
     template Initialiser ( T, size_t i )
     {
-        static if ( isDynamicArrayType!(FieldType!(T, i)) )
+        static if ( isArrayType!(typeof(T.tupleof[i])) == ArrayKind.Dynamic )
         {
             static immutable istring Initialiser =
                 "protected void " ~
-                "init_" ~ FieldName!(i, T) ~ "(ref " ~ FieldType!(T, i).stringof ~ " f)" ~
+                "init_" ~ identifier!(T.tupleof[i]) ~ "(ref " ~ typeof(T.tupleof[i]).stringof ~ " f)" ~
                 "{f.length=0; enableStomping(f);}";
         }
         else
         {
             static immutable istring Initialiser =
                 "protected void " ~
-                "init_" ~ FieldName!(i, T) ~ "(" ~ FieldType!(T, i).stringof ~ "){}";
+                "init_" ~ identifier!(T.tupleof[i]) ~ "(" ~ typeof(T.tupleof[i]).stringof ~ "){}";
         }
     }
 
@@ -365,10 +365,10 @@ public template RequestResources_T ( Shared )
     template Recycler ( T, size_t i )
     {
         static immutable istring Recycler =
-            "if(this.acquired." ~ FieldName!(i, T) ~ ")" ~
+            "if(this.acquired." ~ identifier!(T.tupleof[i]) ~ ")" ~
             "{" ~
-                "this.shared_resources." ~ FieldName!(i, T) ~ "_freelist" ~
-                ".recycle(this.acquired." ~ FieldName!(i, T) ~ ");" ~
+                "this.shared_resources." ~ identifier!(T.tupleof[i]) ~ "_freelist" ~
+                ".recycle(this.acquired." ~ identifier!(T.tupleof[i]) ~ ");" ~
             "}";
     }
 

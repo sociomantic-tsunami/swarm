@@ -14,7 +14,8 @@ module swarm.neo.client.requests.NotificationFormatter;
 
 import ocean.transition;
 import ocean.core.SmartUnion;
-import ocean.core.Traits : TemplateInstanceArgs, hasMethod;
+import ocean.meta.traits.Aggregates : hasMethod;
+import ocean.meta.types.Templates : TemplateInstanceArgs;
 import ocean.text.convert.Formatter;
 
 import swarm.neo.client.NotifierTypes;

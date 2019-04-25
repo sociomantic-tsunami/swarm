@@ -65,10 +65,6 @@ import ocean.io.select.client.FiberSelectEvent;
 
 import ocean.core.MessageFiber;
 
-import ocean.core.Traits : FieldName;
-
-import ocean.core.Traits : ctfe_i2a;
-
 import ocean.core.Verify;
 
 import ocean.io.model.IConduit: ISelectable;
@@ -80,8 +76,6 @@ import IPSocket = ocean.sys.socket.IPSocket;
 import core.sys.posix.netinet.in_: SOL_SOCKET, IPPROTO_TCP, SO_KEEPALIVE;
 
 debug ( ConnectionHandler ) import ocean.io.Stdout;
-
-import ocean.core.Traits : isArrayType;
 
 import ocean.util.log.Logger;
 
@@ -163,6 +157,7 @@ public abstract class ConnectionHandlerTemplate ( Commands : ICommandCodes )
     : ISwarmConnectionHandler
 {
     import ocean.time.StopWatch;
+    import ocean.meta.traits.Basic : isArrayType;
 
     /***************************************************************************
 

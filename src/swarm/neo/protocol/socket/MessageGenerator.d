@@ -16,7 +16,6 @@ import ocean.core.Verify;
 struct IoVecMessage // MessageGenerator
 {
     import swarm.neo.protocol.Message: MessageType, MessageHeader;
-    import ocean.core.Traits: hasIndirections;
 
     import ocean.transition;
 

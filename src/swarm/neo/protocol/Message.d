@@ -219,9 +219,9 @@ align(1) struct MessageHeader
 
     ***************************************************************************/
 
-    import ocean.core.Traits : SizeofTuple;
+    import ocean.meta.traits.Aggregates : totalMemberSize;
 
-    static assert(SizeofTuple!(typeof(typeof(this).tupleof)) == typeof(this).sizeof);
+    static assert(totalMemberSize!(typeof(this)) == typeof(this).sizeof);
 }
 
 /*******************************************************************************

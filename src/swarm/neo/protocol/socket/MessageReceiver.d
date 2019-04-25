@@ -41,7 +41,6 @@ private class MessageReceiverBase
 
     import core.stdc.string: memmove;
 
-    import ocean.core.Traits: hasIndirections;
     import ocean.core.Enforce: enforce;
 
     import swarm.neo.protocol.socket.IOStats;

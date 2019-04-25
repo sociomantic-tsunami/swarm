@@ -23,7 +23,6 @@ module swarm.client.request.params.IChannelRequestParams;
 import swarm.client.request.params.IRequestParams;
 
 import ocean.transition;
-import ocean.core.Traits;
 
 public abstract class IChannelRequestParams : IRequestParams
 {
@@ -43,10 +42,6 @@ public abstract class IChannelRequestParams : IRequestParams
 
         All fields are copied by value. (i.e. all arrays are sliced.)
 
-        Note that the copyFields template used by this method relies on the fact
-        that all the class' fields are non-private. (See template documentation
-        in ocean.core.Traits for further info.)
-
         Params:
             params = instance to copy fields from
 
@@ -55,7 +50,7 @@ public abstract class IChannelRequestParams : IRequestParams
     override final protected void copy_ ( IRequestParams params )
     {
         auto channel_params = cast(IChannelRequestParams)params;
-        copyClassFields(this, channel_params);
+        this.tupleof[] = channel_params.tupleof[];
 
         this.copy__(params);
     }

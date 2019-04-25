@@ -32,8 +32,6 @@ import ocean.io.select.protocol.fiber.model.IFiberSelectProtocol;
 
 import ocean.io.select.EpollSelectDispatcher;
 
-import ocean.core.Traits;
-
 import ocean.core.Verify;
 
 import ocean.math.Math : min;
@@ -44,6 +42,7 @@ import ocean.core.Array : copy;
 public class FiberSelectWriter : Ocean.BufferedFiberSelectWriter
 {
     import swarm.protocol.IAddrPort;
+    import ocean.meta.traits.Basic : isArrayType;
 
     /// Address/port getter for underlying connection.
     public IAddrPort addr_port;
