@@ -39,8 +39,6 @@ template TreeQueue ( T )
         // Provide a wrapper for all public TreeQueueCore methods.
         struct TreeQueue
         {
-            import ocean.core.Traits: isAssocArrayType;
-
             /*******************************************************************
 
                 The wrapped tree queue core implementation.

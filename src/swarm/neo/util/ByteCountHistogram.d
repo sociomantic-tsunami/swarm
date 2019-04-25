@@ -25,7 +25,6 @@ import ocean.core.Verify;
 struct ByteCountHistogram
 {
     import core.bitop: bsr;
-    import ocean.core.Traits : FieldName;
 
     /***************************************************************************
 
@@ -78,7 +77,7 @@ struct ByteCountHistogram
 
     public struct Bins
     {
-        import ocean.core.Traits : ctfe_i2a;
+        import CTFE = ocean.meta.codegen.CTFE : toString;
 
         /***********************************************************************
 
@@ -147,9 +146,9 @@ struct ByteCountHistogram
                 // Only supports formatting metric prefixes up to Kib. Could be
                 // extended, if needed in the future.
                 if ( bytes < 1024 )
-                    return ctfe_i2a(bytes) ~ "b";
+                    return CTFE.toString(bytes) ~ "b";
                 else
-                    return ctfe_i2a(bytes / 1024) ~ "Kib";
+                    return CTFE.toString(bytes / 1024) ~ "Kib";
             }
 
             res ~= type ~ " from_" ~ formatBytes(0) ~ ";";

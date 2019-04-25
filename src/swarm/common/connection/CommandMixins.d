@@ -22,7 +22,7 @@ module swarm.common.connection.CommandMixins;
 import ocean.core.Enum;
 
 import ocean.transition;
-import ocean.core.Traits: ctfe_i2a;
+import CTFE = ocean.meta.codegen.CTFE : toString;
 
 
 /*******************************************************************************
@@ -45,7 +45,8 @@ public template CommandCases ( T : IEnum, size_t i = 0 )
     }
     else
     {
-        static immutable istring CommandCases = "case " ~  ctfe_i2a(T._internal_values[i]) ~
+        static immutable istring CommandCases = "case " ~
+            CTFE.toString(T._internal_values[i]) ~
             ": this.handle" ~ T._internal_names[i] ~ "(); break;" ~
             CommandCases!(T, i + 1);
     }
@@ -92,7 +93,7 @@ unittest
         mixin (CommandMethods!(Enum));
 
         void foo ()
-        {            
+        {
             switch (2)
             {
                 mixin (CommandCases!(Enum));

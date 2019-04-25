@@ -26,7 +26,6 @@ import ocean.core.Verify;
 struct TimeHistogram
 {
     import ocean.transition;
-    import ocean.core.Traits : FieldName;
 
     /***************************************************************************
 
@@ -295,11 +294,11 @@ struct TimeHistogram
         {
             if (us < p1000[$ - 1])
             {
-                foreach (uint j, p; p1000[1 .. $])
+                foreach (size_t j, p; p1000[1 .. $])
                 {
                     if (us < p)
                     {
-                        auto b = (i * cast(uint)(p1000.length - 1) + j) * 3 + 1;
+                        auto b = cast(uint)(i * (p1000.length - 1) + j) * 3 + 1;
                         if (us >= (p1000[j] * 2))
                         {
                             b++;

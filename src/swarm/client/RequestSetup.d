@@ -15,8 +15,6 @@
 
 module swarm.client.RequestSetup;
 
-import ocean.core.Traits;
-
 import swarm.client.request.params.IChannelRequestParams;
 
 /*******************************************************************************
@@ -35,7 +33,7 @@ public template RequestParamsSetup ( )
     ***************************************************************************/
 
     import ocean.transition;
-    import ocean.core.Traits : FieldName, hasMember;
+    import ocean.meta.codegen.Identifier : identifier;
     import swarm.client.request.params.IRequestParams;
 
     mixin TypeofThis;
@@ -57,7 +55,7 @@ public template RequestParamsSetup ( )
     {
         foreach ( i, f; typeof(this.tupleof) )
         {
-            mixin("this.setup_" ~ FieldName!(i, This) ~ "(params);");
+            mixin("this.setup_" ~ identifier!(This.tupleof[i]) ~ "(params);");
         }
     }
 }
@@ -654,6 +652,7 @@ public template Suspendable ( )
     import ocean.transition;
     import ocean.core.Verify;
     import ocean.core.TypeConvert : downcast;
+    import ocean.meta.traits.Aggregates : hasMember;
     import swarm.client.request.params.IRequestParams;
 
     mixin TypeofThis;

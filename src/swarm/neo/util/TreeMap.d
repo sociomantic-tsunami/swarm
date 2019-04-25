@@ -142,7 +142,7 @@ struct TreeMap ( Node = eb64_node )
 
     static if (is(typeof(Node.user_element_with_treemap_backlink) UserElement))
     {
-        import ocean.core.Traits: isReferenceType;
+        import ocean.meta.traits.Basic : isReferenceType;
         static assert(isReferenceType!(UserElement));
 
         /***********************************************************************

@@ -60,7 +60,8 @@ public class Client
             import integrationtest.neo.client.request.internal.Put;
             import integrationtest.neo.client.request.internal.Put;
             import integrationtest.neo.client.request.internal.DoublePut;
-            import integrationtest.neo.client.request.internal.RoundRobinPut;
+            import
+                integrationtest.neo.client.request.internal.RoundRobinPut;
         }
 
         /// Instantiation of ClientCore.

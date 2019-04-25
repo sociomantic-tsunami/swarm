@@ -31,8 +31,6 @@ import swarm.Const;
 
 import swarm.client.ClientCommandParams;
 
-import ocean.core.Traits;
-
 import ocean.core.Verify;
 
 import ocean.io.select.EpollSelectDispatcher;
@@ -92,8 +90,6 @@ public abstract class IRequestParams
     protected alias .InputStream InputStream;
     protected alias .OutputStream OutputStream;
     protected alias .SimpleStreamSerializer SimpleStreamSerializer;
-    protected alias .copyFields copyFields;
-    protected alias .SizeofTuple SizeofTuple;
 
 
     /***************************************************************************
@@ -232,10 +228,6 @@ public abstract class IRequestParams
 
         All fields are copied by value. (i.e. all arrays are sliced.)
 
-        Note that the copyFields template used by this method relies on the fact
-        that all the class' fields are non-private. (See template documentation
-        in ocean.core.Traits for further info.)
-
         Params:
             params = instance to copy fields from
 
@@ -243,7 +235,7 @@ public abstract class IRequestParams
 
     final public void copy ( IRequestParams params )
     {
-        copyClassFields(this, params);
+        this.tupleof[] = params.tupleof[];
 
         this.copy_(params);
     }

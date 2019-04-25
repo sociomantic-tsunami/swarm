@@ -32,7 +32,7 @@ class ConnectProtocol: ISelectClient
 
     import ocean.io.select.EpollSelectDispatcher;
 
-    import ocean.core.Traits: hasIndirections;
+    import ocean.meta.traits.Indirections : hasIndirections;
 
     import ocean.stdc.posix.sys.socket;
     import ocean.stdc.string: strerror_r, strlen;

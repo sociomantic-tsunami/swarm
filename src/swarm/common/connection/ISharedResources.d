@@ -67,7 +67,7 @@ template SharedResources_T ( T )
         ***********************************************************************/
 
         import ocean.transition;
-        import ocean.core.Traits : FieldType, FieldName;
+        import ocean.meta.codegen.Identifier : identifier;
         import ocean.util.container.pool.FreeList;
 
 
@@ -86,7 +86,8 @@ template SharedResources_T ( T )
         template DeclareFreeList ( T, size_t i )
         {
             static immutable istring DeclareFreeList = "public FreeList!("
-                ~ FieldType!(T, i).stringof ~ ") " ~ FieldName!(i, T) ~ "_freelist;";
+                ~ typeof(T.tupleof[i]).stringof ~ ") "
+                ~ identifier!(T.tupleof[i]) ~ "_freelist;";
         }
 
         template DeclareFreeLists ( T, size_t i = 0 )
@@ -119,8 +120,9 @@ template SharedResources_T ( T )
 
         template NewFreeList ( T, size_t i )
         {
-            static immutable istring NewFreeList = "this." ~ FieldName!(i, T) ~ "_freelist"
-                ~ " = new FreeList!(" ~ FieldType!(T, i).stringof ~ ");";
+            static immutable istring NewFreeList = "this."
+                ~ identifier!(T.tupleof[i]) ~ "_freelist = new FreeList!("
+                ~ typeof(T.tupleof[i]).stringof ~ ");";
         }
 
         template NewFreeLists ( T, size_t i = 0 )

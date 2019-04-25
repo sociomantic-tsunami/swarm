@@ -389,6 +389,7 @@ private class ChannelsNodeStatsTemplate ( Logger = StatsLog )
 version ( UnitTest )
 {
     import ocean.core.Test;
+    import ocean.meta.codegen.Identifier : identifier;
     import swarm.node.model.INodeInfo : TestNode;
     import swarm.node.model.IChannelsNodeInfo : TestChannelsNode;
 
@@ -400,7 +401,7 @@ version ( UnitTest )
 
     class TestLogger
     {
-        import ocean.core.Traits : FieldName, hasMethod;
+        import ocean.meta.traits.Aggregates : hasMethod;
         import ocean.text.convert.Formatter;
 
         mstring output;
@@ -410,7 +411,8 @@ version ( UnitTest )
             static assert(is(S == struct));
             foreach ( i, field; str.tupleof )
             {
-                sformat(this.output, "{}:{} ", FieldName!(i, S), field);
+                sformat(this.output, "{}:{} ",
+                    identifier!(S.tupleof[i]), field);
             }
         }
 
@@ -420,7 +422,7 @@ version ( UnitTest )
             foreach ( i, field; str.tupleof )
             {
                 sformat(this.output, "{}/{}/{}:{} ",
-                    category, id, FieldName!(i, S), field);
+                    category, id, identifier!(S.tupleof[i]), field);
             }
         }
     }

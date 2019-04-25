@@ -224,8 +224,8 @@ abstract class RequestOnConnBase
     {
         import swarm.neo.AddrPort;
         import swarm.neo.protocol.MessageParser;
-        import ocean.core.Traits: hasIndirections, StripEnum;
         import ocean.core.SmartUnion;
+        import ocean.meta.traits.Indirections : hasIndirections;
 
         alias RequestOnConnBase.FiberResumeCode FiberResumeCode;
 
@@ -359,7 +359,7 @@ abstract class RequestOnConnBase
 
         public scope class Payload
         {
-            import ocean.core.Traits : hasIndirections;
+            import ocean.meta.traits.Indirections : hasIndirections;
 
             /*******************************************************************
 

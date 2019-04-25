@@ -39,8 +39,6 @@ import ocean.io.select.protocol.fiber.model.IFiberSelectProtocol;
 
 import ocean.io.select.EpollSelectDispatcher;
 
-import ocean.core.Traits;
-
 import ocean.math.Math : min, max;
 
 
@@ -75,6 +73,7 @@ static this ()
 public class FiberSelectReader : Ocean.FiberSelectReader
 {
     import swarm.protocol.IAddrPort;
+    import ocean.meta.traits.Basic : isArrayType;
 
     /// Address/port getter for underlying connection.
     public IAddrPort addr_port;

@@ -22,7 +22,7 @@ template ClientCore ( )
 {
     import ocean.transition;
     import ocean.core.Enforce;
-    import ocean.core.Traits;
+    import ocean.meta.codegen.Identifier : identifier;
     import ocean.util.log.Stats;
 
     import swarm.neo.AddrPort;
@@ -547,7 +547,7 @@ template ClientCore ( )
         Aggr aggr;
 
         foreach ( i, ref field; aggr.tupleof )
-            mixin("field = getter." ~ FieldName!(i, Aggr) ~ "();");
+            mixin("field = getter." ~ identifier!(Aggr.tupleof[i]) ~ "();");
         logger.add(aggr);
     }
 
