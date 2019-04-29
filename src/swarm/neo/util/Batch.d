@@ -136,7 +136,7 @@ public struct BatchWriter ( Record ... )
         foreach ( field; record )
             this.addField(field);
 
-        if ( this.buffer.length >= this.max_size )
+        if ( (*this.buffer).length >= this.max_size )
         {
             batch_finished();
             this.clear();
@@ -175,11 +175,11 @@ public struct BatchWriter ( Record ... )
     {
         // Set destination to max possible length.
         compress_buf.length =
-            lzo.maxCompressedLength(this.buffer.length) + size_t.sizeof;
+            lzo.maxCompressedLength((*this.buffer).length) + size_t.sizeof;
         enableStomping(compress_buf);
 
         // Write uncompressed length into first size_t.sizeof bytes of dest.
-        *(cast(size_t*)(compress_buf.ptr)) = this.buffer.length;
+        *(cast(size_t*)(compress_buf.ptr)) = (*this.buffer).length;
 
         // Compress into destination.
         auto dst = compress_buf[size_t.sizeof .. $];
@@ -199,7 +199,7 @@ public struct BatchWriter ( Record ... )
 
     public void clear ( )
     {
-        this.buffer.length = 0;
+        (*this.buffer).length = 0;
         enableStomping(*this.buffer);
     }
 
@@ -258,7 +258,7 @@ public struct BatchWriter ( Record ... )
 
     private void addBytes ( in void[] data )
     {
-        (*this.buffer) ~= data;
+        *(this.buffer) ~= data;
     }
 }
 

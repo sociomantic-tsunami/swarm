@@ -168,7 +168,7 @@ public struct AddrPort
 
     unittest
     {
-        typeof(*this) x;
+        typeof(this) x;
         test(x.setAddress("192.168.222.111"));
         test!("==")(x.address_bytes, [cast(ubyte)192, 168, 222, 111]);
 
@@ -267,11 +267,11 @@ public struct AddrPort
 
     ***************************************************************************/
 
-    public typeof(this) set ( sockaddr_in src )
+    public typeof(&this) set ( sockaddr_in src )
     {
         this.naddress = src.sin_addr.s_addr;
         this.nport    = src.sin_port;
-        return this;
+        return &this;
     }
 
     /***************************************************************************
@@ -286,11 +286,11 @@ public struct AddrPort
 
     ***************************************************************************/
 
-    public typeof(this) set ( NodeItem node_item )
+    public typeof(&this) set ( NodeItem node_item )
     {
         this.port = node_item.Port;
         this.setAddress(node_item.Address);
-        return this;
+        return &this;
     }
 
     /***************************************************************************

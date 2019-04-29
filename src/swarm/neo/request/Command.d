@@ -34,7 +34,7 @@ public struct Command
 
     import ocean.core.Traits : SizeofTuple;
 
-    static assert(SizeofTuple!(typeof(typeof(*this).tupleof)) == typeof(*this).sizeof);
+    static assert(SizeofTuple!(typeof(typeof(this).tupleof)) == typeof(this).sizeof);
 }
 
 /*******************************************************************************

@@ -277,7 +277,7 @@ private struct TreeQueueCore
 
         ***********************************************************************/
 
-        typeof(this) prev = null, next = null;
+        typeof(&this) prev = null, next = null;
 
         /***********************************************************************
 
@@ -340,7 +340,7 @@ private struct TreeQueueCore
 
     invariant ( )
     {
-        auto _this = cast(TreeQueueCore*)this; // cast away const in invariant
+        auto _this = cast(TreeQueueCore*)(&this); // cast away const in invariant
         if (_this.ebtree.is_empty)
         {
             assert(this.head is null);
@@ -431,7 +431,7 @@ private struct TreeQueueCore
 
         while (!stop && this.tail)
         {
-            assert(this); // call invariant
+            assert(&this); // call invariant
 
             auto request_id = this.tail.ebnode.key;
 
