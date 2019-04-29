@@ -197,7 +197,7 @@ public AllNodesRequest!(Request, Connector, Disconnected, Initialiser, Handler)
     createAllNodesRequest ( Request, Connector, Disconnected, Initialiser, Handler )
     ( RequestOnConn.EventDispatcherAllNodes conn,
     Request.Context* context, Connector connector, Disconnected disconnected,
-    Initialiser initialiser, Handler handler )
+    Initialiser initialiser, scope Handler handler )
 {
     return
         AllNodesRequest!(Request, Connector, Disconnected, Initialiser, Handler)
@@ -599,8 +599,8 @@ private template ExampleRequestCore ( )
     import ocean.core.SmartUnion;
 
     // Required by RequestCore
-    const ubyte RequestCode = 0;
-    const ubyte RequestVersion = 0;
+    static immutable ubyte RequestCode = 0;
+    static immutable ubyte RequestVersion = 0;
 
     // Required by RequestCore
     struct Args

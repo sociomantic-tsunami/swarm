@@ -157,7 +157,7 @@ public struct AcquiredArraysOf ( T )
     {
         verify(this.buffer_pool !is null);
 
-        const initial_array_capacity = 4;
+        enum initial_array_capacity = 4;
 
         // Acquire container buffer, if not already done.
         if ( this.buffer is null )
@@ -519,7 +519,7 @@ public struct AcquiredSingleton ( T )
 
     ***************************************************************************/
 
-    public Elem acquire ( lazy Elem new_t, void delegate ( Elem ) reset )
+    public Elem acquire ( lazy Elem new_t, scope void delegate ( Elem ) reset )
     {
         verify(this.t_pool !is null);
 

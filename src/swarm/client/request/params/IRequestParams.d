@@ -222,7 +222,7 @@ public abstract class IRequestParams
     ***************************************************************************/
 
     protected abstract void notify_
-        ( void delegate ( IRequestNotification ) info_dg );
+        ( scope void delegate ( IRequestNotification ) info_dg );
 
 
     /***************************************************************************
@@ -582,7 +582,7 @@ version (UnitTest)
         long data;
         mixin Serialize!();
 
-        protected override void notify_ ( void delegate ( IRequestNotification ) info_dg ) { }
+        protected override void notify_ ( scope void delegate ( IRequestNotification ) info_dg ) { }
         protected override void copy_ ( IRequestParams params ) { }
     }
 }

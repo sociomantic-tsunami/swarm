@@ -231,7 +231,7 @@ public class IListeners ( Data ... )
 
         ***********************************************************************/
 
-        public int opApply ( int delegate ( ref Listener listener ) dg )
+        public int opApply ( scope int delegate ( ref Listener listener ) dg )
         {
             return this.listeners.opApply(
                 (ref eb64_node node)

@@ -46,7 +46,7 @@ public class NodeErrorTracker : INodeConnectionPoolErrorReporter
 
     ***************************************************************************/
 
-    public const ulong window_size_s_default = 60;
+    public static immutable ulong window_size_s_default = 60;
 
 
     /***************************************************************************

@@ -138,7 +138,7 @@ struct ByteCountHistogram
 
         private static istring divisionBinVariables ( uint max_power )
         {
-            const type = typeof(ByteCountHistogram.bins[0]).stringof;
+            enum type = typeof(ByteCountHistogram.bins[0]).stringof;
 
             istring res;
 
@@ -240,7 +240,7 @@ struct ByteCountHistogram
         mixin("static assert(is(typeof(Bins.init." ~ bin_name ~ ")));");
 
         mixin("const offset = Bins.init." ~ bin_name ~ ".offsetof;");
-        const index = offset / this.bins[0].sizeof;
+        enum index = offset / this.bins[0].sizeof;
         return this.bins[index];
     }
 

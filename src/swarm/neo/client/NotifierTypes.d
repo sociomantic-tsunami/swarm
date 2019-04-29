@@ -42,7 +42,7 @@ public struct NodeInfo
 
     ***************************************************************************/
 
-    public void toString ( void delegate ( cstring chunk ) sink )
+    public void toString ( scope void delegate ( cstring chunk ) sink )
     {
         sformat(sink,
             "Node {}:{}",
@@ -76,7 +76,7 @@ public struct RequestNodeInfo
 
     ***************************************************************************/
 
-    public void toString ( void delegate ( cstring chunk ) sink )
+    public void toString ( scope void delegate ( cstring chunk ) sink )
     {
         sformat(
             sink,
@@ -120,7 +120,7 @@ public struct RequestNodeUnsupportedInfo
 
     ***************************************************************************/
 
-    public void toString ( void delegate ( cstring chunk ) sink )
+    public void toString ( scope void delegate ( cstring chunk ) sink )
     {
         sformat(
             sink,
@@ -176,7 +176,7 @@ public struct NodeExceptionInfo
 
     ***************************************************************************/
 
-    public void toString ( void delegate ( cstring chunk ) sink )
+    public void toString ( scope void delegate ( cstring chunk ) sink )
     {
         if ( this.e !is null )
         {
@@ -225,7 +225,7 @@ public struct RequestNodeExceptionInfo
 
     ***************************************************************************/
 
-    public void toString ( void delegate ( cstring chunk ) sink )
+    public void toString ( scope void delegate ( cstring chunk ) sink )
     {
         if ( this.e !is null )
         {
@@ -275,7 +275,7 @@ public struct RequestDataInfo
 
     ***************************************************************************/
 
-    public void toString ( void delegate ( cstring chunk ) sink )
+    public void toString ( scope void delegate ( cstring chunk ) sink )
     {
         sformat(sink,
             "Request #{} provided the value {}",
@@ -300,7 +300,7 @@ public struct NoInfo
 
     ***************************************************************************/
 
-    public void toString ( void delegate ( cstring chunk ) sink )
+    public void toString ( scope void delegate ( cstring chunk ) sink )
     {
         sink("(empty notification)");
     }
@@ -328,7 +328,7 @@ public struct RequestInfo
 
     ***************************************************************************/
 
-    public void toString ( void delegate ( cstring chunk ) sink )
+    public void toString ( scope void delegate ( cstring chunk ) sink )
     {
         sformat(sink,
             "Request #{}",

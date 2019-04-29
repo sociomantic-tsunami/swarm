@@ -78,7 +78,7 @@ public struct Record
 
     ***************************************************************************/
 
-    private static const Separator = ':';
+    private static enum Separator = ':';
 
 
     /***************************************************************************
@@ -121,7 +121,7 @@ public struct Record
 
     ***************************************************************************/
 
-    public void serialize ( OutputStream stream, ref mstring buf ) /* d1to2fix_inject: const */
+    public void serialize ( OutputStream stream, ref mstring buf ) const
     {
         if ( this.key.length )
         {
@@ -476,9 +476,9 @@ public class StdinRecordStream : ISuspendable
 
     ***************************************************************************/
 
-    public this ( OutputDg output_dg )
+    public this ( scope OutputDg output_dg )
     {
-        const fiber_stack_size = 256 * 1024;
+        static immutable fiber_stack_size = 256 * 1024;
         this.fiber = new MessageFiber(&this.fiberMethod, fiber_stack_size);
         this.output_dg = output_dg;
     }

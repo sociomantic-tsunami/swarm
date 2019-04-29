@@ -92,7 +92,7 @@ template TreeQueue ( T )
 
             *******************************************************************/
 
-            public int opApply ( int delegate ( ref T value ) dg )
+            public int opApply ( scope int delegate ( ref T value ) dg )
             {
                 return this.core.opApply(
                     (ref ulong value_)
@@ -171,11 +171,11 @@ template TreeQueue ( T )
 
             static if (is(T PtrBase == PtrBase*))
             {
-                private const pointer_values = true;
+                private enum pointer_values = true;
             }
             else
             {
-                private const pointer_values = is(T == class) ||
+                private enum pointer_values = is(T == class) ||
                                                is(T == interface);
             }
 
@@ -189,16 +189,16 @@ template TreeQueue ( T )
             static if (pointer_values)
             {
                 static assert(is(size_t == ulong));
-                private const cast_ulong = "cast(ulong)cast(void*)";
-                private const cast_T     = "cast(T)cast(void*)";
+                private enum cast_ulong = "cast(ulong)cast(void*)";
+                private enum cast_T     = "cast(T)cast(void*)";
             }
             else
             {
                 static assert(is(T == long), "The TreeQueue value type is " ~
                               "expected to be a 64-bit integer or reference " ~
                               "type, not \"" ~ T.stringof ~ "\"");
-                private const cast_ulong = "cast(ulong)";
-                private const cast_T     = "cast(T)";
+                private enum cast_ulong = "cast(ulong)";
+                private enum cast_T     = "cast(T)";
             }
         }
     }
@@ -425,7 +425,7 @@ private struct TreeQueueCore
 
     ***************************************************************************/
 
-    public int opApply ( int delegate ( ref ulong id ) dg )
+    public int opApply ( scope int delegate ( ref ulong id ) dg )
     {
         int stop = 0;
 

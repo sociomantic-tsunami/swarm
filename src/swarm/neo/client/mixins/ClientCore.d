@@ -373,7 +373,7 @@ template ClientCore ( )
             *******************************************************************/
 
             public int opApply (
-                int delegate ( ref IOStats sender, ref IOStats receiver ) dg )
+                scope int delegate ( ref IOStats sender, ref IOStats receiver ) dg )
             {
                 int res;
                 foreach ( conn; this.connections )
@@ -395,7 +395,7 @@ template ClientCore ( )
             *******************************************************************/
 
             public int opApply (
-                int delegate ( ref AddrPort node_address, ref IOStats sender,
+                scope int delegate ( ref AddrPort node_address, ref IOStats sender,
                     ref IOStats receiver ) dg )
             {
                 int res;
@@ -442,7 +442,7 @@ template ClientCore ( )
 
             *******************************************************************/
 
-            public int opApply ( int delegate ( ref TreeQueueStats ) dg )
+            public int opApply ( scope int delegate ( ref TreeQueueStats ) dg )
             {
                 int res;
                 foreach ( conn; this.connections )
@@ -462,7 +462,7 @@ template ClientCore ( )
 
             *******************************************************************/
 
-            public int opApply ( int delegate ( ref AddrPort node_address,
+            public int opApply ( scope int delegate ( ref AddrPort node_address,
                 ref TreeQueueStats ) dg )
             {
                 int res;
@@ -674,7 +674,7 @@ template ClientCore ( )
 
             *******************************************************************/
 
-            public int opApply ( int delegate ( ref istring request_name,
+            public int opApply ( scope int delegate ( ref istring request_name,
                 ref IRequestStats.RequestStats request_stats ) dg )
             {
                 int res;
@@ -857,7 +857,7 @@ template ClientCore ( )
     ***************************************************************************/
 
     private bool controlImpl ( Request, ControllerInterface ) ( RequestId id,
-        void delegate ( ControllerInterface ) dg )
+        scope void delegate ( ControllerInterface ) dg )
     {
         if ( auto rq_control =
             this.connections.request_set.getRequestController(id,

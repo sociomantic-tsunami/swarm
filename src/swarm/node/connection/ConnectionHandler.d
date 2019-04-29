@@ -195,7 +195,7 @@ public abstract class ConnectionHandlerTemplate ( Commands : ICommandCodes )
 
     ***************************************************************************/
 
-    public this ( FinalizeDg finalize_dg, ConnectionSetupParams setup )
+    public this ( scope FinalizeDg finalize_dg, ConnectionSetupParams setup )
     {
         super(finalize_dg, setup);
 
@@ -615,7 +615,7 @@ abstract public class ISwarmConnectionHandler : IFiberConnectionHandlerBase,
 
     ***************************************************************************/
 
-    public this ( FinalizeDg finalize_dg, ConnectionSetupParams setup )
+    public this ( scope FinalizeDg finalize_dg, ConnectionSetupParams setup )
     {
         debug this.connection_id = connection_count++;
 
