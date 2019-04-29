@@ -29,7 +29,7 @@ module swarm.client.connection.NodeErrorTracker;
 
 import swarm.client.connection.model.INodeConnectionPoolErrorReporter;
 
-import ocean.time.model.IMicrosecondsClock : IAdvancedMicrosecondsClock;
+import ocean.time.MicrosecondsClock;
 
 import core.stdc.time : time_t;
 
@@ -381,7 +381,7 @@ public class NodeErrorTracker : INodeConnectionPoolErrorReporter
 
     ***************************************************************************/
 
-    public alias IAdvancedMicrosecondsClock Clock;
+    public alias MicrosecondsClock Clock;
 
     private Clock clock;
 
@@ -501,7 +501,7 @@ public class NodeErrorTracker : INodeConnectionPoolErrorReporter
         }
 
         auto updated = this.node_counters[node].counters[type].inc(
-            this.clock.now_sec, this.weights);
+            this.clock.now.tv_sec, this.weights);
         if ( updated && this.updated !is null )
         {
             this.updated(node);
