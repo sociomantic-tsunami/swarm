@@ -537,10 +537,10 @@ public abstract class IRequestParams
 
         ***********************************************************************/
 
-        static typeof(this) serialized ( void[] data )
+        static typeof(&this) serialized ( void[] data )
         in
         {
-            alias typeof(*this) This;
+            alias typeof(this) This;
 
             /*
              * The static assertions don't actually belong in the scope of this
@@ -568,7 +568,7 @@ public abstract class IRequestParams
         }
         body
         {
-            return cast(typeof(this))data.ptr;
+            return cast(typeof(&this))data.ptr;
         }
     }
 }
