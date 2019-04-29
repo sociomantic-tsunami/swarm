@@ -293,7 +293,7 @@ struct TreeMap ( Node = eb64_node )
 
         ***********************************************************************/
 
-        public int opApply ( int delegate ( ref UserElement user_element ) dg )
+        public int opApply ( scope int delegate ( ref UserElement user_element ) dg )
         {
             int stop = 0;
 
@@ -431,7 +431,7 @@ struct TreeMap ( Node = eb64_node )
 
         ***********************************************************************/
 
-        public int opApply ( int delegate ( ref Node node ) dg )
+        public int opApply ( scope int delegate ( ref Node node ) dg )
         {
             int stop = 0;
 
@@ -555,7 +555,7 @@ struct TreeMap ( Node = eb64_node )
             }
             else
             {
-                const istring msg = "malloc(" ~ Node.sizeof.stringof ~
+                enum istring msg = "malloc(" ~ Node.sizeof.stringof ~
                                    ") failed: Out of memory\n\0";
                 fputs(msg.ptr, stderr);
                 exit(EXIT_FAILURE);
@@ -596,7 +596,7 @@ struct TreeMap ( Node = eb64_node )
 
 *******************************************************************************/
 
-private const eb_root empty_unique_ebtroot =
+private static immutable eb_root empty_unique_ebtroot =
     function ( )
     {
         eb_root root;

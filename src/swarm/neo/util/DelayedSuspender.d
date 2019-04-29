@@ -160,7 +160,7 @@ unittest
         private RequestOnConnBase.EventDispatcher conn;
 
         /// Signal code that suspended fiber waits for.
-        const ResumeSuspendedFiber = 23;
+        static immutable ResumeSuspendedFiber = 23;
 
         class Worker
         {

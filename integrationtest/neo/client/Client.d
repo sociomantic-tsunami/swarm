@@ -83,7 +83,7 @@ public class Client
 
         ***********************************************************************/
 
-        public void put ( hash_t key, in void[] value, Put.Notifier notifier )
+        public void put ( hash_t key, in void[] value, scope Put.Notifier notifier )
         {
             auto params = Const!(Internals.Put.UserSpecifiedParams)(
                 Const!(Put.Args)(key, value), notifier);
@@ -105,7 +105,7 @@ public class Client
         ***********************************************************************/
 
         public void doublePut ( hash_t key, in void[] value,
-            DoublePut.Notifier notifier )
+            scope DoublePut.Notifier notifier )
         {
             auto params = Const!(Internals.DoublePut.UserSpecifiedParams)(
                 Const!(DoublePut.Args)(key, value), notifier);
@@ -128,7 +128,7 @@ public class Client
         ***********************************************************************/
 
         public void roundRobinPut ( hash_t key, in void[] value,
-            RoundRobinPut.Notifier notifier )
+            scope RoundRobinPut.Notifier notifier )
         {
             auto params = Const!(Internals.RoundRobinPut.UserSpecifiedParams)(
                 Const!(RoundRobinPut.Args)(key, value), notifier);
@@ -150,7 +150,7 @@ public class Client
 
         ***********************************************************************/
 
-        public void get ( ubyte Version = 0 ) ( hash_t key, Get.Notifier notifier )
+        public void get ( ubyte Version = 0 ) ( hash_t key, scope Get.Notifier notifier )
         {
             auto params = Const!(Internals.VersionedGet!(Version).UserSpecifiedParams)(
                 Const!(Get.Args)(key), notifier);
@@ -175,7 +175,7 @@ public class Client
 
         ***********************************************************************/
 
-        public RequestId getAll ( GetAll.Notifier notifier )
+        public RequestId getAll ( scope GetAll.Notifier notifier )
         {
             auto params = Const!(Internals.GetAll.UserSpecifiedParams)(
                 Const!(GetAll.Args)(), notifier);
@@ -241,7 +241,7 @@ public class Client
         ***********************************************************************/
 
         public bool control ( ControllerInterface ) ( RequestId id,
-            void delegate ( ControllerInterface ) dg )
+            scope void delegate ( ControllerInterface ) dg )
         {
             alias Request!(ControllerInterface) R;
 
@@ -292,7 +292,7 @@ public class Client
 
         ***********************************************************************/
 
-        public bool put ( hash_t key, in void[] value, Neo.Put.Notifier notifier )
+        public bool put ( hash_t key, in void[] value, scope Neo.Put.Notifier notifier )
         {
             auto task = Task.getThis();
             assert(task !is null);
@@ -337,7 +337,7 @@ public class Client
         ***********************************************************************/
 
         public bool doublePut ( hash_t key, in void[] value,
-            Neo.DoublePut.Notifier notifier )
+            scope Neo.DoublePut.Notifier notifier )
         {
             auto task = Task.getThis();
             assert(task !is null);
@@ -395,7 +395,7 @@ public class Client
         ***********************************************************************/
 
         public bool roundRobinPut ( hash_t key, in void[] value,
-            Neo.RoundRobinPut.Notifier notifier )
+            scope Neo.RoundRobinPut.Notifier notifier )
         {
             auto task = Task.getThis();
             assert(task !is null);
@@ -451,7 +451,7 @@ public class Client
         ***********************************************************************/
 
         public bool get ( ubyte Version = 0 ) ( hash_t key, ref void[] value,
-            Neo.Get.Notifier notifier )
+            scope Neo.Get.Notifier notifier )
         {
             auto task = Task.getThis();
             assert(task !is null);
@@ -516,7 +516,7 @@ public class Client
             *******************************************************************/
 
             public int opApply (
-                int delegate ( ref hash_t key, ref Const!(void)[] value ) dg )
+                scope int delegate ( ref hash_t key, ref Const!(void)[] value ) dg )
             {
                 int res;
 
@@ -574,7 +574,7 @@ public class Client
 
         ***********************************************************************/
 
-        public GetAllFruct getAll ( Neo.GetAll.Notifier notifier )
+        public GetAllFruct getAll ( scope Neo.GetAll.Notifier notifier )
         {
             return GetAllFruct(this.outer.neo, notifier);
         }
@@ -606,7 +606,7 @@ public class Client
     ***************************************************************************/
 
     public this ( EpollSelectDispatcher epoll, cstring addr, ushort port,
-        Neo.ConnectionNotifier conn_notifier )
+        scope Neo.ConnectionNotifier conn_notifier )
     {
         this.epoll = epoll;
         this.conn_notifier = conn_notifier;
@@ -632,7 +632,7 @@ public class Client
     ***************************************************************************/
 
     public this ( EpollSelectDispatcher epoll, Neo.Config config,
-        Neo.ConnectionNotifier conn_notifier )
+        scope Neo.ConnectionNotifier conn_notifier )
     {
         this.epoll = epoll;
         this.conn_notifier = conn_notifier;

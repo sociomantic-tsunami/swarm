@@ -374,7 +374,7 @@ public struct RequestEventDispatcher
 
     ***************************************************************************/
 
-    public void send ( MessageFiber fiber, Send.GetPayloadDg fill_payload )
+    public void send ( MessageFiber fiber, scope Send.GetPayloadDg fill_payload )
     {
         auto event = this.nextEvent(fiber, Send(fill_payload));
         enforce(event.active == event.active.sent,
@@ -759,7 +759,7 @@ public struct RequestEventDispatcher
 
         // All the flags that this method sets, used for short-circuit the
         // array iteration if we set all relevant flags.
-        const all_set_flags = flags.Yield | flags.Resume;
+        enum all_set_flags = flags.Yield | flags.Resume;
 
         foreach ( waiting_fiber; this.waiting_fibers.array() )
         {

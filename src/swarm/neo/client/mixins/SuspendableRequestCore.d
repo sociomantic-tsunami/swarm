@@ -408,7 +408,7 @@ public
         ( Request, Connector, Disconnected, FillPayload, Handler )
         ( RequestOnConn.EventDispatcherAllNodes conn, Request.Context* context,
           Connector connector, Disconnected disconnected,
-          FillPayload fill_payload, Handler handler )
+          FillPayload fill_payload, scope Handler handler )
 {
     auto initialiser = createSuspendableRequestInitialiser!(Request)(
         conn, context, fill_payload);
@@ -1097,8 +1097,8 @@ private template ExampleRequestCore ( )
     import ocean.core.SmartUnion;
 
     // Required by RequestCore
-    const ubyte RequestCode = 0;
-    const ubyte RequestVersion = 0;
+    static immutable ubyte RequestCode = 0;
+    static immutable ubyte RequestVersion = 0;
 
     // Required by RequestCore
     struct Args

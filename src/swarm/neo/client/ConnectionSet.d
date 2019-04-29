@@ -188,7 +188,7 @@ public final class ConnectionSet : RequestOnConn.IConnectionGetter
     ***************************************************************************/
 
     public this ( Const!(Credentials) credentials, EpollSelectDispatcher epoll,
-        ConnectionNotifier conn_notifier, bool auto_connect )
+        scope ConnectionNotifier conn_notifier, bool auto_connect )
     {
         verify(conn_notifier !is null);
 
@@ -217,7 +217,7 @@ public final class ConnectionSet : RequestOnConn.IConnectionGetter
     ***************************************************************************/
 
     public ConnectionNotifier setConnectionNotifier (
-        ConnectionNotifier conn_notifier )
+        scope ConnectionNotifier conn_notifier )
     {
         auto old_conn_notifier = this.conn_notifier;
         this.conn_notifier = conn_notifier;
@@ -435,7 +435,7 @@ public final class ConnectionSet : RequestOnConn.IConnectionGetter
 
     ***************************************************************************/
 
-    public int iterateRoundRobin ( int delegate ( Connection conn ) dg )
+    public int iterateRoundRobin ( scope int delegate ( Connection conn ) dg )
     {
         auto connections_buf = this.connection_list_pool.get(
             new Connection[this.connection_pool.num_busy]);
@@ -473,7 +473,7 @@ public final class ConnectionSet : RequestOnConn.IConnectionGetter
 
     ***************************************************************************/
 
-    public int opApply ( int delegate ( ref Connection conn ) dg )
+    public int opApply ( scope int delegate ( ref Connection conn ) dg )
     {
         return this.connections.opApply(dg);
     }
@@ -493,7 +493,7 @@ public final class ConnectionSet : RequestOnConn.IConnectionGetter
 
     ***************************************************************************/
 
-    public int opApplyReverse ( int delegate ( ref Connection conn ) dg )
+    public int opApplyReverse ( scope int delegate ( ref Connection conn ) dg )
     {
         return this.connections.opApplyReverse(dg);
     }
@@ -776,7 +776,7 @@ private struct ConnectionRegistry ( C )
 
     ***************************************************************************/
 
-    public int opApply ( int delegate ( ref Elem conn ) dg )
+    public int opApply ( scope int delegate ( ref Elem conn ) dg )
     {
         for (
             auto conn = this.connection_map.getBoundary!(true)();
@@ -806,7 +806,7 @@ private struct ConnectionRegistry ( C )
 
     ***************************************************************************/
 
-    public int opApplyReverse ( int delegate ( ref Elem conn ) dg )
+    public int opApplyReverse ( scope int delegate ( ref Elem conn ) dg )
     {
         for (
             auto conn = this.connection_map.getBoundary!(false)();
@@ -849,7 +849,7 @@ private struct ConnectionRegistry ( C )
     ***************************************************************************/
 
     public int iterateRoundRobin ( ref Elem[] connections_buf,
-        int delegate ( Elem conn ) dg )
+        scope int delegate ( Elem conn ) dg )
     {
         connections_buf.length = 0;
         enableStomping(connections_buf);

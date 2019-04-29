@@ -96,7 +96,7 @@ public struct RequestOnConnSet
 
     ***************************************************************************/
 
-    public RequestType type ( ) /* d1to2fix_inject: const */
+    public RequestType type ( ) const
     {
         return this.type_;
     }
@@ -181,7 +181,7 @@ public struct RequestOnConnSet
 
     ***************************************************************************/
 
-    public int opApply ( int delegate ( ref RequestOnConn ) dg )
+    public int opApply ( scope int delegate ( ref RequestOnConn ) dg )
     {
         with ( RequestType ) final switch ( this.type_ )
         {
@@ -284,7 +284,7 @@ public struct RequestOnConnSet
 
     ***************************************************************************/
 
-    public void reset ( void delegate ( RequestOnConn ) recycle )
+    public void reset ( scope void delegate ( RequestOnConn ) recycle )
     {
         verify(this.num_active == 0);
 

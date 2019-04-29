@@ -74,7 +74,7 @@ public class Node : NodeBase!(ConnHandler)
         options.credentials_map["dummy"] = Key.init;
         options.shared_resources = this.shared_resources;
 
-        const backlog = 1_000;
+        static immutable backlog = 1_000;
         auto legacy_port = NodeItem(addr.dup, cast(ushort)(neo_port - 1));
         super(legacy_port, neo_port, new ConnectionSetupParams,
             options, backlog);
@@ -108,7 +108,7 @@ public class Node : NodeBase!(ConnHandler)
     ***************************************************************************/
 
     override protected void getResourceAcquirer (
-        void delegate ( Object resource_acquirer ) handle_request_dg )
+        scope void delegate ( Object resource_acquirer ) handle_request_dg )
     {
         handle_request_dg(this.shared_resources);
     }
@@ -125,7 +125,7 @@ private class ConnHandler : ConnectionHandlerTemplate!(ICommandCodes)
 {
     import ocean.net.server.connection.IConnectionHandler;
 
-    public this ( void delegate(IConnectionHandler) finaliser,
+    public this ( scope void delegate(IConnectionHandler) finaliser,
         ConnectionSetupParams params )
     {
         super(finaliser, params);

@@ -134,7 +134,7 @@ class NodeConnect
             fiber, socket_fd, receiver, sender);
         scope ( exit ) this.protocol.unregisterEpoll();
 
-        const request_type     = MessageType.Authentication,
+        static immutable request_type     = MessageType.Authentication,
               protocol_version = 1;
 
         ubyte client_protocol_version = this.protocol.receiveProtocolVersion();

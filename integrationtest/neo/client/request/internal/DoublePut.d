@@ -120,8 +120,8 @@ public struct DoublePut
 
     ***************************************************************************/
 
-    public static void handler ( UseNodeDg use_node,
-        void delegate ( ) start_request_on_new_conn, void[] context_blob )
+    public static void handler ( scope UseNodeDg use_node,
+        scope void delegate ( ) start_request_on_new_conn, void[] context_blob )
     {
         auto context = DoublePut.getContext(context_blob);
         auto node_idx = context.shared_working.nextNodeIndex();

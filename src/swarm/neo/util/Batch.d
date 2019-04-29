@@ -128,7 +128,7 @@ public struct BatchWriter ( Record ... )
 
     ***************************************************************************/
 
-    public bool add ( Record record, void delegate ( ) batch_finished )
+    public bool add ( Record record, scope void delegate ( ) batch_finished )
     {
         if ( !this.fits(record) )
             return false;
@@ -348,7 +348,7 @@ public scope class BatchReader ( Record ... )
 
     ***************************************************************************/
 
-    public int opApply ( int delegate ( ref Record ) dg )
+    public int opApply ( scope int delegate ( ref Record ) dg )
     {
         Record record;
         while ( this.remaining.length )
@@ -498,7 +498,7 @@ version ( UnitTest )
 unittest
 {
     void[] buffer;
-    const max_len = 256;
+    static immutable max_len = 256;
 
     {
         BatchWriter!(uint) batch;
@@ -549,7 +549,7 @@ unittest
 
     auto values = ["best", "thing", "ever"];
 
-    const max_len = 256;
+    static immutable max_len = 256;
     BatchWriter!(cstring) batcher;
     batcher.initialise(&buffer, max_len);
 
@@ -573,7 +573,7 @@ unittest
 
     auto values = ["best", "thing", "ever"];
 
-    const max_len = 256;
+    static immutable max_len = 256;
     BatchWriter!(cstring) batcher;
     batcher.initialise(&buffer, max_len);
 
@@ -605,7 +605,7 @@ unittest
         KeyValue(34, "whatever")];
 
     {
-        const max_len = 256;
+        static immutable max_len = 256;
         BatchWriter!(typeof(KeyValue.tupleof)) batch;
         batch.initialise(&buffer, max_len);
 

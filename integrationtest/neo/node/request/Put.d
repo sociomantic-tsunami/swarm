@@ -33,10 +33,10 @@ public class PutImpl_v0 : IRequest
     mixin RequestCore!();
 
     /// Request code / version. Required by ConnectionHandler.
-    const Command command = Command(RequestCode.Put, 0);
+    static immutable Command command = Command(RequestCode.Put, 0);
 
     /// Request name for stats tracking. Required by ConnectionHandler.
-    const istring name = "Put";
+    static immutable istring name = "Put";
 
     /***************************************************************************
 

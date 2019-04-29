@@ -254,7 +254,7 @@ public class RequestStats
         ***********************************************************************/
 
         public int opApply (
-            int delegate ( ref ulong bucket_end, ref ulong count ) dg )
+            scope int delegate ( ref ulong bucket_end, ref ulong count ) dg )
         {
             int ret;
             foreach ( i, count; this.bucket_count )
@@ -784,7 +784,7 @@ public class RequestStats
             private time_t last_activity;
 
             /// Seconds in an hour.
-            private static const one_hour = 60 * 60;
+            private static enum one_hour = 60 * 60;
 
             invariant ( )
             {
@@ -933,7 +933,7 @@ public class RequestStats
 
             *******************************************************************/
 
-            public hash_t toHash ( ) /* d1to2fix_inject: const */
+            public hash_t toHash ( ) const
             {
                 return Fnv1a.combined(this.request, this.client);
             }

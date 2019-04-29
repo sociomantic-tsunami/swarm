@@ -32,7 +32,7 @@ public struct AddrPort
     import swarm.util.Verify;
 
     /// Minimum length required for an address format buffer.
-    public const AddrBufLength = INET6_ADDRSTRLEN;
+    public enum AddrBufLength = INET6_ADDRSTRLEN;
 
     /***************************************************************************
 

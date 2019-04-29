@@ -117,7 +117,7 @@ align(1) struct MessageHeader
 
     ***************************************************************************/
 
-    const max_auth_body_length = 999;
+    enum max_auth_body_length = 999;
 
     /***************************************************************************
 
@@ -149,7 +149,7 @@ align(1) struct MessageHeader
 
     ***************************************************************************/
 
-    ubyte total_parity ( ) /* d1to2fix_inject: const */
+    ubyte total_parity ( ) const
     {
         return this.calcParity(this.parity);
     }
@@ -168,7 +168,7 @@ align(1) struct MessageHeader
 
     ***************************************************************************/
 
-    ubyte calcParity ( ubyte parity_in = 0 ) /* d1to2fix_inject: const */
+    ubyte calcParity ( ubyte parity_in = 0 ) const
     {
         ulong a = this.body_length,
               b = cast(uint)  (a ^ (a >>> (uint.sizeof   * 8))),
@@ -192,7 +192,7 @@ align(1) struct MessageHeader
 
     ***************************************************************************/
 
-    public void validate ( ProtocolError e ) /* d1to2fix_inject: const */
+    public void validate ( ProtocolError e ) const
     {
         e.enforce(!this.total_parity, "message header data parity fault");
 
