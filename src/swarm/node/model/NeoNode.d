@@ -671,16 +671,6 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
 
         /***********************************************************************
 
-            Flag controlling whether Nagle's algorithm is disabled (true) or
-            left enabled (false) on the underlying socket.
-
-        ***********************************************************************/
-
-        deprecated("This field now doesn't affect anything, since TCP_NODELAY is always on")
-        public bool no_delay;
-
-        /***********************************************************************
-
             Unix domain server socket path. (If null, no unix socket will be
             opened.)
 

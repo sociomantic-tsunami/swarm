@@ -718,29 +718,6 @@ public template Suspendable ( )
 
         params_.suspend_register = this.suspend_register;
     }
-
-
-    /***************************************************************************
-
-        Copies the value of the suspend unregister member into the provided
-        request params class instance.
-
-        Params:
-            params = IRequestParams instance to write into
-
-    ***************************************************************************/
-
-    private void setup_suspend_unregister ( IRequestParams params )
-    {
-        // deprecated: remove in swarm v6
-        static if (hasMember!(RequestParams, "suspend_unregister"))
-        {
-            auto params_ = downcast!(RequestParams)(params);
-            verify(params_ !is null);
-
-            params_.suspend_unregister = this.suspend_unregister;
-        }
-    }
 }
 
 

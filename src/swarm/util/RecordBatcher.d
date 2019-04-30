@@ -448,15 +448,6 @@ public class RecordBatch
 {
     /***************************************************************************
 
-        Maximum uncompressed batch size.
-
-    ***************************************************************************/
-
-    deprecated("Specifying a batch size no longer has any effect. Drop usage of this constant.")
-    public static immutable DefaultMaxBatchSize = 64 * 1024;
-
-    /***************************************************************************
-
         Buffer used to store/extract batch of records.
 
     ***************************************************************************/
@@ -471,24 +462,6 @@ public class RecordBatch
     ***************************************************************************/
 
     protected Lzo lzo;
-
-
-    /***************************************************************************
-
-        Constructor.
-
-        Params:
-            lzo = lzo de/compressor to use
-            batch_size = batch size to use
-
-    ***************************************************************************/
-
-    deprecated("Specifying a batch size no longer has any effect. Please use the other ctor.")
-    public this ( Lzo lzo, size_t batch_size )
-    {
-        this(lzo);
-    }
-
 
     /***************************************************************************
 

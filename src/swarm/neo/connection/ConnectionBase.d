@@ -1169,22 +1169,6 @@ abstract class ConnectionBase: ISelectClient
 
     /***************************************************************************
 
-        Requests to send outgoing data buffered by the OS for the socket
-        immediately. By default outgoing data are buffered to the maximum
-        payload of a TCP frame using the Linux TCP_CORK socket option.
-
-        This method is intended to be called right after `getPayloadForSending`
-        has called the `send` delegate.
-
-    ***************************************************************************/
-
-    deprecated("TCP_NODELAY is now on by default and this method does nothing")
-    public void flush ( )
-    {
-    }
-
-    /***************************************************************************
-
         Called (by ReceiveLoop) when a request message has arrived.
 
         Params:

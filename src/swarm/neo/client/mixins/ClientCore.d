@@ -927,22 +927,6 @@ template ClientCore ( )
             static assert(false, "Invalid request type");
         }
     }
-
-    /***************************************************************************
-
-        Disables TCP socket output data buffering. Should be called before
-        adding a node.
-
-        Warning: This is meant to be used only in tests which perform sequential
-        requests. For a high data throughput rate it may impact performance so
-        do not use it in a production environment.
-
-    ***************************************************************************/
-
-    deprecated("TCP_NODELAY is now on, this method does nothing.")
-    public void enableSocketNoDelay ( )
-    {
-    }
 }
 
 /*******************************************************************************
