@@ -71,26 +71,6 @@ class ConnectionHandler : IConnectionHandler
         import swarm.node.request.RequestStats;
         import ocean.meta.traits.Aggregates : hasMember;
 
-        /***********************************************************************
-
-            Definition of a command handler function. It is called when a new
-            incoming request is handled and runs in its own fiber (the fiber
-            owned by the passed RequestOnConn instance).
-
-            Params:
-                shared_resources = an opaque object containing resources owned
-                    by the node which are required by the request
-                connection = manages the connection socket I/O and the fiber
-                cmdver = the command version
-                msg_payload = the payload of the first message for the request
-
-        ***********************************************************************/
-
-        deprecated("Use new request handling framework. (This symbol should have been removed in v5.0.0.)")
-        public alias void function ( Object shared_resources,
-            RequestOnConn connection, Command.Version cmdver,
-            Const!(void)[] msg_payload ) Handler;
-
         /// Details stored in map about a single request.
         public struct RequestInfo
         {
@@ -123,36 +103,6 @@ class ConnectionHandler : IConnectionHandler
 
         /// Set of supported request codes.
         private bool[Command.Code] supported_requests;
-
-        /***********************************************************************
-
-            Adds a request/version to the map.
-
-            Params:
-                command = command (request/version code) to initiate request
-                name = name of request
-                class_info = class that handles this request type
-                timing = if true, timing stats about request of this type are
-                    tracked
-
-        ***********************************************************************/
-
-        deprecated("Use addHandler instead")
-        public void add ( Command command, cstring name, ClassInfo class_info,
-            bool timing = true )
-        {
-            verify(name.length > 0);
-            verify(class_info !is null);
-
-            RequestInfo ri;
-            ri.old_handler = true;
-            ri.name = idup(name);
-            ri.class_info = class_info;
-            ri.timing = timing;
-            ri.scheduled_for_removal = false;
-            this.request_info[command] = ri;
-            this.supported_requests[command.code] = true;
-        }
 
         /***********************************************************************
 

@@ -789,20 +789,6 @@ abstract class RequestOnConnBase
 
         /***********************************************************************
 
-            Requests to send outgoing data buffered by the OS for the socket
-            immediately. By default outgoing data are buffered to the maximum
-            payload of a TCP frame using the Linux TCP_CORK socket option.
-
-        ***********************************************************************/
-
-        deprecated("Use TCP_NODELAY and explicit buffering instead.")
-        public void flush ( )
-        {
-            this.outer.connection.flush();
-        }
-
-        /***********************************************************************
-
             Sends a message for this request to the node.
 
             Do not resume the fiber before this method has returned or thrown.

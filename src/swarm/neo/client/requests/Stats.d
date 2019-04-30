@@ -104,20 +104,6 @@ public interface IRequestStats
         {
             return this.histogram.mean_time_micros();
         }
-
-        /***********************************************************************
-
-            Returns:
-                the mean time (in microseconds) taken by each request of this
-                type (may, of course, be nan or -nan, if this.count == 0)
-
-        ***********************************************************************/
-
-        deprecated("Use mean_time_micros instead")
-        public double mean_handled_time_micros ( )
-        {
-            return this.histogram.mean_time_micros();
-        }
     }
 
     /// Alias for a unique identifier for a request type. (Request
