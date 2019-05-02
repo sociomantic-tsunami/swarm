@@ -14,9 +14,9 @@ module integrationtest.neo.node.request.RoundRobinPut;
 
 import ocean.transition;
 import integrationtest.neo.node.Storage;
+import swarm.neo.node.IRequest;
 import swarm.neo.node.RequestOnConn;
 import swarm.neo.request.Command;
-import swarm.neo.node.IRequestHandler;
 
 /*******************************************************************************
 
