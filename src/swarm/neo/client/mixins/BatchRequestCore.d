@@ -207,6 +207,21 @@ public template BatchController ( Request, IController )
             }
             return true;
         }
+
+        /***********************************************************************
+
+            Queries the suspension state of the request.
+
+            Returns:
+                the suspension state of the request
+
+        ***********************************************************************/
+
+        public bool suspended ( )
+        {
+            return Request.getContext(this.request_controller.context_blob)
+                .shared_working.suspendable_control.suspended;
+        }
     }
 }
 
@@ -224,6 +239,7 @@ unittest
             bool suspend ( );
             bool resume ( );
             bool stop ( );
+            bool suspended ( );
         }
 
         mixin BatchController!(ExampleRequest, IController);
