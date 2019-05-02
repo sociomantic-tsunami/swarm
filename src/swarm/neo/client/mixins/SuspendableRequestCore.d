@@ -560,6 +560,23 @@ public template SuspendableController ( Request, IController, MessageType )
 
         /***********************************************************************
 
+            Queries the suspension state of the request.
+            This method cannot be implemented and thus always throws. 
+            This will not be fixed since the module is deprecated.
+
+            Returns:
+                the suspension state of the request
+
+        ***********************************************************************/
+
+        public bool suspended ( )
+        {
+            throw new Exception("ISuspendable.suspended() is not currently
+                supported " ~ "by " ~ typeof(this).stringof);
+        }
+
+        /***********************************************************************
+
             Changes the desired state to that specified. Sets the desired state
             flag and resumes any handler fibers which are suspended, passing the
             control message flag to the fiber via the return value of suspend().
@@ -658,6 +675,7 @@ unittest
             bool suspend ( );
             bool resume ( );
             bool stop ( );
+            bool suspended ( );
         }
 
         mixin SuspendableController!(ExampleRequest, IController, MessageType);
