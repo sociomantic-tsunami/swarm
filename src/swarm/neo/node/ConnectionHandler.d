@@ -52,7 +52,7 @@ class ConnectionHandler : IConnectionHandler
 {
     import swarm.neo.node.Connection;
     import swarm.neo.node.RequestOnConn;
-    import swarm.neo.node.IRequestHandler;
+    import swarm.neo.node.IRequest;
     import swarm.neo.request.Command;
 
     import ocean.core.array.Mutation : copy;
@@ -635,7 +635,7 @@ version ( UnitTest )
 {
     import swarm.node.request.RequestStats;
     import swarm.neo.request.Command;
-    import swarm.neo.node.IRequestHandler;
+    import swarm.neo.node.IRequest;
     import swarm.neo.node.RequestOnConn;
 }
 
