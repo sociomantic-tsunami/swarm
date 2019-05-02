@@ -933,7 +933,7 @@ public class RequestStats
 
             *******************************************************************/
 
-            public hash_t toHash ( ) const
+            public hash_t toHash ( ) const nothrow @safe
             {
                 return Fnv1a.combined(this.request, this.client);
             }
