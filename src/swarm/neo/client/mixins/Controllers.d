@@ -302,25 +302,23 @@ template Controllers ( )
 
         /***********************************************************************
 
-            This method of `ISuspendable` cannot currently be implemented and
-            thus always throws. To implement this method correctly, this class
-            would need to somehow hook into the notifications of the request
-            being controlled, in order to receive the suspended/resumed
-            notifications to know when the request had actually changed state
-            (on the nodes' side).
-
             Returns:
                 true if the process is suspended
-
-            Throws:
-                always; unsupported
 
         ***********************************************************************/
 
         public bool suspended ( )
         {
-            throw new Exception("ISuspendable.suspended() is not currently supported "
-                ~ "by " ~ typeof(this).stringof);
+            bool _suspended;
+
+            this.control(
+                ( ControllerInterface controller )
+                {
+                    _suspended = controller.suspended();
+                }
+            );
+
+            return _suspended;
         }
     }
 }
@@ -334,6 +332,7 @@ version (UnitTest) private class ControllersTemplateTest
     {
         bool suspend();
         bool resume();
+        bool suspended();
     }
 
     abstract bool control(RequestId, scope void delegate(DummyControllerInterface));
