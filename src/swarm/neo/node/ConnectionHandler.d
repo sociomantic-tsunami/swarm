@@ -74,12 +74,6 @@ class ConnectionHandler : IConnectionHandler
         /// Details stored in map about a single request.
         public struct RequestInfo
         {
-            /// Indicates whether the specified class info is for an
-            /// IRequestHandler (true) or an IRequest (false). (When the
-            /// deprecated `add()` method is removed, this field can be removed
-            /// as well.)
-            bool old_handler;
-
             /// The name of the request, used for stats tracking.
             istring name;
 
@@ -124,7 +118,6 @@ class ConnectionHandler : IConnectionHandler
             assert(Request.name.length > 0);
 
             RequestInfo ri;
-            ri.old_handler = false;
             ri.name = Request.name;
             ri.class_info = Request.classinfo;
 
@@ -532,26 +525,13 @@ class ConnectionHandler : IConnectionHandler
             scope handle_request =
                 ( Object request_resources )
                 {
-                    if ( rq.old_handler )
-                    {
-                        auto rq_handler = this.emplace!(IRequestHandler)
-                            (connection.emplace_buf, rq.class_info);
-                        rq_handler.initialise(connection, request_resources);
-                        rq_handler.preSupportedCodeSent(init_payload);
-                        this.sendSupportedStatus(connection,
-                            SupportedStatus.RequestSupported);
-                        rq_handler.postSupportedCodeSent();
-                    }
-                    else
-                    {
-                        connection.init_payload_buf.copy(init_payload);
-                        this.sendSupportedStatus(connection,
-                            SupportedStatus.RequestSupported);
-                        auto rq_handler = this.emplace!(IRequest)
-                            (connection.emplace_buf, rq.class_info);
-                        rq_handler.handle(connection, request_resources,
-                            connection.init_payload_buf);
-                    }
+                    connection.init_payload_buf.copy(init_payload);
+                    this.sendSupportedStatus(connection,
+                        SupportedStatus.RequestSupported);
+                    auto rq_handler = this.emplace!(IRequest)
+                        (connection.emplace_buf, rq.class_info);
+                    rq_handler.handle(connection, request_resources,
+                        connection.init_payload_buf);
                 };
 
             this.shared_params.get_resource_acquirer(handle_request);
