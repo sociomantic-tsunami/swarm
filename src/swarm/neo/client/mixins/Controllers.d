@@ -295,7 +295,6 @@ template Controllers ( )
                     this.pending = Pending.None;
                     this.resume();
                     break;
-                version (D_Version2) {} else default: assert(false);
             }
             verify(this.pending == Pending.None,
                 "handlePending() called when request is not ready");

@@ -784,8 +784,6 @@ public struct SuspendableRequestControllerFiber ( Request, MessageType )
                 break;
             case None:
                 assert(false);
-            version (D_Version2) {} else default:
-                assert(false);
         }
 
         // Send message to node.
@@ -844,8 +842,6 @@ public struct SuspendableRequestControllerFiber ( Request, MessageType )
                         stopped_notification_done = true;
                     break;
                 case None:
-                    assert(false);
-                version (D_Version2) {} else default:
                     assert(false);
             }
 

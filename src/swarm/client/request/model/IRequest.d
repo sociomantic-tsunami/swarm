@@ -155,13 +155,6 @@ public abstract scope class IRequest: IFiberRequest
             case Fatal:
                 this.statusActionFatal();
                 throw this.fatal_error_exception(__FILE__, __LINE__);
-
-            version (D_Version2) {}
-            else
-            {
-                default:
-                    assert(false);
-            }
         }
     }
 

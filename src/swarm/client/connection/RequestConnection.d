@@ -208,23 +208,6 @@ public abstract class IRequestConnection :
             this.finalizer = this.outer;
         }
 
-
-        version (D_Version2) {}
-        else
-        {
-            /*******************************************************************
-
-                Disposer
-
-            *******************************************************************/
-
-            protected override void dispose ( )
-            {
-                super.dispose();
-                delete this.timeout_reporter;
-            }
-        }
-
         /***********************************************************************
 
             Connects to the node.
@@ -416,31 +399,6 @@ public abstract class IRequestConnection :
         this.params = params;
     }
 
-
-    version (D_Version2) {}
-    else
-    {
-        /***********************************************************************
-
-            Disposer
-
-        ***********************************************************************/
-
-        protected override void dispose ( )
-        {
-            super.dispose();
-
-            delete this.reader;
-            delete this.writer;
-            delete this.socket;
-            delete this.event;
-            delete this.fiber;
-            delete this.timeout_exception;
-            delete this.connection_timeout_exception;
-        }
-    }
-
-
     /***************************************************************************
 
         Starts this connection handling a new request. The request fiber is
@@ -579,13 +537,6 @@ public abstract class IRequestConnection :
 
                         restart_fiber = true;
                     break;
-
-                    version (D_Version2) {}
-                    else
-                    {
-                        default:
-                            assert(false);
-                    }
                 }
 
                 if ( restart_fiber )
@@ -676,13 +627,6 @@ public abstract class IRequestConnection :
             case EstablishConnection:
                 this.establishConnection();
             break;
-
-            version (D_Version2) {}
-            else
-            {
-                default:
-                    assert(false);
-            }
         }
 
         debug ( SwarmClient ) Stderr.formatln("[{}:{}.{}]: No requests pending -- recycling connection",

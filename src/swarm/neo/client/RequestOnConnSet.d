@@ -126,8 +126,6 @@ public struct RequestOnConnSet
                 break;
             case RequestType.AllNodes, RequestType.None:
                 verify(false);
-            version (D_Version2) {} else default:
-                assert(false);
         }
 
         this.list ~= request_on_conn;
@@ -204,8 +202,6 @@ public struct RequestOnConnSet
                         break;
                 }
                 return 0;
-
-            version (D_Version2) {} else default: assert(false);
         }
 
         assert(false);
@@ -241,8 +237,6 @@ public struct RequestOnConnSet
 
             case AllNodes:
                 return node_address.cmp_id in this.map;
-
-            version (D_Version2) {} else default: assert(false);
         }
 
         assert(false);
@@ -308,8 +302,6 @@ public struct RequestOnConnSet
                     recycle(roc);
                 }
                 break;
-
-            version (D_Version2) {} else default: assert(false);
         }
 
         this.type_ = RequestType.None;
