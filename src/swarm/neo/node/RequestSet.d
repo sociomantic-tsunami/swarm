@@ -213,7 +213,6 @@ class RequestSet
         ***********************************************************************/
 
         public void setup ( RequestId id, Connection connection, RequestSet request_set )
-        in
         {
             /*
              * Confirm that the fiber is in a state where it can be started i.e.
@@ -238,9 +237,7 @@ class RequestSet
             verify(!this.request_id, "previous request id wasn't reset");
             verify(!this.request_set, "previous request set wasn't reset");
             verify(!this.connection, "previous connection wasn't reset");
-        }
-        body
-        {
+
             this.request_id  = id;
             this.request_set = request_set;
             this.connection  = connection;

@@ -889,6 +889,7 @@ private struct ConnectionRegistry ( C )
 version (UnitTest)
 {
     import ocean.core.Test;
+    import ocean.core.Verify;
     import swarm.neo.util.TreeMap;
     import swarm.neo.AddrPort;
 
@@ -917,12 +918,8 @@ version (UnitTest)
 unittest
 {
     static void setAddress ( ref AddrPort address, ubyte[] address_bytes ... )
-    in
     {
-        assert(address_bytes.length == 4, "expected 4 address bytes");
-    }
-    body
-    {
+        verify(address_bytes.length == 4, "expected 4 address bytes");
         address.address_bytes[] = address_bytes;
     }
 

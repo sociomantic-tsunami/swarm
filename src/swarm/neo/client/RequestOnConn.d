@@ -43,6 +43,7 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
     import swarm.neo.client.RequestHandlers;
     import swarm.neo.client.Connection;
     import swarm.neo.connection.YieldedRequestOnConns;
+    import ocean.core.Verify;
     import ocean.transition;
 
     /***************************************************************************
@@ -434,12 +435,9 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
 
     public void start ( RequestId id, void[] context_blob,
         scope HandlerFinishedDg finished_dg, scope SingleNodeHandler handler )
-    in
     {
-        assert(!this.handler.active);
-    }
-    body
-    {
+        verify(!this.handler.active);
+
         this.setupRequest(id, context_blob, finished_dg);
         this.handler.single_node = handler;
         this.fiber.start();
@@ -467,12 +465,9 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
     public void start ( RequestId id, void[] context_blob,
         scope void delegate ( ) start_on_new_connection,
         scope HandlerFinishedDg finished_dg, scope MultiNodeHandler handler )
-    in
     {
-        assert(!this.handler.active);
-    }
-    body
-    {
+        verify(!this.handler.active);
+
         this.setupRequest(id, context_blob, start_on_new_connection, finished_dg);
         this.handler.multi_node = handler;
         this.fiber.start();
@@ -498,12 +493,9 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
 
     public void start ( RequestId id, void[] context_blob,
         scope HandlerFinishedDg finished_dg, scope AllNodesHandler handler, Connection connection )
-    in
     {
-        assert(!this.handler.active);
-    }
-    body
-    {
+        verify(!this.handler.active);
+
         this.setupRequest(id, context_blob, finished_dg);
         this.handler.all_nodes = Handler.AllNodesWithConnection(connection,
             handler);
@@ -528,12 +520,9 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
 
     public void start ( RequestId id, void[] context_blob,
         scope HandlerFinishedDg finished_dg, scope RoundRobinHandler handler )
-    in
     {
-        assert(!this.handler.active);
-    }
-    body
-    {
+        verify(!this.handler.active);
+
         this.setupRequest(id, context_blob, finished_dg);
         this.handler.round_robin = handler;
         this.fiber.start();
