@@ -538,7 +538,6 @@ public abstract class IRequestParams
         ***********************************************************************/
 
         static typeof(&this) serialized ( void[] data )
-        in
         {
             alias typeof(this) This;
 
@@ -565,9 +564,7 @@ public abstract class IRequestParams
                    "data.ptr expected to be an integer  multiple of " ~
                    This.alignof.stringof ~ " as required for the " ~
                    "alignment of serialised " ~ T.stringof);
-        }
-        body
-        {
+
             return cast(typeof(&this))data.ptr;
         }
     }
