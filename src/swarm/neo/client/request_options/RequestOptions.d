@@ -117,35 +117,28 @@ unittest
     // Example request assignment method. Assigns an imaginary request over a
     // specific channel, with varargs allowing optional settings to be
     // specified.
-    // Here the example is D2 only because it requires a function template,
-    // `assignRequest`, and D1 doesn't allow defining a function template at the
-    // scope of a function including `unittest`. In D1 this example works if
-    // `assignRequest`, is defined outside a function scope.
-    version (D_Version2)
+    static void assignRequest ( Options ... )
+        ( cstring channel, Options options )
     {
-        static void assignRequest ( Options ... )
-            ( cstring channel, Options options )
-        {
-            RequestArgs args;
-            args.channel = channel;
-            setupOptionalArgs!(options.length)(options,
-                ( Timeout timeout )
-                {
-                    args.timeout_ms = timeout.ms;
-                },
-                ( Context context )
-                {
-                    args.context_object = context.object;
-                }
-            );
-        }
-
-        // Call the assign method, specifying some optional settings.
-        assignRequest("test_channel", Timeout(23), Context(new Object));
-
-        // Order doesn't matter
-        assignRequest("test_channel", Context(new Object), Timeout(23));
+        RequestArgs args;
+        args.channel = channel;
+        setupOptionalArgs!(options.length)(options,
+            ( Timeout timeout )
+            {
+                args.timeout_ms = timeout.ms;
+            },
+            ( Context context )
+            {
+                args.context_object = context.object;
+            }
+        );
     }
+
+    // Call the assign method, specifying some optional settings.
+    assignRequest("test_channel", Timeout(23), Context(new Object));
+
+    // Order doesn't matter
+    assignRequest("test_channel", Context(new Object), Timeout(23));
 }
 
 /*******************************************************************************

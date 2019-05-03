@@ -595,9 +595,6 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
 
             case handler.active.none:
                 assert(false);
-
-            version (D_Version2) {} else default:
-                assert(false);
         }
     }
 

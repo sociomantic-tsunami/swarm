@@ -38,14 +38,7 @@ struct MessageParser
 
     ***************************************************************************/
 
-	version (D_Version2)
-	{
-		mixin("alias const(void)[] ConstVoidArray;");
-	}
-	else
-	{
-		alias void[] ConstVoidArray;
-	}
+    alias const(void)[] ConstVoidArray;
 
     /***************************************************************************
 

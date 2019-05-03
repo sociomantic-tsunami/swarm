@@ -684,14 +684,7 @@ class ConnectionHandler : IConnectionHandler
         assert(!(ci.flags & 8) && ci.defaultConstructor is null);
         assert(ci.destructor is null);
 
-        version (D_Version2)
-        {
-            auto initializer = ci.initializer();
-        }
-        else
-        {
-            auto initializer = ci.init;
-        }
+        auto initializer = ci.initializer();
 
         // Allocate space
         buf.length = initializer.length;

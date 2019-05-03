@@ -51,14 +51,7 @@ public class OceanMessageFiber
 
     ***************************************************************************/
 
-    version (D_Version2)
-    {
-        alias Error RethrowType;
-    }
-    else
-    {
-        alias AssertError RethrowType;
-    }
+    alias Error RethrowType;
 
     /**************************************************************************
 
@@ -583,10 +576,7 @@ public class OceanMessageFiber
         // throw `msg.exc` if it isn't caught by the fiber. However, this method
         // should throw only exceptions passed to the `suspend()` call that
         // continues the call of this method.
-        version (D_Version2)
-            auto throwable = this.fiber.call(Fiber.Rethrow.no);
-        else
-            auto throwable = this.fiber.call(false);
+        auto throwable = this.fiber.call(Fiber.Rethrow.no);
 
         // If the fiber terminated with an unhandled Error, rethrow it.
         if (cast(RethrowType)throwable)
@@ -644,10 +634,7 @@ public class OceanMessageFiber
         this.killed = true;
         this.e_killed.set(file, line);
 
-        version (D_Version2)
-            auto throwable = this.fiber.call(Fiber.Rethrow.no);
-        else
-            auto throwable = this.fiber.call(false);
+        auto throwable = this.fiber.call(Fiber.Rethrow.no);
 
         // If the fiber terminated with an unhandled Error, rethrow it.
         if (cast(RethrowType)throwable)

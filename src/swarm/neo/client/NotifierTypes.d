@@ -144,8 +144,6 @@ public struct RequestNodeUnsupportedInfo
                 return "request";
             case RequestVersionNotSupported:
                 return "request version";
-            version (D_Version2) {} else default:
-                assert(false);
         }
         assert(false);
     }

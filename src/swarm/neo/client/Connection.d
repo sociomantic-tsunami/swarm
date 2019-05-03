@@ -491,9 +491,6 @@ public final class Connection: ConnectionBase
 
             case this.status_.Connected, this.status_.Shutdown:
                 verify(false);
-
-            version (D_Version2) {} else default:
-                assert(false);
         }
 
         assert(false);

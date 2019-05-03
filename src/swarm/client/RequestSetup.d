@@ -169,10 +169,7 @@ public template RequestBase ( )
     public This* notifier ( scope IRequestNotification.Callback notifier )
     {
         this.notification_dg = notifier;
-        version (D_Version2)
-            return &this;
-        else
-            return this;
+        return &this;
     }
 
 
@@ -191,10 +188,7 @@ public template RequestBase ( )
     public This* timeout ( uint timeout_ms )
     {
         this.timeout_ms = timeout_ms;
-        version (D_Version2)
-            return &this;
-        else
-            return this;
+        return &this;
     }
 
 
@@ -213,10 +207,7 @@ public template RequestBase ( )
     public This* context ( RequestContext context )
     {
         this.user_context = context;
-        version (D_Version2)
-            return &this;
-        else
-            return this;
+        return &this;
     }
 
 
@@ -235,10 +226,7 @@ public template RequestBase ( )
     public This* context ( void* context )
     {
         this.user_context = RequestContext(context);
-        version (D_Version2)
-            return &this;
-        else
-            return this;
+        return &this;
     }
 
 
@@ -257,10 +245,7 @@ public template RequestBase ( )
     public This* context ( Object context )
     {
         this.user_context = RequestContext(context);
-        version (D_Version2)
-            return &this;
-        else
-            return this;
+        return &this;
     }
 
 
@@ -279,10 +264,7 @@ public template RequestBase ( )
     public This* context ( hash_t context )
     {
         this.user_context = RequestContext(context);
-        version (D_Version2)
-            return &this;
-        else
-            return this;
+        return &this;
     }
 
 
@@ -531,10 +513,7 @@ public template Node ( )
     public This* allNodes ( )
     {
         this.node_item = NodeItem();
-        version (D_Version2)
-            return &this;
-        else
-            return this;
+        return &this;
     }
 
 
@@ -554,10 +533,7 @@ public template Node ( )
     {
         verify(node.set(), "Invalid NodeItem passed to node()!");
         this.node_item = node;
-        version (D_Version2)
-            return &this;
-        else
-            return this;
+        return &this;
     }
 
 
@@ -577,10 +553,7 @@ public template Node ( )
     public This* node ( mstring address, ushort port )
     {
         this.node_item = NodeItem(address, port);
-        version (D_Version2)
-            return &this;
-        else
-            return this;
+        return &this;
     }
 
 
@@ -643,10 +616,7 @@ public template Channel ( )
     public This* channel ( cstring channel )
     {
         this.channel_name = channel;
-        version (D_Version2)
-            return &this;
-        else
-            return this;
+        return &this;
     }
 
 
@@ -728,10 +698,7 @@ public template Suspendable ( )
     {
         this.suspend_register = suspend_register;
         this.suspend_unregister = suspend_unregister;
-        version (D_Version2)
-            return &this;
-        else
-            return this;
+        return &this;
     }
 
 
@@ -823,10 +790,7 @@ public template StreamInfo ( )
         RequestParams.RegisterStreamInfoDg stream_info_register )
     {
         this.stream_info_register = stream_info_register;
-        version (D_Version2)
-            return &this;
-        else
-            return this;
+        return &this;
     }
 
 

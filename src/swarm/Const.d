@@ -179,21 +179,9 @@ public struct NodeItem
 
     ***************************************************************************/
 
-    version (D_Version2)
+    public equals_t opEquals ( const NodeItem nodeitem ) const
     {
-        mixin(`
-        public equals_t opEquals ( const NodeItem nodeitem ) const
-        {
-            return nodeitem.Address == this.Address && nodeitem.Port == this.Port;
-        }
-        `);
-    }
-    else
-    {
-        public equals_t opEquals ( NodeItem nodeitem )
-        {
-            return nodeitem.Address == this.Address && nodeitem.Port == this.Port;
-        }
+        return nodeitem.Address == this.Address && nodeitem.Port == this.Port;
     }
 
     /***************************************************************************
