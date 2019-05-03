@@ -26,18 +26,12 @@ jobs:
     templates:
         - &test-matrix
           stage: Test
-          # Don't build tags already converted to D2
-          if: NOT tag =~ \+d2$
           after_success: beaver dlang codecov
           install: beaver dlang install
           script: beaver dlang make
+
     include:
         # Test matrix
-
-        - <<: *test-matrix
-          env: DMD=1.081.* F=production
-        - <<: *test-matrix
-          env: DMD=1.081.* F=devel
         - <<: *test-matrix
           env: DMD=2.071.2.s* F=production
         - <<: *test-matrix
@@ -53,9 +47,3 @@ jobs:
           env: DMD=2.071.2.s* F=devel
           install: beaver dlang install
           script: ci/closures.sh
-
-        - stage: D2 Release
-          if: tag IS present AND NOT tag =~ \+d2$
-          env: DMD=2.071.2.s* F=devel
-          install: beaver dlang install
-          script: beaver dlang d2-release
