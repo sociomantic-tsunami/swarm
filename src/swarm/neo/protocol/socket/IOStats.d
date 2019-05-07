@@ -15,7 +15,7 @@ module swarm.neo.protocol.socket.IOStats;
 /// ditto
 struct IOStats
 {
-    import swarm.neo.util.ByteCountHistogram;
+    import ocean.math.BinaryHistogram;
 
     /***************************************************************************
 
@@ -24,7 +24,7 @@ struct IOStats
 
     ***************************************************************************/
 
-    public ByteCountHistogram msg_body;
+    public BinaryHistogram!(63) msg_body;
 
     /***************************************************************************
 
@@ -33,7 +33,7 @@ struct IOStats
 
     ***************************************************************************/
 
-    public ByteCountHistogram socket;
+    public BinaryHistogram!(63) socket;
 
     /***************************************************************************
 

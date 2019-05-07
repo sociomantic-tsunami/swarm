@@ -172,7 +172,7 @@ class MessageSender
     public bool assign ( MessageType type, in void[][] dynamic_fields, in void[][] static_fields ... )
     {
         auto tracker = this.iov_msg.setup(type, dynamic_fields, static_fields);
-        this.io_stats.msg_body.countBytes(tracker.length - MessageHeader.sizeof);
+        this.io_stats.msg_body.add(tracker.length - MessageHeader.sizeof);
         return this.assign_(*tracker);
     }
 
@@ -310,12 +310,12 @@ class MessageSender
 
         if (n >= 0) // n == 0 cannot happen: write() returns it only if the
         {           // output data are empty, which we prevent in the precondition
-            this.io_stats.socket.countBytes(n);
+            this.io_stats.socket.add(n);
             return !src.advance(n);
         }
         else
         {
-            this.io_stats.socket.countBytes(0);
+            this.io_stats.socket.add(0);
             this.error_e.checkDeviceError("write error");
 
             this.error_e.enforce(!(events & events.EPOLLHUP), "connection hung up");

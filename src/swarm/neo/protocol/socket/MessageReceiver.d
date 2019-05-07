@@ -211,7 +211,7 @@ private class MessageReceiverBase
          */
         size_t pos = header.sizeof + header.body_length;
         dg(header.type, this.buffer[header.sizeof .. pos]);
-        this.io_stats.msg_body.countBytes(pos - header.sizeof);
+        this.io_stats.msg_body.add(pos - header.sizeof);
 
         if (!one_message)
         {
@@ -231,7 +231,7 @@ private class MessageReceiverBase
 
                 // Yes: Pass it to dg, and adjust pos for the next cycle.
                 dg(header.type, this.buffer[header_end .. body_end]);
-                this.io_stats.msg_body.countBytes(body_end - header_end);
+                this.io_stats.msg_body.add(body_end - header_end);
                 pos = body_end;
             }
         }
@@ -541,12 +541,12 @@ class MessageReceiver: MessageReceiverBase
                 dst[0 .. n], n);
 
             this.buffer_content_end += n;
-            this.io_stats.socket.countBytes(n);
+            this.io_stats.socket.add(n);
             return n;
         }
         else
         {
-            this.io_stats.socket.countBytes(0);
+            this.io_stats.socket.add(0);
 
              // EOF or error: Check for socket error and hung-up event first.
 
