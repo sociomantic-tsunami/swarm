@@ -39,9 +39,12 @@ import ocean.transition;
 public struct GetAll
 {
     import integrationtest.neo.common.GetAll;
-    import integrationtest.neo.client.request.GetAll;
+    public import integrationtest.neo.client.request.GetAll
+        : Args, IController, Notification, Notifier;
     import integrationtest.neo.common.RequestCodes;
     import integrationtest.neo.client.NotifierTypes;
+
+    import swarm.neo.client.NotifierTypes;
     import swarm.neo.client.RequestOnConn;
     import swarm.neo.client.mixins.RequestCore;
     import swarm.neo.client.mixins.SuspendableRequestCore;
@@ -141,8 +144,10 @@ private scope class GetAllImpl
     import swarm.neo.connection.RequestOnConnBase;
     import swarm.neo.client.mixins.AllNodesRequestCore;
     import swarm.neo.client.mixins.SuspendableRequestCore;
+    import swarm.neo.client.NotifierTypes;
     import swarm.neo.request.Command;
     import swarm.neo.request.RequestEventDispatcher;
+    import swarm.neo.client.mixins.RequestCore;
     import swarm.neo.client.RequestOnConn;
     import swarm.neo.util.MessageFiber;
 
@@ -316,6 +321,7 @@ private struct Reader
 {
     import swarm.neo.util.MessageFiber;
     import swarm.neo.request.RequestEventDispatcher;
+    import swarm.neo.client.NotifierTypes;
     import swarm.neo.client.RequestOnConn;
     import integrationtest.neo.common.GetAll;
     import integrationtest.neo.client.NotifierTypes;
@@ -399,6 +405,7 @@ private struct Controller
 {
     import swarm.neo.util.MessageFiber;
     import swarm.neo.request.RequestEventDispatcher;
+    import swarm.neo.client.NotifierTypes;
     import swarm.neo.client.RequestOnConn;
     import swarm.neo.client.mixins.SuspendableRequestCore;
     import integrationtest.neo.common.GetAll;

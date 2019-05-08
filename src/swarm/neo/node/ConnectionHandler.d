@@ -243,6 +243,7 @@ class ConnectionHandler : IConnectionHandler
 
         import swarm.neo.authentication.CredentialsFile;
         import swarm.neo.authentication.HmacDef: Key;
+        import swarm.neo.connection.YieldedRequestOnConns;
         import swarm.node.model.INodeInfo;
 
         /***********************************************************************
@@ -283,7 +284,7 @@ class ConnectionHandler : IConnectionHandler
 
         ***********************************************************************/
 
-        public Connection.YieldedRequestOnConns yielded_rqonconns;
+        public YieldedRequestOnConns yielded_rqonconns;
 
         /***********************************************************************
 
@@ -347,7 +348,7 @@ class ConnectionHandler : IConnectionHandler
 
             this.epoll = epoll;
             this.request_pool = new Connection.RequestPool;
-            this.yielded_rqonconns = new Connection.YieldedRequestOnConns;
+            this.yielded_rqonconns = new YieldedRequestOnConns;
             epoll.register(this.yielded_rqonconns);
             this.requests = requests;
             this.no_delay = no_delay;
