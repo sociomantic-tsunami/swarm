@@ -621,6 +621,7 @@ public final class RequestSet: IRequestSet
     /**************************************************************************/
 
     import swarm.neo.util.FixedSizeMap;
+    import swarm.neo.client.Connection;
     import swarm.neo.client.requests.Timeouts;
     import swarm.neo.client.requests.Stats;
     import ocean.util.container.pool.ObjectPool;
@@ -862,7 +863,7 @@ public final class RequestSet: IRequestSet
 
     ***************************************************************************/
 
-    public void newConnectionAdded ( ConnectionSet.Connection connection )
+    public void newConnectionAdded ( Connection connection )
     {
         foreach ( id, rq; this.active_requests )
         {
