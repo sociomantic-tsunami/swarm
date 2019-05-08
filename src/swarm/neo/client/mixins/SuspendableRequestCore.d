@@ -1,5 +1,21 @@
 /*******************************************************************************
 
+    NOTE: This module is deprecated.
+
+    The idea of suspending or resuming requests based on this modules is to send
+    a suspend or resume message and wait for the node to stop or continue
+    sending messages.
+    This design causes the problem that the node continues sending
+    records in the time-frame between submitting the suspend message on the
+    client side and processing it on the node side.
+    Also this module is not compatible with the design of the ISuspendable and
+    ISuspendableThrottler interfaces which assume that calling the suspend
+    method is directly suspending the request which is not necessarily true (see
+    also handlePending() in swarm.neo.client.mixins.Controllers) for requests
+    using this module as core.
+
+    This module will be replaced by the BatchRequestCore module.
+
     Helpers encapsulating core behaviour for suspendable all-nodes requests.
 
     The following helpers, building on top of the helpers in

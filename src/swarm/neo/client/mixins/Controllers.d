@@ -281,6 +281,7 @@ template Controllers ( )
 
         ***********************************************************************/
 
+        deprecated("Only works with SuspendableRequestCore which is deprecated")
         public void handlePending ( )
         {
             final switch ( this.pending )
