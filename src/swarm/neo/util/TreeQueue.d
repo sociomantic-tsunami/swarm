@@ -217,7 +217,7 @@ unittest
 
 public struct TreeQueueStats
 {
-    import swarm.neo.util.TimeHistogram;
+    import ocean.math.TimeHistogram;
 
     /***************************************************************************
 

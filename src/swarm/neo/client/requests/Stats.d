@@ -33,7 +33,7 @@ public interface IRequestStats
 
     public struct RequestStats
     {
-        import swarm.neo.util.TimeHistogram;
+        import ocean.math.TimeHistogram;
 
         /// Request timing stats.
         public TimeHistogram histogram;
