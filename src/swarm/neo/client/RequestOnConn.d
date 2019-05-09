@@ -331,6 +331,24 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
 
     /***************************************************************************
 
+        Enumerated states of nodes to indicate their connection statuses.
+
+    ***************************************************************************/
+
+    public enum NodeState
+    {
+        /// The node is connected
+        Connected,
+
+        /// The node does not exist
+        Missing,
+
+        /// The node is disconnected
+        Disconnected
+    }
+
+    /***************************************************************************
+
         Exception class thrown to abort a request-on-conn. Exceptions of this
         type may be caught (e.g. in order to notify the user), but should always
         be rethrown, to exit the request handler.
@@ -752,12 +770,12 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
                  is destroyed.
 
         Returns:
-            true on success or false if currently not connected to the specified
-            node.
+            A NodeState instance, indicating if the given node is connected, is
+            not found or is disconnected.
 
     ***************************************************************************/
 
-    private bool useNode ( AddrPort node_address,
+    private NodeState useNode ( AddrPort node_address,
         scope void delegate ( EventDispatcher ed ) dg )
     {
         assert(this.connection is null,
@@ -766,12 +784,12 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
 
         this.connection = this.connections.get(node_address);
         if (!this.connection)
-            return false;
+            return NodeState.Missing;
 
         auto client_connection = cast(Connection)this.connection;
         assert(client_connection);
         if (client_connection.status != Connection.Status.Connected)
-            return false;
+            return NodeState.Disconnected;
 
         scope (exit)
         {
@@ -782,6 +800,6 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
         }
         scope ed = this.new EventDispatcher;
         dg(ed);
-        return true;
+        return NodeState.Connected;
     }
 }

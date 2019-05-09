@@ -136,7 +136,7 @@ public alias void function ( UseNodeDg use_node,
 
 *******************************************************************************/
 
-public alias bool delegate ( AddrPort node_address,
+public alias RequestOnConn.NodeState delegate ( AddrPort node_address,
     void delegate ( RequestOnConn.EventDispatcher ed ) dg ) UseNodeDg;
 
 /*******************************************************************************
