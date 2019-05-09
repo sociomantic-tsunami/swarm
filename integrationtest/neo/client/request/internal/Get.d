@@ -150,9 +150,8 @@ public struct VersionedGet ( ubyte Version )
                             context.shared_working.result =
                                 SharedWorking.Result.Received;
 
-                            scope recv_cb = ( in void[] const_payload )
+                            scope recv_cb = ( const(void)[] payload )
                             {
-                                Const!(void)[] payload = const_payload;
                                 auto value =
                                     conn.message_parser.getArray!(void)(payload);
 
