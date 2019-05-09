@@ -867,7 +867,8 @@ abstract class RequestOnConnBase
 
         ***********************************************************************/
 
-        public void receive ( scope void delegate ( in void[] payload ) received )
+        public void receive (
+            scope void delegate ( const(void)[] payload ) received )
         {
             auto event = this.nextEvent(NextEventFlags.Receive);
             received(event.received.payload);
