@@ -182,7 +182,7 @@ public template RequestResources_T ( Shared )
     ***************************************************************************/
 
     import ocean.meta.codegen.Identifier : identifier;
-    import ocean.meta.traits.Basic : isArrayType;
+    import ocean.meta.traits.Basic : ArrayKind, isArrayType;
     import ocean.transition;
 
 
