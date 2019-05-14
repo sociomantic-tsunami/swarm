@@ -2,4 +2,4 @@
 
 `swarm.neo.util.AcquiredResources`
 
-Please use `ocean.util.container.VoidBufferAsArrayOf` instead.
+Please use `ocean.util.container.pool.AcquiredResources` instead.
