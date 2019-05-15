@@ -37,7 +37,7 @@ import core.stdc.string;
 import ocean.transition;
 import ocean.core.SmartUnion;
 import ocean.core.Verify;
-import swarm.neo.util.VoidBufferAsArrayOf;
+import ocean.util.container.VoidBufferAsArrayOf;
 
 /*******************************************************************************
 
