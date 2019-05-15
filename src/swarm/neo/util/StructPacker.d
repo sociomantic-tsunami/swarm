@@ -36,7 +36,8 @@ module swarm.neo.util.StructPacker;
 
 import ocean.transition;
 import ocean.core.Verify;
-import ocean.meta.traits.Basic : ArrayKind, isArrayType, isPrimitiveType;
+import ocean.meta.traits.Basic :
+    ArrayKind, isArrayType, isPointerType, isPrimitiveType;
 import ocean.meta.traits.Indirections : hasIndirections, containsDynamicArray;
 import ocean.meta.types.Arrays : StripAllArrays;
 
@@ -120,9 +121,31 @@ private void packStructDynamicArrays ( S ) ( ref S s, ref void[] buf )
         static if ( isArrayType!(typeof(f)) == ArrayKind.Dynamic )
             packDynamicArray(f, buf);
         // Recursively pack dynamic arrays in struct fields of S.
-        else static if ( containsDynamicArray!(typeof(f)) )
+        else static if ( !isPointerType!(typeof(f)) &&
+            containsDynamicArray!(typeof(f)) )
             packStructDynamicArrays(f, buf);
     }
+}
+
+///
+unittest
+{
+    struct TestStruct
+    {
+        int* a;
+        void[] c;
+        void[]* b;
+        ubyte[] d;
+    }
+
+    TestStruct t_struct;
+    t_struct.c = cast(void[])([cast(ubyte)1, 5, 3]);
+    t_struct.d = cast(ubyte[])([cast(ubyte)4, 7, 1]);
+
+    void[] buf;
+
+    packStructDynamicArrays(t_struct, buf);
+    test!("==")(buf, t_struct.c ~ t_struct.d);
 }
 
 /*******************************************************************************
