@@ -40,6 +40,14 @@ public class GetAllImpl_v0 : IRequest
     /// Request name for stats tracking. Required by ConnectionHandler.
     static immutable istring name = "GetAll";
 
+    /// Flag indicating whether timing stats should be gathered for requests of
+    /// this type.
+    static immutable bool timing = true;
+
+    /// Flag indicating whether this request type is scheduled for removal. (If
+    /// true, clients will be warned.)
+    static immutable bool scheduled_for_removal = false;
+
     /// Set by the Writer when the iteration over the records has finished. Used
     /// by the Controller to ignore incoming messages from that point.
     private bool has_ended;
