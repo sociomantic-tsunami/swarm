@@ -106,37 +106,18 @@ class ConnectionHandler : IConnectionHandler
                 Request = type of request handler class. Must implement IRequest
                     and is expected to have a public, static member called
                     `command`, of type `Command`
-                timing = if true, timing stats about request of this type are
-                    tracked. Use of this argument is deprecated. If a field
-                    named `timing` of type bool is present in Request, that
-                    value is used instead of this argument
 
         ***********************************************************************/
 
-        public void addHandler ( Request : IRequest ) ( bool timing = true )
+        public void addHandler ( Request : IRequest ) ( )
         {
             assert(Request.name.length > 0);
 
             RequestInfo ri;
             ri.name = Request.name;
             ri.class_info = Request.classinfo;
-
-            // In the next major release, the presence of a `timing` field in
-            // request structs can be made obligatory and this static if
-            // removed. (Obligatory search term: deprecated.)
-            static if ( hasMember!(Request, "timing") )
-                ri.timing = Request.timing;
-            else
-                ri.timing = timing;
-
-            // In the next major release, the presence of a
-            // `scheduled_for_removal` field in request structs can be made
-            // obligatory and this static if removed. (Obligatory search term:
-            // deprecated.)
-            static if ( hasMember!(Request, "scheduled_for_removal") )
-                ri.scheduled_for_removal = Request.scheduled_for_removal;
-            else
-                ri.scheduled_for_removal = false;
+            ri.timing = Request.timing;
+            ri.scheduled_for_removal = Request.scheduled_for_removal;
 
             this.request_info[Request.command] = ri;
             this.supported_requests[Request.command.code] = true;
@@ -647,6 +628,8 @@ unittest
     {
         static immutable Command command = Command(1, 0);
         static immutable istring name = "Request1";
+        static immutable bool timing = true;
+        static immutable bool scheduled_for_removal = false;
         void handle ( RequestOnConn connection, Object resources,
             Const!(void)[] init_payload ) { }
     }
@@ -655,6 +638,8 @@ unittest
     {
         static immutable Command command = Command(1, 1);
         static immutable istring name = "Request1";
+        static immutable bool timing = true;
+        static immutable bool scheduled_for_removal = false;
         void handle ( RequestOnConn connection, Object resources,
             Const!(void)[] init_payload ) { }
     }
