@@ -111,7 +111,22 @@ class ConnectionHandler : IConnectionHandler
 
         public void addHandler ( Request : IRequest ) ( )
         {
-            assert(Request.name.length > 0);
+            static void memberExists ( istring name, T ) ( )
+            {
+                static assert (
+                    hasMember!(Request, name)
+                        && is(typeof(mixin("Request." ~ name)) : T),
+                    Request.stringof ~ " should have a static member named '"
+                    ~ name ~ "' of type '" ~ T.stringof ~ "'.");
+            }
+
+            memberExists!("name", istring);
+            memberExists!("command", Command);
+            memberExists!("timing", bool);
+            memberExists!("scheduled_for_removal", bool);
+
+            static assert(Request.name.length > 0,
+                "'Request.name' should have a non-zero length.");
 
             RequestInfo ri;
             ri.name = Request.name;
