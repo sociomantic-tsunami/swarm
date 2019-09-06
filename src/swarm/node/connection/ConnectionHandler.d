@@ -299,12 +299,15 @@ public abstract class ConnectionHandlerTemplate ( Commands : ICommandCodes )
                     // FIXME_IN_D2: can't use `const` inside static foreach
                     // while it is converted in `static immutable`
                     mixin("auto buffer = acquired."
-                        ~ FieldName!(i, Resources) ~ ";");
+                        ~ __traits(identifier, Resources.tupleof[i]) ~ ";");
                     if ( buffer.length > this.bufferSizeWarnLimit() )
                     {
-                        log.warn("Request resource '{}' grew to {} bytes while " ~
-                            "handling {}", FieldName!(i, Resources), buffer.length,
-                            request.description(this.cmd_description));
+                        log.warn("Request resource '{}' grew to {} bytes while"
+                            ~ " handling {}",
+                            __traits(identifier, Resources.tupleof[i]),
+                            buffer.length,
+                            request.description(this.cmd_description)
+                        );
                     }
                 }
             }
