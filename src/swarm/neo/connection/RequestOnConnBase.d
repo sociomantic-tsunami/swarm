@@ -229,6 +229,11 @@ abstract class RequestOnConnBase
 
         alias RequestOnConnBase.FiberResumeCode FiberResumeCode;
 
+        /// Helper alias to allow access to the specific `MessageParser`
+        /// type used by this class
+        public alias MessageParser =
+            swarm.neo.protocol.MessageParser.MessageParser;
+
         /**********************************************************************/
 
         invariant ( )
