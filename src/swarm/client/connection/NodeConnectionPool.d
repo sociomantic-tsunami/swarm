@@ -151,7 +151,7 @@ public abstract class NodeConnectionPool
 
     ***************************************************************************/
 
-    protected Const!(size_t) fiber_stack_size;
+    protected const(size_t) fiber_stack_size;
 
 
     /***************************************************************************

@@ -642,7 +642,7 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
 
     ***************************************************************************/
 
-    override public void setReceivedPayload ( Const!(void)[] payload )
+    override public void setReceivedPayload ( const(void)[] payload )
     {
         super.setReceivedPayload(payload);
     }

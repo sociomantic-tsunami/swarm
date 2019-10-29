@@ -779,7 +779,7 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
         this.neo_socket = new AddressIPSocket!();
 
         // Load credentials from specified file.
-        Const!(Key[istring])* credentials;
+        const(Key[istring])* credentials;
         if ( options.credentials_filename )
         {
             verify(options.credentials_map is null);

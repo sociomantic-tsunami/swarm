@@ -59,7 +59,7 @@ interface IRequest
 interface IRequestOnConn
 {
     void getPayloadForSending ( scope void delegate ( in void[][] payload ) send );
-    void setReceivedPayload ( Const!(void)[] payload );
+    void setReceivedPayload ( const(void)[] payload );
     void error ( Exception e );
     void reconnected ( );
 }

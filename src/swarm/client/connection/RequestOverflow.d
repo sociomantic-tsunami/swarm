@@ -326,7 +326,7 @@ public class DiskOverflow : IRequestOverflow
 
     ***************************************************************************/
 
-    private Const!(bool) open_existing;
+    private const(bool) open_existing;
 
 
     /***************************************************************************

@@ -259,7 +259,7 @@ public struct RequestDataInfo
     RequestId request_id;
 
     /// Data value associated with notification.
-    Const!(void)[] value;
+    const(void)[] value;
 
     /// Template method to deserialize `value` as a given struct.
     mixin DeserializeMethod!(value);

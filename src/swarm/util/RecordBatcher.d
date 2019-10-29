@@ -75,7 +75,7 @@ public class RecordBatcher
 
     ***************************************************************************/
 
-    protected Const!(size_t) batch_size;
+    protected const(size_t) batch_size;
 
 
     /***************************************************************************
@@ -243,9 +243,9 @@ public class RecordBatcher
         }
 
         size_t value_len = value.length;
-        Const!(ubyte[]) value_len_str = (cast(ubyte*)&value_len)[0..size_t.sizeof];
+        const(ubyte[]) value_len_str = (cast(ubyte*)&value_len)[0..size_t.sizeof];
 
-        this.batch.append(value_len_str, cast(Const!(ubyte[]))value);
+        this.batch.append(value_len_str, cast(const(ubyte[]))value);
 
         return AddResult.Added;
     }
@@ -273,13 +273,13 @@ public class RecordBatcher
         }
 
         size_t key_len = key.length;
-        Const!(ubyte[]) key_len_str = (cast(ubyte*)&key_len)[0..size_t.sizeof];
+        const(ubyte[]) key_len_str = (cast(ubyte*)&key_len)[0..size_t.sizeof];
 
         size_t value_len = value.length;
-        Const!(ubyte[]) value_len_str = (cast(ubyte*)&value_len)[0..size_t.sizeof];
+        const(ubyte[]) value_len_str = (cast(ubyte*)&value_len)[0..size_t.sizeof];
 
-        this.batch.append(key_len_str, cast(Const!(ubyte[]))key, value_len_str,
-            cast(Const!(ubyte[]))value);
+        this.batch.append(key_len_str, cast(const(ubyte[]))key, value_len_str,
+            cast(const(ubyte[]))value);
 
         return AddResult.Added;
     }

@@ -123,13 +123,13 @@ class Test : Task
     {
         auto ok = this.client.blocking.put(23, "hello",
             ( Client.Neo.Put.Notification info,
-                Const!(Client.Neo.Put.Args) args ) { });
+                const(Client.Neo.Put.Args) args ) { });
         enforce(ok, "Put request failed");
 
         void[] value;
         ok = this.client.blocking.get(23, value,
             ( Client.Neo.Get.Notification info,
-                Const!(Client.Neo.Get.Args) args ) { });
+                const(Client.Neo.Get.Args) args ) { });
         enforce(ok, "Get request failed");
         enforce(value == cast(void[])"hello");
     }
@@ -145,7 +145,7 @@ class Test : Task
     {
         bool unsupported;
         void notifier ( Client.Neo.Get.Notification info,
-            Const!(Client.Neo.Get.Args) args )
+            const(Client.Neo.Get.Args) args )
         {
             if ( info.active == info.active.unsupported && info.unsupported.type
                 == info.unsupported.type.RequestVersionNotSupported )
@@ -179,7 +179,7 @@ class Test : Task
         {
             auto ok = this.client.blocking.put(key, value,
                 ( Client.Neo.Put.Notification info,
-                    Const!(Client.Neo.Put.Args) args ) { });
+                    const(Client.Neo.Put.Args) args ) { });
             enforce(ok, "Put request failed");
         }
 
@@ -188,7 +188,7 @@ class Test : Task
         bool request_finished;
         this.client.neo.getAll(
             ( Client.Neo.GetAll.Notification info,
-                Const!(Client.Neo.GetAll.Args) args )
+                const(Client.Neo.GetAll.Args) args )
             {
                 with ( info.Active ) switch ( info.active )
                 {
@@ -236,7 +236,7 @@ class Test : Task
         {
             auto ok = this.client.blocking.put(key, value,
                 ( Client.Neo.Put.Notification info,
-                    Const!(Client.Neo.Put.Args) args ) { });
+                    const(Client.Neo.Put.Args) args ) { });
             enforce(ok, "Put request failed");
         }
 
@@ -246,7 +246,7 @@ class Test : Task
         Client.Neo.RequestId getall_id;
         getall_id = this.client.neo.getAll(
             ( Client.Neo.GetAll.Notification info,
-                Const!(Client.Neo.GetAll.Args) args )
+                const(Client.Neo.GetAll.Args) args )
             {
                 with ( info.Active ) switch ( info.active )
                 {
@@ -302,7 +302,7 @@ class Test : Task
         {
             auto ok = this.client.blocking.put(key, value,
                 ( Client.Neo.Put.Notification info,
-                    Const!(Client.Neo.Put.Args) args ) { });
+                    const(Client.Neo.Put.Args) args ) { });
             enforce(ok, "Put request failed");
         }
 
@@ -312,7 +312,7 @@ class Test : Task
         Client.Neo.RequestId getall_id;
         getall_id = this.client.neo.getAll(
             ( Client.Neo.GetAll.Notification info,
-                Const!(Client.Neo.GetAll.Args) args )
+                const(Client.Neo.GetAll.Args) args )
             {
                 with ( info.Active ) switch ( info.active )
                 {
@@ -379,7 +379,7 @@ class Test : Task
         void[] dst;
         auto ok = this.client.blocking.put(23, Serializer.serialize(str, dst),
             ( Client.Neo.Put.Notification info,
-                Const!(Client.Neo.Put.Args) args ) { });
+                const(Client.Neo.Put.Args) args ) { });
         enforce(ok, "Put request failed");
 
         Contiguous!(Str) record;
@@ -387,7 +387,7 @@ class Test : Task
         bool err;
         this.client.neo.get(23,
             ( Client.Neo.Get.Notification info,
-                Const!(Client.Neo.Get.Args) args )
+                const(Client.Neo.Get.Args) args )
             {
                 with ( info.Active ) switch (info.active )
                 {
@@ -438,7 +438,7 @@ class Test : Task
         void[] dst;
         auto ok = this.client.blocking.put(23, version_decorator.store(str, dst),
             ( Client.Neo.Put.Notification info,
-                Const!(Client.Neo.Put.Args) args ) { });
+                const(Client.Neo.Put.Args) args ) { });
         enforce(ok, "Put request failed");
 
         Contiguous!(Str) record;
@@ -446,7 +446,7 @@ class Test : Task
         bool err;
         this.client.neo.get(23,
             ( Client.Neo.Get.Notification info,
-                Const!(Client.Neo.Get.Args) args )
+                const(Client.Neo.Get.Args) args )
             {
                 with ( info.Active ) switch (info.active )
                 {
@@ -526,7 +526,7 @@ class Test : Task
 
         auto ok = this.client.blocking.doublePut(23, "hello",
             ( Client.Neo.DoublePut.Notification info,
-                Const!(Client.Neo.DoublePut.Args) args ) { });
+                const(Client.Neo.DoublePut.Args) args ) { });
         enforce(ok, "DoublePut request failed");
     }
 }

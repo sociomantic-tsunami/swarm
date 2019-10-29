@@ -232,8 +232,8 @@ struct HmacAuthCode
 
         ***********************************************************************/
 
-        typeof(this) setAuthParams ( ulong timestamp, Const!(ubyte)[] nonce,
-                                     Const!(char)[] name, Const!(ubyte)[] code = null )
+        typeof(this) setAuthParams ( ulong timestamp, const(ubyte)[] nonce,
+                                     const(char)[] name, const(ubyte)[] code = null )
         {
             verify(nonce.length == Nonce.length || !nonce.length);
             verify(code.length  == Code.length  || !code.length);

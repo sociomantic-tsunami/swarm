@@ -35,7 +35,7 @@ public struct RequestKeyDataInfo
     hash_t key;
 
     /// Data value associated with notification.
-    Const!(void)[] value;
+    const(void)[] value;
 
     /***************************************************************************
 

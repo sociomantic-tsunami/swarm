@@ -87,7 +87,7 @@ public scope class IRequestNotification
 
     ***************************************************************************/
 
-    public Const!(ICommandCodes.Value) command;
+    public const(ICommandCodes.Value) command;
 
 
     /***************************************************************************

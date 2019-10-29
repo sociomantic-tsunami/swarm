@@ -177,7 +177,7 @@ public template RequestCore ( RequestType request_type_, ubyte request_code,
 
     ***************************************************************************/
 
-    static Const!(Command) cmd = Command(request_code, request_version);
+    static const(Command) cmd = Command(request_code, request_version);
 
     /***************************************************************************
 

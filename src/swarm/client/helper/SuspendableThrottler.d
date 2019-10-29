@@ -119,9 +119,9 @@ public class RequestQueueSuspendableThrottler : Swarm.ISuspendableThrottler
 
     ***************************************************************************/
 
-    private Const!(float) suspend_point;
+    private const(float) suspend_point;
 
-    private Const!(float) resume_point;
+    private const(float) resume_point;
 
 
     /***************************************************************************

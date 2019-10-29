@@ -308,7 +308,7 @@ class ConnectProtocol: ISelectClient
         static assert(!hasIndirections!(Field));
         Field value;
         this.receive_(
-            (Const!(void)[] message_body)
+            (const(void)[] message_body)
             {
                 this.parser.parseBody!(Field)(message_body, value);
             }
@@ -346,7 +346,7 @@ class ConnectProtocol: ISelectClient
     public void receive ( Fields ... ) ( scope void delegate ( Fields fields ) dg )
     {
         this.receive_(
-            (Const!(void)[] message_body)
+            (const(void)[] message_body)
             {
                 Fields fields;
                 this.parser.parseBody!(Fields)(message_body, fields);
@@ -370,14 +370,14 @@ class ConnectProtocol: ISelectClient
 
     ***************************************************************************/
 
-    private void receive_ ( scope void delegate ( Const!(void)[] message_body ) dg )
+    private void receive_ ( scope void delegate ( const(void)[] message_body ) dg )
     {
         this.receiver.receive(
             {
                 this.registerEpoll(Event.EPOLLIN | Event.EPOLLRDHUP);
                 return this.wait();
             }(),
-            (MessageType type, Const!(void)[] message_body)
+            (MessageType type, const(void)[] message_body)
             {
                 this.protocol_e.enforce(type == this.request_type, "request type mismatch");
                 dg(message_body);

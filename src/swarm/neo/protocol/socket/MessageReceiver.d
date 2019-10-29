@@ -192,7 +192,7 @@ private class MessageReceiverBase
     ***************************************************************************/
 
     public void receive ( lazy Event wait,
-        scope void delegate ( MessageType type, Const!(void)[] msg_body ) dg,
+        scope void delegate ( MessageType type, const(void)[] msg_body ) dg,
         bool one_message = false )
     {
         scope (failure) this.buffer_content_end = 0;
@@ -260,7 +260,7 @@ private class MessageReceiverBase
 
     ***************************************************************************/
 
-    private MessageHeader parseHeader ( Const!(void)[] message )
+    private MessageHeader parseHeader ( const(void)[] message )
     {
         auto header = *this.parser.getValue!(MessageHeader)(message);
         header.validate(this.protocol_e);
@@ -679,16 +679,16 @@ unittest
                  msg_body.length >= magic.length;
                  msg_body = msg_body[magic.length .. $])
             {
-                msg_body[0 .. magic.length] = cast(Const!(void)[])magic;
+                msg_body[0 .. magic.length] = cast(const(void)[])magic;
             }
 
-            msg_body[] = cast(Const!(void)[])magic[0 .. msg_body.length];
+            msg_body[] = cast(const(void)[])magic[0 .. msg_body.length];
         }
 
         // Checks if a message body is valid: `id` and `msg_body.length` should
         // match the info, and the remaining data should be stamped with the
         // magic string.
-        static void checkMsgBody ( Const!(void)[] msg_body, uint id )
+        static void checkMsgBody ( const(void)[] msg_body, uint id )
         {
             test!(">=")(msg_body.length, Info.sizeof);
             auto info = *cast(Info*)msg_body[0 .. Info.sizeof].ptr;
@@ -739,7 +739,7 @@ unittest
             while (this.data_read < this.messages.length)
             {
                 this.receive(Event.init,
-                    (MessageType type, Const!(void)[] msg_body)
+                    (MessageType type, const(void)[] msg_body)
                     {
                         test!("==")(type, type.Request);
                         checkMsgBody(msg_body, id++);

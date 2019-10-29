@@ -889,9 +889,9 @@ template ClientCore ( )
 
     private RequestId assign ( R, P ) ( P params )
     {
-        static assert(is(P : Const!(R.UserSpecifiedParams)));
+        static assert(is(P : const(R.UserSpecifiedParams)));
 
-        auto context = Const!(R.Context)(params, this.request_resources);
+        auto context = const(R.Context)(params, this.request_resources);
 
         static if ( R.request_type == R.request_type.SingleNode )
         {
