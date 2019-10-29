@@ -739,7 +739,7 @@ abstract class ConnectionBase: ISelectClient
 
     ***************************************************************************/
 
-    protected Immut!(bool) no_delay;
+    protected immutable(bool) no_delay;
 
     /***************************************************************************
 
