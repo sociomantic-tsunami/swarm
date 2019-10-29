@@ -118,7 +118,7 @@ public abstract class IRequestConnection :
 
     ***************************************************************************/
 
-    private Immut!(size_t) id;
+    private immutable(size_t) id;
 
 
     /***************************************************************************
