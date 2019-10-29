@@ -68,7 +68,7 @@ public class Credentials
 
     ***************************************************************************/
 
-    public Const!(HmacDef.Key[istring])* credentials ( )
+    public const(HmacDef.Key[istring])* credentials ( )
     {
         return &this.credentials_;
     }

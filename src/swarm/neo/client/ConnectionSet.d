@@ -85,7 +85,7 @@ public final class ConnectionSet : RequestOnConn.IConnectionGetter
 
     ***************************************************************************/
 
-    private Const!(Credentials) credentials;
+    private const(Credentials) credentials;
 
     /***************************************************************************
 
@@ -187,7 +187,7 @@ public final class ConnectionSet : RequestOnConn.IConnectionGetter
 
     ***************************************************************************/
 
-    public this ( Const!(Credentials) credentials, EpollSelectDispatcher epoll,
+    public this ( const(Credentials) credentials, EpollSelectDispatcher epoll,
         scope ConnectionNotifier conn_notifier, bool auto_connect )
     {
         verify(conn_notifier !is null);

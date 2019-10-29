@@ -90,8 +90,8 @@ public class Client
 
         public void put ( hash_t key, in void[] value, scope Put.Notifier notifier )
         {
-            auto params = Const!(Internals.Put.UserSpecifiedParams)(
-                Const!(Put.Args)(key, value), notifier);
+            auto params = const(Internals.Put.UserSpecifiedParams)(
+                const(Put.Args)(key, value), notifier);
 
             this.assign!(Internals.Put)(params);
         }
@@ -112,8 +112,8 @@ public class Client
         public void doublePut ( hash_t key, in void[] value,
             scope DoublePut.Notifier notifier )
         {
-            auto params = Const!(Internals.DoublePut.UserSpecifiedParams)(
-                Const!(DoublePut.Args)(key, value), notifier);
+            auto params = const(Internals.DoublePut.UserSpecifiedParams)(
+                const(DoublePut.Args)(key, value), notifier);
 
             this.assign!(Internals.DoublePut)(params);
         }
@@ -135,8 +135,8 @@ public class Client
         public void roundRobinPut ( hash_t key, in void[] value,
             scope RoundRobinPut.Notifier notifier )
         {
-            auto params = Const!(Internals.RoundRobinPut.UserSpecifiedParams)(
-                Const!(RoundRobinPut.Args)(key, value), notifier);
+            auto params = const(Internals.RoundRobinPut.UserSpecifiedParams)(
+                const(RoundRobinPut.Args)(key, value), notifier);
 
             this.assign!(Internals.RoundRobinPut)(params);
         }
@@ -157,8 +157,8 @@ public class Client
 
         public void get ( ubyte Version = 0 ) ( hash_t key, scope Get.Notifier notifier )
         {
-            auto params = Const!(Internals.VersionedGet!(Version).UserSpecifiedParams)(
-                Const!(Get.Args)(key), notifier);
+            auto params = const(Internals.VersionedGet!(Version).UserSpecifiedParams)(
+                const(Get.Args)(key), notifier);
 
             this.assign!(Internals.VersionedGet!(Version))(params);
         }
@@ -182,8 +182,8 @@ public class Client
 
         public RequestId getAll ( scope GetAll.Notifier notifier )
         {
-            auto params = Const!(Internals.GetAll.UserSpecifiedParams)(
-                Const!(GetAll.Args)(), notifier);
+            auto params = const(Internals.GetAll.UserSpecifiedParams)(
+                const(GetAll.Args)(), notifier);
 
             return this.assign!(Internals.GetAll)(params);
         }
@@ -304,7 +304,7 @@ public class Client
 
             bool succeeded, finished;
             void internalNotifier ( Neo.Put.Notification info,
-                Const!(Neo.Put.Args) args )
+                const(Neo.Put.Args) args )
             {
                 notifier(info, args);
 
@@ -349,7 +349,7 @@ public class Client
 
             bool succeeded, finished;
             void internalNotifier ( Neo.DoublePut.Notification info,
-                Const!(Neo.DoublePut.Args) args )
+                const(Neo.DoublePut.Args) args )
             {
                 notifier(info, args);
 
@@ -463,7 +463,7 @@ public class Client
 
             bool succeeded, finished;
             void internalNotifier ( Neo.Get.Notification info,
-                Const!(Neo.Get.Args) args )
+                const(Neo.Get.Args) args )
             {
                 notifier(info, args);
 
@@ -521,7 +521,7 @@ public class Client
             *******************************************************************/
 
             public int opApply (
-                scope int delegate ( ref hash_t key, ref Const!(void)[] value ) dg )
+                scope int delegate ( ref hash_t key, ref const(void)[] value ) dg )
             {
                 int res;
 
@@ -530,7 +530,7 @@ public class Client
 
                 bool rq_finished;
                 void internalNotifier ( Neo.GetAll.Notification info,
-                    Const!(Neo.GetAll.Args) args )
+                    const(Neo.GetAll.Args) args )
                 {
                     this.notifier(info, args);
 

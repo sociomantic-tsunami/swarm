@@ -32,7 +32,7 @@ struct MessageParser
 
     /***************************************************************************
 
-		This is needed for a `parseBody()` parameter, `Const!(void)[]` would
+		This is needed for a `parseBody()` parameter, `const(void)[]` would
 		break the automatic function template instantiation in D1, and
 		`in void[]`, which implies `const(void[])`, cannot be used there.
 
@@ -133,14 +133,14 @@ struct MessageParser
 
     ***************************************************************************/
 
-    public Const!(T)* getValue ( T ) ( ref Const!(void)[] msg_body_rest )
+    public const(T)* getValue ( T ) ( ref const(void)[] msg_body_rest )
     {
         static assert(!hasIndirections!(T));
         this.e.enforceFmt(msg_body_rest.length >= T.sizeof,
                      "message too short: {} byte(s) missing",
                      T.sizeof - msg_body_rest.length);
         scope (exit) msg_body_rest = msg_body_rest[T.sizeof .. $];
-        return cast(Const!(T)*)msg_body_rest.ptr;
+        return cast(const(T)*)msg_body_rest.ptr;
     }
 
     /***************************************************************************
@@ -170,7 +170,7 @@ struct MessageParser
 
     // Disabled for now, see parseBody().
 
-    version (none) private Const!(T)[] getSingleArrayBody ( T ) ( in void[] msg_body )
+    version (none) private const(T)[] getSingleArrayBody ( T ) ( in void[] msg_body )
     {
         static assert(!hasIndirections!(T));
 
@@ -179,7 +179,7 @@ struct MessageParser
                 "the length {} of an array message is not a multiple of the " ~
                 "array element length {}", msg_body.length, T.sizeof);
 
-        return cast(Const!(T)[])msg_body;
+        return cast(const(T)[])msg_body;
     }
 
     /***************************************************************************
@@ -207,7 +207,7 @@ struct MessageParser
 
     ***************************************************************************/
 
-    public Const!(T)[] getArray ( T ) ( ref Const!(void)[] msg_body_rest )
+    public const(T)[] getArray ( T ) ( ref const(void)[] msg_body_rest )
     {
         debug (MessageProtocol)
             Stdout.formatln("\tgetArray {} {:X2}", T.stringof, msg_body_rest);
@@ -223,7 +223,7 @@ struct MessageParser
                                    "message too short: {} byte(s) missing",
                                    n_bytes - msg_body_rest.length);
         scope (exit) msg_body_rest = msg_body_rest[n_bytes .. $];
-        return cast(Const!(T)[])msg_body_rest[0 .. n_bytes];
+        return cast(const(T)[])msg_body_rest[0 .. n_bytes];
     }
 
 }

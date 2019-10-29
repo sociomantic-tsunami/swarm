@@ -207,7 +207,7 @@ class ConnectionHandler : IConnectionHandler
 
         ***********************************************************************/
 
-        public Const!(Key[istring])* credentials;
+        public const(Key[istring])* credentials;
 
         /***********************************************************************
 
@@ -280,7 +280,7 @@ class ConnectionHandler : IConnectionHandler
 
         public this ( EpollSelectDispatcher epoll,
             RequestMap requests, bool no_delay,
-            ref Const!(Key[istring]) credentials, INodeInfo node_info,
+            ref const(Key[istring]) credentials, INodeInfo node_info,
             scope GetResourceAcquirerDg get_resource_acquirer )
         {
             verify(requests.supported_requests.length > 0);
@@ -417,7 +417,7 @@ class ConnectionHandler : IConnectionHandler
 
     ***************************************************************************/
 
-    protected void handleRequest ( RequestOnConn connection, Const!(void)[] init_payload = null )
+    protected void handleRequest ( RequestOnConn connection, const(void)[] init_payload = null )
     {
         if (init_payload.length >= Command.sizeof)
         {
@@ -485,7 +485,7 @@ class ConnectionHandler : IConnectionHandler
     ***************************************************************************/
 
     private void handleRequest ( RequestMap.RequestInfo rq,
-        RequestOnConn connection, Const!(void)[] init_payload )
+        RequestOnConn connection, const(void)[] init_payload )
     {
         StopWatch timer;
 
@@ -646,7 +646,7 @@ unittest
         static immutable bool timing = true;
         static immutable bool scheduled_for_removal = false;
         void handle ( RequestOnConn connection, Object resources,
-            Const!(void)[] init_payload ) { }
+            const(void)[] init_payload ) { }
     }
 
     class Rq1_v1 : IRequest
@@ -656,7 +656,7 @@ unittest
         static immutable bool timing = true;
         static immutable bool scheduled_for_removal = false;
         void handle ( RequestOnConn connection, Object resources,
-            Const!(void)[] init_payload ) { }
+            const(void)[] init_payload ) { }
     }
 
     ConnectionHandler.RequestMap map;

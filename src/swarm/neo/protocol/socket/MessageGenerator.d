@@ -308,7 +308,7 @@ struct IoVecTracker
             }
         }
 
-        Const!(void)[] iovField ( size_t i )
+        const(void)[] iovField ( size_t i )
         {
             with (iov.fields[i]) return iov_base[0 .. iov_len];
         }

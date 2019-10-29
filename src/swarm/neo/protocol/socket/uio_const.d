@@ -108,7 +108,7 @@ import ocean.transition;
 
 struct iovec_const
 {
-    Const!(void)* iov_base;
+    const(void)* iov_base;
     size_t iov_len;
 }
 
@@ -133,8 +133,8 @@ struct iovec_const
 
 ssize_t sendv ( int socket_fd, in iovec_const[] data, int flags = 0 )
 {
-    Const!(msghdr) m = {
-            msg_iov:    cast(Const!(iovec*))data.ptr,
+    const(msghdr) m = {
+            msg_iov:    cast(const(iovec*))data.ptr,
             msg_iovlen: data.length
     };
     return sendmsg(socket_fd, &m, flags);
@@ -152,7 +152,7 @@ unittest
 
     foreach (i, iovec_constField; iovec_constFields)
     {
-        static if (is(iovec_constField == Const!(void)*))
+        static if (is(iovec_constField == const(void)*))
             static assert(is(iovecFields[i] == void*));
         else
             static assert(is(iovec_constField == iovecFields[i]));

@@ -114,7 +114,7 @@ abstract class RequestOnConnBase
 
     ***************************************************************************/
 
-    protected Const!(void)[] recv_payload_;
+    protected const(void)[] recv_payload_;
 
     /***************************************************************************
 
@@ -123,7 +123,7 @@ abstract class RequestOnConnBase
 
     ***************************************************************************/
 
-    protected Const!(void[])[] send_payload_;
+    protected const(void[])[] send_payload_;
 
     /***************************************************************************
 
@@ -132,7 +132,7 @@ abstract class RequestOnConnBase
 
     ***************************************************************************/
 
-    private Const!(void)[][] send_payload;
+    private const(void)[][] send_payload;
 
     /***************************************************************************
 
@@ -293,7 +293,7 @@ abstract class RequestOnConnBase
             public struct Received
             {
                 /// The message payload.
-                Const!(void)[] payload;
+                const(void)[] payload;
             }
 
             /*******************************************************************
@@ -413,7 +413,7 @@ abstract class RequestOnConnBase
             public void add ( T ) ( ref T elem )
             {
                 static assert(!hasIndirections!(T));
-                this.outer.outer.send_payload ~= (cast(Const!(void*))&elem)[0..T.sizeof];
+                this.outer.outer.send_payload ~= (cast(const(void*))&elem)[0..T.sizeof];
             }
 
             /*******************************************************************
@@ -472,7 +472,7 @@ abstract class RequestOnConnBase
 
                 this.addCopy(arr.length);
                 this.outer.outer.send_payload ~=
-                    (cast(Const!(void)*)arr.ptr)[0..arr.length * Element.sizeof];
+                    (cast(const(void)*)arr.ptr)[0..arr.length * Element.sizeof];
             }
         }
 
@@ -883,7 +883,7 @@ abstract class RequestOnConnBase
 
         ***********************************************************************/
 
-        private Const!(void)[] withdrawRecvPayload ( )
+        private const(void)[] withdrawRecvPayload ( )
         {
             scope (exit) this.outer.recv_payload_ = null;
             return this.outer.recv_payload_;
@@ -1033,7 +1033,7 @@ abstract class RequestOnConnBase
 
     ***************************************************************************/
 
-    protected void setReceivedPayload ( Const!(void)[] payload )
+    protected void setReceivedPayload ( const(void)[] payload )
     {
         this.recv_payload_ = payload;
         this.resumeFiber_(fiber.Message(FiberResumeCode.Received));

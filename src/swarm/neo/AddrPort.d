@@ -17,7 +17,7 @@ import core.sys.posix.netinet.in_; // in_addr, in_addr_t, in_port_t, socklen_t, 
 import ocean.transition;
 version ( UnitTest ) import ocean.core.Test;
 
-extern (C) int inet_aton(Const!(char)* src, in_addr* dst);
+extern (C) int inet_aton(const(char)* src, in_addr* dst);
 
 /// ditto
 public struct AddrPort

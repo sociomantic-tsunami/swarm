@@ -40,5 +40,5 @@ public interface IRequest
     ***************************************************************************/
 
     void handle ( RequestOnConn connection, Object resources,
-        Const!(void)[] init_payload );
+        const(void)[] init_payload );
 }

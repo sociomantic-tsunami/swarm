@@ -154,7 +154,7 @@ public struct BatchWriter ( Record ... )
 
     ***************************************************************************/
 
-    public Const!(void)[] get ( )
+    public const(void)[] get ( )
     {
         return *this.buffer;
     }
@@ -173,7 +173,7 @@ public struct BatchWriter ( Record ... )
 
     ***************************************************************************/
 
-    public Const!(void)[] getCompressed ( Lzo lzo, ref void[] compress_buf )
+    public const(void)[] getCompressed ( Lzo lzo, ref void[] compress_buf )
     {
         // Set destination to max possible length.
         compress_buf.length =
@@ -280,7 +280,7 @@ public scope class BatchReader ( Record ... )
     static assert(recordFieldsSupported!(Record)());
 
     /// Unconsumed data remaining in batch. Slice of batch passed to ctor.
-    private Const!(void)[] remaining;
+    private const(void)[] remaining;
 
     /***************************************************************************
 
@@ -402,7 +402,7 @@ public scope class BatchReader ( Record ... )
 
     ***************************************************************************/
 
-    private Const!(void)[] extractBytes ( size_t bytes )
+    private const(void)[] extractBytes ( size_t bytes )
     {
         enforce(this.remaining.length >= bytes);
 

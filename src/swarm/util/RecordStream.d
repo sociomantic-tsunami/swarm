@@ -188,7 +188,7 @@ public struct Record
             return false;
 
         // Extract the key and value from the line
-        splitRecord(cast(Const!(ubyte)[])data, this.key, this.value);
+        splitRecord(cast(const(ubyte)[])data, this.key, this.value);
         return true;
     }
 
@@ -320,7 +320,7 @@ public struct Record
 
             // If another separator is found, the line is invalid
             auto head = line[0..sep];
-            Const!(ubyte)[] tail;
+            const(ubyte)[] tail;
             if ( sep < line.length - 1 )
             {
                 tail = line[sep + 1..$];
@@ -331,7 +331,7 @@ public struct Record
 
             // The head (before the separator) is expected to be the record key
             // and must either be empty or be a 16-character hex-string.
-            if ( head.length && !isHash(castFrom!(Const!(ubyte)[]).to!(cstring)(head)) )
+            if ( head.length && !isHash(castFrom!(const(ubyte)[]).to!(cstring)(head)) )
                 return false;
 
             // The tail (after the separator) is expected to be the record value
