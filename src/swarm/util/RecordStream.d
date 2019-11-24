@@ -469,6 +469,16 @@ public class StdinRecordStream : ISuspendable
 
     /***************************************************************************
 
+        Flag indicating whether the stream is currently suspended.
+        The flag is only set when a call to suspend() has been done and unset
+        when resume() is called.
+
+    ***************************************************************************/
+
+    private bool is_suspended;
+
+    /***************************************************************************
+
         Constructor.
 
         Params:
@@ -494,6 +504,7 @@ public class StdinRecordStream : ISuspendable
 
     public bool process ( )
     {
+        this.is_suspended = false;
         this.fiber.start();
         return this.end_of_stream;
     }
@@ -507,6 +518,7 @@ public class StdinRecordStream : ISuspendable
 
     override public void suspend ( )
     {
+        this.is_suspended = true;
         this.fiber.suspend(token);
     }
 
@@ -518,19 +530,31 @@ public class StdinRecordStream : ISuspendable
 
     override public void resume ( )
     {
+        this.is_suspended = false;
         this.fiber.resume(token);
     }
 
     /***************************************************************************
 
+        Checks if the stream is suspended meaning that the method suspend()
+        has been currently called.
+
         Returns:
-            true if the process is suspended
+            true if the process is suspended (a suspend() has been called)
 
     ***************************************************************************/
 
     override public bool suspended ( )
     {
-        return !this.fiber.running;
+        return this.is_suspended;
+    }
+
+    /// Test the stream is not suspended right after instantiation.
+    unittest
+    {
+        auto null_dg = null;
+        auto stream = new StdinRecordStream(null_dg);
+        test!("==")(stream.suspended, false);
     }
 
     /***************************************************************************
