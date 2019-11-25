@@ -47,12 +47,6 @@ public struct Record
     import ocean.io.stream.Lines;
     import Base64 = ocean.util.encode.Base64;
 
-    version ( UnitTest )
-    {
-        import ocean.core.Test;
-    }
-
-
     /***************************************************************************
 
         Record key. 16-character hex-string or empty.
