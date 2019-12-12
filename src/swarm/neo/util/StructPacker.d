@@ -186,7 +186,7 @@ private void packDynamicArray ( A ) ( ref A[] array, ref void[] buf )
         static assert(!hasIndirections!(A));
 }
 
-version ( UnitTest )
+version ( unittest )
 {
     import ocean.core.Test;
     import ocean.core.DeepCompare : deepEquals;

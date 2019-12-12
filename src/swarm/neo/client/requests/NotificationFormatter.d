@@ -165,7 +165,7 @@ public void format ( T ) ( T notification )
     }
 }
 
-version ( UnitTest )
+version ( unittest )
 {
     import ocean.core.Test;
 

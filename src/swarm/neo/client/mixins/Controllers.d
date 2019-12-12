@@ -325,7 +325,7 @@ template Controllers ( )
 }
 
 /// Unit test instantiating the templates to detect semantic errors
-version (UnitTest) private class ControllersTemplateTest
+version ( unittest ) private class ControllersTemplateTest
 {
     import swarm.neo.protocol.Message: RequestId;
 

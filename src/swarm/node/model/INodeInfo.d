@@ -199,7 +199,7 @@ public interface INodeInfo
 
 *******************************************************************************/
 
-version ( UnitTest )
+version ( unittest )
 {
     public class TestNode : INodeInfo
     {

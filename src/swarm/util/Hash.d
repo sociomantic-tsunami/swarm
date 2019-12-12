@@ -65,7 +65,7 @@ import core.stdc.string: memmove;
 
 import Integer = ocean.text.convert.Integer_tango;
 
-version (UnitTest) import ocean.core.Test;
+version ( unittest ) import ocean.core.Test;
 
 class InvalidHashException: Exception
 {
@@ -523,7 +523,7 @@ public template isKeyType ( T )
 
 *******************************************************************************/
 
-version ( UnitTest )
+version ( unittest )
 {
     import ocean.math.random.Random;
 

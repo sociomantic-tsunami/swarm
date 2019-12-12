@@ -610,7 +610,7 @@ public class RecordBatch
     }
 }
 
-version ( UnitTest )
+version ( unittest )
 {
     import ocean.core.Test;
     import ocean.text.convert.Formatter;

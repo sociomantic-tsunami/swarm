@@ -562,7 +562,7 @@ public abstract class IRequestParams
     }
 }
 
-version (UnitTest)
+version ( unittest )
 {
     import ocean.core.Test;
 

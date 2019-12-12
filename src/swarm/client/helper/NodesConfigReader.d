@@ -50,7 +50,7 @@ import ocean.io.device.File;
 
 import Integer = ocean.text.convert.Integer_tango;
 
-version (UnitTest)
+version ( unittest )
 {
     import ocean.core.Test;
 }

@@ -295,7 +295,7 @@ private istring assertArgsHandled ( size_t n_args, ArgsAndHandlers ... ) ( )
     return result.length? "static assert(false,\"" ~ result ~ "\");" : null;
 }
 
-version ( UnitTest )
+version ( unittest )
 {
     import ocean.core.Test;
 

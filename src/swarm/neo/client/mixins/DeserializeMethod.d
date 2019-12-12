@@ -76,7 +76,7 @@ template DeserializeMethod ( alias src )
 
 public VersionDecorator client_deserializer_version_decorator;
 
-version ( UnitTest )
+version ( unittest )
 {
     import ocean.core.Test;
     import ocean.util.serialize.contiguous.Contiguous;

@@ -185,7 +185,7 @@ template SharedResources_T ( T )
     }
 }
 
-version (UnitTest)
+version ( unittest )
 {
     import ocean.core.Test;
 

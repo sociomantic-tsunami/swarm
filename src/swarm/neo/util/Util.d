@@ -121,7 +121,7 @@ char[] TupleToSlices ( Types ... ) ( istring name )
     return code;
 }
 
-version (UnitTest)
+version ( unittest )
 {
     import ocean.core.Test;
     import ocean.core.Tuple;

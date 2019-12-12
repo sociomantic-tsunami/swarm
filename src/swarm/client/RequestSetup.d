@@ -808,7 +808,7 @@ public template StreamInfo ( )
 }
 
 
-version (UnitTest)
+version ( unittest )
 {
     import ocean.core.Tuple;
 }

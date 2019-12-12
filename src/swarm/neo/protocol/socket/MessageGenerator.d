@@ -273,7 +273,7 @@ struct IoVecTracker
 
     /**************************************************************************/
 
-    version ( UnitTest )
+    version ( unittest )
     {
         import ocean.core.Test: test;
         import ocean.transition;

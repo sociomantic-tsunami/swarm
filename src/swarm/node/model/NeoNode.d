@@ -1057,7 +1057,7 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
 }
 
 
-version (UnitTest)
+version ( unittest )
 {
     private class TestConnectionHandler : ISwarmConnectionHandler
     {

@@ -97,7 +97,7 @@ public interface IChannelsNodeInfo : INodeInfo
 
 *******************************************************************************/
 
-version ( UnitTest )
+version ( unittest )
 {
     public class TestChannelsNode : TestNode, IChannelsNodeInfo
     {
