@@ -243,7 +243,7 @@ public class CredentialsParseException: Exception
 
 /******************************************************************************/
 
-version ( UnitTest )
+version ( unittest )
 {
     import ocean.core.Test;
     import ocean.core.ByteSwap;

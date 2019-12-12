@@ -886,7 +886,7 @@ private struct ConnectionRegistry ( C )
 
 *******************************************************************************/
 
-version (UnitTest)
+version ( unittest )
 {
     import ocean.core.Test;
     import ocean.core.Verify;

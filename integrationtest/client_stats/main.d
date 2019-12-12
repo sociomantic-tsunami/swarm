@@ -23,7 +23,7 @@ import ocean.util.test.DirectorySandbox;
 
 import swarm.util.log.ClientStats;
 
-version ( UnitTest ) {}
+version ( unittest ) {}
 else void main ( )
 {
     // Create temporary sandbox directory to write files to.

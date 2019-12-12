@@ -23,7 +23,7 @@ import ocean.io.model.ISuspendable;
 import ocean.io.serialize.SimpleStreamSerializer;
 import ocean.io.Console : Cin, Cout, Console;
 
-version ( UnitTest )
+version ( unittest )
 {
     import ocean.core.Test;
 }

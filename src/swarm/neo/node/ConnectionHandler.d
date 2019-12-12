@@ -627,7 +627,7 @@ class ConnectionHandler : IConnectionHandler
     }
 }
 
-version ( UnitTest )
+version ( unittest )
 {
     import swarm.node.request.RequestStats;
     import swarm.neo.request.Command;

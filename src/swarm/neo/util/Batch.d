@@ -447,7 +447,7 @@ private bool recordFieldsSupported ( Record ... ) ( )
     return true;
 }
 
-version ( UnitTest )
+version ( unittest )
 {
     import ocean.core.Test;
 

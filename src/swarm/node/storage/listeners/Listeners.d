@@ -360,7 +360,7 @@ public class IListeners ( Data ... )
     }
 }
 
-version (UnitTest) import ocean.core.Test;
+version ( unittest ) import ocean.core.Test;
 
 unittest
 {

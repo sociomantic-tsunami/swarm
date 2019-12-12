@@ -50,7 +50,7 @@ template SerializeMethod ( alias dst )
     }
 }
 
-version ( UnitTest )
+version ( unittest )
 {
     import ocean.core.Test;
     import ocean.util.serialize.contiguous.Contiguous;

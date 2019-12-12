@@ -29,7 +29,7 @@ import core.sys.posix.unistd;
 import core.sys.posix.sys.wait;
 
 
-version (UnitTest) {} else
+version ( unittest ) {} else
 public int main ()
 {
     int[2] pipes;

@@ -475,14 +475,15 @@ public template RequestResources_T ( Shared )
         mixin(Initialisers!(Shared.Resources));
     }
 }
-version (UnitTest)
+
+version ( unittest )
 {
     import ocean.core.Test;
 
     // to avoid clashing of mixed in names from different module tests
     struct LocalNamespace
     {
-        // ISharedResources module has a version (UnitTest) mixin
+        // ISharedResources module has a version (unittest) mixin
         // that provides SharedResources symbol
         public import swarm.common.connection.ISharedResources
             : UnitTestClashFix;

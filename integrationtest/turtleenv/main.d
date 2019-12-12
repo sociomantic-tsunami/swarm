@@ -97,7 +97,7 @@ private class TestNode : Node!(TurtleNode, "turtleNode")
     }
 }
 
-version (UnitTest){}
+version ( unittest ){}
 else
 void main()
 {

@@ -34,7 +34,7 @@ module swarm.node.request.RequestStats;
 import ocean.transition;
 import ocean.core.Verify;
 
-version ( UnitTest )
+version ( unittest )
 {
     import ocean.core.Test;
 }

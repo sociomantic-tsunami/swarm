@@ -517,7 +517,7 @@ template ClientCore ( )
         }
     }
 
-    version ( UnitTest )
+    version ( unittest )
     {
         import ocean.io.Stdout;
     }
@@ -936,7 +936,7 @@ template ClientCore ( )
 
 *******************************************************************************/
 
-version ( UnitTest )
+version ( unittest )
 {
     import ocean.io.Stdout;
 

@@ -26,7 +26,7 @@ import ocean.io.digest.Fnv1;
 import ocean.transition;
 import core.stdc.ctype : isalnum;
 
-version ( UnitTest )
+version ( unittest )
 {
     import ocean.core.Test;
 }
