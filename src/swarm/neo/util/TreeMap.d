@@ -200,7 +200,7 @@ struct TreeMap ( Node = eb64_node )
 
         ***********************************************************************/
 
-        public UserElement opIn_r ( ulong key )
+        public UserElement opBinaryRight (string op : "in") ( ulong key )
         {
             return nodeToUserElement(cast(Node*)eb64_lookup(&this.root, key));
         }
@@ -396,7 +396,7 @@ struct TreeMap ( Node = eb64_node )
 
         ***********************************************************************/
 
-        public Node* opIn_r ( ulong key )
+        public Node* opBinaryRight (string op : "in") ( ulong key )
         {
             return cast(Node*)eb64_lookup(&this.root, key);
         }
