@@ -662,7 +662,12 @@ private struct ConnectionRegistry ( C )
     }
 
     // ditto
-    public alias get opIn_r;
+
+    public template opBinaryRight (string op : "in")
+    {
+        alias opBinaryRight = get;
+    }
+
 
     /***************************************************************************
 
