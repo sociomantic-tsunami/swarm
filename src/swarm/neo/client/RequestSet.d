@@ -614,7 +614,7 @@ public final class RequestSet: IRequestSet
             this.request_on_conns.reset(&this.outer.request_on_conn_pool.recycle);
             this.finished_notifier = null;
             this.context.length = 0;
-            enableStomping(this.context);
+            assumeSafeAppend(this.context);
         }
     }
 

@@ -64,7 +64,7 @@ public void pack ( S ) ( S s, ref void[] buf )
 
     // Do a simple, binary copy of the struct.
     buf.length = S.sizeof;
-    enableStomping(buf);
+    assumeSafeAppend(buf);
     buf[] = (cast(void*)&s)[0..S.sizeof];
 
     // Handle any dynamic array fields. (Note that it's safe to cast away const

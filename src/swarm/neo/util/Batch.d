@@ -178,7 +178,7 @@ public struct BatchWriter ( Record ... )
         // Set destination to max possible length.
         compress_buf.length =
             lzo.maxCompressedLength((*this.buffer).length) + size_t.sizeof;
-        enableStomping(compress_buf);
+        assumeSafeAppend(compress_buf);
 
         // Write uncompressed length into first size_t.sizeof bytes of dest.
         *(cast(size_t*)(compress_buf.ptr)) = (*this.buffer).length;
@@ -189,7 +189,7 @@ public struct BatchWriter ( Record ... )
 
         // Minimize dest length and return.
         compress_buf.length = compressed_len + size_t.sizeof;
-        enableStomping(compress_buf);
+        assumeSafeAppend(compress_buf);
         return compress_buf;
     }
 
@@ -202,7 +202,7 @@ public struct BatchWriter ( Record ... )
     public void clear ( )
     {
         (*this.buffer).length = 0;
-        enableStomping(*this.buffer);
+        assumeSafeAppend(*this.buffer);
     }
 
     /***************************************************************************
@@ -326,7 +326,7 @@ public scope class BatchReader ( Record ... )
         // Read uncompressed length from first size_t.sizeof bytes.
         auto uncompressed_len = *(cast(size_t*)(batch.ptr));
         decompress_buf.length = uncompressed_len;
-        enableStomping(decompress_buf);
+        assumeSafeAppend(decompress_buf);
 
         // Decompress into decompress_buf.
         auto src = batch[size_t.sizeof .. $];

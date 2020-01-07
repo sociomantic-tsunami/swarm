@@ -254,9 +254,9 @@ public hash_t straightToHash ( cstring hash )
 
 public hash_t[] straightToHash ( cstring[] hash_strings, ref hash_t[] hashes )
 {
-    enableStomping(hashes);
+    assumeSafeAppend(hashes);
     hashes.length = hash_strings.length;
-    enableStomping(hashes);
+    assumeSafeAppend(hashes);
     foreach ( i, hash; hash_strings )
     {
         hashes[i] = straightToHash(hash);
@@ -540,9 +540,9 @@ version ( unittest )
         {
             ubyte b;
             HashGenerator.random(b);
-            enableStomping(str);
+            assumeSafeAppend(str);
             str.length = b%32;
-            enableStomping(str);
+            assumeSafeAppend(str);
         }
 
         public static mstring str ( ref mstring str, bool rand_len = true )
@@ -598,9 +598,9 @@ version ( unittest )
 
         public static mstring hashStr ( ref mstring str )
         {
-            enableStomping(str);
+            assumeSafeAppend(str);
             str.length = HashDigits;
-            enableStomping(str);
+            assumeSafeAppend(str);
             HashGenerator.hexStr(str, false);
 
             return str;

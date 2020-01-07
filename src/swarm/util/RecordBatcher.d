@@ -307,7 +307,7 @@ public class RecordBatcher
         // Set destination to max possible length.
         compress_buf.length =
             this.lzo.maxCompressedLength(this.batch.length) + size_t.sizeof;
-        enableStomping(compress_buf);
+        assumeSafeAppend(compress_buf);
 
         // Write uncompressed length into first size_t.sizeof bytes of dest.
         *(cast(size_t*)(compress_buf.ptr)) = this.batch.length;
@@ -321,7 +321,7 @@ public class RecordBatcher
 
         // Minimize dest length and return.
         compress_buf.length = compressed_len + size_t.sizeof;
-        enableStomping(compress_buf);
+        assumeSafeAppend(compress_buf);
         return compress_buf;
     }
 

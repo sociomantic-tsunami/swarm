@@ -269,7 +269,7 @@ public scope class IRequestNotification
     public mstring message ( ref mstring message_ )
     {
         message_.length = 0;
-        enableStomping(message_);
+        assumeSafeAppend(message_);
 
         if ( this.exception is null )
         {

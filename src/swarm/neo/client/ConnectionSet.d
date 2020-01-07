@@ -400,7 +400,7 @@ public final class ConnectionSet : RequestOnConn.IConnectionGetter
             this.initialiseConnection(conn.connection, conn.node_address);
 
         this.queued_conns.length = 0;
-        enableStomping(this.queued_conns);
+        assumeSafeAppend(this.queued_conns);
     }
 
     /***************************************************************************
@@ -852,7 +852,7 @@ private struct ConnectionRegistry ( C )
         scope int delegate ( Elem conn ) dg )
     {
         connections_buf.length = 0;
-        enableStomping(connections_buf);
+        assumeSafeAppend(connections_buf);
 
         this.opApply(
             ( ref Elem conn )

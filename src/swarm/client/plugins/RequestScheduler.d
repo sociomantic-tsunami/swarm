@@ -212,7 +212,7 @@ public class RequestScheduler
             void setupScheduledRequest ( ref void[] scheduled_data )
             {
                 scheduled_data.length = params.serialized_length;
-                enableStomping(scheduled_data);
+                assumeSafeAppend(scheduled_data);
                 params.serialize(cast(ubyte[])scheduled_data);
             }
 

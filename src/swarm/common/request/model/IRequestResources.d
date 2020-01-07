@@ -324,7 +324,7 @@ public template RequestResources_T ( Shared )
             static immutable istring Initialiser =
                 "protected void " ~
                 "init_" ~ identifier!(T.tupleof[i]) ~ "(ref " ~ typeof(T.tupleof[i]).stringof ~ " f)" ~
-                "{f.length=0; enableStomping(f);}";
+                "{f.length=0; assumeSafeAppend(f);}";
         }
         else
         {
