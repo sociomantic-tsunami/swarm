@@ -58,7 +58,7 @@ struct IoVecMessage // MessageGenerator
         verify(type <= type.max);
 
         this.tracker.fields.length = 1 + static_fields.length + dynamic_fields.length;
-        enableStomping(this.tracker.fields);
+        assumeSafeAppend(this.tracker.fields);
 
         with (this.tracker.fields[0])
         {
@@ -131,7 +131,6 @@ struct IoVecMessage // MessageGenerator
 struct IoVecTracker
 {
     import swarm.neo.protocol.socket.uio_const: iovec_const;
-    import ocean.transition: enableStomping;
 
     /***************************************************************************
 
@@ -189,7 +188,7 @@ struct IoVecTracker
             if (n == this.length)
             {
                 this.fields.length = 0;
-                enableStomping(this.fields);
+                assumeSafeAppend(this.fields);
             }
             else
             {
@@ -204,7 +203,7 @@ struct IoVecTracker
                         field.iov_base += field.iov_len - d;
                         field.iov_len  = d;
                         this.fields = this.fields[i .. $];
-                        enableStomping(this.fields);
+                        assumeSafeAppend(this.fields);
                         break;
                     }
                 }
@@ -242,7 +241,7 @@ struct IoVecTracker
         {
             if (dst)
             {
-                dst.enableStomping();
+                dst.assumeSafeAppend();
                 dst.length = this.length;
             }
             else
@@ -262,7 +261,7 @@ struct IoVecTracker
             verify(start == this.length);
 
             this.fields = this.fields[0 .. 1];
-            enableStomping(this.fields);
+            assumeSafeAppend(this.fields);
             this.fields[0] = iovec_const(dst.ptr, this.length);
         }
         else if (dst)

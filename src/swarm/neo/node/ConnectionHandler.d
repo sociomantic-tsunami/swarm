@@ -615,7 +615,7 @@ class ConnectionHandler : IConnectionHandler
 
         // Allocate space
         buf.length = initializer.length;
-        enableStomping(buf);
+        assumeSafeAppend(buf);
 
         // Initialize it
         buf[] = initializer[];

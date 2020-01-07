@@ -211,7 +211,7 @@ class MessageSender
         scope (exit)
         {
             this.pending_data.length = 0;
-            enableStomping(this.pending_data);
+            assumeSafeAppend(this.pending_data);
         }
 
         do

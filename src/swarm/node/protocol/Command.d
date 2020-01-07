@@ -86,7 +86,7 @@ public abstract scope class Command : IRequest
     override public mstring description ( ref mstring dst )
     {
         dst.length = 0;
-        enableStomping(dst);
+        assumeSafeAppend(dst);
         sformat(dst, "{} request", this.name);
         return dst;
     }

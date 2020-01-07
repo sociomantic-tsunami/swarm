@@ -44,7 +44,7 @@ private alias void delegate ( cstring chunk ) Sink;
 public cstring formatNotification ( SU ) ( SU notification, ref mstring buf )
 {
     buf.length = 0;
-    enableStomping(buf);
+    assumeSafeAppend(buf);
 
     formatNotification(notification,
         ( cstring chunk )

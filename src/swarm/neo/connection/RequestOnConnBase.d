@@ -398,7 +398,7 @@ abstract class RequestOnConnBase
             ~this ( )
             {
                 this.outer.outer.send_payload.length = 0;
-                enableStomping(this.outer.outer.send_payload);
+                assumeSafeAppend(this.outer.outer.send_payload);
             }
 
             /*******************************************************************

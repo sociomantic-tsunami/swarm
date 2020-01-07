@@ -295,7 +295,7 @@ public class NodeSet
         // Remove from list
         this.list[index] = this.list[$-1];
         this.list.length = this.list.length - 1;
-        enableStomping(this.list);
+        assumeSafeAppend(this.list);
 
         // Remove from map
         this.map.remove(node);

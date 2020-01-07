@@ -292,7 +292,7 @@ public struct RequestOnConnSet
                 foreach ( roc; this.list )
                     recycle(roc);
                 this.list.length = 0;
-                enableStomping(this.list);
+                assumeSafeAppend(this.list);
                 break;
 
             case AllNodes:

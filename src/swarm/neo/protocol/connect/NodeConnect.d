@@ -247,7 +247,7 @@ class NodeConnect
                 this.client_name, this.e_auth_rejected.message);
 
             this.client_name.length = 0;
-            enableStomping(this.client_name);
+            assumeSafeAppend(this.client_name);
             throw this.e_auth_rejected;
         }
 
@@ -280,7 +280,7 @@ class NodeConnect
     public void reset ( )
     {
         this.client_name.length = 0;
-        enableStomping(this.client_name);
+        assumeSafeAppend(this.client_name);
     }
 
     /***************************************************************************
