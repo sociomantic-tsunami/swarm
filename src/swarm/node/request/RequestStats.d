@@ -31,8 +31,8 @@
 
 module swarm.node.request.RequestStats;
 
-import ocean.transition;
 import ocean.core.Verify;
+import ocean.meta.types.Qualifiers;
 
 version ( unittest )
 {
@@ -950,11 +950,10 @@ public class RequestStats
 
             *******************************************************************/
 
-            mixin (genOpEquals("
+            bool opEquals ( const typeof(this) rhs ) const
             {
                 return this.request == rhs.request && this.client == rhs.client;
             }
-            "));
 
             /*******************************************************************
 
@@ -970,11 +969,10 @@ public class RequestStats
 
             *******************************************************************/
 
-            mixin (genOpCmp("
+            int opCmp ( const typeof(this) rhs ) const
             {
                 return this.request != rhs.request || this.client != rhs.client;
             }
-            "));
         }
 
         /// Per-client/request information map.
