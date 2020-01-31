@@ -39,7 +39,7 @@ struct HmacAuthCode
 
     import core.stdc.time: time_t;
 
-    import ocean.transition;
+    import ocean.meta.types.Qualifiers;
 
     debug import ocean.io.Stdout;
 

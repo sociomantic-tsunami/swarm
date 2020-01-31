@@ -23,7 +23,7 @@ module swarm.neo.client.mixins.TaskBlockingCore;
 /// ditto
 template TaskBlockingCore ( )
 {
-    import ocean.transition;
+    import ocean.meta.types.Qualifiers;
     import ocean.task.Task;
     import ocean.core.Verify;
 

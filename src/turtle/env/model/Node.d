@@ -12,7 +12,7 @@
 
 module turtle.env.model.Node;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 import ocean.text.convert.Formatter;
 import turtle.env.model.Registry;
 import ocean.core.Verify;

@@ -37,7 +37,7 @@ import swarm.Const;
 
 import swarm.client.request.notifier.IRequestNotification;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 /*******************************************************************************
 

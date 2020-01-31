@@ -22,7 +22,7 @@ static if (hasFeaturesFrom!("ocean", 3, 4))
     public import ocean.core.Verify;
 else:
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 /*******************************************************************************
 

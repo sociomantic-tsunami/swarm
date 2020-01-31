@@ -26,7 +26,7 @@ import swarm.client.request.context.RequestContext;
 import ocean.core.Array;
 import ocean.core.Enum;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 import ocean.text.convert.Formatter;
 
 import swarm.client.ClientExceptions : TimedOutException,

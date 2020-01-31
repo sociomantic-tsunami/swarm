@@ -45,7 +45,7 @@ private class MessageReceiverBase
 
     import swarm.neo.protocol.socket.IOStats;
 
-    import ocean.transition;
+    import ocean.meta.types.Qualifiers;
 
     debug (Raw) import ocean.io.Stdout: Stderr;
 
@@ -601,7 +601,7 @@ unittest
 
         import ocean.core.Test;
         import core.sys.posix.stdlib: erand48;
-        import ocean.transition;
+        import ocean.meta.types.Qualifiers;
 
         // Information stored in the message body, at the beginning
         static struct Info

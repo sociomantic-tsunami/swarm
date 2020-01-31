@@ -12,7 +12,7 @@
 
 module integrationtest.neo.client.request.internal.Put;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 /*******************************************************************************
 

@@ -37,7 +37,7 @@
 
 module swarm.common.connection.ISharedResources;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 /*******************************************************************************
 
@@ -66,7 +66,7 @@ template SharedResources_T ( T )
 
         ***********************************************************************/
 
-        import ocean.transition;
+        import ocean.meta.types.Qualifiers;
         import ocean.meta.codegen.Identifier : identifier;
         import ocean.util.container.pool.FreeList;
 

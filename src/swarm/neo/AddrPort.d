@@ -14,7 +14,7 @@ module swarm.neo.AddrPort;
 
 import core.sys.posix.netinet.in_; // in_addr, in_addr_t, in_port_t, socklen_t, sockaddr_in, AF_INET
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 version ( unittest ) import ocean.core.Test;
 
 extern (C) int inet_aton(const(char)* src, in_addr* dst);

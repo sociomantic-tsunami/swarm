@@ -59,7 +59,7 @@ import ocean.io.select.EpollSelectDispatcher;
 
 import ocean.util.config.ConfigFiller;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 /*******************************************************************************
 

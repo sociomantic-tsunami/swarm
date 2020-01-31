@@ -19,7 +19,7 @@
 
 module integrationtest.neo.node.Node;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 import swarm.node.model.NeoNode;
 import swarm.node.connection.ConnectionHandler;
 import swarm.Const : ICommandCodes, NodeItem;

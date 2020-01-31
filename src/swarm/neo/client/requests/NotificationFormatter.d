@@ -12,7 +12,7 @@
 
 module swarm.neo.client.requests.NotificationFormatter;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 import ocean.core.SmartUnion;
 import ocean.meta.traits.Aggregates : hasMethod;
 import ocean.meta.types.Templates : TemplateInstanceArgs;

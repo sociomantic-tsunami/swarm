@@ -128,7 +128,7 @@ public template RequestCore ( RequestType request_type_, ubyte request_code,
 
     ***************************************************************************/
 
-    import ocean.transition;
+    import ocean.meta.types.Qualifiers;
     import ocean.util.serialize.contiguous.Contiguous;
 
     import swarm.neo.request.Command;

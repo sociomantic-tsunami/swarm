@@ -26,7 +26,7 @@
 
 module swarm.node.model.RecordActionCounters;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 import ocean.core.Verify;
 

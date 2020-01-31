@@ -33,7 +33,7 @@ import swarm.node.storage.model.IStorageChannels;
 import swarm.node.storage.model.IStorageEngine;
 import swarm.node.storage.model.IStorageEngineInfo;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 /*******************************************************************************
 

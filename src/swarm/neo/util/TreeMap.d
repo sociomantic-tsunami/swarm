@@ -52,7 +52,7 @@ import ocean.util.container.ebtree.c.ebtree;
 
 struct TreeMap ( Node = eb64_node )
 {
-    import ocean.transition;
+    import ocean.meta.types.Qualifiers;
 
     static if (!is(Node == eb64_node))
     {

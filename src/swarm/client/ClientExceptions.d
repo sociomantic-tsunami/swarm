@@ -21,7 +21,7 @@ module swarm.client.ClientExceptions;
 
 *******************************************************************************/
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 import ocean.core.Exception;
 
 

@@ -45,7 +45,7 @@ import ocean.core.Verify;
 
 import ocean.io.select.EpollSelectDispatcher;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 
 /*******************************************************************************

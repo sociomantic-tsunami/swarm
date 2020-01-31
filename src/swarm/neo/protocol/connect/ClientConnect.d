@@ -32,7 +32,7 @@ class ClientConnect
 
     import ocean.core.Enforce;
 
-    import ocean.transition;
+    import ocean.meta.types.Qualifiers;
 
     debug ( SwarmConn ) import ocean.io.Stdout;
 

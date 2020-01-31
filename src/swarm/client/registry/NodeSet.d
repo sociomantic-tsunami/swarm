@@ -37,7 +37,7 @@ import ocean.core.Verify;
 
 import ocean.util.container.map.Map : StandardKeyHashingMap;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 import ocean.text.convert.Formatter;
 

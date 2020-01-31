@@ -47,7 +47,7 @@ module swarm.util.Hash;
 
 *******************************************************************************/
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 import ocean.core.Array;
 

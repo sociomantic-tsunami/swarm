@@ -18,7 +18,7 @@ module swarm.client.connection.model.INodeConnectionPoolInfo;
 
 *******************************************************************************/
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 
 /******************************************************************************/

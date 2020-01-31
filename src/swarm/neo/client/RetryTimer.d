@@ -27,7 +27,7 @@ import swarm.neo.util.FiberTokenHashGenerator;
 
 import stdio = core.stdc.stdio;
 import ocean.stdc.string;
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 import ocean.core.Verify;
 

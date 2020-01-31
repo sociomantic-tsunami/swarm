@@ -17,7 +17,7 @@
 
 module integrationtest.neo.client.Client;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 /// ditto
 public class Client

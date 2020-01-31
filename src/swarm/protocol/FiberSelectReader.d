@@ -27,7 +27,7 @@ module swarm.protocol.FiberSelectReader;
 
 *******************************************************************************/
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 import ocean.core.Array;
 

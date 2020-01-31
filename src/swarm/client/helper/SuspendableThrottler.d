@@ -37,7 +37,7 @@ import swarm.client.request.context.RequestContext;
 import swarm.client.request.model.ISuspendableRequest;
 
 import ocean.core.array.Search : contains;
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 import ocean.core.Verify;
 

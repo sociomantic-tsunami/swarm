@@ -36,7 +36,7 @@ public final class Connection: ConnectionBase
 
     import ocean.core.Enforce;
     import ocean.io.select.EpollSelectDispatcher;
-    import ocean.transition;
+    import ocean.meta.types.Qualifiers;
 
     debug ( SwarmConn ) import ocean.io.Stdout;
 

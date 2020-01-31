@@ -26,7 +26,7 @@ module swarm.client.registry.model.IFluidNodeRegistry;
 import swarm.client.registry.model.INodeRegistry;
 import swarm.client.registry.model.IFluidNodeRegistryInfo;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 
 public interface IFluidNodeRegistry : INodeRegistry, IFluidNodeRegistryInfo

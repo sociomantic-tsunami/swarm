@@ -12,7 +12,7 @@
 
 module integrationtest.client_stats.main;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 import ocean.core.Test;
 import ocean.core.VersionCheck;
 import ocean.io.device.File;

@@ -18,7 +18,7 @@ public class Credentials
     import CredFile = swarm.neo.authentication.CredentialsFile;
     import HmacDef = swarm.neo.authentication.HmacDef;
 
-    import ocean.transition;
+    import ocean.meta.types.Qualifiers;
     import ocean.io.device.File;
     import ocean.net.util.QueryParams;
 

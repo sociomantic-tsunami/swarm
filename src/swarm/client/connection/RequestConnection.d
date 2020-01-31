@@ -55,7 +55,7 @@ debug ( SwarmClient ) import ocean.io.Stdout;
 
 import swarm.client.connection.FiberSocketConnection;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 import ocean.util.log.Logger;
 
 

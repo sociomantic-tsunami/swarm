@@ -14,7 +14,7 @@ module swarm.neo.authentication.Credentials;
 import Client = swarm.neo.authentication.ClientCredentials;
 
 import core.stdc.ctype: isgraph;
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 /*******************************************************************************
 

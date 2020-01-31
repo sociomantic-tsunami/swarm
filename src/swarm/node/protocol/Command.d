@@ -21,7 +21,7 @@ import swarm.node.request.model.IRequest;
 
 import ocean.text.convert.Formatter;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 /*******************************************************************************
 

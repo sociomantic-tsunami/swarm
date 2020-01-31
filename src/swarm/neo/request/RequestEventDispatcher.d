@@ -34,7 +34,7 @@
 module swarm.neo.request.RequestEventDispatcher;
 
 import core.stdc.string;
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 import ocean.core.SmartUnion;
 import ocean.core.Verify;
 import ocean.util.container.VoidBufferAsArrayOf;
