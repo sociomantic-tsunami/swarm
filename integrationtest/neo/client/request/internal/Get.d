@@ -57,7 +57,7 @@ public struct VersionedGet ( ubyte Version )
 
     import ocean.io.select.protocol.generic.ErrnoIOException: IOError;
 
-    mixin TypeofThis;
+    alias typeof(this) This;
 
     /***************************************************************************
 

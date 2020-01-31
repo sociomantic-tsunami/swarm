@@ -151,7 +151,7 @@ public template RequestCore ( RequestType request_type_, ubyte request_code,
 
     ***************************************************************************/
 
-    private mixin TypeofThis!();
+    private alias typeof(this) This;
 
     /***************************************************************************
 

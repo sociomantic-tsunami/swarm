@@ -276,7 +276,7 @@ struct IoVecTracker
     {
         import ocean.core.Test: test;
         import ocean.transition;
-        mixin TypeofThis;
+        alias typeof(this) This;
     }
 
     unittest
