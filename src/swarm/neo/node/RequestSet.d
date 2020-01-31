@@ -21,7 +21,7 @@ module swarm.neo.node.RequestSet;
 
 import ocean.util.container.pool.ObjectPool;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 import ocean.core.Verify;
 
 /******************************************************************************/

@@ -40,7 +40,7 @@ import ocean.core.Verify;
 
 import ocean.util.log.Logger;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 /*******************************************************************************
 

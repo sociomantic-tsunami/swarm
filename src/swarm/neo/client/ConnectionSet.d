@@ -41,7 +41,7 @@ public final class ConnectionSet : RequestOnConn.IConnectionGetter
     import ocean.util.container.pool.ObjectPool;
     import ocean.util.container.pool.FreeList;
 
-    import ocean.transition;
+    import ocean.meta.types.Qualifiers;
 
     debug ( SwarmConn ) import ocean.io.Stdout;
 
@@ -588,7 +588,7 @@ public final class ConnectionSet : RequestOnConn.IConnectionGetter
 
 private struct ConnectionRegistry ( C )
 {
-    import ocean.transition;
+    import ocean.meta.types.Qualifiers;
     import Array = ocean.core.Array : shuffle;
     import core.sys.posix.stdlib : drand48;
     import swarm.neo.util.TreeMap;

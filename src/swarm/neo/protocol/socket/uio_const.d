@@ -16,7 +16,7 @@ import core.sys.posix.sys.types: ssize_t;
 
 import core.sys.posix.sys.socket;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 /*******************************************************************************
 

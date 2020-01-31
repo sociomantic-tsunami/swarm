@@ -161,7 +161,7 @@ module swarm.util.ExtensibleClass;
 
 *******************************************************************************/
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 
 /*******************************************************************************
@@ -179,7 +179,7 @@ import ocean.transition;
 
 public template ExtensibleClass ( Plugins ... )
 {
-    import ocean.transition;
+    import ocean.meta.types.Qualifiers;
 
     static if ( Plugins.length )
     {

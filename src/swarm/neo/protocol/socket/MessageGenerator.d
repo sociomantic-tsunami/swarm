@@ -17,7 +17,7 @@ struct IoVecMessage // MessageGenerator
 {
     import swarm.neo.protocol.Message: MessageType, MessageHeader;
 
-    import ocean.transition;
+    import ocean.meta.types.Qualifiers;
 
     /***************************************************************************
 
@@ -275,7 +275,7 @@ struct IoVecTracker
     version ( unittest )
     {
         import ocean.core.Test: test;
-        import ocean.transition;
+        import ocean.meta.types.Qualifiers;
         alias typeof(this) This;
     }
 

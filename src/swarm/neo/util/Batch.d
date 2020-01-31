@@ -26,7 +26,7 @@
 
 module swarm.neo.util.Batch;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 import ocean.core.Verify;
 import ocean.io.compress.Lzo;
 import ocean.meta.traits.Basic : ArrayKind, isArrayType;

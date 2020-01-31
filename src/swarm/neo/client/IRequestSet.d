@@ -16,7 +16,7 @@
 
 module swarm.neo.client.IRequestSet;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 /*******************************************************************************
 

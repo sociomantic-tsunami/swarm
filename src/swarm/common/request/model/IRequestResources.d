@@ -30,7 +30,7 @@ module swarm.common.request.model.IRequestResources;
 
 import ocean.meta.codegen.Identifier : identifier;
 import ocean.meta.traits.Basic : ArrayKind, isArrayType;
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 
 /*******************************************************************************
@@ -88,7 +88,7 @@ public template IRequestResources_T ( Shared )
     ***************************************************************************/
 
     import ocean.meta.codegen.Identifier : identifier;
-    import ocean.transition;
+    import ocean.meta.types.Qualifiers;
 
 
     /***************************************************************************
@@ -183,7 +183,7 @@ public template RequestResources_T ( Shared )
 
     import ocean.meta.codegen.Identifier : identifier;
     import ocean.meta.traits.Basic : ArrayKind, isArrayType;
-    import ocean.transition;
+    import ocean.meta.types.Qualifiers;
 
 
     /***************************************************************************

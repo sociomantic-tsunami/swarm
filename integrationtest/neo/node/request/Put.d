@@ -12,7 +12,7 @@
 
 module integrationtest.neo.node.request.Put;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 import integrationtest.neo.node.Storage;
 import swarm.neo.node.RequestOnConn;
 import swarm.neo.request.Command;

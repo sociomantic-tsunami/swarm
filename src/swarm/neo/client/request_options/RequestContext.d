@@ -24,7 +24,7 @@ module swarm.neo.client.request_options.RequestContext;
 /// ditto
 public struct RequestContext
 {
-    import ocean.transition;
+    import ocean.meta.types.Qualifiers;
     import ocean.core.ContextUnion;
 
     private alias typeof(this) This;

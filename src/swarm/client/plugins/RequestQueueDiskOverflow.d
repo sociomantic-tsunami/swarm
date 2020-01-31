@@ -27,7 +27,7 @@ module swarm.client.plugins.RequestQueueDiskOverflow;
 
 import swarm.client.connection.RequestOverflow;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 /*******************************************************************************
 

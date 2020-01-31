@@ -11,7 +11,7 @@
 
 module swarm.neo.authentication.ClientCredentials;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 /// ditto
 public struct Credentials

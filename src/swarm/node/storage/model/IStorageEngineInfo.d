@@ -11,7 +11,7 @@
 
 module swarm.node.storage.model.IStorageEngineInfo;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 public interface IStorageEngineInfo
 {

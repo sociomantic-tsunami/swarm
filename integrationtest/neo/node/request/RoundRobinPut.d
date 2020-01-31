@@ -12,7 +12,7 @@
 
 module integrationtest.neo.node.request.RoundRobinPut;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 import integrationtest.neo.node.Storage;
 import swarm.neo.node.IRequest;
 import swarm.neo.node.RequestOnConn;

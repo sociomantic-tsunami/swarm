@@ -24,7 +24,7 @@ import ocean.util.container.AppendBuffer;
 
 import ocean.io.compress.Lzo;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 import ocean.core.Enforce;
 

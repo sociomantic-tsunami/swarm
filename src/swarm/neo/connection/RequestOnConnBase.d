@@ -81,7 +81,7 @@ abstract class RequestOnConnBase
     import swarm.neo.connection.YieldedRequestOnConns;
     import Util = swarm.neo.util.Util;
 
-    import ocean.transition;
+    import ocean.meta.types.Qualifiers;
     import ocean.core.Verify;
 
     /// Convenience alias for derived classes

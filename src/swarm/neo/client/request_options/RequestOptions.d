@@ -16,7 +16,7 @@
 
 module swarm.neo.client.request_options.RequestOptions;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 import ocean.core.Tuple;
 
 /*******************************************************************************

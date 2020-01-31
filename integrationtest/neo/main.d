@@ -12,7 +12,7 @@
 
 module integrationtest.neo.main;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 import ocean.task.Scheduler;
 import ocean.task.Task;
 

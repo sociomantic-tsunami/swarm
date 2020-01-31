@@ -11,7 +11,7 @@
 
 module swarm.util.RecordStream;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 /*******************************************************************************
 

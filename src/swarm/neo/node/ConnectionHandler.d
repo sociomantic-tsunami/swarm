@@ -28,7 +28,7 @@ module swarm.neo.node.ConnectionHandler;
 
 *******************************************************************************/
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 import ocean.core.Verify;
 import ocean.net.server.connection.IConnectionHandler;
 import ocean.sys.socket.AddressIPSocket;
@@ -63,7 +63,7 @@ class ConnectionHandler : IConnectionHandler
     import ClassicSwarm =
         swarm.node.connection.ConnectionHandler: ConnectionSetupParams;
 
-    import ocean.transition;
+    import ocean.meta.types.Qualifiers;
 
     /// Map of request handling info indexed by command code.
     public struct RequestMap

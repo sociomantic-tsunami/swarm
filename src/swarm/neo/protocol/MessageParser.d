@@ -18,7 +18,7 @@ struct MessageParser
 
     import ocean.meta.traits.Indirections : hasIndirections;
 
-    import ocean.transition;
+    import ocean.meta.types.Qualifiers;
 
     debug (MessageProtocol) import ocean.io.Stdout_tango;
 

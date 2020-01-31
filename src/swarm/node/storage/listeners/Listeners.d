@@ -31,7 +31,7 @@ import ocean.io.select.client.FiberSelectEvent;
 
 import ocean.core.array.Mutation : moveToEnd;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 import ocean.core.Verify;
 

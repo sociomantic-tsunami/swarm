@@ -12,7 +12,7 @@
 
 module swarm.neo.client.RequestOnConnSet;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 import ocean.core.Verify;
 
 /*******************************************************************************

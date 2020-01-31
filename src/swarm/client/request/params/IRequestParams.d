@@ -43,7 +43,7 @@ import ocean.io.device.Array;
 
 debug ( SwarmClient ) import ocean.io.Stdout;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 import ocean.util.log.Logger;
 

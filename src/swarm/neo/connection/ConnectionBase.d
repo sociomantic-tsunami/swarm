@@ -49,7 +49,7 @@ abstract class ConnectionBase: ISelectClient
 
     import ocean.util.log.Logger;
 
-    import ocean.transition;
+    import ocean.meta.types.Qualifiers;
 
     import core.sys.posix.netinet.in_: SOL_SOCKET, IPPROTO_TCP, SO_KEEPALIVE;
 

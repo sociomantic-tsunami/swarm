@@ -33,7 +33,7 @@ class NodeConnect
     import ocean.core.Enforce;
     import ocean.core.Verify;
     import ocean.core.array.Mutation : copy;
-    import ocean.transition;
+    import ocean.meta.types.Qualifiers;
     import ocean.util.log.Logger;
 
     debug ( SwarmConn ) import ocean.io.Stdout_tango;

@@ -38,7 +38,7 @@ import swarm.Const : NodeItem;
 
 debug ( SwarmClient ) import ocean.io.Stdout;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 
 public class FluidNodeRegistry : NodeRegistry, IFluidNodeRegistry

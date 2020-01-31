@@ -24,7 +24,7 @@ module swarm.node.model.NeoNode;
 
 *******************************************************************************/
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 import swarm.Const : NodeItem;
 import swarm.neo.AddrPort;

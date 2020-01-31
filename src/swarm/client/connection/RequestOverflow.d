@@ -53,7 +53,7 @@ import swarm.Const;
 
 import ocean.util.container.queue.FlexibleFileQueue;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 import Integer = ocean.text.convert.Integer_tango;
 

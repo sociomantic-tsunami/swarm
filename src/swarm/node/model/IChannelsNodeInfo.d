@@ -29,7 +29,7 @@ import swarm.Const;
 
 import swarm.node.storage.model.IStorageEngineInfo;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 public interface IChannelsNodeInfo : INodeInfo
 {

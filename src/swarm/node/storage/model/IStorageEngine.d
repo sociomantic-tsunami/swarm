@@ -31,7 +31,7 @@ import ocean.core.Array;
 
 import ocean.util.container.pool.model.IResettable;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 abstract public class IStorageEngine : IStorageEngineInfo, Resettable
 {

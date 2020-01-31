@@ -34,7 +34,7 @@
 
 module swarm.neo.util.StructPacker;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 import ocean.core.Verify;
 import ocean.meta.traits.Basic :
     ArrayKind, isArrayType, isPointerType, isPrimitiveType;

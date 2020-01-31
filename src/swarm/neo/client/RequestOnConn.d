@@ -44,7 +44,7 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
     import swarm.neo.client.Connection;
     import swarm.neo.connection.YieldedRequestOnConns;
     import ocean.core.Verify;
-    import ocean.transition;
+    import ocean.meta.types.Qualifiers;
 
     /***************************************************************************
 

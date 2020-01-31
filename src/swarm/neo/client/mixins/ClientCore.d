@@ -20,7 +20,7 @@ module swarm.neo.client.mixins.ClientCore;
 /// ditto
 template ClientCore ( )
 {
-    import ocean.transition;
+    import ocean.meta.types.Qualifiers;
     import ocean.core.Enforce;
     import ocean.meta.codegen.Identifier : identifier;
     import ocean.util.log.Stats;

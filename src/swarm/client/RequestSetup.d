@@ -32,7 +32,7 @@ public template RequestParamsSetup ( )
 
     ***************************************************************************/
 
-    import ocean.transition;
+    import ocean.meta.types.Qualifiers;
     import ocean.meta.codegen.Identifier : identifier;
     import swarm.client.request.params.IRequestParams;
 
@@ -69,7 +69,7 @@ public template RequestParamsSetup ( )
 
 public template RequestBase ( )
 {
-    import ocean.transition;
+    import ocean.meta.types.Qualifiers;
     import swarm.client.request.context.RequestContext;
     import swarm.client.request.params.IRequestParams;
     import swarm.client.request.notifier.IRequestNotification;
@@ -378,7 +378,7 @@ public template RequestBase ( )
 
 public template ClientCommandBase ( )
 {
-    import ocean.transition;
+    import ocean.meta.types.Qualifiers;
     import swarm.client.ClientCommandParams;
     import swarm.client.request.notifier.IRequestNotification;
     import swarm.client.request.params.IRequestParams;
@@ -485,7 +485,7 @@ public template ClientCommandBase ( )
 
 public template Node ( )
 {
-    import ocean.transition;
+    import ocean.meta.types.Qualifiers;
     import ocean.core.Verify;
     import swarm.Const;
     import swarm.client.request.params.IRequestParams;
@@ -581,7 +581,7 @@ public template Node ( )
 
 public template Channel ( )
 {
-    import ocean.transition;
+    import ocean.meta.types.Qualifiers;
     import ocean.core.Verify;
     import ocean.core.TypeConvert : downcast;
     import swarm.client.request.params.IRequestParams;
@@ -649,7 +649,7 @@ public template Channel ( )
 
 public template Suspendable ( )
 {
-    import ocean.transition;
+    import ocean.meta.types.Qualifiers;
     import ocean.core.Verify;
     import ocean.core.TypeConvert : downcast;
     import ocean.meta.traits.Aggregates : hasMember;
@@ -751,7 +751,7 @@ public template Suspendable ( )
 
 public template StreamInfo ( )
 {
-    import ocean.transition;
+    import ocean.meta.types.Qualifiers;
     import ocean.core.Verify;
     import ocean.core.TypeConvert : downcast;
     import swarm.client.request.params.IRequestParams;

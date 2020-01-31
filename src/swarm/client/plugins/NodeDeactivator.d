@@ -32,7 +32,7 @@ import swarm.client.connection.NodeErrorTracker;
 
 import swarm.Const : NodeItem;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 import ocean.core.Verify;
 

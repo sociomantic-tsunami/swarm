@@ -29,7 +29,7 @@ class Connection: ConnectionBase
     import ocean.io.select.EpollSelectDispatcher;
     import ocean.sys.socket.AddressIPSocket;
 
-    import ocean.transition;
+    import ocean.meta.types.Qualifiers;
 
     debug (SwarmConn) import ocean.io.Stdout_tango;
 

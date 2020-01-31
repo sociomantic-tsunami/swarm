@@ -12,7 +12,7 @@
 
 module swarm.neo.client.mixins.SerializeMethod;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 import ocean.util.serialize.contiguous.MultiVersionDecorator;
 
 /*******************************************************************************

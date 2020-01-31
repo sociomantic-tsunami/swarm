@@ -12,7 +12,7 @@
 
 module integrationtest.neo.client.request.Put;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 import ocean.core.SmartUnion;
 import swarm.neo.client.NotifierTypes;
 

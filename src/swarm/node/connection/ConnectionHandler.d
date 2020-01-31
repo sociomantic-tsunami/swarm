@@ -30,7 +30,7 @@ module swarm.node.connection.ConnectionHandler;
 
 *******************************************************************************/
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 import swarm.Const;
 

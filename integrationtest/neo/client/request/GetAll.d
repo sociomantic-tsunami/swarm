@@ -12,7 +12,7 @@
 
 module integrationtest.neo.client.request.GetAll;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 import ocean.core.SmartUnion;
 import integrationtest.neo.client.NotifierTypes;
 
