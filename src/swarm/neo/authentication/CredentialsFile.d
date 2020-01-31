@@ -42,10 +42,11 @@ import NodeCred = swarm.neo.authentication.NodeCredentials;
 import CredDef = swarm.neo.authentication.Credentials;
 import HmacDef = swarm.neo.authentication.HmacDef;
 
-import ocean.transition;
+import ocean.core.TypeConvert : assumeUnique;
 import ocean.core.Verify;
 import ocean.io.device.File;
 import ocean.net.util.QueryParams;
+import ocean.meta.types.Qualifiers;
 import ocean.text.convert.Formatter;
 
 debug ( SwarmConn )
