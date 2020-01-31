@@ -602,7 +602,7 @@ template ClientCore ( )
         static assert(Requests.length > 0);
 
         /// typeof(this) convenience alias
-        mixin TypeofThis;
+        alias typeof(this) This;
 
         /***********************************************************************
 

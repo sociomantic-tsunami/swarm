@@ -36,7 +36,7 @@ public template RequestParamsSetup ( )
     import ocean.meta.codegen.Identifier : identifier;
     import swarm.client.request.params.IRequestParams;
 
-    mixin TypeofThis;
+    alias typeof(this) This;
     static assert (is(This == struct));
 
     /***************************************************************************
@@ -75,7 +75,7 @@ public template RequestBase ( )
     import swarm.client.request.notifier.IRequestNotification;
     import swarm.Const : ICommandCodes;
 
-    mixin TypeofThis;
+    alias typeof(this) This;
     static assert (is(This == struct));
 
     /***************************************************************************
@@ -383,7 +383,7 @@ public template ClientCommandBase ( )
     import swarm.client.request.notifier.IRequestNotification;
     import swarm.client.request.params.IRequestParams;
 
-    mixin TypeofThis;
+    alias typeof(this) This;
     static assert (is(This == struct));
 
     /***************************************************************************
@@ -490,7 +490,7 @@ public template Node ( )
     import swarm.Const;
     import swarm.client.request.params.IRequestParams;
 
-    mixin TypeofThis;
+    alias typeof(this) This;
     static assert (is(This == struct));
 
     /***************************************************************************
@@ -587,7 +587,7 @@ public template Channel ( )
     import swarm.client.request.params.IRequestParams;
     import swarm.client.request.params.IChannelRequestParams;
 
-    mixin TypeofThis;
+    alias typeof(this) This;
     static assert (is(This == struct));
 
     /***************************************************************************
@@ -655,7 +655,7 @@ public template Suspendable ( )
     import ocean.meta.traits.Aggregates : hasMember;
     import swarm.client.request.params.IRequestParams;
 
-    mixin TypeofThis;
+    alias typeof(this) This;
     static assert (is(This == struct));
 
     /***************************************************************************
@@ -756,7 +756,7 @@ public template StreamInfo ( )
     import ocean.core.TypeConvert : downcast;
     import swarm.client.request.params.IRequestParams;
 
-    mixin TypeofThis;
+    alias typeof(this) This;
     static assert (is(This == struct));
 
     /***************************************************************************

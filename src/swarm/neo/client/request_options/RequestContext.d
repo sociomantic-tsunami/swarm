@@ -27,7 +27,7 @@ public struct RequestContext
     import ocean.transition;
     import ocean.core.ContextUnion;
 
-    private mixin TypeofThis!();
+    private alias typeof(this) This;
 
     /***************************************************************************
 
