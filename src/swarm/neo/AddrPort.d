@@ -267,7 +267,7 @@ public struct AddrPort
 
     ***************************************************************************/
 
-    public typeof(&this) set ( sockaddr_in src )
+    public typeof(&this) set ( sockaddr_in src ) return
     {
         this.naddress = src.sin_addr.s_addr;
         this.nport    = src.sin_port;
@@ -286,7 +286,7 @@ public struct AddrPort
 
     ***************************************************************************/
 
-    public typeof(&this) set ( NodeItem node_item )
+    public typeof(&this) set ( NodeItem node_item ) return
     {
         this.port = node_item.Port;
         this.setAddress(node_item.Address);
