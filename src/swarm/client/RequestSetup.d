@@ -164,7 +164,7 @@ public template RequestBase ( )
 
     ***************************************************************************/
 
-    public This* notifier ( scope IRequestNotification.Callback notifier )
+    public This* notifier ( scope IRequestNotification.Callback notifier ) return
     {
         this.notification_dg = notifier;
         return &this;
@@ -183,7 +183,7 @@ public template RequestBase ( )
 
     ***************************************************************************/
 
-    public This* timeout ( uint timeout_ms )
+    public This* timeout ( uint timeout_ms ) return
     {
         this.timeout_ms = timeout_ms;
         return &this;
@@ -202,7 +202,7 @@ public template RequestBase ( )
 
     ***************************************************************************/
 
-    public This* context ( RequestContext context )
+    public This* context ( RequestContext context ) return
     {
         this.user_context = context;
         return &this;
@@ -221,7 +221,7 @@ public template RequestBase ( )
 
     ***************************************************************************/
 
-    public This* context ( void* context )
+    public This* context ( void* context ) return
     {
         this.user_context = RequestContext(context);
         return &this;
@@ -240,7 +240,7 @@ public template RequestBase ( )
 
     ***************************************************************************/
 
-    public This* context ( Object context )
+    public This* context ( Object context ) return
     {
         this.user_context = RequestContext(context);
         return &this;
@@ -259,7 +259,7 @@ public template RequestBase ( )
 
     ***************************************************************************/
 
-    public This* context ( hash_t context )
+    public This* context ( hash_t context ) return
     {
         this.user_context = RequestContext(context);
         return &this;
@@ -508,7 +508,7 @@ public template Node ( )
 
     ***************************************************************************/
 
-    public This* allNodes ( )
+    public This* allNodes ( ) return
     {
         this.node_item = NodeItem();
         return &this;
@@ -527,7 +527,7 @@ public template Node ( )
 
     ***************************************************************************/
 
-    public This* node ( NodeItem node )
+    public This* node ( NodeItem node ) return
     {
         verify(node.set(), "Invalid NodeItem passed to node()!");
         this.node_item = node;
@@ -548,7 +548,7 @@ public template Node ( )
 
     ***************************************************************************/
 
-    public This* node ( mstring address, ushort port )
+    public This* node ( mstring address, ushort port ) return
     {
         this.node_item = NodeItem(address, port);
         return &this;
@@ -611,7 +611,7 @@ public template Channel ( )
 
     ***************************************************************************/
 
-    public This* channel ( cstring channel )
+    public This* channel ( cstring channel ) return
     {
         this.channel_name = channel;
         return &this;
@@ -693,7 +693,7 @@ public template Suspendable ( )
 
     public This* suspendable (
         RequestParams.RegisterSuspendableDg suspend_register,
-        RequestParams.RegisterSuspendableDg suspend_unregister = null )
+        RequestParams.RegisterSuspendableDg suspend_unregister = null ) return
     {
         this.suspend_register = suspend_register;
         this.suspend_unregister = suspend_unregister;
@@ -781,7 +781,7 @@ public template StreamInfo ( )
     ***************************************************************************/
 
     public This* stream_info (
-        RequestParams.RegisterStreamInfoDg stream_info_register )
+        RequestParams.RegisterStreamInfoDg stream_info_register ) return
     {
         this.stream_info_register = stream_info_register;
         return &this;

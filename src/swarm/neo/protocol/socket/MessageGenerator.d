@@ -53,7 +53,8 @@ struct IoVecMessage // MessageGenerator
 
     ***************************************************************************/
 
-    IoVecTracker* setup ( MessageType type, in void[][] dynamic_fields, in void[][] static_fields ... )
+    IoVecTracker* setup ( MessageType type, in void[][] dynamic_fields,
+        in void[][] static_fields ... ) return
     {
         verify(type <= type.max);
 
