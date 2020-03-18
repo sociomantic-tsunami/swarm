@@ -231,7 +231,7 @@ public struct AddrPort
 
     ***************************************************************************/
 
-    public ubyte[] address_bytes ( )
+    public ubyte[] address_bytes ( ) return
     {
         return (cast(ubyte*)&this.naddress)[0 .. this.naddress.sizeof];
     }
