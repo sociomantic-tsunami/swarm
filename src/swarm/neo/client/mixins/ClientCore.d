@@ -510,10 +510,10 @@ template ClientCore ( )
                     rcv_stats.socket.total);
 
             // Connection send queue stats iteration.
-            foreach ( node, stats; stats.connection_send_queue )
+            foreach ( node, queue_stats; stats.connection_send_queue )
                 Stdout.formatln("{}:{}: total {} microseconds queued time",
                     node.address_bytes, node.port,
-                    stats.time_histogram.total_time_micros);
+                    queue_stats.time_histogram.total_time_micros);
         }
     }
 
