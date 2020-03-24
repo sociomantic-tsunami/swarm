@@ -200,6 +200,8 @@ public class ChannelsNodeBase (
 
         Looks up channels by id.
 
+        Aliased to opIn_r for backwards compatibility.
+
         Params:
             id = id of channel to look up
 
@@ -213,6 +215,10 @@ public class ChannelsNodeBase (
     {
         return cast(IStorageEngineInfo*)(id in this.channels);
     }
+
+    /** ditto */
+
+    public alias opBinaryRight ( istring op : "in" ) = opIn_r;
 
 
     /***************************************************************************
