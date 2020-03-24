@@ -204,7 +204,7 @@ public struct RequestContext
 
     ***************************************************************************/
 
-    private ContextUnion* context ( ) const
+    private ContextUnion* context ( ) const return
     {
         return cast(ContextUnion*)this.context_.ptr;
     }
