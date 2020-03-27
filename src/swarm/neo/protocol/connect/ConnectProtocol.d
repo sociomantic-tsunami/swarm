@@ -34,10 +34,9 @@ class ConnectProtocol: ISelectClient
 
     import ocean.meta.traits.Indirections : hasIndirections;
 
-    import ocean.stdc.posix.sys.socket;
-    import ocean.stdc.string: strerror_r, strlen;
-
     import core.stdc.errno: ENOENT;
+    import core.stdc.string: strerror_r, strlen;
+    import core.sys.posix.sys.socket;
 
     import ocean.util.log.Logger;
 

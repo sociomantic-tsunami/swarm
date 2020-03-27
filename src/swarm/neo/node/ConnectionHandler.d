@@ -261,7 +261,7 @@ class ConnectionHandler : IConnectionHandler
             Constructor.
 
             Note that `unix_socket_path.length` needs to be less than
-            `UNIX_PATH_MAX`, a constant defined in `ocean.stdc.posix.sys.un`.
+            `core.sys.posix.sys.un : UNIX_PATH_MAX`.
 
             Params:
                 epoll = epoll dispatcher used by the node
