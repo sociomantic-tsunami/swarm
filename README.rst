@@ -85,23 +85,10 @@ needed ebtree library in https://github.com/sociomantic-tsunami/ebtree/releases
 (look only for the ``v6.0.socioX`` releases, some pre-built Ubuntu packages are
 provided).
 
-If you plan to use the provided ``Makefile`` (you need it to convert code to
-D2, or to run the tests), you need to also checkout the submodules with ``git
-submodule update --init``. This will fetch the `Makd
-<https://github.com/sociomantic-tsunami/makd>`_ project in ``submodules/makd``.
-
-
-Conversion to D2
-----------------
-
-Once you have all the dependencies installed, you need to convert the code to
-D2 (if you want to use it in D2). For this you also need to build/install the
-`d1to2fix <https://github.com/sociomantic-tsunami/d1to2fix>`_ tool.
-
-Also, make sure you have the Makd submodule properly updated (see the previous
-section for instructions), then just type::
-
-  make d2conv
+If you plan to use the provided ``Makefile`` (you need it to run the tests),
+you need to also checkout the submodules with ``git submodule update --init``.
+This will fetch the `Makd<https://github.com/sociomantic-tsunami/makd>`_ project
+in ``submodules/makd``.
 
 Versioning
 ==========
@@ -125,10 +112,10 @@ Maintained Major Branches
 ====== ==================== ===============
 Major  Initial release date Supported until
 ====== ==================== ===============
-v5.x.x v5.0.0_: 30/01/2018  TBD
+v6.x.x v6.0.0_: 04/06/2019  TBD
 ====== ==================== ===============
 
-.. _v5.0.0: https://github.com/sociomantic-tsunami/swarm/releases/tag/v5.0.0
+.. _v6.0.0: https://github.com/sociomantic-tsunami/swarm/releases/tag/v6.0.0
 
 Contributing
 ============
