@@ -14,6 +14,7 @@ module swarm.neo.client.RetryTimer;
 
 import core.stdc.errno;
 import stdio = core.stdc.stdio;
+import core.stdc.string;
 import core.sys.posix.sys.time;
 import core.sys.posix.time;
 
@@ -21,7 +22,6 @@ import ocean.core.Verify;
 import ocean.io.select.EpollSelectDispatcher;
 import ocean.io.select.client.model.ISelectClient;
 import ocean.meta.types.Qualifiers;
-import ocean.stdc.string;
 import ocean.sys.TimerFD;
 
 import swarm.neo.util.FiberTokenHashGenerator;
