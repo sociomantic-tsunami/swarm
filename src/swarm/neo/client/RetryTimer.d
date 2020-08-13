@@ -222,8 +222,8 @@ private final class TimerEvent: ISelectClient
             auto msg = e.message();
             stdio.fprintf(stdio.stderr, ("Error unregistering " ~
                     typeof(this).stringof ~
-                    " from epoll: %.*s @%s:%u\n\0").ptr,
-                    msg.length, msg.ptr, e.file.ptr, e.line);
+                    " from epoll: %.*s @%s:%zu\n\0").ptr,
+                    cast(int) msg.length, msg.ptr, e.file.ptr, e.line);
         }
     }
 
