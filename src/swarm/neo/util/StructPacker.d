@@ -319,6 +319,43 @@ unittest
     test(packUnpack(Context.init));
 }
 
+// Tests of packed data
+unittest
+{
+    ulong val = 0x0123456789abcdef;
+
+    // Test packing a pointer. (The pointer is packed.)
+    {
+        struct Pointer
+        {
+            void* p;
+        }
+
+        Pointer s;
+        s.p = cast(void*)val;
+
+        void[] buf;
+        pack(s, buf);
+        test!("==")(buf, (cast(void*)(&val))[0..val.sizeof]);
+    }
+
+    // Test packing a pointer to an array. (The pointer to the array is packed,
+    // not the content of the array.)
+    {
+        struct ArrayPointer
+        {
+            void[]* ap;
+        }
+
+        ArrayPointer s;
+        s.ap = cast(void[]*)val;
+
+        void[] buf;
+        pack(s, buf);
+        test!("==")(buf, (cast(void*)(&val))[0..val.sizeof]);
+    }
+}
+
 /*******************************************************************************
 
     Statically asserts that the specified type can be packed by the `pack`
