@@ -132,8 +132,9 @@ struct HmacAuthCode
         }
         catch (GCryptError e)
         {
-            cstdio.fprintf(cstdio.stderr, "libgcrypt test for SHA512 failed: %.*s @%s:%u\n".ptr,
-                    e.msg.length, e.msg.ptr, e.file.ptr, e.line);
+            cstdio.fprintf(cstdio.stderr,
+                    "libgcrypt test for SHA512 failed: %.*s @%s:%zu\n".ptr,
+                    cast(int) e.msg.length, e.msg.ptr, e.file.ptr, e.line);
             exit(EXIT_FAILURE);
         }
     }
