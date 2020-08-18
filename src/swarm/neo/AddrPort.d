@@ -29,7 +29,7 @@ public struct AddrPort
 
     import ocean.util.container.map.model.StandardHash;
     import ocean.core.Test;
-    import swarm.util.Verify;
+    import ocean.core.Verify;
 
     /// Minimum length required for an address format buffer.
     public enum AddrBufLength = INET6_ADDRSTRLEN;
