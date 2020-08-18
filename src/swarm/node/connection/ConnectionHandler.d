@@ -22,76 +22,40 @@
 
 module swarm.node.connection.ConnectionHandler;
 
-
-
-/*******************************************************************************
-
-    Imports
-
-*******************************************************************************/
-
-import ocean.meta.types.Qualifiers;
-
-import swarm.Const;
-
 import swarm.common.connection.CommandMixins;
-
+import swarm.Const;
 import swarm.node.model.INodeInfo;
 import swarm.node.model.ISwarmConnectionHandlerInfo;
-
 import swarm.node.request.model.IRequest;
-
-import ocean.util.container.pool.model.IResettable;
-
-import ocean.core.SmartEnum;
-
-import ocean.io.compress.lzo.LzoChunkCompressor;
-
-import ocean.io.select.EpollSelectDispatcher;
-
-import ocean.net.server.connection.IFiberConnectionHandler;
-
-import ocean.io.select.client.model.ISelectClient;
-
-import ocean.io.select.protocol.fiber.model.IFiberSelectProtocol;
-
-import ocean.io.select.protocol.generic.ErrnoIOException : SocketError;
-
-import swarm.protocol.FiberSelectWriter;
 import swarm.protocol.FiberSelectReader;
+import swarm.protocol.FiberSelectWriter;
 import swarm.protocol.IAddrPort;
 
-import ocean.io.select.client.FiberSelectEvent;
-
 import ocean.core.MessageFiber;
-
+import ocean.core.SmartEnum;
 import ocean.core.Verify;
-
+import ocean.io.compress.lzo.LzoChunkCompressor;
 import ocean.io.model.IConduit: ISelectable;
-
+import ocean.io.select.client.FiberSelectEvent;
+import ocean.io.select.client.model.ISelectClient;
+import ocean.io.select.EpollSelectDispatcher;
+import ocean.io.select.protocol.fiber.model.IFiberSelectProtocol;
+import ocean.io.select.protocol.generic.ErrnoIOException : SocketError;
+debug (ConnectionHandler) import ocean.io.Stdout;
+import ocean.meta.types.Qualifiers;
+import ocean.net.server.connection.IFiberConnectionHandler;
 import ocean.sys.socket.AddressIPSocket;
-
 import IPSocket = ocean.sys.socket.IPSocket;
-
-import core.sys.posix.netinet.in_: SOL_SOCKET, IPPROTO_TCP, SO_KEEPALIVE;
-
-debug ( ConnectionHandler ) import ocean.io.Stdout;
-
+import ocean.util.container.pool.model.IResettable;
 import ocean.util.log.Logger;
 
-/*******************************************************************************
-
-    Static module logger
-
-*******************************************************************************/
+import core.sys.posix.netinet.in_: SOL_SOCKET, IPPROTO_TCP, SO_KEEPALIVE;
 
 private Logger log;
 static this ( )
 {
     log = Log.lookup("swarm.node.connection.ConnectionHandler");
 }
-
-
 
 /*******************************************************************************
 
