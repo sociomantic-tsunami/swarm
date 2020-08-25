@@ -412,8 +412,26 @@ abstract class RequestOnConnBase
 
             public void add ( T ) ( ref T elem )
             {
+                this.addPointer(&elem);
+            }
+
+            /*******************************************************************
+
+                Adds a single element to the payload to be sent.
+
+                Note that this takes a pointer to the element, and the element's
+                lifetime needs to match or exceed that of this payload to avoid
+                memory corruption.
+
+                Params:
+                    ptr = pointer to the element to add
+
+            *******************************************************************/
+
+            public void addPointer ( T ) ( const T* ptr )
+            {
                 static assert(!hasIndirections!(T));
-                this.outer.outer.send_payload ~= (cast(const(void*))&elem)[0..T.sizeof];
+                this.outer.outer.send_payload ~= (cast(const(void*))ptr)[0..T.sizeof];
             }
 
             /*******************************************************************
