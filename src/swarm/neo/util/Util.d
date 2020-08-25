@@ -30,6 +30,7 @@ import ocean.meta.types.Qualifiers;
 
 *******************************************************************************/
 
+deprecated("This function is not safe to use - Use `Payload` facilities instead")
 void appendSlices ( Types ... ) ( ref void[][] slices, ref Types x )
 {
     foreach (i, T; Types)
@@ -78,7 +79,7 @@ void appendSlices ( Types ... ) ( ref void[][] slices, ref Types x )
     }
 }
 
-unittest
+deprecated unittest
 {
     void[][] slices;
     char[] str = "Hello World!".dup;
