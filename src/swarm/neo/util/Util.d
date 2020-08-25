@@ -79,18 +79,6 @@ void appendSlices ( Types ... ) ( ref void[][] slices, ref Types x )
     }
 }
 
-deprecated unittest
-{
-    void[][] slices;
-    char[] str = "Hello World!".dup;
-    appendSlices(slices, str);
-    test!("==")(slices.length, 2);
-    test!("==")(slices[0].length, size_t.sizeof);
-    test!("==")(*cast(size_t*)(slices[0].ptr), str.length);
-    test!("is")(slices[1], str);
-}
-
-
 char[] TupleToSlices ( Types ... ) ( istring name )
 {
     char[] code;
