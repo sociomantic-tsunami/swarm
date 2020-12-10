@@ -20,7 +20,7 @@ module swarm.protocol.StringListReader;
 
 *******************************************************************************/
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 import ocean.util.container.ConcatBuffer;
 
@@ -142,14 +142,14 @@ public class StringListReader
     public cstring[] read ( )
     {
         this.strings.length = 0;
-        enableStomping(this.strings);
+        assumeSafeAppend(this.strings);
         this.strings_buffer.clear;
 
         // Read strings
         do
         {
             this.buffer.length = 0;
-            enableStomping(*this.buffer);
+            assumeSafeAppend(*this.buffer);
             this.reader.readArray(*this.buffer);
 
             if ( this.buffer.length > 0 )

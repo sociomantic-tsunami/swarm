@@ -19,9 +19,9 @@ module swarm.client.connection.NodeConnectionPool;
 
 *******************************************************************************/
 
-import ocean.transition;
-
 import ocean.core.Verify;
+
+import ocean.meta.types.Qualifiers;
 
 import swarm.Const;
 
@@ -151,7 +151,7 @@ public abstract class NodeConnectionPool
 
     ***************************************************************************/
 
-    protected Const!(size_t) fiber_stack_size;
+    protected const(size_t) fiber_stack_size;
 
 
     /***************************************************************************
@@ -309,13 +309,12 @@ public abstract class NodeConnectionPool
 
     ***************************************************************************/
 
-    public mixin(genOpCmp(`
+    public override int opCmp ( Object rhs )
     {
         auto other = cast(typeof(this)) rhs;
         verify(other !is null);
         return this.node_item.opCmp(other.node_item);
     }
-    `));
 
 
     /**************************************************************************

@@ -26,7 +26,7 @@
 
 module swarm.neo.util.Batch;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 import ocean.core.Verify;
 import ocean.io.compress.Lzo;
 import ocean.meta.traits.Basic : ArrayKind, isArrayType;
@@ -154,7 +154,7 @@ public struct BatchWriter ( Record ... )
 
     ***************************************************************************/
 
-    public Const!(void)[] get ( )
+    public const(void)[] get ( )
     {
         return *this.buffer;
     }
@@ -173,12 +173,12 @@ public struct BatchWriter ( Record ... )
 
     ***************************************************************************/
 
-    public Const!(void)[] getCompressed ( Lzo lzo, ref void[] compress_buf )
+    public const(void)[] getCompressed ( Lzo lzo, ref void[] compress_buf )
     {
         // Set destination to max possible length.
         compress_buf.length =
             lzo.maxCompressedLength((*this.buffer).length) + size_t.sizeof;
-        enableStomping(compress_buf);
+        assumeSafeAppend(compress_buf);
 
         // Write uncompressed length into first size_t.sizeof bytes of dest.
         *(cast(size_t*)(compress_buf.ptr)) = (*this.buffer).length;
@@ -189,7 +189,7 @@ public struct BatchWriter ( Record ... )
 
         // Minimize dest length and return.
         compress_buf.length = compressed_len + size_t.sizeof;
-        enableStomping(compress_buf);
+        assumeSafeAppend(compress_buf);
         return compress_buf;
     }
 
@@ -202,7 +202,7 @@ public struct BatchWriter ( Record ... )
     public void clear ( )
     {
         (*this.buffer).length = 0;
-        enableStomping(*this.buffer);
+        assumeSafeAppend(*this.buffer);
     }
 
     /***************************************************************************
@@ -280,7 +280,7 @@ public scope class BatchReader ( Record ... )
     static assert(recordFieldsSupported!(Record)());
 
     /// Unconsumed data remaining in batch. Slice of batch passed to ctor.
-    private Const!(void)[] remaining;
+    private const(void)[] remaining;
 
     /***************************************************************************
 
@@ -326,7 +326,7 @@ public scope class BatchReader ( Record ... )
         // Read uncompressed length from first size_t.sizeof bytes.
         auto uncompressed_len = *(cast(size_t*)(batch.ptr));
         decompress_buf.length = uncompressed_len;
-        enableStomping(decompress_buf);
+        assumeSafeAppend(decompress_buf);
 
         // Decompress into decompress_buf.
         auto src = batch[size_t.sizeof .. $];
@@ -402,7 +402,7 @@ public scope class BatchReader ( Record ... )
 
     ***************************************************************************/
 
-    private Const!(void)[] extractBytes ( size_t bytes )
+    private const(void)[] extractBytes ( size_t bytes )
     {
         enforce(this.remaining.length >= bytes);
 
@@ -447,7 +447,7 @@ private bool recordFieldsSupported ( Record ... ) ( )
     return true;
 }
 
-version ( UnitTest )
+version ( unittest )
 {
     import ocean.core.Test;
 

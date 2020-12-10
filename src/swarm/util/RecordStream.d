@@ -11,7 +11,7 @@
 
 module swarm.util.RecordStream;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 /*******************************************************************************
 
@@ -23,7 +23,7 @@ import ocean.io.model.ISuspendable;
 import ocean.io.serialize.SimpleStreamSerializer;
 import ocean.io.Console : Cin, Cout, Console;
 
-version ( UnitTest )
+version ( unittest )
 {
     import ocean.core.Test;
 }
@@ -46,12 +46,6 @@ public struct Record
     import ocean.io.model.IConduit;
     import ocean.io.stream.Lines;
     import Base64 = ocean.util.encode.Base64;
-
-    version ( UnitTest )
-    {
-        import ocean.core.Test;
-    }
-
 
     /***************************************************************************
 
@@ -188,7 +182,7 @@ public struct Record
             return false;
 
         // Extract the key and value from the line
-        splitRecord(cast(Const!(ubyte)[])data, this.key, this.value);
+        splitRecord(cast(const(ubyte)[])data, this.key, this.value);
         return true;
     }
 
@@ -320,7 +314,7 @@ public struct Record
 
             // If another separator is found, the line is invalid
             auto head = line[0..sep];
-            Const!(ubyte)[] tail;
+            const(ubyte)[] tail;
             if ( sep < line.length - 1 )
             {
                 tail = line[sep + 1..$];
@@ -331,7 +325,7 @@ public struct Record
 
             // The head (before the separator) is expected to be the record key
             // and must either be empty or be a 16-character hex-string.
-            if ( head.length && !isHash(castFrom!(Const!(ubyte)[]).to!(cstring)(head)) )
+            if ( head.length && !isHash(castFrom!(const(ubyte)[]).to!(cstring)(head)) )
                 return false;
 
             // The tail (after the separator) is expected to be the record value
@@ -469,6 +463,16 @@ public class StdinRecordStream : ISuspendable
 
     /***************************************************************************
 
+        Flag indicating whether the stream is currently suspended.
+        The flag is only set when a call to suspend() has been done and unset
+        when resume() is called.
+
+    ***************************************************************************/
+
+    private bool is_suspended;
+
+    /***************************************************************************
+
         Constructor.
 
         Params:
@@ -494,6 +498,7 @@ public class StdinRecordStream : ISuspendable
 
     public bool process ( )
     {
+        this.is_suspended = false;
         this.fiber.start();
         return this.end_of_stream;
     }
@@ -507,6 +512,7 @@ public class StdinRecordStream : ISuspendable
 
     override public void suspend ( )
     {
+        this.is_suspended = true;
         this.fiber.suspend(token);
     }
 
@@ -518,19 +524,31 @@ public class StdinRecordStream : ISuspendable
 
     override public void resume ( )
     {
+        this.is_suspended = false;
         this.fiber.resume(token);
     }
 
     /***************************************************************************
 
+        Checks if the stream is suspended meaning that the method suspend()
+        has been currently called.
+
         Returns:
-            true if the process is suspended
+            true if the process is suspended (a suspend() has been called)
 
     ***************************************************************************/
 
     override public bool suspended ( )
     {
-        return !this.fiber.running;
+        return this.is_suspended;
+    }
+
+    /// Test the stream is not suspended right after instantiation.
+    unittest
+    {
+        auto null_dg = null;
+        auto stream = new StdinRecordStream(null_dg);
+        test!("==")(stream.suspended, false);
     }
 
     /***************************************************************************

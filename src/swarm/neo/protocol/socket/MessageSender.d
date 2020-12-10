@@ -47,7 +47,7 @@ class MessageSender
         import core.sys.linux.sys.netinet.tcp: TCP_CORK;
     import core.stdc.errno: errno, EAGAIN, EWOULDBLOCK, EINTR;
 
-    import ocean.transition;
+    import ocean.meta.types.Qualifiers;
     import ocean.core.Verify;
 
     debug (Raw) import ocean.io.Stdout: Stderr;
@@ -211,7 +211,7 @@ class MessageSender
         scope (exit)
         {
             this.pending_data.length = 0;
-            enableStomping(this.pending_data);
+            assumeSafeAppend(this.pending_data);
         }
 
         do

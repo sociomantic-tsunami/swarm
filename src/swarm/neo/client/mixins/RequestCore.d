@@ -128,7 +128,7 @@ public template RequestCore ( RequestType request_type_, ubyte request_code,
 
     ***************************************************************************/
 
-    import ocean.transition;
+    import ocean.meta.types.Qualifiers;
     import ocean.util.serialize.contiguous.Contiguous;
 
     import swarm.neo.request.Command;
@@ -151,7 +151,7 @@ public template RequestCore ( RequestType request_type_, ubyte request_code,
 
     ***************************************************************************/
 
-    private mixin TypeofThis!();
+    private alias typeof(this) This;
 
     /***************************************************************************
 
@@ -177,7 +177,7 @@ public template RequestCore ( RequestType request_type_, ubyte request_code,
 
     ***************************************************************************/
 
-    static Const!(Command) cmd = Command(request_code, request_version);
+    static const(Command) cmd = Command(request_code, request_version);
 
     /***************************************************************************
 

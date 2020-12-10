@@ -37,7 +37,7 @@ import swarm.client.request.context.RequestContext;
 import swarm.client.request.model.ISuspendableRequest;
 
 import ocean.core.array.Search : contains;
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 import ocean.core.Verify;
 
@@ -119,9 +119,9 @@ public class RequestQueueSuspendableThrottler : Swarm.ISuspendableThrottler
 
     ***************************************************************************/
 
-    private Const!(float) suspend_point;
+    private const(float) suspend_point;
 
-    private Const!(float) resume_point;
+    private const(float) resume_point;
 
 
     /***************************************************************************

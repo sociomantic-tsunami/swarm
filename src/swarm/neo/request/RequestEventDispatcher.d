@@ -34,7 +34,7 @@
 module swarm.neo.request.RequestEventDispatcher;
 
 import core.stdc.string;
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 import ocean.core.SmartUnion;
 import ocean.core.Verify;
 import ocean.util.container.VoidBufferAsArrayOf;
@@ -175,7 +175,7 @@ public struct ReceivedMessage
     ubyte type;
 
     /// The message payload.
-    Const!(void)[] payload;
+    const(void)[] payload;
 }
 
 /*******************************************************************************
@@ -433,7 +433,7 @@ public struct RequestEventDispatcher
     ***************************************************************************/
 
     public void periodicYield ( MessageFiber fiber, ref uint call_count,
-        Const!(uint) yield_after )
+        const(uint) yield_after )
     {
         if ( call_count >= yield_after )
         {
@@ -570,7 +570,7 @@ public struct RequestEventDispatcher
     {
         bool sending = writer != writer.init;
         bool sent;
-        Const!(void)[] received;
+        const(void)[] received;
 
         do
         {
@@ -910,7 +910,7 @@ public struct RequestEventDispatcher
     ***************************************************************************/
 
     private void dispatchReceivedPayload ( RequestOnConnBase.EventDispatcher conn,
-        Const!(void)[] payload )
+        const(void)[] payload )
     {
         auto message_type = *conn.message_parser.getValue!(ubyte)(payload);
 

@@ -29,7 +29,7 @@ import swarm.Const;
 
 import swarm.node.storage.model.IStorageEngineInfo;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 public interface IChannelsNodeInfo : INodeInfo
 {
@@ -57,6 +57,8 @@ public interface IChannelsNodeInfo : INodeInfo
 
         Looks up channels by id.
 
+        Alias to opIn_r for backwards compatibility.
+
         Params:
             id = id of channel to look up
 
@@ -67,6 +69,9 @@ public interface IChannelsNodeInfo : INodeInfo
     ***************************************************************************/
 
     public IStorageEngineInfo* opIn_r ( cstring id );
+
+
+    public alias opBinaryRight ( istring op : "in" ) = opIn_r;
 
 
     /***************************************************************************
@@ -97,7 +102,7 @@ public interface IChannelsNodeInfo : INodeInfo
 
 *******************************************************************************/
 
-version ( UnitTest )
+version ( unittest )
 {
     public class TestChannelsNode : TestNode, IChannelsNodeInfo
     {

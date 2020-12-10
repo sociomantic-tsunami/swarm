@@ -33,7 +33,7 @@ class NodeConnect
     import ocean.core.Enforce;
     import ocean.core.Verify;
     import ocean.core.array.Mutation : copy;
-    import ocean.transition;
+    import ocean.meta.types.Qualifiers;
     import ocean.util.log.Logger;
 
     debug ( SwarmConn ) import ocean.io.Stdout_tango;
@@ -58,7 +58,7 @@ class NodeConnect
 
     ***************************************************************************/
 
-    private Const!(HmacDef.Key[istring])* credentials;
+    private const(HmacDef.Key[istring])* credentials;
 
     /***************************************************************************
 
@@ -89,7 +89,7 @@ class NodeConnect
 
     ***************************************************************************/
 
-    public this ( ref Const!(HmacDef.Key[istring]) credentials )
+    public this ( ref const(HmacDef.Key[istring]) credentials )
     {
         this.credentials = &credentials;
         this.e_auth_rejected = new HmacAuthCode.RejectedException;
@@ -247,7 +247,7 @@ class NodeConnect
                 this.client_name, this.e_auth_rejected.message);
 
             this.client_name.length = 0;
-            enableStomping(this.client_name);
+            assumeSafeAppend(this.client_name);
             throw this.e_auth_rejected;
         }
 
@@ -280,7 +280,7 @@ class NodeConnect
     public void reset ( )
     {
         this.client_name.length = 0;
-        enableStomping(this.client_name);
+        assumeSafeAppend(this.client_name);
     }
 
     /***************************************************************************

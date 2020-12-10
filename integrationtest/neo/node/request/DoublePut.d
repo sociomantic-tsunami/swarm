@@ -12,7 +12,7 @@
 
 module integrationtest.neo.node.request.DoublePut;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 import integrationtest.neo.node.Storage;
 import swarm.neo.node.RequestOnConn;
 import swarm.neo.request.Command;
@@ -60,7 +60,7 @@ public class DoublePutImpl_v0 : IRequest
     ***************************************************************************/
 
     public void handle ( RequestOnConn connection, Object resources,
-        Const!(void)[] init_payload )
+        const(void)[] init_payload )
     {
         this.initialise(connection, resources);
 

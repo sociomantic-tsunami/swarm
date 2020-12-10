@@ -25,7 +25,7 @@ import ocean.text.convert.Formatter;
 
 public struct RequestKeyDataInfo
 {
-    import ocean.transition;
+    import ocean.meta.types.Qualifiers;
     import swarm.neo.protocol.Message : RequestId;
 
     /// ID of the request for which the notification is occurring.
@@ -35,7 +35,7 @@ public struct RequestKeyDataInfo
     hash_t key;
 
     /// Data value associated with notification.
-    Const!(void)[] value;
+    const(void)[] value;
 
     /***************************************************************************
 

@@ -12,7 +12,7 @@
 
 module integrationtest.client_stats.main;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 import ocean.core.Test;
 import ocean.core.VersionCheck;
 import ocean.io.device.File;
@@ -23,7 +23,7 @@ import ocean.util.test.DirectorySandbox;
 
 import swarm.util.log.ClientStats;
 
-version ( UnitTest ) {}
+version ( unittest ) {}
 else void main ( )
 {
     // Create temporary sandbox directory to write files to.

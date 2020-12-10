@@ -27,7 +27,7 @@ import swarm.client.registry.model.INodeRegistryInfo;
 
 import swarm.client.request.params.IRequestParams;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 
 public interface INodeRegistry : INodeRegistryInfo

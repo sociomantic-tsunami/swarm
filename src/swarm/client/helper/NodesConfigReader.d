@@ -33,7 +33,7 @@ module swarm.client.helper.NodesConfigReader;
 
 *******************************************************************************/
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 import swarm.Const : NodeItem;
 
@@ -50,7 +50,7 @@ import ocean.io.device.File;
 
 import Integer = ocean.text.convert.Integer_tango;
 
-version (UnitTest)
+version ( unittest )
 {
     import ocean.core.Test;
 }
@@ -137,7 +137,7 @@ static:
     private NodeItem[] read ( cstring content )
     {
         slices.length = 0;
-        enableStomping(slices);
+        assumeSafeAppend(slices);
 
         NodeItem[] nodeitems;
 
@@ -171,14 +171,14 @@ static:
             auto port = castFrom!(int).to!(ushort)(Integer.toInt(line[split_pos+1..$]));
 
             nodeitems.length = nodeitems.length + 1;
-            enableStomping(nodeitems);
+            assumeSafeAppend(nodeitems);
 
             nodeitems[$-1].Address = address.dup;
             nodeitems[$-1].Port = port;
         }
 
         slices.length = 0;
-        enableStomping(slices);
+        assumeSafeAppend(slices);
 
         return nodeitems;
     }

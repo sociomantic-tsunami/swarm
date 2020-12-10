@@ -17,7 +17,7 @@ module swarm.neo.util.Util;
 
 *******************************************************************************/
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 /*******************************************************************************
 
@@ -30,6 +30,7 @@ import ocean.transition;
 
 *******************************************************************************/
 
+deprecated("This function is not safe to use - Use `Payload` facilities instead")
 void appendSlices ( Types ... ) ( ref void[][] slices, ref Types x )
 {
     foreach (i, T; Types)
@@ -78,18 +79,6 @@ void appendSlices ( Types ... ) ( ref void[][] slices, ref Types x )
     }
 }
 
-unittest
-{
-    void[][] slices;
-    char[] str = "Hello World!".dup;
-    appendSlices(slices, str);
-    test!("==")(slices.length, 2);
-    test!("==")(slices[0].length, size_t.sizeof);
-    test!("==")(*cast(size_t*)(slices[0].ptr), str.length);
-    test!("is")(slices[1], str);
-}
-
-
 char[] TupleToSlices ( Types ... ) ( istring name )
 {
     char[] code;
@@ -121,7 +110,7 @@ char[] TupleToSlices ( Types ... ) ( istring name )
     return code;
 }
 
-version (UnitTest)
+version ( unittest )
 {
     import ocean.core.Test;
     import ocean.core.Tuple;

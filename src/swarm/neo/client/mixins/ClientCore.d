@@ -20,7 +20,7 @@ module swarm.neo.client.mixins.ClientCore;
 /// ditto
 template ClientCore ( )
 {
-    import ocean.transition;
+    import ocean.meta.types.Qualifiers;
     import ocean.core.Enforce;
     import ocean.meta.codegen.Identifier : identifier;
     import ocean.util.log.Stats;
@@ -510,14 +510,14 @@ template ClientCore ( )
                     rcv_stats.socket.total);
 
             // Connection send queue stats iteration.
-            foreach ( node, stats; stats.connection_send_queue )
+            foreach ( node, queue_stats; stats.connection_send_queue )
                 Stdout.formatln("{}:{}: total {} microseconds queued time",
                     node.address_bytes, node.port,
-                    stats.time_histogram.total_time_micros);
+                    queue_stats.time_histogram.total_time_micros);
         }
     }
 
-    version ( UnitTest )
+    version ( unittest )
     {
         import ocean.io.Stdout;
     }
@@ -602,7 +602,7 @@ template ClientCore ( )
         static assert(Requests.length > 0);
 
         /// typeof(this) convenience alias
-        mixin TypeofThis;
+        alias typeof(this) This;
 
         /***********************************************************************
 
@@ -889,9 +889,9 @@ template ClientCore ( )
 
     private RequestId assign ( R, P ) ( P params )
     {
-        static assert(is(P : Const!(R.UserSpecifiedParams)));
+        static assert(is(P : const(R.UserSpecifiedParams)));
 
-        auto context = Const!(R.Context)(params, this.request_resources);
+        auto context = const(R.Context)(params, this.request_resources);
 
         static if ( R.request_type == R.request_type.SingleNode )
         {
@@ -936,7 +936,7 @@ template ClientCore ( )
 
 *******************************************************************************/
 
-version ( UnitTest )
+version ( unittest )
 {
     import ocean.io.Stdout;
 

@@ -12,7 +12,7 @@
 
 module swarm.neo.client.requests.NotificationFormatter;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 import ocean.core.SmartUnion;
 import ocean.meta.traits.Aggregates : hasMethod;
 import ocean.meta.types.Templates : TemplateInstanceArgs;
@@ -44,7 +44,7 @@ private alias void delegate ( cstring chunk ) Sink;
 public cstring formatNotification ( SU ) ( SU notification, ref mstring buf )
 {
     buf.length = 0;
-    enableStomping(buf);
+    assumeSafeAppend(buf);
 
     formatNotification(notification,
         ( cstring chunk )
@@ -165,7 +165,7 @@ public void format ( T ) ( T notification )
     }
 }
 
-version ( UnitTest )
+version ( unittest )
 {
     import ocean.core.Test;
 

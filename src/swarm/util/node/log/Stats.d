@@ -20,7 +20,7 @@ module swarm.util.node.log.Stats;
 
 import ocean.util.log.Stats;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 import ocean.core.Verify;
 
@@ -77,7 +77,7 @@ private class NodeStatsTemplate ( Logger = StatsLog )
 
     ***************************************************************************/
 
-    version ( UnitTest ) { }
+    version ( unittest ) { }
     else
     {
         static assert(is(Logger == StatsLog));
@@ -386,7 +386,7 @@ private class ChannelsNodeStatsTemplate ( Logger = StatsLog )
 
 *******************************************************************************/
 
-version ( UnitTest )
+version ( unittest )
 {
     import ocean.core.Test;
     import ocean.meta.codegen.Identifier : identifier;

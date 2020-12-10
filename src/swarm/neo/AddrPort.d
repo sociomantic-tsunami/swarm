@@ -14,10 +14,10 @@ module swarm.neo.AddrPort;
 
 import core.sys.posix.netinet.in_; // in_addr, in_addr_t, in_port_t, socklen_t, sockaddr_in, AF_INET
 
-import ocean.transition;
-version ( UnitTest ) import ocean.core.Test;
+import ocean.meta.types.Qualifiers;
+version ( unittest ) import ocean.core.Test;
 
-extern (C) int inet_aton(Const!(char)* src, in_addr* dst);
+extern (C) int inet_aton(const(char)* src, in_addr* dst);
 
 /// ditto
 public struct AddrPort
@@ -29,7 +29,7 @@ public struct AddrPort
 
     import ocean.util.container.map.model.StandardHash;
     import ocean.core.Test;
-    import swarm.util.Verify;
+    import ocean.core.Verify;
 
     /// Minimum length required for an address format buffer.
     public enum AddrBufLength = INET6_ADDRSTRLEN;
@@ -231,7 +231,7 @@ public struct AddrPort
 
     ***************************************************************************/
 
-    public ubyte[] address_bytes ( )
+    public ubyte[] address_bytes ( ) return
     {
         return (cast(ubyte*)&this.naddress)[0 .. this.naddress.sizeof];
     }
@@ -267,7 +267,7 @@ public struct AddrPort
 
     ***************************************************************************/
 
-    public typeof(&this) set ( sockaddr_in src )
+    public typeof(&this) set ( sockaddr_in src ) return
     {
         this.naddress = src.sin_addr.s_addr;
         this.nport    = src.sin_port;
@@ -286,7 +286,7 @@ public struct AddrPort
 
     ***************************************************************************/
 
-    public typeof(&this) set ( NodeItem node_item )
+    public typeof(&this) set ( NodeItem node_item ) return
     {
         this.port = node_item.Port;
         this.setAddress(node_item.Address);

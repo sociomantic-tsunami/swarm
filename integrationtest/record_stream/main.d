@@ -20,7 +20,7 @@ import core.sys.posix.unistd;
 import ocean.core.Test;
 import ocean.io.Console;
 import ocean.io.device.Device;
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 import swarm.util.RecordStream;
 
@@ -29,7 +29,7 @@ import core.sys.posix.unistd;
 import core.sys.posix.sys.wait;
 
 
-version (UnitTest) {} else
+version ( unittest ) {} else
 public int main ()
 {
     int[2] pipes;

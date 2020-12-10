@@ -41,7 +41,7 @@ public final class ConnectionSet : RequestOnConn.IConnectionGetter
     import ocean.util.container.pool.ObjectPool;
     import ocean.util.container.pool.FreeList;
 
-    import ocean.transition;
+    import ocean.meta.types.Qualifiers;
 
     debug ( SwarmConn ) import ocean.io.Stdout;
 
@@ -85,7 +85,7 @@ public final class ConnectionSet : RequestOnConn.IConnectionGetter
 
     ***************************************************************************/
 
-    private Const!(Credentials) credentials;
+    private const(Credentials) credentials;
 
     /***************************************************************************
 
@@ -187,7 +187,7 @@ public final class ConnectionSet : RequestOnConn.IConnectionGetter
 
     ***************************************************************************/
 
-    public this ( Const!(Credentials) credentials, EpollSelectDispatcher epoll,
+    public this ( const(Credentials) credentials, EpollSelectDispatcher epoll,
         scope ConnectionNotifier conn_notifier, bool auto_connect )
     {
         verify(conn_notifier !is null);
@@ -400,7 +400,7 @@ public final class ConnectionSet : RequestOnConn.IConnectionGetter
             this.initialiseConnection(conn.connection, conn.node_address);
 
         this.queued_conns.length = 0;
-        enableStomping(this.queued_conns);
+        assumeSafeAppend(this.queued_conns);
     }
 
     /***************************************************************************
@@ -588,7 +588,7 @@ public final class ConnectionSet : RequestOnConn.IConnectionGetter
 
 private struct ConnectionRegistry ( C )
 {
-    import ocean.transition;
+    import ocean.meta.types.Qualifiers;
     import Array = ocean.core.Array : shuffle;
     import core.sys.posix.stdlib : drand48;
     import swarm.neo.util.TreeMap;
@@ -662,7 +662,12 @@ private struct ConnectionRegistry ( C )
     }
 
     // ditto
-    public alias get opIn_r;
+
+    public template opBinaryRight (string op : "in")
+    {
+        alias opBinaryRight = get;
+    }
+
 
     /***************************************************************************
 
@@ -852,7 +857,7 @@ private struct ConnectionRegistry ( C )
         scope int delegate ( Elem conn ) dg )
     {
         connections_buf.length = 0;
-        enableStomping(connections_buf);
+        assumeSafeAppend(connections_buf);
 
         this.opApply(
             ( ref Elem conn )
@@ -886,7 +891,7 @@ private struct ConnectionRegistry ( C )
 
 *******************************************************************************/
 
-version (UnitTest)
+version ( unittest )
 {
     import ocean.core.Test;
     import ocean.core.Verify;

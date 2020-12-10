@@ -13,7 +13,7 @@
 
 module swarm.client.plugins.ScopeRequests;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 import ocean.core.Verify;
 

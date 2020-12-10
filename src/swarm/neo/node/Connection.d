@@ -29,7 +29,7 @@ class Connection: ConnectionBase
     import ocean.io.select.EpollSelectDispatcher;
     import ocean.sys.socket.AddressIPSocket;
 
-    import ocean.transition;
+    import ocean.meta.types.Qualifiers;
 
     debug (SwarmConn) import ocean.io.Stdout_tango;
 
@@ -93,7 +93,7 @@ class Connection: ConnectionBase
 
     ***************************************************************************/
 
-    public this ( ref Const!(Key[istring]) credentials,
+    public this ( ref const(Key[istring]) credentials,
                   AddressIPSocket!() socket, EpollSelectDispatcher epoll,
                   scope RequestSet.Handler request_handler,
                   scope void delegate ( ) when_closed, RequestPool request_pool,
@@ -240,7 +240,7 @@ class Connection: ConnectionBase
 
     ***************************************************************************/
 
-    override protected void setReceivedPayload ( RequestId id, Const!(void)[] payload )
+    override protected void setReceivedPayload ( RequestId id, const(void)[] payload )
     {
         this.request_set.getOrCreateRequest(id).setReceivedPayload(payload);
     }

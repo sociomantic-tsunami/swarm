@@ -12,7 +12,7 @@
 
 module swarm.neo.client.mixins.SerializeMethod;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 import ocean.util.serialize.contiguous.MultiVersionDecorator;
 
 /*******************************************************************************
@@ -50,7 +50,7 @@ template SerializeMethod ( alias dst )
     }
 }
 
-version ( UnitTest )
+version ( unittest )
 {
     import ocean.core.Test;
     import ocean.util.serialize.contiguous.Contiguous;

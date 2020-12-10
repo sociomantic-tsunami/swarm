@@ -40,7 +40,7 @@ import ocean.core.Verify;
 
 import ocean.util.log.Logger;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 /*******************************************************************************
 
@@ -124,6 +124,8 @@ abstract public class IStorageChannelsTemplate ( Storage : IStorageEngine )
 
         Looks up channel_id in registered channels.
 
+        Alias to opIn_r for backwards compatibility.
+
         Params:
             channel_id = channel identifier string to lookup
 
@@ -136,6 +138,8 @@ abstract public class IStorageChannelsTemplate ( Storage : IStorageEngine )
     {
         return channel_id in this.channels;
     }
+
+    public alias opBinaryRight ( istring op : "in" ) = opIn_r;
 
 
     /***************************************************************************

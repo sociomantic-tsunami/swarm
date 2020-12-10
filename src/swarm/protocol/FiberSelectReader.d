@@ -27,7 +27,7 @@ module swarm.protocol.FiberSelectReader;
 
 *******************************************************************************/
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 import ocean.core.Array;
 
@@ -294,9 +294,9 @@ public class FiberSelectReader : Ocean.FiberSelectReader
     private void readArray ( SizeT = size_t, T ) ( ref T[] array,
         SizeT array_len )
     {
-        enableStomping(array);
+        assumeSafeAppend(array);
         array.length = max(0, array_len); // to handle negative input as well
-        enableStomping(array);
+        assumeSafeAppend(array);
 
         if ( array_len > 0 )
         {

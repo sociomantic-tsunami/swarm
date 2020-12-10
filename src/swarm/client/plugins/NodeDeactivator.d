@@ -32,7 +32,7 @@ import swarm.client.connection.NodeErrorTracker;
 
 import swarm.Const : NodeItem;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 import ocean.core.Verify;
 
@@ -304,7 +304,8 @@ public class NodeDeactivator
 
             // For each node, check whether it exceeds the threshold and the
             // warning level.
-            foreach ( node, counter; mixin(instance).error_tracker.node_counters )
+            foreach ( n, counter;
+                mixin(instance).error_tracker.node_counters )
             {
                 debug ( NodeDeactivator ) Stderr.formatln("err={}, thrsh={}, warn={}",
                     counter.per_sec, mixin(instance).threshold, warning_level);
@@ -313,7 +314,7 @@ public class NodeDeactivator
                      && counter.per_sec > warning_level )
                 {
                     debug ( NodeDeactivator ) Stderr.formatln("    Disabled");
-                    this.deactivate(node, mean_error_rate);
+                    this.deactivate(n, mean_error_rate);
                 }
             }
         }

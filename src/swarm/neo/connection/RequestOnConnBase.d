@@ -81,7 +81,7 @@ abstract class RequestOnConnBase
     import swarm.neo.connection.YieldedRequestOnConns;
     import Util = swarm.neo.util.Util;
 
-    import ocean.transition;
+    import ocean.meta.types.Qualifiers;
     import ocean.core.Verify;
 
     /// Convenience alias for derived classes
@@ -114,7 +114,7 @@ abstract class RequestOnConnBase
 
     ***************************************************************************/
 
-    protected Const!(void)[] recv_payload_;
+    protected const(void)[] recv_payload_;
 
     /***************************************************************************
 
@@ -123,7 +123,7 @@ abstract class RequestOnConnBase
 
     ***************************************************************************/
 
-    protected Const!(void[])[] send_payload_;
+    protected const(void[])[] send_payload_;
 
     /***************************************************************************
 
@@ -132,7 +132,7 @@ abstract class RequestOnConnBase
 
     ***************************************************************************/
 
-    private Const!(void)[][] send_payload;
+    private const(void)[][] send_payload;
 
     /***************************************************************************
 
@@ -293,7 +293,7 @@ abstract class RequestOnConnBase
             public struct Received
             {
                 /// The message payload.
-                Const!(void)[] payload;
+                const(void)[] payload;
             }
 
             /*******************************************************************
@@ -398,7 +398,7 @@ abstract class RequestOnConnBase
             ~this ( )
             {
                 this.outer.outer.send_payload.length = 0;
-                enableStomping(this.outer.outer.send_payload);
+                assumeSafeAppend(this.outer.outer.send_payload);
             }
 
             /*******************************************************************
@@ -412,8 +412,26 @@ abstract class RequestOnConnBase
 
             public void add ( T ) ( ref T elem )
             {
+                this.addPointer(&elem);
+            }
+
+            /*******************************************************************
+
+                Adds a single element to the payload to be sent.
+
+                Note that this takes a pointer to the element, and the element's
+                lifetime needs to match or exceed that of this payload to avoid
+                memory corruption.
+
+                Params:
+                    ptr = pointer to the element to add
+
+            *******************************************************************/
+
+            public void addPointer ( T ) ( const T* ptr )
+            {
                 static assert(!hasIndirections!(T));
-                this.outer.outer.send_payload ~= (cast(Const!(void*))&elem)[0..T.sizeof];
+                this.outer.outer.send_payload ~= (cast(const(void*))ptr)[0..T.sizeof];
             }
 
             /*******************************************************************
@@ -472,7 +490,7 @@ abstract class RequestOnConnBase
 
                 this.addCopy(arr.length);
                 this.outer.outer.send_payload ~=
-                    (cast(Const!(void)*)arr.ptr)[0..arr.length * Element.sizeof];
+                    (cast(const(void)*)arr.ptr)[0..arr.length * Element.sizeof];
             }
         }
 
@@ -883,7 +901,7 @@ abstract class RequestOnConnBase
 
         ***********************************************************************/
 
-        private Const!(void)[] withdrawRecvPayload ( )
+        private const(void)[] withdrawRecvPayload ( )
         {
             scope (exit) this.outer.recv_payload_ = null;
             return this.outer.recv_payload_;
@@ -1033,7 +1051,7 @@ abstract class RequestOnConnBase
 
     ***************************************************************************/
 
-    protected void setReceivedPayload ( Const!(void)[] payload )
+    protected void setReceivedPayload ( const(void)[] payload )
     {
         this.recv_payload_ = payload;
         this.resumeFiber_(fiber.Message(FiberResumeCode.Received));

@@ -26,7 +26,7 @@
 
 module swarm.node.model.RecordActionCounters;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 import ocean.core.Verify;
 
@@ -150,7 +150,7 @@ public class RecordActionCounters
 
 /******************************************************************************/
 
-version (UnitTest)
+version ( unittest )
 {
     import ocean.core.Test;
 

@@ -27,7 +27,7 @@ import swarm.node.model.RecordActionCounters;
 
 import swarm.node.storage.model.IStorageEngineInfo;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 public interface INodeInfo
 {
@@ -199,7 +199,7 @@ public interface INodeInfo
 
 *******************************************************************************/
 
-version ( UnitTest )
+version ( unittest )
 {
     public class TestNode : INodeInfo
     {

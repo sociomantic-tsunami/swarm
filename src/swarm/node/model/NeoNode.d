@@ -24,7 +24,7 @@ module swarm.node.model.NeoNode;
 
 *******************************************************************************/
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 import swarm.Const : NodeItem;
 import swarm.neo.AddrPort;
@@ -779,7 +779,7 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
         this.neo_socket = new AddressIPSocket!();
 
         // Load credentials from specified file.
-        Const!(Key[istring])* credentials;
+        const(Key[istring])* credentials;
         if ( options.credentials_filename )
         {
             verify(options.credentials_map is null);
@@ -1057,7 +1057,7 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
 }
 
 
-version (UnitTest)
+version ( unittest )
 {
     private class TestConnectionHandler : ISwarmConnectionHandler
     {

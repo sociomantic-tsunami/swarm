@@ -12,7 +12,7 @@
 
 module integrationtest.neo.client.request.internal.DoublePut;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 /*******************************************************************************
 

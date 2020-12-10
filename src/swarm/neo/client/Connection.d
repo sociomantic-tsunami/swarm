@@ -36,7 +36,7 @@ public final class Connection: ConnectionBase
 
     import ocean.core.Enforce;
     import ocean.io.select.EpollSelectDispatcher;
-    import ocean.transition;
+    import ocean.meta.types.Qualifiers;
 
     debug ( SwarmConn ) import ocean.io.Stdout;
 
@@ -224,7 +224,7 @@ public final class Connection: ConnectionBase
 
     ***************************************************************************/
 
-    public this ( Const!(Credentials) credentials, IRequestSet request_set,
+    public this ( const(Credentials) credentials, IRequestSet request_set,
                   EpollSelectDispatcher epoll )
     {
         this.client_socket = new ClientSocket;
@@ -639,7 +639,7 @@ public final class Connection: ConnectionBase
     ***************************************************************************/
 
     override protected void setReceivedPayload (
-        RequestId id, Const!(void)[] payload
+        RequestId id, const(void)[] payload
     )
     {
         if (auto request_handler = this.getRequestOnConn(id))

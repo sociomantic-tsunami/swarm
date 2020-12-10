@@ -29,7 +29,7 @@ module swarm.node.request.model.IRequest;
 
 import swarm.common.request.model.IFiberRequest;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 /*******************************************************************************
 

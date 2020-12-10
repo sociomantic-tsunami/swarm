@@ -26,7 +26,7 @@ import swarm.client.request.context.RequestContext;
 import ocean.core.Array;
 import ocean.core.Enum;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 import ocean.text.convert.Formatter;
 
 import swarm.client.ClientExceptions : TimedOutException,
@@ -87,7 +87,7 @@ public scope class IRequestNotification
 
     ***************************************************************************/
 
-    public Const!(ICommandCodes.Value) command;
+    public const(ICommandCodes.Value) command;
 
 
     /***************************************************************************
@@ -269,7 +269,7 @@ public scope class IRequestNotification
     public mstring message ( ref mstring message_ )
     {
         message_.length = 0;
-        enableStomping(message_);
+        assumeSafeAppend(message_);
 
         if ( this.exception is null )
         {

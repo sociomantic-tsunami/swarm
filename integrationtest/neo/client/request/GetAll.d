@@ -12,7 +12,7 @@
 
 module integrationtest.neo.client.request.GetAll;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 import ocean.core.SmartUnion;
 import integrationtest.neo.client.NotifierTypes;
 
@@ -88,7 +88,7 @@ public alias SmartUnion!(NotificationUnion) Notification;
 
 *******************************************************************************/
 
-public alias void delegate ( Notification, Const!(Args) ) Notifier;
+public alias void delegate ( Notification, const(Args) ) Notifier;
 
 /*******************************************************************************
 

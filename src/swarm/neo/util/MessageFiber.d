@@ -18,7 +18,7 @@ module swarm.neo.util.MessageFiber;
 
  ******************************************************************************/
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 import ocean.core.Array: copy;
 import ocean.core.Verify;

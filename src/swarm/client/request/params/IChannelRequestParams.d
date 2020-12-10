@@ -22,7 +22,7 @@ module swarm.client.request.params.IChannelRequestParams;
 
 import swarm.client.request.params.IRequestParams;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 public abstract class IChannelRequestParams : IRequestParams
 {

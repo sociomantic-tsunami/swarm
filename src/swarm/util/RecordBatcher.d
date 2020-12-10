@@ -24,7 +24,7 @@ import ocean.util.container.AppendBuffer;
 
 import ocean.io.compress.Lzo;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 import ocean.core.Enforce;
 
@@ -75,7 +75,7 @@ public class RecordBatcher
 
     ***************************************************************************/
 
-    protected Const!(size_t) batch_size;
+    protected const(size_t) batch_size;
 
 
     /***************************************************************************
@@ -243,9 +243,9 @@ public class RecordBatcher
         }
 
         size_t value_len = value.length;
-        Const!(ubyte[]) value_len_str = (cast(ubyte*)&value_len)[0..size_t.sizeof];
+        const(ubyte[]) value_len_str = (cast(ubyte*)&value_len)[0..size_t.sizeof];
 
-        this.batch.append(value_len_str, cast(Const!(ubyte[]))value);
+        this.batch.append(value_len_str, cast(const(ubyte[]))value);
 
         return AddResult.Added;
     }
@@ -273,13 +273,13 @@ public class RecordBatcher
         }
 
         size_t key_len = key.length;
-        Const!(ubyte[]) key_len_str = (cast(ubyte*)&key_len)[0..size_t.sizeof];
+        const(ubyte[]) key_len_str = (cast(ubyte*)&key_len)[0..size_t.sizeof];
 
         size_t value_len = value.length;
-        Const!(ubyte[]) value_len_str = (cast(ubyte*)&value_len)[0..size_t.sizeof];
+        const(ubyte[]) value_len_str = (cast(ubyte*)&value_len)[0..size_t.sizeof];
 
-        this.batch.append(key_len_str, cast(Const!(ubyte[]))key, value_len_str,
-            cast(Const!(ubyte[]))value);
+        this.batch.append(key_len_str, cast(const(ubyte[]))key, value_len_str,
+            cast(const(ubyte[]))value);
 
         return AddResult.Added;
     }
@@ -307,7 +307,7 @@ public class RecordBatcher
         // Set destination to max possible length.
         compress_buf.length =
             this.lzo.maxCompressedLength(this.batch.length) + size_t.sizeof;
-        enableStomping(compress_buf);
+        assumeSafeAppend(compress_buf);
 
         // Write uncompressed length into first size_t.sizeof bytes of dest.
         *(cast(size_t*)(compress_buf.ptr)) = this.batch.length;
@@ -321,7 +321,7 @@ public class RecordBatcher
 
         // Minimize dest length and return.
         compress_buf.length = compressed_len + size_t.sizeof;
-        enableStomping(compress_buf);
+        assumeSafeAppend(compress_buf);
         return compress_buf;
     }
 
@@ -610,7 +610,7 @@ public class RecordBatch
     }
 }
 
-version ( UnitTest )
+version ( unittest )
 {
     import ocean.core.Test;
     import ocean.text.convert.Formatter;

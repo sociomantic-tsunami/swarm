@@ -16,7 +16,7 @@ import integrationtest.neo.client.Client;
 
 import swarm.neo.authentication.CredentialsFile;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 import ocean.util.test.DirectorySandbox;
 import ocean.core.Test;
 import ocean.io.device.File;
@@ -24,7 +24,7 @@ import ocean.io.select.EpollSelectDispatcher;
 import Config = ocean.util.config.ConfigFiller;
 import ocean.util.config.ConfigParser;
 
-version (UnitTest) {}
+version ( unittest ) {}
 else
 void main ( )
 {

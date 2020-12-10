@@ -25,7 +25,7 @@ module swarm.node.model.ISwarmConnectionHandlerInfo;
 
 *******************************************************************************/
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 import ocean.net.server.connection.IConnectionHandlerInfo;
 import ocean.io.select.client.model.ISelectClientInfo;

@@ -21,7 +21,7 @@ module swarm.neo.node.RequestSet;
 
 import ocean.util.container.pool.ObjectPool;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 import ocean.core.Verify;
 
 /******************************************************************************/
@@ -189,7 +189,7 @@ class RequestSet
 
         ***********************************************************************/
 
-        override public void setReceivedPayload ( Const!(void)[] payload )
+        override public void setReceivedPayload ( const(void)[] payload )
         {
             super.setReceivedPayload(payload);
         }
@@ -408,7 +408,7 @@ class RequestSet
     ***************************************************************************/
 
     alias void delegate ( RequestOnConn handler,
-        Const!(void)[] init_payload = null ) Handler;
+        const(void)[] init_payload = null ) Handler;
 
     private Handler handler;
 

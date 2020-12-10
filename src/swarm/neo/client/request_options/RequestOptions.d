@@ -16,7 +16,7 @@
 
 module swarm.neo.client.request_options.RequestOptions;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 import ocean.core.Tuple;
 
 /*******************************************************************************
@@ -295,7 +295,7 @@ private istring assertArgsHandled ( size_t n_args, ArgsAndHandlers ... ) ( )
     return result.length? "static assert(false,\"" ~ result ~ "\");" : null;
 }
 
-version ( UnitTest )
+version ( unittest )
 {
     import ocean.core.Test;
 

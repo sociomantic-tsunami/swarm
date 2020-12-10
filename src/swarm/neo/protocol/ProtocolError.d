@@ -26,7 +26,7 @@ class ProtocolError: Exception
     mixin ReusableExceptionImplementation!();
 
     import core.stdc.stdarg;
-    import ocean.transition;
+    import ocean.meta.types.Qualifiers;
     import ocean.text.convert.Formatter;
 
     /***************************************************************************

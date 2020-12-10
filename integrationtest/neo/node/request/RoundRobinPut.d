@@ -12,7 +12,7 @@
 
 module integrationtest.neo.node.request.RoundRobinPut;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 import integrationtest.neo.node.Storage;
 import swarm.neo.node.IRequest;
 import swarm.neo.node.RequestOnConn;
@@ -60,7 +60,7 @@ public class RoundRobinPutImpl_v0 : IRequest
     ***************************************************************************/
 
     public void handle ( RequestOnConn connection, Object resources,
-        Const!(void)[] init_payload )
+        const(void)[] init_payload )
     {
         this.initialise(connection, resources);
 

@@ -12,7 +12,7 @@
 
 module integrationtest.neo.node.request.GetAll;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 import integrationtest.neo.node.Storage;
 import swarm.neo.node.RequestOnConn;
 import swarm.neo.request.Command;
@@ -189,7 +189,7 @@ public class GetAllImpl_v0 : IRequest
     ***************************************************************************/
 
     public void handle ( RequestOnConn connection, Object resources,
-        Const!(void)[] init_payload )
+        const(void)[] init_payload )
     {
         try
         {

@@ -12,7 +12,7 @@
 
 module integrationtest.neo.node.Storage;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 public class Storage
 {

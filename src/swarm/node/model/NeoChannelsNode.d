@@ -33,7 +33,7 @@ import swarm.node.storage.model.IStorageChannels;
 import swarm.node.storage.model.IStorageEngine;
 import swarm.node.storage.model.IStorageEngineInfo;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 /*******************************************************************************
 
@@ -200,6 +200,8 @@ public class ChannelsNodeBase (
 
         Looks up channels by id.
 
+        Aliased to opIn_r for backwards compatibility.
+
         Params:
             id = id of channel to look up
 
@@ -213,6 +215,10 @@ public class ChannelsNodeBase (
     {
         return cast(IStorageEngineInfo*)(id in this.channels);
     }
+
+    /** ditto */
+
+    public alias opBinaryRight ( istring op : "in" ) = opIn_r;
 
 
     /***************************************************************************
@@ -229,7 +235,7 @@ public class ChannelsNodeBase (
 }
 
 
-version (UnitTest)
+version ( unittest )
 {
     import ocean.net.server.connection.IConnectionHandler;
 

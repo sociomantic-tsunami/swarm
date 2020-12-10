@@ -55,7 +55,7 @@ debug ( SwarmClient ) import ocean.io.Stdout;
 
 import swarm.client.connection.FiberSocketConnection;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 import ocean.util.log.Logger;
 
 
@@ -118,7 +118,7 @@ public abstract class IRequestConnection :
 
     ***************************************************************************/
 
-    private Immut!(size_t) id;
+    private immutable(size_t) id;
 
 
     /***************************************************************************

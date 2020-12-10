@@ -21,7 +21,7 @@ module swarm.common.connection.CommandMixins;
 
 import ocean.core.Enum;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 import CTFE = ocean.meta.codegen.CTFE : toString;
 
 

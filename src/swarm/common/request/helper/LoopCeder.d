@@ -19,7 +19,7 @@ module swarm.common.request.helper.LoopCeder;
 
 *******************************************************************************/
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 import ocean.io.select.client.FiberSelectEvent;
 
 
@@ -83,7 +83,7 @@ public class LoopCeder
 
     ***************************************************************************/
 
-    private Const!(uint) cede_point;
+    private const(uint) cede_point;
 
 
     /***************************************************************************

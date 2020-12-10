@@ -12,7 +12,7 @@
 
 module integrationtest.neo.client.request.internal.Get;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 import integrationtest.neo.common.Get;
 
 /// Default (v0) Get implementation.
@@ -57,7 +57,7 @@ public struct VersionedGet ( ubyte Version )
 
     import ocean.io.select.protocol.generic.ErrnoIOException: IOError;
 
-    mixin TypeofThis;
+    alias typeof(this) This;
 
     /***************************************************************************
 

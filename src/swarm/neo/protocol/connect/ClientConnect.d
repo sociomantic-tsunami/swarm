@@ -32,7 +32,7 @@ class ClientConnect
 
     import ocean.core.Enforce;
 
-    import ocean.transition;
+    import ocean.meta.types.Qualifiers;
 
     debug ( SwarmConn ) import ocean.io.Stdout;
 
@@ -69,7 +69,7 @@ class ClientConnect
 
     ***************************************************************************/
 
-    public this ( Const!(Credentials) credentials )
+    public this ( const(Credentials) credentials )
     {
         this.credentials = Credentials(credentials.name.dup, credentials.key);
         this.protocol = new ConnectProtocol;

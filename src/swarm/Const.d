@@ -23,10 +23,11 @@ import ocean.core.Enum;
 
 import ocean.io.digest.Fnv1;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
+
 import core.stdc.ctype : isalnum;
 
-version ( UnitTest )
+version ( unittest )
 {
     import ocean.core.Test;
 }
@@ -190,7 +191,7 @@ public struct NodeItem
 
     ***************************************************************************/
 
-    public mixin (genOpCmp(`
+    int opCmp ( const typeof(this) rhs ) const
     {
         if ( this.Address > rhs.Address ) return 1;
         if ( this.Address < rhs.Address ) return -1;
@@ -198,7 +199,7 @@ public struct NodeItem
         if ( this.Port < rhs.Port ) return -1;
 
         return 0;
-    }`));
+    }
 }
 
 

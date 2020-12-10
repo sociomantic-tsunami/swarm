@@ -12,7 +12,7 @@
 
 module swarm.neo.client.RequestOnConnSet;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 import ocean.core.Verify;
 
 /*******************************************************************************
@@ -292,7 +292,7 @@ public struct RequestOnConnSet
                 foreach ( roc; this.list )
                     recycle(roc);
                 this.list.length = 0;
-                enableStomping(this.list);
+                assumeSafeAppend(this.list);
                 break;
 
             case AllNodes:

@@ -12,24 +12,21 @@
 
 module swarm.neo.client.RetryTimer;
 
-import ocean.sys.TimerFD;
-
-import swarm.neo.util.MessageFiber;
-
-import ocean.io.select.EpollSelectDispatcher;
-import ocean.io.select.client.model.ISelectClient;
-
-import core.sys.posix.time;
-import core.sys.posix.sys.time;
 import core.stdc.errno;
-
-import swarm.neo.util.FiberTokenHashGenerator;
-
 import stdio = core.stdc.stdio;
-import ocean.stdc.string;
-import ocean.transition;
+import core.stdc.string;
+import core.sys.posix.sys.time;
+import core.sys.posix.time;
 
 import ocean.core.Verify;
+import ocean.io.select.EpollSelectDispatcher;
+import ocean.io.select.client.model.ISelectClient;
+import ocean.meta.types.Qualifiers;
+import ocean.sys.TimerFD;
+
+import swarm.neo.util.FiberTokenHashGenerator;
+import swarm.neo.util.MessageFiber;
+
 
 /*******************************************************************************
 
@@ -61,7 +58,7 @@ void retry ( lazy bool success, MessageFiber fiber, EpollSelectDispatcher epoll 
     timespec t_end;
     clock_gettime(clockid_t.CLOCK_MONOTONIC, &t_end);
 
-    scope e = new TimerFD.TimerException;	
+    scope e = new TimerFD.TimerException;
     scope timer = new TimerFD(e);
     scope event = new TimerEvent(epoll, fiber, timer, t_start, t_end);
 
@@ -225,8 +222,8 @@ private final class TimerEvent: ISelectClient
             auto msg = e.message();
             stdio.fprintf(stdio.stderr, ("Error unregistering " ~
                     typeof(this).stringof ~
-                    " from epoll: %.*s @%s:%u\n\0").ptr,
-                    msg.length, msg.ptr, e.file.ptr, e.line);
+                    " from epoll: %.*s @%s:%zu\n\0").ptr,
+                    cast(int) msg.length, msg.ptr, e.file.ptr, e.line);
         }
     }
 

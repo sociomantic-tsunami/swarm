@@ -24,10 +24,10 @@ module swarm.neo.client.request_options.RequestContext;
 /// ditto
 public struct RequestContext
 {
-    import ocean.transition;
+    import ocean.meta.types.Qualifiers;
     import ocean.core.ContextUnion;
 
-    private mixin TypeofThis!();
+    private alias typeof(this) This;
 
     /***************************************************************************
 
@@ -204,7 +204,7 @@ public struct RequestContext
 
     ***************************************************************************/
 
-    private ContextUnion* context ( ) const
+    private ContextUnion* context ( ) const return
     {
         return cast(ContextUnion*)this.context_.ptr;
     }

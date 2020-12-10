@@ -28,7 +28,7 @@ module swarm.neo.node.ConnectionHandler;
 
 *******************************************************************************/
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 import ocean.core.Verify;
 import ocean.net.server.connection.IConnectionHandler;
 import ocean.sys.socket.AddressIPSocket;
@@ -63,7 +63,7 @@ class ConnectionHandler : IConnectionHandler
     import ClassicSwarm =
         swarm.node.connection.ConnectionHandler: ConnectionSetupParams;
 
-    import ocean.transition;
+    import ocean.meta.types.Qualifiers;
 
     /// Map of request handling info indexed by command code.
     public struct RequestMap
@@ -207,7 +207,7 @@ class ConnectionHandler : IConnectionHandler
 
         ***********************************************************************/
 
-        public Const!(Key[istring])* credentials;
+        public const(Key[istring])* credentials;
 
         /***********************************************************************
 
@@ -261,7 +261,7 @@ class ConnectionHandler : IConnectionHandler
             Constructor.
 
             Note that `unix_socket_path.length` needs to be less than
-            `UNIX_PATH_MAX`, a constant defined in `ocean.stdc.posix.sys.un`.
+            `core.sys.posix.sys.un : UNIX_PATH_MAX`.
 
             Params:
                 epoll = epoll dispatcher used by the node
@@ -280,7 +280,7 @@ class ConnectionHandler : IConnectionHandler
 
         public this ( EpollSelectDispatcher epoll,
             RequestMap requests, bool no_delay,
-            ref Const!(Key[istring]) credentials, INodeInfo node_info,
+            ref const(Key[istring]) credentials, INodeInfo node_info,
             scope GetResourceAcquirerDg get_resource_acquirer )
         {
             verify(requests.supported_requests.length > 0);
@@ -417,7 +417,7 @@ class ConnectionHandler : IConnectionHandler
 
     ***************************************************************************/
 
-    protected void handleRequest ( RequestOnConn connection, Const!(void)[] init_payload = null )
+    protected void handleRequest ( RequestOnConn connection, const(void)[] init_payload = null )
     {
         if (init_payload.length >= Command.sizeof)
         {
@@ -485,7 +485,7 @@ class ConnectionHandler : IConnectionHandler
     ***************************************************************************/
 
     private void handleRequest ( RequestMap.RequestInfo rq,
-        RequestOnConn connection, Const!(void)[] init_payload )
+        RequestOnConn connection, const(void)[] init_payload )
     {
         StopWatch timer;
 
@@ -615,7 +615,7 @@ class ConnectionHandler : IConnectionHandler
 
         // Allocate space
         buf.length = initializer.length;
-        enableStomping(buf);
+        assumeSafeAppend(buf);
 
         // Initialize it
         buf[] = initializer[];
@@ -627,7 +627,7 @@ class ConnectionHandler : IConnectionHandler
     }
 }
 
-version ( UnitTest )
+version ( unittest )
 {
     import swarm.node.request.RequestStats;
     import swarm.neo.request.Command;
@@ -646,7 +646,7 @@ unittest
         static immutable bool timing = true;
         static immutable bool scheduled_for_removal = false;
         void handle ( RequestOnConn connection, Object resources,
-            Const!(void)[] init_payload ) { }
+            const(void)[] init_payload ) { }
     }
 
     class Rq1_v1 : IRequest
@@ -656,7 +656,7 @@ unittest
         static immutable bool timing = true;
         static immutable bool scheduled_for_removal = false;
         void handle ( RequestOnConn connection, Object resources,
-            Const!(void)[] init_payload ) { }
+            const(void)[] init_payload ) { }
     }
 
     ConnectionHandler.RequestMap map;

@@ -35,7 +35,7 @@ abstract class RequestOnConn: RequestOnConnBase
     import swarm.neo.connection.YieldedRequestOnConns;
     import swarm.neo.util.MessageFiber;
 
-    import ocean.transition;
+    import ocean.meta.types.Qualifiers;
 
     /***************************************************************************
 

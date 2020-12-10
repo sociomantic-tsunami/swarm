@@ -248,7 +248,7 @@ public struct TreeQueueStats
 private struct TreeQueueCore
 {
     import swarm.neo.util.TreeMap;
-    import ocean.transition : Unqual;
+    import ocean.meta.types.Qualifiers : Unqual;
 
     /***************************************************************************
 

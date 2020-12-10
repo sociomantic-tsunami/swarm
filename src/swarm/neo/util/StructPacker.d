@@ -34,7 +34,7 @@
 
 module swarm.neo.util.StructPacker;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 import ocean.core.Verify;
 import ocean.meta.traits.Basic :
     ArrayKind, isArrayType, isPointerType, isPrimitiveType;
@@ -64,7 +64,7 @@ public void pack ( S ) ( S s, ref void[] buf )
 
     // Do a simple, binary copy of the struct.
     buf.length = S.sizeof;
-    enableStomping(buf);
+    assumeSafeAppend(buf);
     buf[] = (cast(void*)&s)[0..S.sizeof];
 
     // Handle any dynamic array fields. (Note that it's safe to cast away const
@@ -186,7 +186,7 @@ private void packDynamicArray ( A ) ( ref A[] array, ref void[] buf )
         static assert(!hasIndirections!(A));
 }
 
-version ( UnitTest )
+version ( unittest )
 {
     import ocean.core.Test;
     import ocean.core.DeepCompare : deepEquals;
@@ -317,6 +317,43 @@ unittest
         SharedWorking shared_working;
     }
     test(packUnpack(Context.init));
+}
+
+// Tests of packed data
+unittest
+{
+    ulong val = 0x0123456789abcdef;
+
+    // Test packing a pointer. (The pointer is packed.)
+    {
+        struct Pointer
+        {
+            void* p;
+        }
+
+        Pointer s;
+        s.p = cast(void*)val;
+
+        void[] buf;
+        pack(s, buf);
+        test!("==")(buf, (cast(void*)(&val))[0..val.sizeof]);
+    }
+
+    // Test packing a pointer to an array. (The pointer to the array is packed,
+    // not the content of the array.)
+    {
+        struct ArrayPointer
+        {
+            void[]* ap;
+        }
+
+        ArrayPointer s;
+        s.ap = cast(void[]*)val;
+
+        void[] buf;
+        pack(s, buf);
+        test!("==")(buf, (cast(void*)(&val))[0..val.sizeof]);
+    }
 }
 
 /*******************************************************************************

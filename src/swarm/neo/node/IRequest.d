@@ -18,7 +18,7 @@ module swarm.neo.node.IRequest;
 /// ditto
 public interface IRequest
 {
-    import ocean.transition;
+    import ocean.meta.types.Qualifiers;
 
     import swarm.neo.node.RequestOnConn;
 
@@ -40,5 +40,5 @@ public interface IRequest
     ***************************************************************************/
 
     void handle ( RequestOnConn connection, Object resources,
-        Const!(void)[] init_payload );
+        const(void)[] init_payload );
 }

@@ -30,7 +30,7 @@ module swarm.common.request.model.IRequestResources;
 
 import ocean.meta.codegen.Identifier : identifier;
 import ocean.meta.traits.Basic : ArrayKind, isArrayType;
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 
 
 /*******************************************************************************
@@ -88,7 +88,7 @@ public template IRequestResources_T ( Shared )
     ***************************************************************************/
 
     import ocean.meta.codegen.Identifier : identifier;
-    import ocean.transition;
+    import ocean.meta.types.Qualifiers;
 
 
     /***************************************************************************
@@ -183,7 +183,7 @@ public template RequestResources_T ( Shared )
 
     import ocean.meta.codegen.Identifier : identifier;
     import ocean.meta.traits.Basic : ArrayKind, isArrayType;
-    import ocean.transition;
+    import ocean.meta.types.Qualifiers;
 
 
     /***************************************************************************
@@ -324,7 +324,7 @@ public template RequestResources_T ( Shared )
             static immutable istring Initialiser =
                 "protected void " ~
                 "init_" ~ identifier!(T.tupleof[i]) ~ "(ref " ~ typeof(T.tupleof[i]).stringof ~ " f)" ~
-                "{f.length=0; enableStomping(f);}";
+                "{f.length=0; assumeSafeAppend(f);}";
         }
         else
         {
@@ -475,14 +475,15 @@ public template RequestResources_T ( Shared )
         mixin(Initialisers!(Shared.Resources));
     }
 }
-version (UnitTest)
+
+version ( unittest )
 {
     import ocean.core.Test;
 
     // to avoid clashing of mixed in names from different module tests
     struct LocalNamespace
     {
-        // ISharedResources module has a version (UnitTest) mixin
+        // ISharedResources module has a version (unittest) mixin
         // that provides SharedResources symbol
         public import swarm.common.connection.ISharedResources
             : UnitTestClashFix;

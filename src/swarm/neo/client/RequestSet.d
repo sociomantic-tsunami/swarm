@@ -44,7 +44,7 @@ public final class RequestSet: IRequestSet
     import swarm.neo.connection.YieldedRequestOnConns;
     import swarm.neo.protocol.ProtocolError;
     import swarm.neo.util.TreeMap;
-    import ocean.transition;
+    import ocean.meta.types.Qualifiers;
     import swarm.neo.AddrPort;
     import swarm.neo.protocol.Message: RequestId;
 
@@ -65,7 +65,7 @@ public final class RequestSet: IRequestSet
         import ocean.util.serialize.contiguous.Deserializer;
         import ocean.time.MicrosecondsClock;
 
-        import ocean.transition;
+        import ocean.meta.types.Qualifiers;
 
         /***********************************************************************
 
@@ -614,7 +614,7 @@ public final class RequestSet: IRequestSet
             this.request_on_conns.reset(&this.outer.request_on_conn_pool.recycle);
             this.finished_notifier = null;
             this.context.length = 0;
-            enableStomping(this.context);
+            assumeSafeAppend(this.context);
         }
     }
 

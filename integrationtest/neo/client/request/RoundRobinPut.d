@@ -15,7 +15,7 @@
 
 module integrationtest.neo.client.request.RoundRobinPut;
 
-import ocean.transition;
+import ocean.meta.types.Qualifiers;
 import ocean.core.SmartUnion;
 import swarm.neo.client.NotifierTypes;
 

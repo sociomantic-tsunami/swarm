@@ -49,7 +49,7 @@ abstract class ConnectionBase: ISelectClient
 
     import ocean.util.log.Logger;
 
-    import ocean.transition;
+    import ocean.meta.types.Qualifiers;
 
     import core.sys.posix.netinet.in_: SOL_SOCKET, IPPROTO_TCP, SO_KEEPALIVE;
 
@@ -617,7 +617,7 @@ abstract class ConnectionBase: ISelectClient
 
         ***********************************************************************/
 
-        private void receivedMessage ( MessageType type, Const!(void)[] msg_body )
+        private void receivedMessage ( MessageType type, const(void)[] msg_body )
         {
             // A previously parsed message decided to shutdown the connection.
             // Don't parse any subsequent pending messages.
@@ -739,7 +739,7 @@ abstract class ConnectionBase: ISelectClient
 
     ***************************************************************************/
 
-    protected Immut!(bool) no_delay;
+    protected immutable(bool) no_delay;
 
     /***************************************************************************
 
@@ -1177,7 +1177,7 @@ abstract class ConnectionBase: ISelectClient
 
     ***************************************************************************/
 
-    abstract protected void setReceivedPayload ( RequestId id, Const!(void)[] payload );
+    abstract protected void setReceivedPayload ( RequestId id, const(void)[] payload );
 
     /***************************************************************************
 
