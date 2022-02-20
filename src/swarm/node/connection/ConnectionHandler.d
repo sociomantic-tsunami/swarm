@@ -46,7 +46,6 @@ import ocean.meta.types.Qualifiers;
 import ocean.net.server.connection.IFiberConnectionHandler;
 import ocean.sys.socket.AddressIPSocket;
 import IPSocket = ocean.sys.socket.IPSocket;
-debug import ocean.transition;
 import ocean.util.container.pool.model.IResettable;
 import ocean.util.log.Logger;
 
@@ -235,19 +234,17 @@ public abstract class ConnectionHandlerTemplate ( Commands : ICommandCodes )
     {
         debug
         {
-            size_t used1, free1;
-            gc_usage(used1, free1);
+            import core.memory;
 
+            const before = GC.stats();
             scope ( exit )
             {
-                size_t used2, free2;
-                gc_usage(used2, free2);
-
-                if ( used2 > used1 )
+                const after = GC.stats();
+                if ( after.usedSize > before.usedSize )
                 {
                     log.info("Memory usage increased while handling command {} " ~
                         "(+{} bytes)", request.description(this.cmd_description),
-                        used2 - used1);
+                        after.usedSize - before.usedSize);
                 }
             }
         }
