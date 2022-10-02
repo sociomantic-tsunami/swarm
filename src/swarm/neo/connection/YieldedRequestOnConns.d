@@ -217,7 +217,7 @@ class YieldedRequestOnConns: ISelectEvent
                    ".swapAndPop: " ~
                    "Expected the inactive queue to be empty when returning");
         }
-        body
+        do
         {
             verify(this.queue[!this.active].is_empty, typeof(this).stringof ~
                    ".swapAndPop: " ~

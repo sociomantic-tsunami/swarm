@@ -52,7 +52,7 @@
             // passed as the 'instance' template parameter as a string, and must
             // be mixed in wherever used.
 
-            public template Extension ( istring instance )
+            public template Extension ( string instance )
             {
                 public void trace ( cstring msg )
                 {
@@ -97,7 +97,7 @@
             // passed as the 'instance' template parameter as a string, and must
             // be mixed in wherever used.
 
-            public template Extension ( istring instance )
+            public template Extension ( string instance )
             {
                 public void add ( uint value )
                 {
@@ -229,7 +229,7 @@ public template ExtensibleClass ( Plugins ... )
 
         ***********************************************************************/
 
-        private template MixinPluginExtension ( T, istring instance_name )
+        private template MixinPluginExtension ( T, string instance_name )
         {
             mixin T.Extension!(instance_name);
         }

@@ -384,7 +384,7 @@ private struct TreeQueueCore
     {
         assert(!this.ebtree.is_empty, "ebtree empty after push");
     }
-    body
+    do
     {
         bool added;
         auto item = this.ebtree.put(id, added);

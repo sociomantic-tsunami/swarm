@@ -58,7 +58,7 @@ class NodeConnect
 
     ***************************************************************************/
 
-    private const(HmacDef.Key[istring])* credentials;
+    private const(HmacDef.Key[string])* credentials;
 
     /***************************************************************************
 
@@ -89,7 +89,7 @@ class NodeConnect
 
     ***************************************************************************/
 
-    public this ( ref const(HmacDef.Key[istring]) credentials )
+    public this ( ref const(HmacDef.Key[string]) credentials )
     {
         this.credentials = &credentials;
         this.e_auth_rejected = new HmacAuthCode.RejectedException;

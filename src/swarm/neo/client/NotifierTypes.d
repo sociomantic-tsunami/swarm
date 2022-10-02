@@ -136,7 +136,7 @@ public struct RequestNodeUnsupportedInfo
 
     ***************************************************************************/
 
-    private istring type_explanation ( )
+    private string type_explanation ( )
     {
         with ( Type ) final switch ( this.type )
         {

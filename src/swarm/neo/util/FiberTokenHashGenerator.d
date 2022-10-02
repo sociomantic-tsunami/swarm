@@ -58,7 +58,7 @@ struct FiberTokenHashGenerator
             assert(!this.receiving);
         }
     }
-    body
+    do
     {
         this.hash = rand();
 

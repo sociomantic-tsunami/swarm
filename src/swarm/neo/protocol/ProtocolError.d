@@ -43,7 +43,7 @@ class ProtocolError: Exception
     ***************************************************************************/
 
     public typeof(this) setFmt
-        ( istring file = __FILE__, typeof(__LINE__) line = __LINE__, T ... )
+        ( string file = __FILE__, typeof(__LINE__) line = __LINE__, T ... )
         ( cstring fmt, T items )
     {
         static if (items.length)
@@ -72,7 +72,7 @@ class ProtocolError: Exception
     ***************************************************************************/
 
     public void enforceFmt
-        ( istring file = __FILE__, long line = __LINE__, Ok, T ... )
+        ( string file = __FILE__, long line = __LINE__, Ok, T ... )
         ( Ok ok, cstring fmt, T params )
     {
         if (!ok)
@@ -90,7 +90,7 @@ class ProtocolError: Exception
 
     ***************************************************************************/
 
-    private void setFmt_ ( T... ) ( istring file, long line, cstring fmt, T args )
+    private void setFmt_ ( T... ) ( string file, long line, cstring fmt, T args )
     {
         this.reused_msg.reset();
         sformat(this.reused_msg, fmt, args);

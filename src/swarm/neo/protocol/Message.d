@@ -136,7 +136,7 @@ align(1) struct MessageHeader
     {
         assert(!this.total_parity);
     }
-    body
+    do
     {
         return this.parity = this.calcParity();
     }

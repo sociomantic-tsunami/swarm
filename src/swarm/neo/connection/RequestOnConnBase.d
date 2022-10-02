@@ -357,7 +357,7 @@ abstract class RequestOnConnBase
 
         ***********************************************************************/
 
-        public scope class Payload
+        public class Payload
         {
             import ocean.meta.traits.Indirections : hasIndirections;
 
@@ -543,7 +543,7 @@ abstract class RequestOnConnBase
         ***********************************************************************/
 
         public void shutdownWithProtocolError ( cstring msg,
-            istring file = __FILE__, int line = __LINE__ )
+            string file = __FILE__, int line = __LINE__ )
         {
             auto e = this.outer.connection.protocol_error.set(msg, file, line);
             this.shutdownConnection(e);
@@ -651,7 +651,7 @@ abstract class RequestOnConnBase
             assert(fired_event_non_const.active !=
                 fired_event_non_const.active.none);
         }
-        body
+        do
         {
             EventNotification fired_event;
 

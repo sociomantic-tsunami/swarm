@@ -571,7 +571,7 @@ public abstract class INodeBase : INode, INodeInfo
 
     ***************************************************************************/
 
-    protected istring[] record_action_counter_ids ( )
+    protected string[] record_action_counter_ids ( )
     {
         return null;
     }
@@ -676,7 +676,7 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
 
         ***********************************************************************/
 
-        public istring unix_socket_path;
+        public string unix_socket_path;
 
         /***********************************************************************
 
@@ -686,7 +686,7 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
 
         ***********************************************************************/
 
-        public istring credentials_filename;
+        public string credentials_filename;
 
         /***********************************************************************
 
@@ -695,7 +695,7 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
 
         ***********************************************************************/
 
-        public Key[istring] credentials_map;
+        public Key[string] credentials_map;
     }
 
     /***************************************************************************
@@ -722,7 +722,7 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
 
     ***************************************************************************/
 
-    protected BasicCommandHandler.Handler[istring] unix_socket_handlers;
+    protected BasicCommandHandler.Handler[string] unix_socket_handlers;
 
     /***************************************************************************
 
@@ -779,7 +779,7 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
         this.neo_socket = new AddressIPSocket!();
 
         // Load credentials from specified file.
-        const(Key[istring])* credentials;
+        const(Key[string])* credentials;
         if ( options.credentials_filename )
         {
             verify(options.credentials_map is null);
@@ -794,7 +794,7 @@ public class NodeBase ( ConnHandler : ISwarmConnectionHandler ) : INodeBase
 
             // Make sure the reference to the credentials map does not go out
             // of scope. (Store a copy in heap-allocated memory.)
-            static struct S { Key[istring] cred; }
+            static struct S { Key[string] cred; }
             auto s = new S;
             s.cred = options.credentials_map;
             credentials = &s.cred;

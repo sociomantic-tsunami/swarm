@@ -36,7 +36,7 @@ import swarm.Const : ICommandCodes;
 
 *******************************************************************************/
 
-public scope class RemoveChannelRequestTemplate ( Base : IRequest, Resources,
+public class RemoveChannelRequestTemplate ( Base : IRequest, Resources,
     ICommandCodes.Value Cmd ) : Base
 {
     /***************************************************************************

@@ -105,7 +105,7 @@ public template IRequestResources_T ( Shared )
 
     template Getter ( T, size_t i )
     {
-        static immutable istring Getter = GetterReturnType!(T, i).stringof ~ " " ~
+        static immutable string Getter = GetterReturnType!(T, i).stringof ~ " " ~
             identifier!(T.tupleof[i]) ~ "();";
     }
 
@@ -113,11 +113,11 @@ public template IRequestResources_T ( Shared )
     {
         static if ( i == T.tupleof.length - 1 )
         {
-            static immutable istring Getters = Getter!(T, i);
+            static immutable string Getters = Getter!(T, i);
         }
         else
         {
-            static immutable istring Getters =
+            static immutable string Getters =
                 Getter!(T, i) ~ Getters!(T, i + 1);
         }
     }
@@ -203,12 +203,12 @@ public template RequestResources_T ( Shared )
     {
         static if ( isArrayType!(typeof(T.tupleof[i])) == ArrayKind.Dynamic )
         {
-            static immutable istring GetterReturnValue =
+            static immutable string GetterReturnValue =
                 "&this.acquired." ~ identifier!(T.tupleof[i]) ~ ";";
         }
         else
         {
-            static immutable istring GetterReturnValue =
+            static immutable string GetterReturnValue =
                 "this.acquired." ~ identifier!(T.tupleof[i]) ~ ";";
         }
     }
@@ -233,7 +233,7 @@ public template RequestResources_T ( Shared )
 
     template Getter ( T, size_t i )
     {
-        static immutable istring Getter =
+        static immutable string Getter =
             GetterReturnType!(T, i).stringof ~ " " ~ identifier!(T.tupleof[i]) ~ "()" ~
             "{" ~
                 "if(!this.acquired." ~ identifier!(T.tupleof[i]) ~ ")" ~
@@ -252,11 +252,11 @@ public template RequestResources_T ( Shared )
     {
         static if ( i == T.tupleof.length - 1 )
         {
-            static immutable istring Getters = Getter!(T, i);
+            static immutable string Getters = Getter!(T, i);
         }
         else
         {
-            static immutable istring Getters = Getter!(T, i) ~ Getters!(T, i + 1);
+            static immutable string Getters = Getter!(T, i) ~ Getters!(T, i + 1);
         }
     }
 
@@ -279,7 +279,7 @@ public template RequestResources_T ( Shared )
 
     template Newer ( T, size_t i )
     {
-        static immutable istring Newer = "protected abstract " ~ typeof(T.tupleof[i]).stringof ~ " " ~
+        static immutable string Newer = "protected abstract " ~ typeof(T.tupleof[i]).stringof ~ " " ~
             "new_" ~ identifier!(T.tupleof[i]) ~ "();";
     }
 
@@ -287,11 +287,11 @@ public template RequestResources_T ( Shared )
     {
         static if ( i == T.tupleof.length - 1 )
         {
-            static immutable istring Newers = Newer!(T, i);
+            static immutable string Newers = Newer!(T, i);
         }
         else
         {
-            static immutable istring Newers = Newer!(T, i) ~ Newers!(T, i + 1);
+            static immutable string Newers = Newer!(T, i) ~ Newers!(T, i + 1);
         }
     }
 
@@ -321,14 +321,14 @@ public template RequestResources_T ( Shared )
     {
         static if ( isArrayType!(typeof(T.tupleof[i])) == ArrayKind.Dynamic )
         {
-            static immutable istring Initialiser =
+            static immutable string Initialiser =
                 "protected void " ~
                 "init_" ~ identifier!(T.tupleof[i]) ~ "(ref " ~ typeof(T.tupleof[i]).stringof ~ " f)" ~
                 "{f.length=0; assumeSafeAppend(f);}";
         }
         else
         {
-            static immutable istring Initialiser =
+            static immutable string Initialiser =
                 "protected void " ~
                 "init_" ~ identifier!(T.tupleof[i]) ~ "(" ~ typeof(T.tupleof[i]).stringof ~ "){}";
         }
@@ -338,11 +338,11 @@ public template RequestResources_T ( Shared )
     {
         static if ( i == T.tupleof.length - 1 )
         {
-            static immutable istring Initialisers = Initialiser!(T, i);
+            static immutable string Initialisers = Initialiser!(T, i);
         }
         else
         {
-            static immutable istring Initialisers =
+            static immutable string Initialisers =
                 Initialiser!(T, i) ~ Initialisers!(T, i + 1);
         }
     }
@@ -364,7 +364,7 @@ public template RequestResources_T ( Shared )
 
     template Recycler ( T, size_t i )
     {
-        static immutable istring Recycler =
+        static immutable string Recycler =
             "if(this.acquired." ~ identifier!(T.tupleof[i]) ~ ")" ~
             "{" ~
                 "this.shared_resources." ~ identifier!(T.tupleof[i]) ~ "_freelist" ~
@@ -376,11 +376,11 @@ public template RequestResources_T ( Shared )
     {
         static if ( i == T.tupleof.length - 1 )
         {
-            static immutable istring Recyclers = Recycler!(T, i);
+            static immutable string Recyclers = Recycler!(T, i);
         }
         else
         {
-            static immutable istring Recyclers = Recycler!(T, i) ~ Recyclers!(T, i + 1);
+            static immutable string Recyclers = Recycler!(T, i) ~ Recyclers!(T, i + 1);
         }
     }
 
@@ -393,7 +393,7 @@ public template RequestResources_T ( Shared )
 
     ***************************************************************************/
 
-    abstract scope class RequestResources : IRequestResources
+    abstract class RequestResources : IRequestResources
     {
         /***********************************************************************
 
@@ -495,7 +495,7 @@ version ( unittest )
 
 unittest
 {
-    scope class Resources : LocalNamespace.RequestResources
+    class Resources : LocalNamespace.RequestResources
     {
         this ()
         {

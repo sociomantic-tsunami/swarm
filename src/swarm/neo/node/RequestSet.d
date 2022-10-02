@@ -146,7 +146,7 @@ class RequestSet
         {
             assert(name.length > 0);
         }
-        body
+        do
         {
             auto node_conn = downcast!(Connection)(this.connection);
             verify(node_conn !is null);
@@ -477,7 +477,7 @@ class RequestSet
         assert(request.id == id);
         assert(this.n_active_requests <= max_requests);
     }
-    body
+    do
     {
         bool added;
         auto request = this.active_requests.put(

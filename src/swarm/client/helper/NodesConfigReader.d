@@ -185,7 +185,7 @@ static:
 
     unittest
     {
-        istring content = "
+        string content = "
         127.0.0.1:4000
         127.0.0.2:5000 # comment
         # 127.0.0.3:6000";

@@ -394,7 +394,7 @@ public class RequestOnConn: RequestOnConnBase, IRequestOnConn
 
         ***********************************************************************/
 
-        public Exception opCall ( AbortReason reason, istring file = __FILE__,
+        public Exception opCall ( AbortReason reason, string file = __FILE__,
             long line = __LINE__ )
         {
             this.reason = reason;

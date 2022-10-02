@@ -38,7 +38,7 @@ public class GetAllImpl_v0 : IRequest
     static immutable Command command = Command(RequestCode.GetAll, 0);
 
     /// Request name for stats tracking. Required by ConnectionHandler.
-    static immutable istring name = "GetAll";
+    static immutable string name = "GetAll";
 
     /// Flag indicating whether timing stats should be gathered for requests of
     /// this type.

@@ -187,7 +187,7 @@ public final class Connection: ConnectionBase
 
     static class ConnectionClosedException : Exception
     {
-        this ( istring file = __FILE__, typeof(__LINE__) line = __LINE__ )
+        this ( string file = __FILE__, typeof(__LINE__) line = __LINE__ )
         {
             super("Connection closed", file, line);
         }
@@ -298,7 +298,7 @@ public final class Connection: ConnectionBase
 
     ***************************************************************************/
 
-    public void shutdownAndHalt ( istring file = __FILE__, typeof(__LINE__) line = __LINE__ )
+    public void shutdownAndHalt ( string file = __FILE__, typeof(__LINE__) line = __LINE__ )
     {
         this.restart_after_shutdown = false;
 

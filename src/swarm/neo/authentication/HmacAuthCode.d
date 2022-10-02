@@ -295,8 +295,8 @@ struct HmacAuthCode
 
         ***********************************************************************/
 
-        this ( uint gcry_error_code, istring funcname,
-               istring file = __FILE__, typeof(__LINE__) line = __LINE__ )
+        this ( uint gcry_error_code, string funcname,
+               string file = __FILE__, typeof(__LINE__) line = __LINE__ )
         {
             auto msg = "(no error description available)"[];
 

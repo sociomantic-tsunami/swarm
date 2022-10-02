@@ -71,7 +71,7 @@ public interface IChannelsNodeInfo : INodeInfo
     public IStorageEngineInfo* opIn_r ( cstring id );
 
 
-    public alias opBinaryRight ( istring op : "in" ) = opIn_r;
+    public alias opBinaryRight ( string op : "in" ) = opIn_r;
 
 
     /***************************************************************************
@@ -112,7 +112,7 @@ version ( unittest )
 
         ***********************************************************************/
 
-        istring storage_type_ = "dummy";
+        string storage_type_ = "dummy";
         ulong num_records_;
         ulong num_bytes_;
 
@@ -130,7 +130,7 @@ version ( unittest )
 
             *******************************************************************/
 
-            istring id_;
+            string id_;
             ulong num_records_;
             ulong num_bytes_;
 
@@ -143,7 +143,7 @@ version ( unittest )
 
             *******************************************************************/
 
-            this ( istring id )
+            this ( string id )
             {
                 this.id_ = id;
             }
@@ -170,7 +170,7 @@ version ( unittest )
             }
         }
 
-        ChannelStats[istring] channels;
+        ChannelStats[string] channels;
 
         /***********************************************************************
 
@@ -186,8 +186,8 @@ version ( unittest )
 
         ***********************************************************************/
 
-        this ( istring[] actions, istring[] requests, istring[] neo_requests,
-            istring[] channels, istring[] disable_timing )
+        this ( string[] actions, string[] requests, string[] neo_requests,
+            string[] channels, string[] disable_timing )
         {
             super(actions, requests, neo_requests, disable_timing);
 

@@ -141,7 +141,7 @@ unittest
 
     // (Partial) request implementation, to be instantiated from the request's
     // handler function.
-    scope class ExampleRequestImpl
+    class ExampleRequestImpl
     {
         private RequestOnConn.EventDispatcherAllNodes conn;
         private ExampleRequest.Context* context;
@@ -357,7 +357,7 @@ unittest
 
     // (Partial) request implementation, to be instantiated from the request's
     // handler function.
-    scope class ExampleRequestImpl
+    class ExampleRequestImpl
     {
         import swarm.neo.connection.RequestOnConnBase;
 
@@ -445,7 +445,7 @@ unittest
 
     // (Partial) request implementation, to be instantiated from the request's
     // handler function.
-    scope class ExampleRequestImpl
+    class ExampleRequestImpl
     {
         import swarm.neo.connection.RequestOnConnBase;
 
@@ -514,7 +514,7 @@ public template SuspendableController ( Request, IController, MessageType )
 
     ***************************************************************************/
 
-    public scope class Controller : IController
+    public class Controller : IController
     {
         import ocean.core.Enforce;
         import ocean.core.Verify;
@@ -911,7 +911,7 @@ unittest
 
     // (Partial) request implementation, to be instantiated from the request's
     // handler function.
-    scope class ExampleRequestImpl
+    class ExampleRequestImpl
     {
         import swarm.neo.util.MessageFiber;
         import swarm.neo.request.RequestEventDispatcher;

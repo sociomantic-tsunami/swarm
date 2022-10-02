@@ -84,7 +84,7 @@ public abstract class IClient
 
         ***********************************************************************/
 
-        istring nodes_file;
+        string nodes_file;
 
         /***********************************************************************
 
@@ -302,7 +302,7 @@ public abstract class IClient
 
     ***************************************************************************/
 
-    static public size_t nodesInConfigFile ( istring file )
+    static public size_t nodesInConfigFile ( string file )
     {
         auto nodes = NodesConfigReader(file);
         return nodes.length;

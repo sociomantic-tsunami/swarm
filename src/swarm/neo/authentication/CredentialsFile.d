@@ -82,7 +82,7 @@ extern (C) private int g_ascii_xdigit_value ( char c ); // glib-2.0
 
 ***************************************************************************/
 
-public HmacDef.Key[istring] parse ( cstring filepath )
+public HmacDef.Key[string] parse ( cstring filepath )
 {
     scope file = new File(filepath, File.ReadExisting);
     scope ( exit ) file.close;
@@ -125,7 +125,7 @@ public HmacDef.Key[istring] parse ( cstring filepath )
 
 ***************************************************************************/
 
-private HmacDef.Key[istring] parseContent ( istring content,
+private HmacDef.Key[string] parseContent ( string content,
     cstring filepath = null )
 {
     int line = 0; // The current line in the input file.
@@ -138,7 +138,7 @@ private HmacDef.Key[istring] parseContent ( istring content,
 
     ***********************************************************************/
 
-    void enforce ( bool ok, cstring msg_base, istring src_file = __FILE__,
+    void enforce ( bool ok, cstring msg_base, string src_file = __FILE__,
         typeof(__LINE__) src_line = __LINE__ )
     {
         if (!ok)
@@ -150,7 +150,7 @@ private HmacDef.Key[istring] parseContent ( istring content,
 
     scope parser = new QueryParams('\n', ':');
 
-    HmacDef.Key[istring] keys;
+    HmacDef.Key[string] keys;
 
     foreach (name, hex_key; parser.set(content))
     {
@@ -192,7 +192,7 @@ private HmacDef.Key[istring] parseContent ( istring content,
         assert(i == hex_key.length); // enforced above
 
         /*
-         * name is a cstring slice to the istring content so we don't need
+         * name is a cstring slice to the string content so we don't need
          * to idup it in order to use it as an associative array key. Verify
          * the slice is correct, and cast it.
          * Note that determining that name is a slice to content via pointer
@@ -202,10 +202,10 @@ private HmacDef.Key[istring] parseContent ( istring content,
          * inherits in this case. However, there is no other way, and x86-64
          * has a flat memory model.
          */
-        static assert(is(typeof(content) == istring));
+        static assert(is(typeof(content) == string));
         verify(content.ptr <= name.ptr &&
                name.ptr + name.length <= content.ptr + content.length);
-        keys[cast(istring)name] = key;
+        keys[cast(string)name] = key;
     }
 
     return keys.rehash;
@@ -236,7 +236,7 @@ public class CredentialsParseException: Exception
     ***********************************************************************/
 
     public this ( cstring msg_base, cstring reg_file, uint reg_file_line,
-        istring src_file = __FILE__, typeof(__LINE__) src_line = __LINE__ )
+        string src_file = __FILE__, typeof(__LINE__) src_line = __LINE__ )
     {
         super(format("{} in registry file {} at line {}", msg_base, file, reg_file_line));
     }
@@ -262,8 +262,8 @@ version ( unittest )
 
     ***************************************************************************/
 
-    void registryTest ( istring name, istring file_content,
-        HmacDef.Key[istring] expected )
+    void registryTest ( string name, string file_content,
+        HmacDef.Key[string] expected )
     {
         auto t = new NamedTest(name);
         auto reg = parseContent(file_content, name);
@@ -311,7 +311,7 @@ version ( unittest )
 unittest
 {
     // Empty
-    registryTest("Empty", [], (HmacDef.Key[istring]).init);
+    registryTest("Empty", [], (HmacDef.Key[string]).init);
 
     // One entry then EOF
     registryTest(

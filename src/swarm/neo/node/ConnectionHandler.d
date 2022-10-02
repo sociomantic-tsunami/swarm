@@ -75,7 +75,7 @@ class ConnectionHandler : IConnectionHandler
         public struct RequestInfo
         {
             /// The name of the request, used for stats tracking.
-            istring name;
+            string name;
 
             /// The ClassInfo of the request handler class that is newed when
             /// handling a request of this type.
@@ -111,7 +111,7 @@ class ConnectionHandler : IConnectionHandler
 
         public void addHandler ( Request : IRequest ) ( )
         {
-            static void memberExists ( istring name, T ) ( )
+            static void memberExists ( string name, T ) ( )
             {
                 static assert (
                     hasMember!(Request, name)
@@ -120,7 +120,7 @@ class ConnectionHandler : IConnectionHandler
                     ~ name ~ "' of type '" ~ T.stringof ~ "'.");
             }
 
-            memberExists!("name", istring);
+            memberExists!("name", string);
             memberExists!("command", Command);
             memberExists!("timing", bool);
             memberExists!("scheduled_for_removal", bool);
@@ -207,7 +207,7 @@ class ConnectionHandler : IConnectionHandler
 
         ***********************************************************************/
 
-        public const(Key[istring])* credentials;
+        public const(Key[string])* credentials;
 
         /***********************************************************************
 
@@ -280,7 +280,7 @@ class ConnectionHandler : IConnectionHandler
 
         public this ( EpollSelectDispatcher epoll,
             RequestMap requests, bool no_delay,
-            ref const(Key[istring]) credentials, INodeInfo node_info,
+            ref const(Key[string]) credentials, INodeInfo node_info,
             scope GetResourceAcquirerDg get_resource_acquirer )
         {
             verify(requests.supported_requests.length > 0);
@@ -642,7 +642,7 @@ unittest
     class Rq1_v0 : IRequest
     {
         static immutable Command command = Command(1, 0);
-        static immutable istring name = "Request1";
+        static immutable string name = "Request1";
         static immutable bool timing = true;
         static immutable bool scheduled_for_removal = false;
         void handle ( RequestOnConn connection, Object resources,
@@ -652,7 +652,7 @@ unittest
     class Rq1_v1 : IRequest
     {
         static immutable Command command = Command(1, 1);
-        static immutable istring name = "Request1";
+        static immutable string name = "Request1";
         static immutable bool timing = true;
         static immutable bool scheduled_for_removal = false;
         void handle ( RequestOnConn connection, Object resources,

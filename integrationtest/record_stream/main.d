@@ -83,7 +83,7 @@ public void runListener ()
     assert(eos, "End Of Stream not received!");
 }
 
-private static immutable istring[] Verbatim = [
+private static immutable string[] Verbatim = [
     "\n\n\n",
     "bbbbbbbbbbbbbbbb:AAAAAAAAAAAAAAAA\n",
 ];

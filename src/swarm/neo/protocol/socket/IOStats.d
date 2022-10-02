@@ -44,4 +44,3 @@ struct IOStats
 
     public uint num_iowait_calls;
 }
-

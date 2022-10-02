@@ -88,7 +88,7 @@ unittest
 
     // (Partial) request implementation, to be instantiated from the request's
     // handler function.
-    scope class ExampleRequestImpl
+    class ExampleRequestImpl
     {
         private RequestOnConn.EventDispatcherAllNodes conn;
         private ExampleRequest.Context* context;
@@ -135,7 +135,7 @@ public template BatchController ( Request, IController )
 
     ***************************************************************************/
 
-    public scope class Controller : IController
+    public class Controller : IController
     {
         import ocean.core.Enforce;
         import swarm.neo.client.mixins.RequestCore : ControllerBase;

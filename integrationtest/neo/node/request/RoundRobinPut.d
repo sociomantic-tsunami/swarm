@@ -36,7 +36,7 @@ public class RoundRobinPutImpl_v0 : IRequest
     static immutable Command command = Command(RequestCode.RoundRobinPut, 0);
 
     /// Request name for stats tracking. Required by ConnectionHandler.
-    static immutable istring name = "RoundRobinPut";
+    static immutable string name = "RoundRobinPut";
 
     /// Flag indicating whether timing stats should be gathered for requests of
     /// this type.

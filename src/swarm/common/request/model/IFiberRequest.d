@@ -40,7 +40,7 @@ import swarm.protocol.FiberSelectWriter;
 
 *******************************************************************************/
 
-public abstract scope class IFiberRequest
+public abstract class IFiberRequest
 {
     /***************************************************************************
 

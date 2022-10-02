@@ -29,7 +29,7 @@ import ocean.meta.types.Qualifiers;
 
 *******************************************************************************/
 
-public abstract scope class Command : IRequest
+public abstract class Command : IRequest
 {
     /***************************************************************************
 

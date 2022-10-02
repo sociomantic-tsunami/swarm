@@ -491,7 +491,7 @@ public class DiskOverflow : IRequestOverflow
     {
         assert (queue !is null, "Creation of FlexibleFileQueue failed");
     }
-    body
+    do
     {
         auto queue = node.toHash in this.disk_queues;
         if ( queue is null )

@@ -39,7 +39,7 @@ import swarm.Const : ICommandCodes;
 
 *******************************************************************************/
 
-public scope class GetChannelsRequestTemplate ( Base : IRequest, Resources,
+public class GetChannelsRequestTemplate ( Base : IRequest, Resources,
     ICommandCodes.Value Cmd ) : Base
 {
     /***************************************************************************

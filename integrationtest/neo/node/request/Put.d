@@ -36,7 +36,7 @@ public class PutImpl_v0 : IRequest
     static immutable Command command = Command(RequestCode.Put, 0);
 
     /// Request name for stats tracking. Required by ConnectionHandler.
-    static immutable istring name = "Put";
+    static immutable string name = "Put";
 
     /// Flag indicating whether timing stats should be gathered for requests of
     /// this type.

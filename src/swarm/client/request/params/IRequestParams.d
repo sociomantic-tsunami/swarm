@@ -266,7 +266,7 @@ public abstract class IRequestParams
                " The serialized length is not an integer multiple of 8 as " ~
                "required for alignment");
     }
-    body
+    do
     {
         return Serial!(typeof(this.tupleof)).sizeof;
     }

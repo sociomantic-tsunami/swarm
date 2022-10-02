@@ -217,7 +217,7 @@ class ConnectProtocol: ISelectClient
 
     public void checkVersion (
         ubyte client_protocol_version, ubyte node_protocol_version,
-        istring file = __FILE__, typeof(__LINE__) line = __LINE__
+        string file = __FILE__, typeof(__LINE__) line = __LINE__
     )
     {
         if (client_protocol_version != node_protocol_version)

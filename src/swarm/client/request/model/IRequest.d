@@ -50,7 +50,7 @@ import swarm.client.request.context.RequestContext;
 
 *******************************************************************************/
 
-public abstract scope class IRequest: IFiberRequest
+public abstract class IRequest: IFiberRequest
 {
     /**************************************************************************
 

@@ -29,7 +29,7 @@ public class Credentials
 
     ***************************************************************************/
 
-    private HmacDef.Key[istring] credentials_;
+    private HmacDef.Key[string] credentials_;
 
     /***************************************************************************
 
@@ -37,7 +37,7 @@ public class Credentials
 
     ***************************************************************************/
 
-    private istring filepath;
+    private string filepath;
 
     /***************************************************************************
 
@@ -52,7 +52,7 @@ public class Credentials
 
     ***************************************************************************/
 
-    public this ( istring filepath )
+    public this ( string filepath )
     {
         this.filepath = filepath;
         this.update();
@@ -68,7 +68,7 @@ public class Credentials
 
     ***************************************************************************/
 
-    public const(HmacDef.Key[istring])* credentials ( )
+    public const(HmacDef.Key[string])* credentials ( )
     {
         return &this.credentials_;
     }

@@ -82,7 +82,7 @@ public class ClientStats : StatsLog
 
     ***************************************************************************/
 
-    public IClient[istring] clients;
+    public IClient[string] clients;
 
 
     /***************************************************************************
@@ -146,7 +146,7 @@ public class ClientStats : StatsLog
 
     ***************************************************************************/
 
-    public this ( EpollSelectDispatcher epoll, istring file_name,
+    public this ( EpollSelectDispatcher epoll, string file_name,
         time_t period = default_period )
     {
         this(epoll, file_name, null, period);
@@ -168,9 +168,9 @@ public class ClientStats : StatsLog
     ***************************************************************************/
 
     public this ( Application app, EpollSelectDispatcher epoll,
-        istring file_name, time_t period = default_period )
+        string file_name, time_t period = default_period )
     {
-        Appender newAppender ( istring file, Appender.Layout layout )
+        Appender newAppender ( string file, Appender.Layout layout )
         {
             auto stream = new File(file, File.WriteAppending);
 
@@ -201,8 +201,8 @@ public class ClientStats : StatsLog
 
     ***************************************************************************/
 
-    public this ( EpollSelectDispatcher epoll, istring file_name,
-        scope Appender delegate ( istring file, Appender.Layout layout ) appender,
+    public this ( EpollSelectDispatcher epoll, string file_name,
+        scope Appender delegate ( string file, Appender.Layout layout ) appender,
         time_t period = default_period )
     {
         if ( appender is null )
@@ -317,7 +317,7 @@ public class ClientStats : StatsLog
 
     ***************************************************************************/
 
-    private void appendSection ( istring desc ) ( scope void delegate ( IClient client,
+    private void appendSection ( string desc ) ( scope void delegate ( IClient client,
         cstring id, ref bool add_separator ) append_client )
     {
         bool add_separator;
@@ -351,7 +351,7 @@ public class ClientStats : StatsLog
 
     ***************************************************************************/
 
-    private void appendNodeInfoValue ( istring field ) ( IClient client,
+    private void appendNodeInfoValue ( string field ) ( IClient client,
         cstring id, ref bool add_separator )
     {
         foreach ( node_info; client.nodes )
