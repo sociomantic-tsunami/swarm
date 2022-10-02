@@ -380,7 +380,7 @@ unittest
     // `listeners` should contain the elements that are expected in `liset` in
     // order; that is, unique elements sorted ascendingly by object pointer.
     // `name` is the name of the test.
-    void testListenerSet ( istring name, Listener[] listeners ... )
+    void testListenerSet ( string name, Listener[] listeners ... )
     {
         test!(">")(listeners.length, 0);
         foreach (i, listener; listeners[1 .. $])

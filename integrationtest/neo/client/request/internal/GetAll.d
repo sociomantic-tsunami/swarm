@@ -139,7 +139,7 @@ public struct GetAll
 
 *******************************************************************************/
 
-private scope class GetAllImpl
+private class GetAllImpl
 {
     import swarm.neo.connection.RequestOnConnBase;
     import swarm.neo.client.mixins.AllNodesRequestCore;

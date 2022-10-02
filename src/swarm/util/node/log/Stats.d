@@ -231,7 +231,7 @@ private class NodeStatsTemplate ( Logger = StatsLog )
 
     ***************************************************************************/
 
-    private void logRequestStats ( istring category )
+    private void logRequestStats ( string category )
         ( RequestStats request_stats )
     {
         struct RequestStats
@@ -416,7 +416,7 @@ version ( unittest )
             }
         }
 
-        void addObject ( istring category, S ) ( cstring id, S str )
+        void addObject ( string category, S ) ( cstring id, S str )
         {
             static assert(is(S == struct));
             foreach ( i, field; str.tupleof )

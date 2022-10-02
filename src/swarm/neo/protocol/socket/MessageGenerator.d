@@ -236,7 +236,7 @@ struct IoVecTracker
             with (this.fields[0]) assert(iov_base[0 .. iov_len] is dst);
         }
     }
-    body
+    do
     {
         if (this.length)
         {
@@ -356,4 +356,3 @@ struct IoVecTracker
         with (iov.fields[0]) test(iov_base[0 .. iov_len] is buf);
     }
 }
-

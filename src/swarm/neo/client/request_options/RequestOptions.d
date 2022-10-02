@@ -246,7 +246,7 @@ private template getHandlerArgument ( Handler, Handlers ... )
 
 *******************************************************************************/
 
-private istring assertArgsHandled ( size_t n_args, ArgsAndHandlers ... ) ( )
+private string assertArgsHandled ( size_t n_args, ArgsAndHandlers ... ) ( )
 {
     mstring duplicate, unhandled;
 

@@ -253,7 +253,7 @@ public class RequestScheduler
 
     ***************************************************************************/
 
-    template Extension ( istring instance )
+    template Extension ( string instance )
     {
         /***********************************************************************
 

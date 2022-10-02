@@ -343,7 +343,7 @@ public final class ConnectionSet : RequestOnConn.IConnectionGetter
 
     ***************************************************************************/
 
-    public void stopAll ( istring file = __FILE__, typeof(__LINE__) line = __LINE__ )
+    public void stopAll ( string file = __FILE__, typeof(__LINE__) line = __LINE__ )
     {
         this.epoll.unregister(this.yielded_rqonconns);
 

@@ -60,7 +60,7 @@ class TypeEnum : IEnum
 
 *******************************************************************************/
 
-public scope class IRequestNotification
+public class IRequestNotification
 {
     /***************************************************************************
 
@@ -160,7 +160,7 @@ public scope class IRequestNotification
 
     ***************************************************************************/
 
-    private static immutable istring invalid_code = "INVALID";
+    private static immutable string invalid_code = "INVALID";
 
 
     /***************************************************************************

@@ -35,7 +35,7 @@ public class ClientException : Exception
 {
     mixin DefaultExceptionCtor!();
 
-    public typeof(this) opCall ( istring file, long line )
+    public typeof(this) opCall ( string file, long line )
     {
         super.file = file;
         super.line = line;

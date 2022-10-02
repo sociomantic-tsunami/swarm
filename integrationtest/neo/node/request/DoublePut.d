@@ -36,7 +36,7 @@ public class DoublePutImpl_v0 : IRequest
     static immutable Command command = Command(RequestCode.DoublePut, 0);
 
     /// Request name for stats tracking. Required by ConnectionHandler.
-    static immutable istring name = "DoublePut";
+    static immutable string name = "DoublePut";
 
     /// Flag indicating whether timing stats should be gathered for requests of
     /// this type.

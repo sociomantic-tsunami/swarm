@@ -94,4 +94,3 @@ public interface IFluidNodeRegistryInfo : INodeRegistryInfo
 
     void disabled_nodes ( scope void delegate ( IDisabledIterator ) dg );
 }
-

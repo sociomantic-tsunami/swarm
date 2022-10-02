@@ -52,7 +52,7 @@ public class RecordActionCounters
 
     ***************************************************************************/
 
-    private Counter[istring] counters;
+    private Counter[string] counters;
 
     /***************************************************************************
 
@@ -136,7 +136,7 @@ public class RecordActionCounters
 
     ***************************************************************************/
 
-    public int opApply ( scope int delegate ( ref istring id, ref Counter counter ) dg )
+    public int opApply ( scope int delegate ( ref string id, ref Counter counter ) dg )
     {
         foreach (id, counter; this.counters)
         {
@@ -161,7 +161,7 @@ version ( unittest )
         scope sc = new RecordActionCounters(["eggs"[], "bacon", "spam"]);
 
         void testCounters ( Counter eggs, Counter bacon, Counter spam,
-                            istring file = __FILE__, int line = __LINE__  )
+                            string file = __FILE__, int line = __LINE__  )
         {
             test!("==")(sc["eggs"], eggs, file, line);
             test!("==")(sc["bacon"], bacon, file, line);

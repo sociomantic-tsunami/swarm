@@ -608,7 +608,7 @@ public final class RequestSet: IRequestSet
         {
             assert(this); // invariant
         }
-        body
+        do
         {
             this.id = 0;
             this.request_on_conns.reset(&this.outer.request_on_conn_pool.recycle);
@@ -926,7 +926,7 @@ public final class RequestSet: IRequestSet
     {
         assert((id in this.active_requests) is null);
     }
-    body
+    do
     {
         if ( auto rq = id in this.active_requests )
         {
@@ -1022,7 +1022,7 @@ public final class RequestSet: IRequestSet
     {
         assert(request.id);
     }
-    body
+    do
     {
         if ( this.active_requests.length < typeof(this).max_requests )
         {
@@ -1105,7 +1105,7 @@ public final class RequestSet: IRequestSet
 
     static class NoMoreRequests: Exception
     {
-        this ( istring file = __FILE__, typeof(__LINE__) line = __LINE__ )
+        this ( string file = __FILE__, typeof(__LINE__) line = __LINE__ )
         {
             super("Attepted to start more than " ~ max_requests.stringof ~
                   " requests, which is the maximum allowed number", file, line);

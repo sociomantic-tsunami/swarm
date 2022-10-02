@@ -56,7 +56,7 @@ public class Node : NodeBase!(ConnHandler)
     {
         assert(neo_port > 2);
     }
-    body
+    do
     {
         // In this simple example node implementation, we don't need any shared
         // resources except the reference to the storage.

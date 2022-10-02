@@ -85,7 +85,7 @@ template SharedResources_T ( T )
 
         template DeclareFreeList ( T, size_t i )
         {
-            static immutable istring DeclareFreeList = "public FreeList!("
+            static immutable string DeclareFreeList = "public FreeList!("
                 ~ typeof(T.tupleof[i]).stringof ~ ") "
                 ~ identifier!(T.tupleof[i]) ~ "_freelist;";
         }
@@ -94,11 +94,11 @@ template SharedResources_T ( T )
         {
             static if ( i == T.tupleof.length - 1 )
             {
-                static immutable istring DeclareFreeLists = DeclareFreeList!(T, i);
+                static immutable string DeclareFreeLists = DeclareFreeList!(T, i);
             }
             else
             {
-                static immutable istring DeclareFreeLists = DeclareFreeList!(T, i) ~
+                static immutable string DeclareFreeLists = DeclareFreeList!(T, i) ~
                     DeclareFreeLists!(T, i + 1);
             }
         }
@@ -120,7 +120,7 @@ template SharedResources_T ( T )
 
         template NewFreeList ( T, size_t i )
         {
-            static immutable istring NewFreeList = "this."
+            static immutable string NewFreeList = "this."
                 ~ identifier!(T.tupleof[i]) ~ "_freelist = new FreeList!("
                 ~ typeof(T.tupleof[i]).stringof ~ ");";
         }
@@ -129,11 +129,11 @@ template SharedResources_T ( T )
         {
             static if ( i == T.tupleof.length - 1 )
             {
-                static immutable istring NewFreeLists = NewFreeList!(T, i);
+                static immutable string NewFreeLists = NewFreeList!(T, i);
             }
             else
             {
-                static immutable istring NewFreeLists = NewFreeList!(T, i) ~
+                static immutable string NewFreeLists = NewFreeList!(T, i) ~
                     NewFreeLists!(T, i + 1);
             }
         }

@@ -39,7 +39,7 @@ import swarm.Const : ICommandCodes;
 
 *******************************************************************************/
 
-public scope class GetSizeRequestTemplate ( Base : IRequest, Resources,
+public class GetSizeRequestTemplate ( Base : IRequest, Resources,
     ICommandCodes.Value Cmd ) : Base
 {
     /***************************************************************************

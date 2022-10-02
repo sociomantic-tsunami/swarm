@@ -79,7 +79,7 @@ void appendSlices ( Types ... ) ( ref void[][] slices, ref Types x )
     }
 }
 
-char[] TupleToSlices ( Types ... ) ( istring name )
+char[] TupleToSlices ( Types ... ) ( string name )
 {
     char[] code;
 

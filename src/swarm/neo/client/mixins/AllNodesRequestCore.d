@@ -215,7 +215,7 @@ unittest
 
     // (Partial) request implementation, to be instantiated from the request's
     // handler function.
-    scope class ExampleRequestImpl
+    class ExampleRequestImpl
     {
         private RequestOnConn.EventDispatcherAllNodes conn;
         private ExampleRequest.Context* context;
@@ -304,7 +304,7 @@ unittest
 
     // (Partial) request implementation, to be instantiated from the request's
     // handler function.
-    scope class ExampleRequestImpl
+    class ExampleRequestImpl
     {
         private RequestOnConn.EventDispatcherAllNodes conn;
 
@@ -474,7 +474,7 @@ unittest
 
     // (Partial) request implementation, to be instantiated from the request's
     // handler function.
-    scope class ExampleRequestImpl
+    class ExampleRequestImpl
     {
         import swarm.neo.connection.RequestOnConnBase;
 

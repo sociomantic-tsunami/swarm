@@ -238,8 +238,8 @@ version ( unittest )
 
         ***********************************************************************/
 
-        this ( istring[] actions, istring[] requests, istring[] neo_requests,
-            istring[] disable_timing )
+        this ( string[] actions, string[] requests, string[] neo_requests,
+            string[] disable_timing )
         {
             this.record_action_counters_ = new RecordActionCounters(actions);
             this.request_stats_ = new RequestStats;

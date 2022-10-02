@@ -158,7 +158,7 @@ public class RecordBatcher
             assert(!f);
         }
     }
-    body
+    do
     {
         auto size = this.batchedSize(value);
         return this.fits(size, will_never_fit);
@@ -215,7 +215,7 @@ public class RecordBatcher
             assert(!f);
         }
     }
-    body
+    do
     {
         auto size = this.batchedSize(key, value);
         return this.fits(size, will_never_fit);
@@ -418,7 +418,7 @@ public class RecordBatcher
             assert(!f);
         }
     }
-    body
+    do
     {
         if ( extra_bytes > this.batch.dimension )
         {

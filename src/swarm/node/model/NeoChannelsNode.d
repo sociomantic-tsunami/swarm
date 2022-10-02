@@ -218,7 +218,7 @@ public class ChannelsNodeBase (
 
     /** ditto */
 
-    public alias opBinaryRight ( istring op : "in" ) = opIn_r;
+    public alias opBinaryRight ( string op : "in" ) = opIn_r;
 
 
     /***************************************************************************

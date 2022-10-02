@@ -41,11 +41,11 @@ public template CommandCases ( T : IEnum, size_t i = 0 )
 {
     static if ( i == T._internal_names.length )
     {
-        static immutable istring CommandCases = "";
+        static immutable string CommandCases = "";
     }
     else
     {
-        static immutable istring CommandCases = "case " ~
+        static immutable string CommandCases = "case " ~
             CTFE.toString(T._internal_values[i]) ~
             ": this.handle" ~ T._internal_names[i] ~ "(); break;" ~
             CommandCases!(T, i + 1);
@@ -68,11 +68,11 @@ public template CommandMethods ( T : IEnum, size_t i = 0 )
 {
     static if ( i == T._internal_names.length )
     {
-        static immutable istring CommandMethods = "";
+        static immutable string CommandMethods = "";
     }
     else
     {
-        static immutable istring CommandMethods =
+        static immutable string CommandMethods =
             "abstract protected void handle" ~ T._internal_names[i] ~ "();" ~
             CommandMethods!(T, i + 1);
     }

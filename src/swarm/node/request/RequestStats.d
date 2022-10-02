@@ -281,7 +281,7 @@ public class RequestStats
 
     unittest
     {
-        void checkCounts ( istring name, BucketDistribution dist, ulong[] expected )
+        void checkCounts ( string name, BucketDistribution dist, ulong[] expected )
         {
             auto t = new NamedTest(name);
             size_t i;
@@ -403,7 +403,7 @@ public class RequestStats
             assert(this.counters.active > 0);
             assert(this.counters.active <= this.counters.max_active);
         }
-        body
+        do
         {
             this.counters.active++;
 
@@ -635,7 +635,7 @@ public class RequestStats
 
     ***************************************************************************/
 
-    public ISingleRequestStats[istring] request_stats;
+    public ISingleRequestStats[string] request_stats;
 
 
     /***************************************************************************
@@ -649,7 +649,7 @@ public class RequestStats
 
     ***************************************************************************/
 
-    public void init ( istring rq, bool timing = true )
+    public void init ( string rq, bool timing = true )
     {
         verify(!(rq in this.request_stats), "command stats " ~ rq ~ " initialised twice");
 

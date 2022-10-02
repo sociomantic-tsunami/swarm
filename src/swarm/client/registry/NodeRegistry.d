@@ -201,7 +201,7 @@ public abstract class NodeRegistry : INodeRegistry
     {
         assert(this.inRegistry(address, port), "node not in registry after add()");
     }
-    body
+    do
     {
         this.nodes.add(NodeItem(address, port),
             this.newConnectionPool(address, port));

@@ -273,7 +273,7 @@ public struct BatchWriter ( Record ... )
 
 *******************************************************************************/
 
-public scope class BatchReader ( Record ... )
+public class BatchReader ( Record ... )
 {
     import ocean.core.Enforce;
 
@@ -460,7 +460,7 @@ version ( unittest )
     }
 
     /// Adds the specified field to the batch and checks the result.
-    void checkAdd ( Field ) ( istring test_name, BatchWriter!(Field) batch,
+    void checkAdd ( Field ) ( string test_name, BatchWriter!(Field) batch,
         Field field, size_t expected_length,
         ExpectedResult expected = ExpectedResult.Added )
     {
@@ -601,7 +601,7 @@ unittest
     struct KeyValue
     {
         hash_t key;
-        istring value;
+        string value;
     }
     KeyValue[] values = [KeyValue(12, "hi"), KeyValue(23, "bye"),
         KeyValue(34, "whatever")];

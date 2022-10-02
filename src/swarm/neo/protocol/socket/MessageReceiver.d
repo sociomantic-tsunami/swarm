@@ -148,7 +148,7 @@ private class MessageReceiverBase
     {
         assert(!this.buffer_content_end);
     }
-    body
+    do
     {
         verify(!this.buffer_content_end);
 
@@ -299,7 +299,7 @@ private class MessageReceiverBase
     {
         assert(this.buffer_content_end >= header.sizeof + header.body_length);
     }
-    body
+    do
     {
         /*
          * this.buffer[0 .. this.buffer_content_end] contains a partial message,
@@ -391,7 +391,7 @@ private class MessageReceiverBase
         assert(bytes_requested <= this.buffer_content_end);
         assert(this); // invariant
     }
-    body
+    do
     {
         if (this.buffer_content_end < bytes_requested)
         {
@@ -522,7 +522,7 @@ class MessageReceiver: MessageReceiverBase
     {
         assert(this);
     }
-    body
+    do
     {
         verify((events & events.EPOLLIN) != 0,
                typeof(this).stringof ~ ".write: called without EPOLLIN event");
@@ -661,7 +661,7 @@ unittest
         {
             checkMsgBody(dst[MessageHeader.sizeof .. $], id);
         }
-        body
+        do
         {
             verify(dst.length >= MessageHeader.sizeof + Info.sizeof);
 

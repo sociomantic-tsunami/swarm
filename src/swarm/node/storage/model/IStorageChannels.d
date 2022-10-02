@@ -139,7 +139,7 @@ abstract public class IStorageChannelsTemplate ( Storage : IStorageEngine )
         return channel_id in this.channels;
     }
 
-    public alias opBinaryRight ( istring op : "in" ) = opIn_r;
+    public alias opBinaryRight ( string op : "in" ) = opIn_r;
 
 
     /***************************************************************************

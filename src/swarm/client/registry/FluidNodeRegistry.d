@@ -99,7 +99,7 @@ public class FluidNodeRegistry : NodeRegistry, IFluidNodeRegistry
     {
         assert(!this.inRegistry(address, port), "node in registry after remove()");
     }
-    body
+    do
     {
         this.nodes.remove(NodeItem(address, port));
     }
@@ -125,7 +125,7 @@ public class FluidNodeRegistry : NodeRegistry, IFluidNodeRegistry
     {
         assert(!this.inRegistry(address, port), "node in registry after disable()");
     }
-    body
+    do
     {
         debug ( SwarmClient ) Stderr.formatln("Disabling {}:{}", address, port);
 
@@ -153,7 +153,7 @@ public class FluidNodeRegistry : NodeRegistry, IFluidNodeRegistry
     {
         assert(this.inRegistry(address, port), "node not in registry after enable()");
     }
-    body
+    do
     {
         debug ( SwarmClient ) Stderr.formatln("Enabling {}:{}", address, port);
 
@@ -198,7 +198,7 @@ public class FluidNodeRegistry : NodeRegistry, IFluidNodeRegistry
 
     ***************************************************************************/
 
-    private scope class DisabledIterator : IDisabledIterator
+    private class DisabledIterator : IDisabledIterator
     {
         /***********************************************************************
 

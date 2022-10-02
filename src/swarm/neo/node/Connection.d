@@ -93,7 +93,7 @@ class Connection: ConnectionBase
 
     ***************************************************************************/
 
-    public this ( ref const(Key[istring]) credentials,
+    public this ( ref const(Key[string]) credentials,
                   AddressIPSocket!() socket, EpollSelectDispatcher epoll,
                   scope RequestSet.Handler request_handler,
                   scope void delegate ( ) when_closed, RequestPool request_pool,

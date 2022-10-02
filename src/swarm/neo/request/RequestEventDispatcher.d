@@ -801,7 +801,7 @@ public struct RequestEventDispatcher
         auto waiting_fiber = cast(WaitingFiber)const_waiting_fiber;
         assert(waiting_fiber.event.active == waiting_fiber.event.active.send);
     }
-    body
+    do
     {
         verify(this.waiting_fibers.length > 0);
         verify(this.enabled_events > 0);
@@ -832,7 +832,7 @@ public struct RequestEventDispatcher
     {
         assert(this.queued_signals.length == 0);
     }
-    body
+    do
     {
         while ( this.queued_signals.length > 0 )
         {

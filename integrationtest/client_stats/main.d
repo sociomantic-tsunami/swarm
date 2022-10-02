@@ -52,7 +52,7 @@ class App : Application
         this.registerExtension(this.rof_ext);
     }
 
-    override protected int run ( istring[] args )
+    override protected int run ( string[] args )
     {
         return 0;
     }

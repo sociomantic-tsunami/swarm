@@ -34,7 +34,7 @@ import ocean.core.Verify;
 
 *******************************************************************************/
 
-public abstract class Node ( NodeType, istring id ) : ITurtleEnv
+public abstract class Node ( NodeType, string id ) : ITurtleEnv
 {
     import swarm.Const : NodeItem;
     import swarm.neo.AddrPort;

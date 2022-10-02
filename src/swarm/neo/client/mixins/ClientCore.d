@@ -86,10 +86,10 @@ template ClientCore ( )
         import ocean.util.config.ConfigFiller : Required;
 
         /// Path of file specifying the addr/port of all nodes to connect with.
-        public Required!(istring) nodes_file;
+        public Required!(string) nodes_file;
 
         /// Path of file containing the client's auth name/key.
-        public Required!(istring) credentials_file;
+        public Required!(string) credentials_file;
     }
 
     /// Compile-time-configurable settings to be passed to the ctor.
@@ -180,7 +180,7 @@ template ClientCore ( )
     {
         AddrPort ip;
         auto addr_ok = ip.setAddress(host);
-        enforce(addr_ok, cast(istring)("Invalid address: " ~ host));
+        enforce(addr_ok, cast(string)("Invalid address: " ~ host));
         ip.port = port;
         this.connections.start(ip);
     }
@@ -590,7 +590,7 @@ template ClientCore ( )
 
         Params:
             Requests = tuple of request names. All elements must be implicitly
-                castable to istring
+                castable to string
 
     ***************************************************************************/
 
@@ -621,7 +621,7 @@ template ClientCore ( )
 
         ***********************************************************************/
 
-        public IRequestStats.RequestStats request ( istring name ) ( )
+        public IRequestStats.RequestStats request ( string name ) ( )
         {
             mixin("alias Internals." ~ name ~ " Request;");
             return this.outer.connections.request_set.stats.requestStats(
@@ -645,7 +645,7 @@ template ClientCore ( )
 
         ***********************************************************************/
 
-        public bool requestHasOccurred ( istring name ) ( )
+        public bool requestHasOccurred ( string name ) ( )
         {
             mixin("alias Internals." ~ name ~ " Request;");
             return this.outer.connections.request_set.stats.requestHasOccurred(
@@ -674,13 +674,13 @@ template ClientCore ( )
 
             *******************************************************************/
 
-            public int opApply ( scope int delegate ( ref istring request_name,
+            public int opApply ( scope int delegate ( ref string request_name,
                 ref IRequestStats.RequestStats request_stats ) dg )
             {
                 int res;
                 foreach ( rq_name; Requests )
                 {
-                    static assert(is(typeof(rq_name) : istring));
+                    static assert(is(typeof(rq_name) : string));
 
                     auto slice = rq_name[];
                     if ( !this.occurred_only ||
@@ -792,7 +792,7 @@ template ClientCore ( )
 
     ***************************************************************************/
 
-    public void shutdown ( istring file = __FILE__, typeof(__LINE__) line = __LINE__ )
+    public void shutdown ( string file = __FILE__, typeof(__LINE__) line = __LINE__ )
     {
         this.connections.stopAll(file, line);
     }

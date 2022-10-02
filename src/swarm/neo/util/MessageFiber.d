@@ -85,7 +85,7 @@ public class OceanMessageFiber
 
         ***********************************************************************/
 
-        private debug (MessageFiberToken) istring str;
+        private debug (MessageFiberToken) string str;
 
         /***********************************************************************
 
@@ -107,7 +107,7 @@ public class OceanMessageFiber
 
         ***********************************************************************/
 
-        public static Token opCall ( istring s )
+        public static Token opCall ( string s )
         {
             Token token;
             token.hash = Fnv1a64(s);
@@ -170,7 +170,7 @@ public class OceanMessageFiber
     {
         this ( )  {super("Fiber killed");}
 
-        void set ( istring file, long line )
+        void set ( string file, long line )
         {
             super.file = file;
             super.line = line;
@@ -188,7 +188,7 @@ public class OceanMessageFiber
     {
         this ( )  {super("Resumed with invalid identifier!");}
 
-        ResumeException set ( istring file, long line )
+        ResumeException set ( string file, long line )
         {
             super.file = file;
             super.line = line;
@@ -385,7 +385,7 @@ public class OceanMessageFiber
         assert (a);
         assert (a != a.exc);
     }
-    body
+    do
     {
         verify (this.fiber.state != this.fiber.State.EXEC, "attempt to start an active fiber");
 
@@ -443,7 +443,7 @@ public class OceanMessageFiber
         auto msg_out = cast(Unqual!(typeof(_msg_out))) _msg_out;
         assert(msg_out.active);
     }
-    body
+    do
     {
         verify (this.fiber.state == this.fiber.State.EXEC, "attempt to suspend an inactive fiber");
         with (msg) if (active == active.exc) verify (exc !is null);
@@ -549,7 +549,7 @@ public class OceanMessageFiber
         assert (a);
         assert (a != a.exc);
     }
-    body
+    do
     {
         verify (this.fiber.state == this.fiber.State.HOLD, "attempt to resume a non-held fiber");
 
@@ -617,7 +617,7 @@ public class OceanMessageFiber
 
      **************************************************************************/
 
-    public void kill ( istring file = __FILE__, long line = __LINE__ )
+    public void kill ( string file = __FILE__, long line = __LINE__ )
     {
         verify (this.fiber.state == this.fiber.State.HOLD, "attempt to kill a non-held fiber");
         verify (!this.killed);

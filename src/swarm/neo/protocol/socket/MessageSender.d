@@ -200,7 +200,7 @@ class MessageSender
     {
         assert(!this.pending_data.length);
     }
-    body
+    do
     {
         verify(this.pending_data.length > 0, typeof(this).stringof ~
                ".finishSending: no message to send");
@@ -249,7 +249,7 @@ class MessageSender
     {
         assert(need_finish || !this.pending_data.length);
     }
-    body
+    do
     {
         verify(src.length > 0, typeof(this).stringof ~ ".assign_: empty message");
         verify(!this.pending_data.length, typeof(this).stringof ~

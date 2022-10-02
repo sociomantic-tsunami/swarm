@@ -287,7 +287,7 @@ out ( result )
     assert(isHash(result),
            "Resulting hash string isn't valid - " ~ result);
 }
-body
+do
 {
     if (hash.length < HexDigest.length)
     {

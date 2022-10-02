@@ -88,7 +88,7 @@ public class DisablableNodeSet : NodeSet
         assert(!(node in this.map), "node in set after disable()");
         assert(node in this.disabled_nodes, "node not disabled after disable()");
     }
-    body
+    do
     {
         verify(!(node in this.disabled_nodes), "node already disabled");
 
@@ -115,7 +115,7 @@ public class DisablableNodeSet : NodeSet
         assert(node in this.map, "node not in set after enable()");
         assert(!(node in this.disabled_nodes), "node disabled after enabled()");
     }
-    body
+    do
     {
         auto conn_pool = node in this.disabled_nodes;
         enforce(this.no_node_exception(node.Address, node.Port), conn_pool !is null);

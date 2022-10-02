@@ -32,7 +32,7 @@ public class ScopeRequestsPlugin
 
     ***************************************************************************/
 
-    template Extension ( istring instance )
+    template Extension ( string instance )
     {
         /***********************************************************************
 
@@ -57,7 +57,7 @@ public class ScopeRequestsPlugin
 
         ***********************************************************************/
 
-        public scope class ScopeRequests
+        public class ScopeRequests
         {
             /*******************************************************************
 
