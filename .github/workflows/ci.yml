@@ -4,6 +4,11 @@ name: CI
 on: [push, pull_request]
 
 jobs:
+  setup-ebtree:
+    uses: sociomantic-tsunami/ocean/.github/workflows/ebtree.yml@v6.x.x
+    with:
+      os: ubuntu-20.04
+
   main:
     name: Run
     strategy:
@@ -21,38 +26,14 @@ jobs:
 
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
+    needs: setup-ebtree
     steps:
-    - name: "Ensure tools/ exists"
-      run: mkdir -p ${{ github.workspace }}/tools/
-
     - name: 'Restore ebtree ${{ matrix.ebtree_version }} from cache'
       id: cache-ebtree
-      uses: actions/cache@v1
+      uses: actions/cache@v3
       with:
         path: ${{ github.workspace }}/tools/
         key:  ebtree-${{ matrix.ebtree_version }}
-
-    - name: 'Checkout ebtree ${{ matrix.ebtree_version }}'
-      uses: actions/checkout@v2
-      if: steps.cache-ebtree.outputs.cache-hit != 'true'
-      with:
-        repository: sociomantic-tsunami/ebtree
-        ref: ${{ matrix.ebtree_version }}
-        # Relative to Github workspace
-        path: tools/ebtree
-
-    - name: 'Build ebtree ${{ matrix.ebtree_version }}'
-      if: steps.cache-ebtree.outputs.cache-hit != 'true'
-      run: |
-        # fpm is used to build the `.deb` and depends on ruby
-        sudo apt-get update
-        sudo apt-get install -y build-essential ruby ruby-dev
-        sudo gem install --no-document fpm
-        # Build the debian package
-        # Package lives in tools/ebtree/deb/libebtree6[-{dbg,dev}]_$VERSION-distro_arch.deb
-        # $VERSION is ${{ matrix.ebtree_version }} without the leading 'v'
-        # E.g. libebtree6[-{dbg,dev}]_6.0.socio10-bionic_amd64.deb
-        make -C '${{ github.workspace }}/tools/ebtree' deb
 
     - name: Install dependencies
       run: |
@@ -66,7 +47,7 @@ jobs:
         compiler: ${{ matrix.dc }}
 
     # Checkout this repository and its submodules
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
       with:
         submodules: true
         # Required for codecov (codecov/codecov-action#190)
@@ -91,6 +72,6 @@ jobs:
 
     - name: 'Upload coverage'
       if: ${{ matrix.coverage == 1 }}
-      uses: codecov/codecov-action@v1
+      uses: codecov/codecov-action@v3
       with:
         flags: ${{ matrix.dc }}-${{ matrix.flavor }}
