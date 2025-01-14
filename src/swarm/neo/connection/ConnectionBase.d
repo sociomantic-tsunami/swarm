@@ -758,7 +758,6 @@ abstract class ConnectionBase: ISelectClient
     {
         this.socket               = socket;
         this.epoll                = epoll;
-        this.no_delay             = no_delay;
         this.protocol_error_      = new ProtocolError;
         this.parser.e             = this.protocol_error_;
         this.receiver             = new MessageReceiver(this.socket, this.protocol_error_);
