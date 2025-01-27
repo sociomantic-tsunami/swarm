@@ -19,26 +19,15 @@
 
 module swarm.protocol.FiberSelectWriter;
 
-
-
-/*******************************************************************************
-
-    Imports
-
-*******************************************************************************/
-
+import ocean.core.Array : copy;
+import ocean.core.Verify;
+import ocean.io.select.EpollSelectDispatcher;
 import Ocean = ocean.io.select.protocol.fiber.BufferedFiberSelectWriter;
 import ocean.io.select.protocol.fiber.model.IFiberSelectProtocol;
-
-import ocean.io.select.EpollSelectDispatcher;
-
-import ocean.core.Verify;
-
 import ocean.math.Math : min;
 
-import ocean.core.Array : copy;
 
-
+/// Ditto
 public class FiberSelectWriter : Ocean.BufferedFiberSelectWriter
 {
     import swarm.protocol.IAddrPort;
@@ -160,5 +149,3 @@ public class FiberSelectWriter : Ocean.BufferedFiberSelectWriter
         }
     }
 }
-
-

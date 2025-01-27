@@ -20,25 +20,12 @@
 module swarm.protocol.FiberSelectReader;
 
 
-
-/*******************************************************************************
-
-    Imports
-
-*******************************************************************************/
-
-import ocean.meta.types.Qualifiers;
-
 import ocean.core.Array;
-
 import ocean.core.Exception;
-
-import Ocean = ocean.io.select.protocol.fiber.FiberSelectReader;
-
-import ocean.io.select.protocol.fiber.model.IFiberSelectProtocol;
-
+import ocean.meta.types.Qualifiers;
 import ocean.io.select.EpollSelectDispatcher;
-
+import Ocean = ocean.io.select.protocol.fiber.FiberSelectReader;
+import ocean.io.select.protocol.fiber.model.IFiberSelectProtocol;
 import ocean.math.Math : min, max;
 
 
@@ -48,7 +35,7 @@ import ocean.math.Math : min, max;
 
 ***************************************************************************/
 
-public static class InputTooLargeException : Exception
+public class InputTooLargeException : Exception
 {
     mixin ReusableExceptionImplementation!();
 }
@@ -522,4 +509,3 @@ unittest
     static assert(is(typeof(
         { FiberSelectReader reader; reader.skipArray!(int)(); })));
 }
-

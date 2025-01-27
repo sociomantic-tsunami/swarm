@@ -2,7 +2,8 @@
 
     Fiber-based client socket connection holding request handler instances
 
-    copyright:      Copyright (c) 2011-2017 dunnhumby Germany GmbH. All rights reserved
+    Copyright:
+        Copyright (c) 2011-2017 dunnhumby Germany GmbH. All rights reserved
 
     License:
         Boost Software License Version 1.0. See LICENSE.txt for details.
@@ -11,63 +12,34 @@
 
 module swarm.client.connection.RequestConnection;
 
-
-
-/*******************************************************************************
-
-    Imports
-
-*******************************************************************************/
-
-import swarm.Const;
-
+import swarm.client.ClientExceptions;
 import swarm.common.connection.CommandMixins;
-
-import swarm.client.request.model.IRequest;
-
-import swarm.client.request.params.IRequestParams;
-
-import swarm.client.request.notifier.IRequestNotification;
-
+import swarm.client.connection.FiberSocketConnection;
 import swarm.client.connection.model.INodeConnectionPool;
 import swarm.client.connection.model.INodeConnectionPoolInfo;
-
-import swarm.client.ClientExceptions;
-
+import swarm.client.request.model.IRequest;
+import swarm.client.request.params.IRequestParams;
+import swarm.client.request.notifier.IRequestNotification;
+import swarm.Const;
+import ocean.core.Enum;
 import swarm.protocol.FiberSelectReader;
 import swarm.protocol.FiberSelectWriter;
 
-import ocean.core.Enum;
-
 import ocean.core.Verify;
-
-import ocean.io.select.client.FiberSelectEvent;
-
-import ocean.io.select.fiber.SelectFiber;
-
-import ocean.io.select.client.model.ISelectClient;
-
-import ocean.io.select.EpollSelectDispatcher;
-
 import ocean.io.compress.lzo.LzoChunkCompressor;
-
-debug ( SwarmClient ) import ocean.io.Stdout;
-
-import swarm.client.connection.FiberSocketConnection;
+import ocean.io.select.client.FiberSelectEvent;
+import ocean.io.select.client.model.ISelectClient;
+import ocean.io.select.EpollSelectDispatcher;
+import ocean.io.select.fiber.SelectFiber;
+debug (SwarmClient) import ocean.io.Stdout;
 
 import ocean.meta.types.Qualifiers;
 import ocean.util.log.Logger;
 
 
-
-/*******************************************************************************
-
-    Static module logger
-
-*******************************************************************************/
-
-static private Logger log;
-static this ( )
+/// Module logger
+private Logger log;
+static this ()
 {
     log = Log.lookup("swarm.client.connection.RequestConnection");
 }
