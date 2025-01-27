@@ -4,7 +4,8 @@
     adding an extra socket initialisation step to set various parameters for
     TCP keepalive and SYN retransmits.
 
-    copyright:      Copyright (c) 2012-2017 dunnhumby Germany GmbH. All rights reserved
+    Copyright:
+        Copyright (c) 2012-2017 dunnhumby Germany GmbH. All rights reserved
 
     License:
         Boost Software License Version 1.0. See LICENSE.txt for details.
@@ -13,13 +14,6 @@
 
 module swarm.client.connection.FiberSocketConnection;
 
-
-
-/*******************************************************************************
-
-    Imports
-
-*******************************************************************************/
 
 import Ocean = ocean.io.select.protocol.fiber.FiberSocketConnection;
 

@@ -11,58 +11,32 @@
 
 module swarm.client.connection.NodeConnectionPool;
 
-
-
-/*******************************************************************************
-
-    Imports
-
-*******************************************************************************/
-
 import ocean.core.Verify;
-
 import ocean.meta.types.Qualifiers;
 
-import swarm.Const;
-
+import swarm.client.ClientExceptions;
 import swarm.client.connection.RequestConnection;
-
-import swarm.client.model.ClientSettings;
-
 import swarm.client.connection.model.INodeConnectionPool;
 import swarm.client.connection.model.INodeConnectionPoolErrorReporter;
-
 import swarm.client.connection.RequestOverflow;
-
+import swarm.client.model.ClientSettings;
 import swarm.client.request.model.IRequest;
-
 import swarm.client.request.params.IRequestParams;
-
 import swarm.client.request.notifier.IRequestNotification;
-
-import swarm.client.ClientExceptions;
+import swarm.Const;
 
 import ocean.core.TypeConvert : castFrom;
-
+import ocean.io.select.client.model.ISelectClient;
+import ocean.io.select.EpollSelectDispatcher;
 import ocean.util.container.pool.ObjectPool;
 
-import ocean.io.select.client.model.ISelectClient;
-
-import ocean.io.select.EpollSelectDispatcher;
-
 //version = FixedQueue;
-
-version ( FixedQueued )
-{
+version (FixedQueued)
     import ocean.util.container.queue.FixedRingQueue;
-}
 else
-{
     import ocean.util.container.queue.FlexibleRingQueue;
-}
 
-debug ( SwarmClient ) import ocean.io.Stdout;
-
+debug (SwarmClient) import ocean.io.Stdout;
 
 
 /*******************************************************************************
