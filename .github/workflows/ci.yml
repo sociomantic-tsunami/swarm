@@ -7,7 +7,7 @@ jobs:
   setup-ebtree:
     uses: sociomantic-tsunami/ocean/.github/workflows/ebtree.yml@v6.x.x
     with:
-      os: ubuntu-20.04
+      os: ubuntu-24.04
 
   main:
     name: Run
@@ -16,13 +16,13 @@ jobs:
       # or build flavour we still want to see how things perform with the others
       fail-fast: false
       matrix:
-        os: [ ubuntu-20.04 ]
-        dc: [ dmd-2.092.1, dmd-2.093.1 ]
+        os: [ ubuntu-24.04 ]
+        dc: [ dmd-2.105.3, dmd-2.109.1 ]
         flavor: [ prod, devel ]
         # Not a matrix row, but referenced as a constant in this file
         ebtree_version: [ v6.0.socio10 ]
         include:
-          - { dc: dmd-2.093.1, coverage: 1, closure_check: 1 }
+          - { dc: dmd-2.109.1, coverage: 1, closure_check: 1 }
 
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
@@ -38,7 +38,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y libxslt-dev liblzo2-dev libgcrypt-dev libgpg-error-dev
+        sudo apt-get install -y libbz2-dev libglib2.0-dev libpcre3-dev libreadline-dev libxslt-dev liblzo2-dev libgcrypt-dev libgpg-error-dev
         sudo dpkg -i ${{ github.workspace }}/tools/ebtree/deb/libebtree6*.deb
 
     - name: Install compiler
