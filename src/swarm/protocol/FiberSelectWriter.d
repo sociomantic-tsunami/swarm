@@ -144,7 +144,7 @@ public class FiberSelectWriter : Ocean.BufferedFiberSelectWriter
     {
         void instantiate ()
         {
-            FiberSelectWriter writer;
+            FiberSelectWriter writer = new FiberSelectWriter(null);
             writer.writeArray( [ 1, 2, 3 ] );
         }
     }
